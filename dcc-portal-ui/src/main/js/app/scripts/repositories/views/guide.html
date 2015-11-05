@@ -137,15 +137,15 @@
             </div>
          </div>
 
-         <p>You can verify that your Access Token has the desired scopes by inspecting it in the table at the bottom of the dialog.</p>
+         <p>You can verify that your Access Token has the desired scopes by inspecting it in the table at the bottom of the dialog. For security purposes, Access Tokens must remain private and not be shared with anyone.</p>
 
-         <p>You will then need to edit the client configuration file in the Storage Client to include the generated Access Token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
+         <p>Following the creation of a Compute Instance, discussed in the next section, you will need to edit the Storage Client client configuration file to include the generated Access Token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
       </section>
       <section id="preqs">
          <h2>Compute Prerequisites</h2>
 
          <h3>Compute Instance</h3>
-         As a first step in analyzing data, you will need to create a Compute Instance to run the Storage Client and any other supporting software.
+         <p>As a first step in analyzing data, you will need to create a Compute Instance to run the Storage Client and any other supporting software.</p>
          <div class="guide-callout guide-callout-aws">
             <div class="guide-callout-content">
             <h4>AWS</h4>
@@ -423,7 +423,7 @@ alias dcc-storage-client="docker run -it --rm -e ACCESSTOKEN --privileged icgc/d
         <pre class="language-shell"><code class=" language-shell"># Mount the file system in the container
 dcc-storage-client mount --mount-point /mnt</code></pre>
 
-        <p>Note that the <code>--privileged</code> Docker option is required for FUSE in order to access the hosts <code>/dev/fuse</code> device.</p>
+        <p>Note that the <code>--privileged</code> Docker option is required for FUSE in order to access the host's <code>/dev/fuse</code> device.</p>
 
         <p>In another terminal, you can access the newly mounted file system:</p>
 
@@ -460,7 +460,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <h5>How long will pre-signed URLs remain valid?</h5>
 
-         <p> Pre-signed URLs are valid for 7 days from the time they are issued. A token issued to one user cannot be used by another.</p>
+         <p> Pre-signed URLs are valid for 7 days from the time they are issued. For security purposes, a URL issued to one user must not be used by another and be considered private.</p>
 
          <h5>Does the client maintain state?</h5>
 
