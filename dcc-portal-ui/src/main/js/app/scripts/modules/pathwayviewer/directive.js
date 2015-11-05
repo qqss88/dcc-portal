@@ -181,14 +181,6 @@
           var rect = $('.pathway-legend')[0].getBoundingClientRect();
           controller.renderLegend(rect.width,rect.height);
         }, 700);
-        
-        $('.pathway-legend-controller').on('click', function(){
-          if(showingLegend){
-            hideLegend();
-          }else{
-            showLegend();
-          }
-        });
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
@@ -277,6 +269,14 @@
           if(highlights){
             controller.highlight(highlights);
           }
+        };
+        
+        $scope.legendClick = function() {
+            if(showingLegend){
+              hideLegend();
+            }else{
+              showLegend();
+            }
         };
         
         $scope.$watch('items', function (newValue, oldValue) {         
