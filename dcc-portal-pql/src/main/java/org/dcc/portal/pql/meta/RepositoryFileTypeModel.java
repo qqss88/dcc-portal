@@ -25,8 +25,6 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 import java.util.List;
 import java.util.Map;
 
-import lombok.experimental.UtilityClass;
-
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
@@ -34,6 +32,8 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import lombok.experimental.UtilityClass;
 
 /**
  * TypeModel for Repository File index type
@@ -262,6 +262,7 @@ public class RepositoryFileTypeModel extends TypeModel {
       .add(Fields.FILE_FORMAT)
       .add(Fields.ACCESS)
       .add(Fields.DONOR_STUDY)
+      .add(Fields.ANALYSIS_SOFTWARE)
       .build();
 
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
