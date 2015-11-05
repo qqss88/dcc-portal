@@ -55,7 +55,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                }
          })
          .state('ICGCcloud.repositories', {
-            url: '/repositories/{repoCode}/',
+            url: '/{repoAlias}/',
             // UI-Router only instantiates RepositoriesController once
             // which is good for us in this context
             views: {
@@ -69,7 +69,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                      repoMap: ['ExternalRepoService', function(ExternalRepoService) {
                         // Force a refresh of the repo map from the server
                         // before instantianting the controller...
-                        console.log('Force Repo Map Refresh...');
+
                         return ExternalRepoService.refreshRepoMap();
                      }]
                   }
@@ -77,7 +77,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                'bodyContent@ICGCcloud.repositories': {
                   templateUrl: function ($stateParams) {
                      return    'scripts/repositories/views/repos/repos.' +
-                           _normalizeRepoCode($stateParams.repoCode) + '.content.html';
+                           _normalizeRepoCode($stateParams.repoAlias) + '.content.html';
                   },
                   controller: 'RepositoriesContentController as repositoryContentCtrl'
                } /*,
@@ -89,7 +89,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                   controller: 'RepositoriesController as repositoryCtrl'
                } */
             }
-         })
+         }) 
       .state('ICGCcloud.repositoryGuide', {
             url: '/guide',
             views: {
@@ -122,6 +122,10 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 // Controller Declaration
 ////////////////////////////////////////////////////////////////////////
 angular.module('icgc.repositories.controllers', [])
+   .constant('repoAliasMapConstants', {
+         'collaboratory': 'collaboratory',
+         'aws': 'aws-virginia'
+    })
    .controller('RepositoriesHomeController', function($scope, Page) {
       Page.stopWork();
       Page.setPage('entity');
@@ -132,14 +136,16 @@ angular.module('icgc.repositories.controllers', [])
       Page.setPage('entity');
       Page.setTitle('User Guide');
    })
-   .controller('RepositoriesController', function($scope, Page, RepositoriesService, $stateParams) {
-      var _ctrl = this,
-         _repoContext = $stateParams.repoCode.toLowerCase(),
-         _repoDataCollectionManager = null,
-         _repoCreationDate = null,
-         _filterQueryStr = null,
-         _repoSummaryData = null,
-         _repoStats = {};
+  .controller('RepositoriesController', function ($scope, Page, repoAliasMapConstants,
+                                                  RepositoriesService, $stateParams) {
+     var _ctrl = this,
+       _repoAlias = $stateParams.repoAlias.toLowerCase(),
+       _repoContext = _.get(repoAliasMapConstants, _repoAlias, null),
+       _repoDataCollectionManager = null,
+       _repoCreationDate = null,
+       _filterQueryStr = null,
+       _repoSummaryData = null,
+       _repoStats = {};   
 
 
       function _capitalizeWords(str) {

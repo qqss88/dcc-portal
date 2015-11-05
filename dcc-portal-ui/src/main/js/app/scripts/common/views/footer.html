@@ -35,7 +35,7 @@
 </ul>
 <ul data-ng-if="stagedFeatures.getCloudLinks()">
     <li class="heading">Cloud</li>
-    <li data-ng-repeat="cloudLink in stagedFeatures.getCloudLinks()"> 
+    <li data-ng-repeat="cloudLink in ::stagedFeatures.getCloudLinks()"> 
       <a data-ng-href="{{cloudLink.link}}" data-ng-bind="cloudLink.title"></a>
     </li>
 </ul>
