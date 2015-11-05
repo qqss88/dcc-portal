@@ -411,9 +411,10 @@
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
     <div data-ng-if="GeneSetCtrl.pathway">
         <h3>Pathway Viewer</h3>
-        <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+        <h4 data-ng-if="GeneSetCtrl.pathway.xml!==''">Drag and scroll to explore the pathway. Double click to reset the view.</h4>
         <pathway-viewer data-items="GeneSetCtrl.pathway.xml" data-zooms="GeneSetCtrl.pathway.zooms" data-highlights="GeneSetCtrl.pathway.highlights">
         </pathway-viewer>
+        <small>Data Source: <a href="http://www.reactome.org/">Reactome</a></small>
     </div>
     <h3 data-ng-if="!GeneSetCtrl.pathway">
         No Pathway Diagram Found.
