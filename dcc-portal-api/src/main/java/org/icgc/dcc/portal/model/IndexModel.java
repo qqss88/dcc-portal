@@ -106,7 +106,7 @@ public class IndexModel {
     REPOSITORY_FILE_TEXT("file-text"),
     REPOSITORY_FILE_DONOR_TEXT("donor-text"),
     PROJECT_TEXT("project-text");
-    
+
     @NonNull
     private final String id;
   }
@@ -134,6 +134,7 @@ public class IndexModel {
       .add(RepositoryFileTypeModel.Fields.SPECIMEN_TYPE)
       .add(RepositoryFileTypeModel.Fields.SAMPLE_ID)
       .add(RepositoryFileTypeModel.Fields.PROGRAM)
+      .add(RepositoryFileTypeModel.Fields.ANALYSIS_SOFTWARE)
       .build();
   private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING = ImmutableMap
       .<String, String> builder()
