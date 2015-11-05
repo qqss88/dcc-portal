@@ -49,7 +49,8 @@
 	
 
 	module.controller('PathwaysController', function($scope, $q, Page, EnrichmentData, Restangular,
-		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService) {
+		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService,
+    EnrichmentService) {
 				
 		
 		var _ctrl = this,
@@ -89,36 +90,18 @@
     
     function _addFilters(pathway) {
       
-      
       if (_.get(pathway, 'geneSetFilters', false)) {
         return;
       }
       
-      var geneOverlapFilter = {
-        'gene': {
-          'entitySetId': {
-            'is': [EnrichmentData.id]},
-            'pathwayId': {
-              'is':[pathway.geneSetId]
-            }
-          }
-        },
-        geneSetFilters = {
-          'gene': { 
-            'pathwayId': {
-              'is': [pathway.geneSetId]
-            }
-          }
-        };
-      
-      pathway.geneSetFilters = encodeURIComponent(JSON.stringify(geneSetFilters));
-      pathway.geneSetOverlapFilters = encodeURIComponent(JSON.stringify(geneOverlapFilter));
+      pathway.geneSetFilters = EnrichmentService.geneSetFilters(EnrichmentData, pathway);
+      pathway.geneSetOverlapFilters = EnrichmentService.geneSetOverlapFilters(EnrichmentData, pathway);
      
-    }	
+    }
 		
 		$scope.getSelectedPathway = function() {
       return _selectedPathway;
-    }
+    };
 
 		$scope.setSelectedPathway = function(pathway) {			
 			$scope.pathway = {};
@@ -221,8 +204,7 @@
                 var ensemblId = uniprotObj[0].id;
                 n.advQuery =  LocationService.mergeIntoFilters({
                   gene: {
-                    id:  {is: [ensemblId]},
-                    pathwayId: {is: [_parentPathwayId]}
+                    id:  {is: [ensemblId]}
                   }
                 });
                 n.geneSymbol = uniprotObj[0].symbol;

@@ -28,11 +28,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
-import org.icgc.dcc.portal.auth.oauth.UserScopesInternal;
+import org.icgc.dcc.portal.auth.oauth.UserScopesResponse;
 import org.icgc.dcc.portal.model.AccessToken;
 import org.icgc.dcc.portal.model.AccessTokenScopes.AccessTokenScope;
 import org.icgc.dcc.portal.model.User;
@@ -44,6 +41,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableSet;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
 public class TokenServiceTest {
@@ -52,7 +52,7 @@ public class TokenServiceTest {
    * Scope supported by default. <br>
    * // TODO: Make sure scope is correctly resolved.
    */
-  private static final Set<String> USER_SCOPES = ImmutableSet.of("s3.download", "s3.upload", "collab.download",
+  private static final Set<String> USER_SCOPES = ImmutableSet.of("aws.download", "aws.upload", "collab.download",
       "collab.upload", "id.create");
   private static final String USER_ID = "userId";
   private static final String TOKEN_ID = "123";
@@ -111,8 +111,8 @@ public class TokenServiceTest {
     tokenService.userScopes(createUser(USER_ID, TRUE));
   }
 
-  private static UserScopesInternal createUserScopesInternal(Set<String> scopes) {
-    return new UserScopesInternal(scopes);
+  private static UserScopesResponse createUserScopesInternal(Set<String> scopes) {
+    return new UserScopesResponse(scopes);
   }
 
   private static User createUser(String userId, Boolean hasDaco) {

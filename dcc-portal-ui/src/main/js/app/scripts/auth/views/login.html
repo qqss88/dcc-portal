@@ -1,20 +1,15 @@
 <div style="background: #eaeaea;color:#333;text-align: right; padding: .2rem 1rem">
-    <span data-ng-show="params.user.verifying"><i class="icon-spinner icon-spin"></i> Verifying...</span>
-    <span data-ng-show="params.user.token && !params.user.verifying">
-        <i data-ng-show="params.user.daco" class="icon-shield data-available"
-           data-tooltip-placement="bottom"
-           data-tooltip="Authorized"></i>
-        <i data-ng-hide="params.user.daco" class="icon-shield data-missing"
-           data-tooltip-placement="bottom"
-           data-tooltip="Unauthorized"></i>
-        <span data-ng-click="openAuthPopup()"><a href="">{{params.user.email}}</a></span>
-
-        <i data-ng-show="params.user.daco && params.showCollaboratoryToken" style="cursor: pointer" 
-           class="icon-cog" 
-           data-ng-click="openTokenManagerPopup()" 
-           data-tooltip="Token Settings" data-tooltip-placement="bottom"></i>
-
-        (<a href="" data-ng-click="logout()"><i class="icon-logout"></i> Logout</a>)</span>
-    <a data-ng-hide="params.user.token || params.user.verifying" data-ng-click="openLoginPopup()" href="">
-        <i class="icon-login"></i>Login</a>
+   <span data-ng-show="params.user.verifying"><i class="icon-spinner icon-spin"></i> Verifying...</span>
+   <span data-ng-show="params.user.token && !params.user.verifying">
+      <i data-ng-show="params.user.daco" class="icon-shield data-available"
+         data-tooltip-placement="bottom"
+         data-tooltip="Authorized"></i>
+      <i data-ng-hide="params.user.daco" class="icon-shield data-missing"
+         data-tooltip-placement="bottom"
+         data-tooltip="Unauthorized"></i>
+      <span><a href="">{{params.user.email}}</a></span>
+   <i data-ng-show="params.user.daco && params.showCollaboratoryToken" style="cursor: pointer" class="icon-cog" data-ng-click="openTokenManagerPopup()" data-tooltip="Token Settings" data-tooltip-placement="bottom"></i> (
+   <a href="" data-ng-click="logout()"><i class="icon-logout"></i> Logout</a>)</span>
+   <a data-ng-hide="params.user.token || params.user.verifying" data-ng-click="openLoginPopup()" href="">
+      <i class="icon-login"></i>Login</a>
 </div>

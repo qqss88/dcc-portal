@@ -1,7 +1,46 @@
 /** Used for the ICGC in the cloud user repository sub site **/
 $button-colour: #1693c0;
+$collab-colour: rgb(97,168,225);
+$aws-colour:  rgb(228, 121, 17);
 
 /** ICGC Cloud Home Page **/
+.cloud-banner {
+  padding: 0rem 2rem;
+  position: relative;
+  
+  img {
+    vertical-align: middle;
+      margin-top: 0.5rem
+  }
+  
+  .icgc {
+    color: #283e5d;
+    font-weight: bold;
+    letter-spacing: -2px; 
+    font-size: 3.75rem;
+  }
+  
+  .icgc-cloud-other {
+    color: #bb282e;
+    //font-size: 1.5rem;
+    display: inline;
+    
+    vertical-align: super;
+    font-size: 2rem;
+  }
+    
+  .icgc-title-caption-container {
+    display: inline-block;
+    border-left: 3px solid #527c9e;
+    height: 6rem;
+    vertical-align: top;
+    padding-left: 1rem;
+    
+    .icgc-title-caption {
+          margin-top: 1.5rem;
+    }
+  }
+}
 .cloud-home {
     .icgc-workflow-diagram {
         width: 60%;
@@ -9,8 +48,14 @@ $button-colour: #1693c0;
         margin: 1rem auto;
     }
     
+
     section {
+      padding: 0rem 2rem 2rem 2rem;
       border-bottom: none;
+      
+      h2 {
+        margin-top: 0;
+      }
     }
     
     .indent { 
@@ -20,11 +65,176 @@ $button-colour: #1693c0;
     a {
       text-indent: initial;
     }
+    
+    h2 {
+      margin-bottom: 1.5rem;
+    }
+    
+    .divider {
+      border-top: solid 1px #e6e6e6;
+      //width: 60%;
+      margin-bottom: 2rem;
+    }
+    
+    .card-body {
+      height:100%;
+      position: relative;
+      
+      .card-container {
+        position: relative;
+        display: inline-block;
+       // width: 49%;
+        height: 100%;
+      }
+    }
+    // Callout Card 
+    .card {
+      border: solid 1px #ccc;
+      display: table;
+      height: 100%;
+     
+     &:first-child {
+       margin-left: 0.3rem;
+     }
+      
+      .card-handle {
+        overflow: hidden;
+        
+        .indicator-icon h3 {
+         text-align: center;
+          margin: 0 0;
+          font-size: 2.3rem;
+        }
+      }
+      
+      &.aws  {
+        border-color: $aws-colour;
+        
+        .card-handle {
+          background: $aws-colour;
+          
+          .indicator-icon { 
+            
+            &:hover {
+              background-color: lighten($aws-colour, 40);
+            }
+            
+            h3 {
+              color: $aws-colour;
+            }
+            
+            img {
+              width: 5.2rem;
+              margin-left: -0.7rem;
+              margin-top: -0.7rem;
+            }
+          }
+          
+        
+        }
+        
+        &:hover {
+          border-color: darken($aws-colour, 10); 
+        }
+      }
+      
+       &.collab  {
+        border-color: $collab-colour;
+        
+        .card-handle {
+          background: $collab-colour;
+          
+          .indicator-icon {
+            color: $collab-colour;
+            
+            &:hover {
+              background-color: lighten($collab-colour, 30); 
+            }
+            
+            h3 {
+              color: inherit;
+              font-size: 3rem;
+              margin-left: -0.3rem
+            }
+          }
+        }
+        
+        &:hover {
+          border-color: darken($collab-colour, 10); 
+        }
+      }
+      
+      
+      
+      .card-handle {
+        background: #fafafa;// #e6e6e6;
+        display:table-cell;
+        //width: 6rem;
+        width: 1rem;
+        vertical-align: middle;
+        
+        //-webkit-box-shadow: inset -16px 0px 8px -13px rgba(0,0,0,0.32);
+        //-moz-box-shadow: inset -16px 0px 8px -13px rgba(0,0,0,0.32);
+        //box-shadow: inset -16px 0px 8px -13px rgba(0,0,0,0.32);
+        -webkit-box-shadow: inset -16px 0px 8px -16px rgba(0,0,0,0.72);
+        -moz-box-shadow: inset -16px 0px 8px -16px rgba(0,0,0,0.72);
+        box-shadow: inset -16px 0px 8px -16px rgba(0,0,0,0.72);
+        
+        .indicator-icon {
+          margin: 0 auto;
+          height: 4em;
+          width: 4em;
+          background: #fff;
+          border-radius: 50%;
+          color: #000;
+          transform: rotateZ(-90deg);
+          transition: transform 0.30s ease-in;
+          
+          &:hover {
+            background:#e6e6e6;
+            
+          }
+          
+          a:hover {
+            background: none;
+          }
+        }
+      }
+      .card-content {
+        padding: 1rem 1rem;
+        background: #fff;
+        //transform: translateX(-5.5rem);
+        transition-property: transform border-color;
+        transition: 0.25s ease-in;
+        
+        &.slide {
+          transform: translateX(0);
+        }
+      }
+      
+      /*&:hover { 
+        .card-handle .indicator-icon {
+           transform: rotateZ(0deg);
+        }
+        
+        .card-content {
+          transform: translateX(0);
+         
+        }
+      } */
+    }
 }
 
 /* shared classes */
 .icgc-cloud {
   .header-link {
+    
+      line-height: 4rem;
+    
+      img {
+        vertical-align: middle;
+      }
+      
       a { 
         color: inherit;
         
@@ -35,6 +245,7 @@ $button-colour: #1693c0;
         
         .link-title {
           margin-left: 1rem;
+          display: inline-block;
         }
       }
   }
@@ -92,7 +303,7 @@ $button-colour: #1693c0;
         
         .logo {
             margin-left: 2rem; 
-            vertical-align: baseline;
+            vertical-align: middle;
         }
         span {
             margin-left: 0.5rem;
@@ -141,7 +352,7 @@ $button-colour: #1693c0;
     }
     
     h3 {
-      padding-top: 3rem;
+      padding-top: 2rem;
     }
     
 }

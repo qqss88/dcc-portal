@@ -26,7 +26,7 @@
       <section id="overview">
          <h2>Overview</h2>
 
-         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i> Amazon Web Services (AWS)</a>. </p>
+         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a>. </p>
 
          <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
 
@@ -36,7 +36,6 @@
          <div class="screen-shot">
             <a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
                <img src="styles/images/repositories/guides/aws/aws_process_diagram.png" alt="AWS Process Diagram">
-               <i class="icon-external-link screen-caption"></i>
             </a>
          </div>
          <ol>
@@ -55,7 +54,7 @@
          <h3>Security</h3>
          <p>The usage of the distributed <a href="/software">Storage Client</a> is required to provide additional security while operating in participating cloud environments and to enhance user download speeds. </p>
          <p>
-            Security is enforced by using a coordinating ICGC EC2 server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i> pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.  
+            Security is enforced by using a coordinating ICGC EC2 server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.  
          </p>
          <p>
             It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
@@ -71,17 +70,17 @@
 
          <h3 id="auth-daco">DACO Access</h3>
 
-         <p>DACO access is prerequisite to using the storage client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i> https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">access token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i> ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
+         <p>DACO access is prerequisite to using the storage client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">access token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
 
          <h3 id="auth-token">Access Token</h3>
 
-         <p>The access token model used for protecting the AWS S3 data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i> personal access tokens</a>. In the case of the ICGC AWS data set, an access token with the <code>s3.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i> controlled access data</a>. This scope will become available after acquiring DACO access. A instance of this token will grant access to all of the available data.</p>
+         <p>The access token model used for protecting the AWS S3 data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. In the case of the ICGC AWS data set, an access token with the <code>aws.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>. This scope will become available after acquiring DACO access. A instance of this token will grant access to all of the available data.</p>
 
-         <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. For AWS, you will need to specify the <code>s3.download</code> scope when you generate your token. </p>
+         <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. For AWS, you will need to specify the <code>aws.download</code> scope when you generate your token. </p>
 
 
          <div class="screen-shot">
-            <img src="styles/images/repositories/guides/aws/token_manager_link.png" alt="Token Manager Link" />
+          <img  style="width: 30%;" src="styles/images/repositories/guides/aws/token_manager_link.png" alt="Token Manager Link" />
          </div>
 
          <p>You will then need to edit the client configuration file in the storage client to include this token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
@@ -89,7 +88,6 @@
          <div class="screen-shot">
             <a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/aws/token_manager_screenshot.png" target="_blank">
                <img src="styles/images/repositories/guides/aws/token_manager_screenshot.png" alt="Token Manager Screenshot" />
-               <i class="icon-external-link screen-caption"></i>
             </a>
          </div>
       </section>
@@ -98,7 +96,7 @@
 
          <h3>EC2 Instance</h3>
          <p>
-            In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i> EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the EC2 is free of charge. Please see Amazon's documentation for detailed instructions.
+            In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the EC2 is free of charge. Please see Amazon's documentation for detailed instructions.
          </p>
          <p>
            The following sections will give guidance on the selecting and configuring the chosen instance type.
@@ -122,7 +120,7 @@
 
          <p>The storage client requires Java 8 to be installed. It has been tested using the Oracle distribution. The procedure for installing Java 8 will vary depending on the operating system and package manager used.</p>
          <p>
-           In order to use the mount feature, <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i> FUSE</a> is required. On most Linux based systems this will require installing <code>libfuse-dev</code> and <code>fuse</code> packages.
+           In order to use the mount feature, <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i>FUSE</a> is required. On most Linux based systems this will require installing <code>libfuse-dev</code> and <code>fuse</code> packages.
          </p>
       </section>
       <section id="install">
@@ -142,7 +140,7 @@
 
             <p>We also support a Docker image of the storage client that is bundled with Java 8 for easy deployment.</p>
 
-            <p>The image is hosted at <a href="https://hub.docker.com/r/icgc/dcc-storage-client/" target="_blank"><i class="icon-external-link"></i> https://hub.docker.com/r/icgc/dcc-storage-client/</a> and downloaded by issuing the following command:</p>
+            <p>The image is hosted at <a href="https://hub.docker.com/r/icgc/dcc-storage-client/" target="_blank"><i class="icon-external-link"></i>https://hub.docker.com/r/icgc/dcc-storage-client/</a> and downloaded by issuing the following command:</p>
 
             <pre class="language-shell"><code class="language-shell">docker pull icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
 
@@ -258,7 +256,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
 
          <h3>View Command</h3>
 
-         <p>The <code>view</code> command is a minimal version of <a href="http://www.htslib.org/doc/samtools.html" target="_blank"><i class="icon-external-link"></i> samtools view</a>. It allows to request a &ldquo;genomic slice&rdquo; of the remote BAM file, freeing the user from having to download the entire file locally, saving bytes and time.</p>
+         <p>The <code>view</code> command is a minimal version of <a href="http://www.htslib.org/doc/samtools.html" target="_blank"><i class="icon-external-link"></i>samtools view</a>. It allows to request a &ldquo;genomic slice&rdquo; of the remote BAM file, freeing the user from having to download the entire file locally, saving bytes and time.</p>
 
          <p>The following example will download reads overlapping the region 1 - 100000 in chromosome 1:</p>
 
@@ -272,7 +270,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
          <pre class="language-shell"><code class=" language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">|</span> samtools mpileup <span class="token operator">-</span></code></pre>
       
         <h3>Mount Command</h3>
-        <p>The <code>mount</code> command can be used to mount the remote S3 bucket as a read-only <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i> FUSE</a> file system. This is very useful to browse and explore the available files, as well as quickly see their size and date of modification using common commands such as <code>ls</code>, <code>find</code>, <code>du</code> and <code>tree</code>. It also works very well with standard analysis tools such as <code>samtools</code>. </p>
+        <p>The <code>mount</code> command can be used to mount the remote S3 bucket as a read-only <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i>FUSE</a> file system. This is very useful to browse and explore the available files, as well as quickly see their size and date of modification using common commands such as <code>ls</code>, <code>find</code>, <code>du</code> and <code>tree</code>. It also works very well with standard analysis tools such as <code>samtools</code>. </p>
         <p>Files are organized into a virtual directory structure:</p>
         <pre><code>/gnosId1/fileName1
 /gnosId1/fileName2
@@ -357,7 +355,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
         <p>
           Due to a limitation of Docker it is not possible to access a FUSE mounted file system from the host operating system. 
-          Please see <a href="https://github.com/docker/docker/issues/10088" target="_blank"><i class="icon-external-link"></i> here</a> for more details.
+          Please see <a href="https://github.com/docker/docker/issues/10088" target="_blank"><i class="icon-external-link"></i>here</a> for more details.
         </p>
       </section>
 
@@ -381,7 +379,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <h5>Why do I get a security exception?</h5>
 
-         <p>Ensure that you are running within the AWS <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank"><i class="icon-external-link"></i> region</a>.</p>
+         <p>Ensure that you are running within the AWS <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank"><i class="icon-external-link"></i>region</a>.</p>
 
          <h5>I can&rsquo;t use the result of a <code>url</code> command with <code>samtools</code></h5>
 
@@ -389,7 +387,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <h5>How do I report a bug in the software?</h5>
 
-         <p>Please contact <a href="mailto:dcc-support@icgc.org"><i class="icon-mail"></i> dcc-support@icgc.org</a> and include the version of the software in the body of the message (<code>bin/dcc-storage-client --version</code>). </p>
+         <p>Please contact <a href="mailto:dcc-support@icgc.org"><i class="icon-mail"></i>dcc-support@icgc.org</a> and include the version of the software in the body of the message (<code>bin/dcc-storage-client --version</code>). </p>
       </section>
       <section id="terms">
          <h2>Terms</h2>
@@ -414,7 +412,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>DCC</em></td>
-                  <td>The ICGC Data Coordination Center (<a href="https://icgc.org/icgc/goals-structure-policies-guidelines/coordination" target="_blank"><i class="icon-external-link"></i> DCC</a>) performs quality assessment, curation and data releases and also manages the data flow from projects and centers to the central ICGC database and public repositories.</td>
+                  <td>The ICGC Data Coordination Center (<a href="https://icgc.org/icgc/goals-structure-policies-guidelines/coordination" target="_blank"><i class="icon-external-link"></i>DCC</a>) performs quality assessment, curation and data releases and also manages the data flow from projects and centers to the central ICGC database and public repositories.</td>
                </tr>
                <tr>
                   <td><em>Data Portal</em></td>
@@ -422,7 +420,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>FUSE</em></td>
-                  <td><a href="https://en.wikipedia.org/wiki/Filesystem_in_Userspace" target="_blank"><i class="icon-external-link"></i> Filesystem in Userspace</a> is an operating system mechanism for Unix-like computer operating systems that 
+                  <td><a href="https://en.wikipedia.org/wiki/Filesystem_in_Userspace" target="_blank"><i class="icon-external-link"></i>Filesystem in Userspace</a> is an operating system mechanism for Unix-like computer operating systems that 
                   lets non-privileged users create their own file systems without editing kernel code.</a></td>
                </tr>
                <tr>
@@ -439,7 +437,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>S3</em></td>
-                  <td><a href="https://aws.amazon.com/s3/" target="_blank"><i class="icon-external-link"></i> Amazon Simple Storage Service</a>, the physical store of the ICGC AWS data.</td>
+                  <td><a href="https://aws.amazon.com/s3/" target="_blank"><i class="icon-external-link"></i>Amazon Simple Storage Service</a>, the physical store of the ICGC AWS data.</td>
                </tr>					
                <tr>
                   <td><em>Token Manager</em></td>

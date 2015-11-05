@@ -29,17 +29,13 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
 import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.ws.rs.core.MultivaluedMap;
-
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.common.core.security.DumbHostnameVerifier;
 import org.icgc.dcc.common.core.security.DumbX509TrustManager;
@@ -62,24 +58,42 @@ import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 public class OAuthClient {
 
   /**
-   * Constants.
+   * Constants
    */
   private static final String PASSWORD_GRANT_TYPE = "password";
+  private static final int MAX_DESCRIPTION_LENGTH = 200;
+
+  /**
+   * Constants - Params.
+   */
   private static final String SCOPE_PARAM = "scope";
   private static final String DESCRIPTION_PARAM = "desc";
-  private static final int MAX_DESCRIPTION_LENGTH = 200;
   private static final String USERNAME_PARAM = "username";
   private static final String GRANT_TYPE_PARAM = "grant_type";
+  private static final String TOKEN_PARAM = "token";
+
+  /**
+   * Constants - URL.
+   */
   private static final String TOKENS_URL = "tokens";
   private static final String USERS_URL = "users";
   private static final String SCOPES_URL = "scopes";
   private static final String CREATE_TOKEN_URL = "oauth/token";
+  private static final String CHECK_TOKEN_URL = "oauth/check_token";
 
+  /**
+   * Configuration.
+   */
   private final WebResource resource;
 
   @Autowired
@@ -101,7 +115,7 @@ public class OAuthClient {
         .accept(APPLICATION_JSON_TYPE)
         .post(ClientResponse.class, createParameters(userId, scope, description));
     validateResponse(response);
-    val accessToken = response.getEntity(AccessTokenInternal.class);
+    val accessToken = response.getEntity(AccessTokenResponse.class);
 
     return convertToAccessToken(accessToken);
   }
@@ -120,12 +134,33 @@ public class OAuthClient {
     validateResponse(response);
   }
 
-  public UserScopesInternal getUserScopes(@NonNull String userId) {
+  public boolean checkToken(@NonNull String token, String scope) {
+    checkArguments(token);
+
+    val params = new MultivaluedMapImpl();
+    params.add(TOKEN_PARAM, token);
+
+    val response = resource.path(CHECK_TOKEN_URL)
+        .type(APPLICATION_FORM_URLENCODED_TYPE)
+        .accept(APPLICATION_JSON_TYPE)
+        .post(ClientResponse.class, params);
+
+    checkState(response.getClientResponseStatus().getFamily() != SERVER_ERROR, "Error checking token: %s", response);
+    if (response.getClientResponseStatus() != OK) {
+      return false;
+    }
+
+    val accessToken = response.getEntity(CheckTokenResponse.class);
+    val scopes = accessToken.getScope();
+    return scopes.contains(scope);
+  }
+
+  public UserScopesResponse getUserScopes(@NonNull String userId) {
     checkArguments(userId);
     val response = resource.path(USERS_URL).path(userId).path(SCOPES_URL).get(ClientResponse.class);
     validateResponse(response);
 
-    return response.getEntity(UserScopesInternal.class);
+    return response.getEntity(UserScopesResponse.class);
   }
 
   private static MultivaluedMap<String, String> createParameters(String userId, String scope, String description) {
@@ -178,7 +213,7 @@ public class OAuthClient {
     }
   }
 
-  private static AccessToken convertToAccessToken(AccessTokenInternal token) {
+  private static AccessToken convertToAccessToken(AccessTokenResponse token) {
     return new AccessToken(token.getId(), token.getDescription(), token.getExpiresIn(), convertScope(token.getScope()));
   }
 
