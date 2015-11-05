@@ -348,7 +348,9 @@
       $rootScope.$on('$stateChangeSuccess', scroll);
       
       // Add UI Router Debug if there is a fatal state change error
-      $rootScope.$on('$stateChangeError', function () { console.log(arguments); });
+      $rootScope.$on('$stateChangeError', function () { 
+        console.error('State Change Error Occurred. Error occurred with arguments: ', arguments);
+      });
     });
 
 

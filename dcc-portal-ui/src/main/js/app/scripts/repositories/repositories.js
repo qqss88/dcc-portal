@@ -64,10 +64,10 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
           views:{
             
             'cloud-repo-content': {
-              templateUrl: function ($stateParams) {
-
+              templateUrl: function () {
                 var contentURL = 'scripts/repositories/views/guide.html',
-                    context = $stateParams.repoAlias.toLowerCase();
+                    stateParams = arguments[0],
+                    context = stateParams.repoAlias.toLowerCase();
                 
                 if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
                   contentURL = 'scripts/repositories/views/repos/repos.html';
@@ -75,7 +75,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 
                 return contentURL;
               },
-              controllerProvider: function ($stateParams) {
+              controllerProvider: ['$stateParams', function ($stateParams) {
                 var ctrlName = 'RepositoriesGuideController as repositoryGuideCtrl',
                     context = $stateParams.repoAlias.toLowerCase();
 
@@ -84,7 +84,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                 }
 
                 return ctrlName;
-              },
+              }],
               
               resolve: {
                 // Use the explicit dependency injection
@@ -112,10 +112,11 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
               }
             },
             'bodyContent@ICGCcloud.repositories': {
-              templateUrl: function ($stateParams) {
+              templateUrl: function () {
 
                 var contentURL = null,
-                    context = $stateParams.repoAlias.toLowerCase();
+                    stateParams = arguments[0],
+                    context = stateParams.repoAlias.toLowerCase();
                 
                 if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
                   contentURL = 'scripts/repositories/views/repos/repos.' +
@@ -124,7 +125,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 
                 return contentURL;
               },
-              controllerProvider: function ($stateParams) {
+              controllerProvider: ['$stateParams', function ($stateParams) {
                 var ctrlName = null,
                     context = $stateParams.repoAlias.toLowerCase();
 
@@ -133,7 +134,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                 }
 
                 return ctrlName;
-              }
+              }]
             }
             /*,
               'dataContent@ICGCcloud.repositories': {
