@@ -21,98 +21,131 @@
 // Primary Repository Module
 ////////////////////////////////////////////////////////////////////////
 angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repositories.services'])
-   .config(function ($stateProvider, PortalFeatureProvider) {
+   .config(function ($stateProvider, PortalFeatureProvider, $urlMatcherFactoryProvider, REPO_GUIDE_ALIAS_CONSTANT) {
 
+      // Make UI-Router ignore trailing slashes
+      $urlMatcherFactoryProvider.strictMode(false);
+    
       function _normalizeRepoCode(repoCode) {
          return repoCode.toLowerCase().replace(/[^\w]+/i, '.');
       }
-
+    
       $stateProvider
-         .state('ICGCcloud', {
-               url: '/icgc-in-the-cloud',
-               template: function() {
+        .state('ICGCcloud', {
+          url: '/icgc-in-the-cloud',
+          template: function () {
 
             var _templateStr = '',
-                isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
+              isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
 
-                if (isICGCCloudFunctionlityEnabled) {
-                   _templateStr = '<div data-ui-view="home" data-reset-scroll="top"></div>' +
-                      '<div data-ui-view="repositoryGuides" data-reset-scroll="top"></div>' +
-                      '<div data-ui-view="repos" class="cloud-repository-container" data-reset-scroll="top"></div>';
+            if (isICGCCloudFunctionlityEnabled) {
+              _templateStr = '<div data-ui-view="home" data-reset-scroll="top"></div>' +
+              '<div data-ui-view="cloud-repo-content" class="cloud-repository-container" ' +
+              ' data-reset-scroll="top"></div>';
+            }
+
+            return _templateStr;
+          },
+          abstract: true
+        })
+        .state('ICGCcloud.home', {
+          url: '',
+          views: {
+            'home': {
+              templateUrl: 'scripts/repositories/views/home.html',
+              controller: 'RepositoriesHomeController'
+            }
+          }
+        })
+        .state('ICGCcloud.repositories', {
+          url: '/:repoAlias',
+          // UI-Router only instantiates RepositoriesController once
+          // which is good for us in this context
+          views:{
+            
+            'cloud-repo-content': {
+              templateUrl: function ($stateParams) {
+
+                var contentURL = 'scripts/repositories/views/guide.html',
+                    context = $stateParams.repoAlias.toLowerCase();
+                
+                if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
+                  contentURL = 'scripts/repositories/views/repos/repos.html';
                 }
 
-              return _templateStr;
-          },
-               abstract: true
-         })
-         .state('ICGCcloud.home', {
-               url: '/',
-               views: {
-                  'home': {
-                     templateUrl: 'scripts/repositories/views/home.html',
-                     controller: 'RepositoriesHomeController'
-                  }
-               }
-         })
-         .state('ICGCcloud.repositories', {
-            url: '/{repoAlias}/',
-            // UI-Router only instantiates RepositoriesController once
-            // which is good for us in this context
-            views: {
-               'repos': {
-                  templateUrl: 'scripts/repositories/views/repos/repos.html',
-                  controller: 'RepositoriesController as repositoryCtrl',
-                  resolve: {
-                     // Use the explicit dependency injection
-                     // declaration so the code doesn't blow up
-                     // after its minified/uglified.
-                     repoMap: ['ExternalRepoService', function(ExternalRepoService) {
-                        // Force a refresh of the repo map from the server
-                        // before instantianting the controller...
+                return contentURL;
+              },
+              controllerProvider: function ($stateParams) {
+                var ctrlName = 'RepositoriesGuideController as repositoryGuideCtrl',
+                    context = $stateParams.repoAlias.toLowerCase();
 
-                        return ExternalRepoService.refreshRepoMap();
-                     }]
+                if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
+                  ctrlName = 'RepositoriesController as repositoryCtrl';
+                }
+
+                return ctrlName;
+              },
+              
+              resolve: {
+                // Use the explicit dependency injection
+                // declaration so the code doesn't blow up
+                // after its minified/uglified.
+                repoMap: ['$stateParams', '$q', 'ExternalRepoService',
+
+                function ($stateParams, $q, ExternalRepoService) {
+                  var deferred = $q.defer(),
+                      promise = null,
+                      context = $stateParams.repoAlias.toLowerCase();
+
+                  // Force a refresh of the repo map from the server
+                  // before instantianting the controller...
+                  if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
+                    promise = ExternalRepoService.refreshRepoMap();
                   }
-               },
-               'bodyContent@ICGCcloud.repositories': {
-                  templateUrl: function ($stateParams) {
-                     return    'scripts/repositories/views/repos/repos.' +
-                           _normalizeRepoCode($stateParams.repoAlias) + '.content.html';
-                  },
-                  controller: 'RepositoriesContentController as repositoryContentCtrl'
-               } /*,
-               'dataContent@ICGCcloud.repositories': {
-                  templateUrl: function ($stateParams) {
-                     return    'scripts/repositories/views/repos/repos.' +
-                           _normalizeRepoCode($stateParams.repoCode) + '.content.data.html';
-                  },
-                  controller: 'RepositoriesController as repositoryCtrl'
-               } */
+                  else {
+                    promise = deferred.promise;
+                    deferred.resolve(); 
+                  }
+
+                  return promise;
+                }]
+              }
+            },
+            'bodyContent@ICGCcloud.repositories': {
+              templateUrl: function ($stateParams) {
+
+                var contentURL = null,
+                    context = $stateParams.repoAlias.toLowerCase();
+                
+                if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
+                  contentURL = 'scripts/repositories/views/repos/repos.' +
+                  _normalizeRepoCode(context) + '.content.html';
+                }
+
+                return contentURL;
+              },
+              controllerProvider: function ($stateParams) {
+                var ctrlName = null,
+                    context = $stateParams.repoAlias.toLowerCase();
+
+                if (context !== REPO_GUIDE_ALIAS_CONSTANT) {
+                  ctrlName = 'RepositoriesContentController as repositoryContentCtrl';
+                }
+
+                return ctrlName;
+              }
             }
-         }) 
-      .state('ICGCcloud.repositoryGuide', {
-            url: '/guide',
-            views: {
-               'repositoryGuides': {
-                  templateUrl: function () {
-                     return    'scripts/repositories/views/guide.html';
-                  },
-                  controller: 'RepositoriesGuideController as repositoryGuideCtrl'
-               }
-            }
-         })
-         .state('ICGCcloud.repositoryGuides', {
-            url: '/repositories/{repoCode}/guide',
-            views: {
-               'repositoryGuides': {
-                  templateUrl: function ($stateParams) {
-                     return    'scripts/repositories/views/guides/' +
-                           _normalizeRepoCode($stateParams.repoCode) + '.html';
-                  },
-                  controller: 'RepositoriesGuideController as repositoryGuideCtrl'
-               }
-            }
-         });
+            /*,
+              'dataContent@ICGCcloud.repositories': {
+                 templateUrl: function ($stateParams) {
+                    return    'scripts/repositories/views/repos/repos.' +
+                          _normalizeRepoCode($stateParams.repoCode) + '.content.data.html';
+                 },
+                 controller: 'RepositoriesController as repositoryCtrl'
+              } */
+          }
+        });
+    
 
    });
 
@@ -122,6 +155,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 // Controller Declaration
 ////////////////////////////////////////////////////////////////////////
 angular.module('icgc.repositories.controllers', [])
+   .constant('REPO_GUIDE_ALIAS_CONSTANT', 'guide')
    .constant('repoAliasMapConstants', {
          'collaboratory': 'collaboratory',
          'aws': 'aws-virginia'
@@ -145,7 +179,7 @@ angular.module('icgc.repositories.controllers', [])
        _repoCreationDate = null,
        _filterQueryStr = null,
        _repoSummaryData = null,
-       _repoStats = {};   
+       _repoStats = {};      
 
 
       function _capitalizeWords(str) {
@@ -208,9 +242,9 @@ angular.module('icgc.repositories.controllers', [])
 
          _refreshData();
       }
-
-      // Initialize the controller
-      _init();
+     
+        // Initialize the controller
+        _init();  
 
       //
 

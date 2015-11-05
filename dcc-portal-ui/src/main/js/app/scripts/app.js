@@ -346,6 +346,9 @@
 
       $rootScope.$on('$viewContentLoaded', scroll);
       $rootScope.$on('$stateChangeSuccess', scroll);
+      
+      // Add UI Router Debug if there is a fatal state change error
+      $rootScope.$on('$stateChangeError', console.log.bind(console));
     });
 
 

@@ -36,9 +36,9 @@
       'dataReleases', 'dataRepositories', 'pcawg'], RouteInfoService.get);
 
    var cloudLinks = [
-            {'link': '/icgc-in-the-cloud/', 'title': 'About'},
-            {'link': '/icgc-in-the-cloud/aws/', 'title': 'Amazon'},
-            {'link': '/icgc-in-the-cloud/collaboratory/', 'title': 'Collaboratory'},
+            {'link': '/icgc-in-the-cloud', 'title': 'About'},
+            {'link': '/icgc-in-the-cloud/aws', 'title': 'Amazon'},
+            {'link': '/icgc-in-the-cloud/collaboratory', 'title': 'Collaboratory'},
             {'link': '/icgc-in-the-cloud/guide', 'title': 'User Guide'}
             //{'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'User Guide'}
           ];
