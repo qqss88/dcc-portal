@@ -55,7 +55,9 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
-              AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings) {
+      AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings,
+      $timeout) {
+
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -70,11 +72,41 @@
       _ctrl.Mutation = AdvancedMutationService;
       _ctrl.Location = LocationService;
 
+
+
       function refresh() {
         var filters = LocationService.filters();
-        _ctrl.Donor.refresh();
-        _ctrl.Gene.refresh();
-        _ctrl.Mutation.refresh();
+        var refreshOrder = [];
+        
+        switch (_ctrl.state.tab) {
+          case 'mutation':
+            refreshOrder = [_ctrl.Mutation, _ctrl.Gene, _ctrl.Donor];
+            break;
+          case 'gene':
+            refreshOrder = [_ctrl.Gene, _ctrl.Donor,  _ctrl.Mutation];
+            break;  
+          default: // donor
+             refreshOrder = [_ctrl.Donor, _ctrl.Gene, _ctrl.Mutation];
+            break;
+        }
+        _.forEach(refreshOrder, function (refreshOrderObject, order) {
+          var refreshFunction = refreshOrderObject.refresh;
+
+          if (order === 0) {
+            Page.startWork();
+
+            refreshFunction.call(this)
+              .then(function () {
+                Page.stopWork();
+              });
+              
+          } 
+          else {
+            $timeout(function () {
+              refreshFunction.call(this); 
+            }, 250);
+          }
+        });
         _ctrl.hasGeneFilter = angular.isObject(filters) ?  filters.hasOwnProperty('gene') : false;
       }
 
@@ -234,7 +266,7 @@
 
 
   module.service('AdvancedDonorService',
-    function(Page, LocationService, HighchartsService, Donors, State, Extensions) {
+    function(Page, LocationService, HighchartsService, Donors, State, Extensions, $q) {
 
     var _this = this;
 
@@ -304,8 +336,10 @@
 
     _this.success = function (donors) {
       var filters = LocationService.filters();
-      Page.stopWork();
+      //Page.stopWork();
       _this.loading = false;
+      
+       //console.log('Stop Donor Work!');
 
       donors.hits.forEach(function (donor) {
         donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
@@ -325,16 +359,23 @@
     };
 
     _this.refresh = function () {
-      Page.startWork();
+      var deferred = $q.defer();
       _this.loading = true;
+      
+      //console.log('Start Donor Work!');
       var params = LocationService.getJsonParam('donors');
       params.include = 'facets';
-      Donors.getList(params).then(_this.success);
+      Donors.getList(params).then(function (donorList) {
+         deferred.resolve();
+        _this.success(donorList);
+      });
+      
+      return deferred.promise;
     };
   });
 
   module.service('AdvancedGeneService',
-    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions, ProjectCache) {
+    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions, ProjectCache, $q) {
 
     var _this = this;
 
@@ -447,9 +488,10 @@
     };
 
     _this.success = function (genes) {
-      Page.stopWork();
       _this.loading = false;
-
+     
+      //console.log('Stop Gene Work!');
+      
       genes.hits.forEach(function (gene) {
         var filters = LocationService.filters();
         gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
@@ -469,16 +511,24 @@
     };
 
     _this.refresh = function () {
-      Page.startWork();
+       var deferred = $q.defer();
+      
       _this.loading = true;
+      //console.log('Start Gene Work!');
       var params = LocationService.getJsonParam('genes');
       params.include = 'facets';
-      Genes.getList(params).then(_this.success);
+      
+      Genes.getList(params).then(function (geneList) {
+        deferred.resolve();
+        _this.success(geneList);
+      });
+      
+      return deferred.promise;
     };
   });
 
   module.service('AdvancedMutationService', function (Page, LocationService, HighchartsService, Mutations,
-    Occurrences, Projects, Donors, State, Extensions, ProjectCache) {
+    Occurrences, Projects, Donors, State, Extensions, ProjectCache, $q) {
 
       var _this = this;
       var projectCachePromise = ProjectCache.getData();
@@ -601,9 +651,9 @@
       };
 
       _this.mSuccess = function (mutations) {
-        Page.stopWork();
         _this.loading = false;
-
+        //console.log('Stop Mutation Work!');
+         
         mutations.hits.forEach(function (mutation) {
           var filters = LocationService.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
@@ -632,12 +682,27 @@
       };
 
       _this.refresh = function () {
-        Page.startWork();
+        //Page.startWork();
+        var deferred = $q.defer();
         _this.loading = true;
+
+        //console.log('Start Mutation Work!');
+
         var mParams = LocationService.getJsonParam('mutations');
         mParams.include = ['facets', 'consequences'];
-        Mutations.getList(mParams).then(_this.mSuccess);
-        Occurrences.getList(LocationService.getJsonParam('occurrences')).then(_this.oSuccess);
+        Mutations.getList(mParams).then(
+          function (mutationsList) {
+            deferred.resolve();
+            _this.mSuccess(mutationsList);
+          }
+          );
+        Occurrences.getList(LocationService.getJsonParam('occurrences'))
+          .then(function(occurrencesList) {
+            //deferred.resolve();
+            _this.oSuccess(occurrencesList);
+          });
+        
+        return deferred.promise;
       };
     });
 })();
