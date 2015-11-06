@@ -75,18 +75,21 @@
                             <a href="/search/g?filters={{getSelectedPathway().geneSetFilters}}" data-ng-bind="getSelectedPathway().geneCount | number"></a>
                         </td>
                         <td class="text-right">
-                            <span>
+                            <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></span>
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
                                 <a href="/search/g?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></a>
                             </span>
                         </td>
     
                         <td class="text-right">
-                            <span>
+                            <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetDonorCount | number"></span>
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
                                 <a href="/search?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetDonorCount | number"></a>
                             </span>
                         </td>
                         <td class="text-right">
-                            <span>
+                            <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetMutationCount | number"></span>
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
                                 <a href="/search/m?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetMutationCount | number"></a>
                             </span>
                         </td>
@@ -97,13 +100,14 @@
                 </tbody>
             </table>
         <div data-ng-if="pathway">
-            <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+            <h4 data-ng-if="pathway.xml!==''">Drag and scroll to explore the pathway. Double click to reset the view.</h4>
             <pathway-viewer data-items="pathway.xml" data-zooms="pathway.zooms" data-highlights="pathway.highlights">
             </pathway-viewer>
         </div>
         <h3 data-ng-if="!pathway">
             No Pathway Diagram Found.
         </h3>
+        <small>Data Source: <a href="http://www.reactome.org/">Reactome</a></small>
       </section>
     </article>
   </div>

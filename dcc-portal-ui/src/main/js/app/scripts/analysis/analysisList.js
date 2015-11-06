@@ -21,7 +21,7 @@
   var module = angular.module('icgc.analysis.controllers');
 
   /**
-   * Controls list of existing analyses (bench)
+   * Controls list of existing analysis (bench)
    */
   module.controller('AnalysisListController', function($window, $location, AnalysisService) {
     var _this = this;

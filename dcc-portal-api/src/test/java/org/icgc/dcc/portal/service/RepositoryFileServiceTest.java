@@ -38,11 +38,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.xml.stream.XMLInputFactory;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -62,6 +57,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
 
 /**
  * Test suite for RepositoryFileService
@@ -114,7 +114,7 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
     // This creates and populates the test index with fixture data.
     es.execute(createIndexMapping(Type.REPOSITORY_FILE_CENTRIC)
         .withData(bulkFile(getClass())));
-    service = new RepositoryFileService(new RepositoryFileRepository(es.client()));
+    service = new RepositoryFileService(new RepositoryFileRepository(es.client(), REPO_INDEX_NAME, new IndexService()));
   }
 
   @Test

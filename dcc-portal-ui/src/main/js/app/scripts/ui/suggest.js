@@ -77,7 +77,9 @@ angular.module('icgc.ui.suggest').controller('suggestController', function ($sco
   $scope.onChange = debounce($scope.onChangeFn, 200, false);
 });
 
-angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $document, $location) {
+angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $document, $location, RouteInfoService) {
+  var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+
   return {
     restrict: 'A',
     replace: true,
@@ -120,7 +122,7 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
           if (_.contains (['curated_set', 'go_term', 'pathway'], resourceType)) {
             resourceType = 'geneset';
           } else if ('file' === resourceType) {
-            resourceType = 'repository/external/file';
+            return dataRepoFileUrl + item.id;
           }
 
           return '/' + resourceType + 's/' + item.id;
@@ -172,7 +174,9 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
   };
 });
 
-angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location) {
+angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location, RouteInfoService) {
+  var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+
   return {
     restrict: 'E',
     replace: true,
@@ -192,7 +196,8 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
           if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
             resourceType = 'geneset';
           } else if (item.type === 'file') {
-            resourceType = 'repository/external/file';
+            $location.path (dataRepoFileUrl + item.id).search ({});
+            return;
           }
 
           $location.path('/' + resourceType + 's/' + item.id).search({});

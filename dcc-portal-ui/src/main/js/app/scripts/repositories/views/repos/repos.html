@@ -1,15 +1,15 @@
 <div data-ng-init="repoContextID = repositoryCtrl.getRepoContextID()">
     <h1 class="repo-header" data-ng-if="repoContextID == 'aws-virginia'">
-        <img src="styles/images/PCAWG-icon.png" class="logo" alt="ICGC AWS Logo" />
-        <div>
-            The ICGC AWS S3 Repository
-        </div>
+        <img src="styles/images/repositories/home/aws_logo.svg" width="260" class="logo" alt="ICGC AWS Logo" />
+        <span>
+            ICGC on the Amazon Cloud
+        </span>
     </h1>
     <h1 class="repo-header" data-ng-if="repoContextID == 'collaboratory'">
-        <img src="styles/images/PCAWG-icon.png" class="logo" alt="Collaboratory Logo" />
-        <div>
-        The Cancer Genome Collaboratory Repository
-        </div>
+        <img src="styles/images/repositories/home/collab_logo.png" class="logo" alt="Collaboratory Logo" />
+        <span>
+        The Cancer Genome Collaboratory
+        </span>
     </h1>
     <section class="cloud-repository-content">
         <div class="half pull-right" data-ui-view2="dataContent">
@@ -50,7 +50,7 @@
                             <td data-ng-bind="type.uiName"></td>
                             <td class="text-right" data-ng-bind="type.donorCount | number"></td>
                             <td class="text-right">
-                                <a href="/repository/external?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
+                                <a href="/repositories?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
                             </td>
                             <td data-ng-bind="type.fileFormat.join(', ')"></td>
                             <td class="text-right" data-ng-bind="type.fileSize | bytes"></td>
@@ -59,16 +59,12 @@
                 </table>
             
                 <span>
-                    Available data as of <a href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
+                    Available data as of <a href="/repositories?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
                 </span>
             </div>
             <!-- -->     
         </div>
         <div data-ui-view="bodyContent">
-        </div>
-        <div class="repo-controls-container">
-                <a class="btn" data-ng-show="repositoryCtrl.hasSummaryData()" data-ng-href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}">Search Respository</a>
-                <a class="btn" data-ng-href="/icgc-in-the-cloud/repositories/{{repoContextID}}/guide">User Guide</a>
         </div>
     </section>
 </div>

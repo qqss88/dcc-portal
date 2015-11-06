@@ -12,9 +12,9 @@
     var data = [
       {id: 'DNA-Seq', shortLabel: 'Whole Genomes'},
       {id: 'RNA-Seq', shortLabel: 'Whole Transcriptomes'},
-      {id: 'SSM', shortLabel: 'Simple Somatic Mutataions'},
+      {id: 'SSM', shortLabel: 'Simple Somatic Mutations'},
       {id: 'CNSM', shortLabel: 'Copy Number Somatic Mutations'},
-      {id: 'StSM', shortLabel: 'Structural Somatic Mutation'}
+      {id: 'StSM', shortLabel: 'Structural Somatic Mutations'}
     ];
 
     var shortLabelMap = {};

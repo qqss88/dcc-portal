@@ -37,10 +37,10 @@ import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
 import org.icgc.dcc.common.core.mail.Mailer;
 import org.icgc.dcc.downloader.client.DownloaderClient;
 import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.portal.auth.UserAuthProvider;
+import org.icgc.dcc.portal.auth.UserAuthenticator;
 import org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore;
 import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
-import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
-import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
@@ -133,8 +133,8 @@ public class PortalConfig {
   }
 
   @Bean
-  public OpenIDAuthProvider openIdProvider(OpenIDAuthenticator authenticator) {
-    return new OpenIDAuthProvider(authenticator, "OpenID");
+  public UserAuthProvider openIdProvider(UserAuthenticator authenticator) {
+    return new UserAuthProvider(authenticator, "OpenID");
   }
 
   @Bean
@@ -313,7 +313,7 @@ public class PortalConfig {
     return Mailer.builder()
         .enabled(mail.isEnabled())
         .recipient(mail.getRecipientEmail())
-        .from(mail.getSenderName())
+        .from(mail.getSenderEmail())
         .host(mail.getSmtpServer())
         .port(Integer.toString(mail.getSmtpPort()))
         .build();

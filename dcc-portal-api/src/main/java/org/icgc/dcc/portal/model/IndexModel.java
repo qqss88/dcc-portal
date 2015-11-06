@@ -10,12 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +20,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @Component
 public class IndexModel {
@@ -46,10 +46,6 @@ public class IndexModel {
    * Special cases for term lookups
    */
   public static final String API_ENTITY_LIST_ID_FIELD_NAME = ENTITY_SET_ID;
-
-  // Index name for the icgc-repository index.
-  // TODO: Externalize
-  public static final String REPOSITORY_INDEX_NAME = "icgc-repository";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -138,6 +134,7 @@ public class IndexModel {
       .add(RepositoryFileTypeModel.Fields.SPECIMEN_TYPE)
       .add(RepositoryFileTypeModel.Fields.SAMPLE_ID)
       .add(RepositoryFileTypeModel.Fields.PROGRAM)
+      .add(RepositoryFileTypeModel.Fields.ANALYSIS_SOFTWARE)
       .build();
   private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING = ImmutableMap
       .<String, String> builder()
@@ -554,15 +551,21 @@ public class IndexModel {
       GeneSetType.GENE_SET_TYPE_GO.getType(), "hasGoTerm");
 
   private String index;
+  private String repoIndexName;
 
   @Autowired
-  public IndexModel(@Value("#{indexName}") String index) {
+  public IndexModel(@Value("#{indexName}") String index, @Value("#{repoIndexName}") String repoIndexName) {
     super();
     this.index = index;
+    this.repoIndexName = repoIndexName;
   }
 
   public String getIndex() {
     return this.index;
+  }
+
+  public String getRepoIndex() {
+    return this.repoIndexName;
   }
 
   private static ImmutableMap<String, String> createFieldsMapping(Kind kind) {

@@ -42,9 +42,11 @@
 
   var module = angular.module('icgc.repository.controllers', ['icgc.repository.services']);
 
+// FIXME: No longer in use. To be removed.
   /**
    * This just controllers overall state
    */
+/*
   module.controller('RepositoryController', function($scope, $location, $state, Page) {
     var _ctrl = this;
 
@@ -58,19 +60,25 @@
     });
 
   });
-
+*/
   /**
    * ICGC static repository controller
    */
-  module.controller('ICGCRepoController',
-    function($scope, $stateParams, Restangular, RepositoryService, ProjectCache, API, Settings) {
+  module.controller('ICGCRepoController', function($scope, $stateParams, Restangular, RepositoryService,
+    ProjectCache, API, Settings, Page, RouteInfoService) {
     var _ctrl = this;
+    var dataReleasesRouteInfo = RouteInfoService.get ('dataReleases');
+
+    Page.setTitle (dataReleasesRouteInfo.title);
+    Page.setPage ('dataReleases');
 
     _ctrl.path = $stateParams.path || '';
     _ctrl.slugs = [];
     _ctrl.API = API;
     _ctrl.deprecatedReleases = ['release_15'];
     _ctrl.downloadEnabled = true;
+    _ctrl.dataReleasesTitle = dataReleasesRouteInfo.title;
+    _ctrl.dataReleasesUrl = dataReleasesRouteInfo.href;
 
     function buildBreadcrumbs() {
       var i, s, slug, url;
@@ -151,7 +159,7 @@
     }
 
     // Initialize
-    $scope.$watch(function() {
+    $scope.$watch (function() {
       return $stateParams.path;
     }, function() {
       _ctrl.path = $stateParams.path || '';
@@ -162,7 +170,7 @@
   });
 
   module.controller('ExternalFileDownloadController',
-    function($scope, $window, $modalInstance, ExternalRepoService, SetService, LocationService, params) {
+    function($scope, $window, $document, $modalInstance, ExternalRepoService, SetService, LocationService, params) {
 
     $scope.selectedFiles = params.selectedFiles;
     $scope.cancel = function() {
@@ -224,9 +232,12 @@
       $scope.cancel();
     };
 
-    $scope.createManifestId = function (repoName, fileCount, buttonId, textBoxId) {
-
-      jQuery('#' + buttonId).html ('<i class="icon-spinner icon-spin pull-right"></i>');
+    $scope.createManifestId = function (repoName, fileCount, event) {
+      var docRoot = $document [0];
+      var canCopyToClipboard = docRoot.queryCommandSupported ('copy');
+      var parentNode = event.target.parentNode;
+      var domNode = jQuery (parentNode);
+      domNode.html ('<i class="icon-spinner icon-spin pull-right" />');
 
       var selectedFiles = $scope.selectedFiles;
       var filters = LocationService.filters();
@@ -244,16 +255,31 @@
       };
 
       SetService.createFileSet (params).then (function (data) {
-       if (! data.id) {
-          console.log('there is no id!!!!');
+        if (! data.id) {
+          console.log('No Manifest UUID is returned from API call.');
           return;
-       }
+        }
 
-       var textBoxHtml = '<input id="' + textBoxId +
-         '" class="input_manifest pull-right" type="text" size="33" readonly value="' +
-         data.id + '"/>';
-       jQuery ('#' + buttonId).html (textBoxHtml);
-       jQuery ('#' + textBoxId).select();
+        var widgetHtml = '<input class="input_manifest' +
+          (canCopyToClipboard ? '' : ' pull-right') +
+          '" type="text" size="38" readonly ' +
+          'onClick="this.setSelectionRange (0, this.value.length)" value="' +
+           data.id + '" />';
+
+        if (canCopyToClipboard) {
+          widgetHtml += '<button style="border: 0; background: transparent;" title="Copy Manifest ID">' +
+            '<span class="icon-clippy" /></button>';
+        }
+
+        domNode.html (widgetHtml);
+
+        if (canCopyToClipboard) {
+          domNode.children ('button').click (function () {
+            domNode.children ('input[type=text]').select();
+            docRoot.execCommand('copy');
+          });
+        }
+        domNode.children ('input[type=text]').select();
      });
     };
 
@@ -262,12 +288,21 @@
   /**
    * Controller for File Entity page
    */
-  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, CodeTable, PCAWG, fileInfo) {
+  module.controller('ExternalFileInfoController',
+    function (Page, ExternalRepoService, CodeTable, ProjectCache, PCAWG, fileInfo) {
 
-    Page.setTitle('External File Entity');
+    Page.setTitle('Repository File');
     Page.setPage('externalFileEntity');
 
     var slash = '/';
+    var projectMap = {};
+
+    function refresh () {
+      ProjectCache.getData().then (function (cache) {
+        projectMap = ensureObject (cache);
+      });
+    }
+    refresh();
 
     this.fileInfo = fileInfo;
     this.stringOrDefault = stringOrDefault;
@@ -306,6 +341,10 @@
     }
 
     // Public functions
+    this.projectName = function (projectCode) {
+      return _.get (projectMap, projectCode, '');
+    };
+
     this.buildUrl = function (baseUrl, dataPath, entityId) {
       // Removes any opening and closing slash in all parts then concatenates.
       return _.map ([baseUrl, dataPath, entityId], removeBookendingSlash)
@@ -352,13 +391,26 @@
    * External repository controller
    */
   module.controller ('ExternalRepoController', function ($scope, $window, $modal, LocationService, Page,
-    ExternalRepoService, SetService, ProjectCache, CodeTable) {
+    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService) {
 
+    var dataRepoTitle = RouteInfoService.get ('dataRepositories').title;
+
+    Page.setTitle (dataRepoTitle);
+    Page.setPage ('repository');
+
+    var tabNames = {
+      files: 'Files',
+      donors: 'Donors'
+    };
+    var currentTabName = tabNames.files;
     var projectMap = {};
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
     _ctrl.summary = {};
+    _ctrl.dataRepoTitle = dataRepoTitle;
+    _ctrl.dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+    _ctrl.advancedSearchInfo = RouteInfoService.get ('advancedSearch');
 
     function toSummarizedString (values, name) {
       var size = _.size (values);
@@ -384,6 +436,20 @@
           paths.one + _.first (ids)
       };
     }
+
+    _ctrl.setTabToFiles = function() {
+      currentTabName = tabNames.files;
+    };
+    _ctrl.setTabToDonors = function() {
+      currentTabName = tabNames.donors;
+    };
+
+    _ctrl.isOnFilesTab = function() {
+      return currentTabName === tabNames.files;
+    };
+    _ctrl.isOnDonorsTab = function() {
+      return currentTabName === tabNames.donors;
+    };
 
     _ctrl.donorInfo = function (donors) {
       var toolTipMaker = function () {
@@ -561,6 +627,25 @@
       });
     };
 
+    function removeCityFromRepoName (repoName) {
+      if (_.contains (repoName, 'CGHub')) {
+        return 'CGHub';
+      }
+
+      if (_.contains (repoName, 'TCGA DCC')) {
+        return 'TCGA DCC';
+      }
+
+      return repoName;
+    }
+
+    function fixRepoNameInTableData (data) {
+      _.forEach (data, function (row) {
+        _.forEach (row.fileCopies, function (fileCopy) {
+          fileCopy.repoName = removeCityFromRepoName (fileCopy.repoName);
+        });
+      });
+    }
 
     function refresh() {
       var promise, params = {};
@@ -585,6 +670,8 @@
       // Get files that match query
       promise = ExternalRepoService.getList (params);
       promise.then (function (data) {
+        // Vincent asked to remove city names from repository names for CGHub and TCGA DCC.
+        fixRepoNameInTableData (data.hits);
         _ctrl.files = data;
 
         // Sanity check, just reset everything
@@ -610,17 +697,16 @@
     refresh();
 
     $scope.$watch (function() {return LocationService.filters();}, function (n) {
-      if (n) {
-        $scope.isActive = true;
-      }
 
-      if (n && _ctrl.selectedFiles.length > 0) {
+      var hasFilters = ! _.isEmpty(n);
+
+      if (hasFilters && _ctrl.selectedFiles.length > 0) {
         _ctrl.undo();
       }
     }, true);
 
     $scope.$on ('$locationChangeSuccess', function (event, next) {
-      if (next.indexOf ('repository') !== -1) {
+      if (next.indexOf ('repositories') !== -1) {
         // Undo existing selection if filters change
         refresh();
       }

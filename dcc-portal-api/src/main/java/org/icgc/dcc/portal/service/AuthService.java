@@ -17,11 +17,6 @@
 
 package org.icgc.dcc.portal.service;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.cud.User;
@@ -31,6 +26,11 @@ import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Provides authentication services against the Central User Directory (CUD) and utilities to check if the user is a
  * DACO approved user.
@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class AuthService {
 
   @NonNull
@@ -58,6 +58,19 @@ public class AuthService {
     log.debug("Checking DACO access for user: '{}'. User type: {}", userId, userType);
     val result = dacoClient.hasDacoAccess(userId, userType);
     log.debug("Does {} have DACO access? - {}", userId, result);
+
+    return result;
+  }
+
+  /**
+   * Checks Central User Directory(CUD) if <tt>username</tt> has DACO cloud access.
+   * 
+   * @throws ICGCException and its sub-classes
+   */
+  public boolean hasDacoCloudAccess(String userId) {
+    log.debug("Checking DACO cloud access for user: '{}'. User type: {}", userId);
+    val result = dacoClient.hasCloudAccess(userId);
+    log.debug("Does {} have DACO cloud access? - {}", userId, result);
 
     return result;
   }

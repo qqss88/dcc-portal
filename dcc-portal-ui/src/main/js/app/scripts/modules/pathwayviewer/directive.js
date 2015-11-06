@@ -116,8 +116,9 @@
           infoRenderer.renderNodes([node]);
           
           if(isMutated){
-            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}],
-                                         {getNodesByReactomeId:function (){return [node];}});
+            var model = new dcc.PathwayModel();
+            model.nodes = [node];
+            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}], model);
           }
         };
 
@@ -180,14 +181,6 @@
           var rect = $('.pathway-legend')[0].getBoundingClientRect();
           controller.renderLegend(rect.width,rect.height);
         }, 700);
-        
-        $('.pathway-legend-controller').on('click', function(){
-          if(showingLegend){
-            hideLegend();
-          }else{
-            showLegend();
-          }
-        });
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
@@ -262,6 +255,7 @@
         
         var handleRender = function(){
           if(!xml || !zoomedOn){
+            $('.pathwaysvg').remove();
             return;
           }else if(!rendered){
             $('.pathwaysvg').remove();
@@ -275,6 +269,14 @@
           if(highlights){
             controller.highlight(highlights);
           }
+        };
+        
+        $scope.legendClick = function() {
+            if(showingLegend){
+              hideLegend();
+            }else{
+              showLegend();
+            }
         };
         
         $scope.$watch('items', function (newValue, oldValue) {         

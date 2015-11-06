@@ -185,6 +185,8 @@
           // Get pathway XML
           GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
             _ctrl.pathway.xml = xml;
+          }).catch(function() {
+            _ctrl.pathway.xml = '';
           });
 
 
@@ -233,8 +235,7 @@
                 var ensemblId = uniprotObj[0].id;
                 n.advQuery =  LocationService.mergeIntoFilters({
                   gene: {
-                    id:  {is: [ensemblId]},
-                    pathwayId: {is: [parentPathwayId]}
+                    id:  {is: [ensemblId]}
                   }
                 });
                 n.geneSymbol = uniprotObj[0].symbol;
@@ -243,6 +244,8 @@
             });
 
             _ctrl.pathway.highlights = pathwayHighlights;
+          }).catch(function () {
+            _ctrl.pathway.highlights = [];
           });
 
 

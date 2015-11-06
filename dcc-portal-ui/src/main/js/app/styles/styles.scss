@@ -10,6 +10,7 @@
 @import "_general/type";
 //-----------------------------------------------------------------------------
 // Sections
+@import "_sections/preheader";
 @import "_sections/header";
 @import "_sections/home";
 @import "_sections/donor";
@@ -106,6 +107,28 @@ section {
   background: $white;
   border-radius: 0;
   border-bottom: 1px solid $greyLight;
+  
+  a {
+    text-indent: initial;
+    
+    &.link {
+      white-space: nowrap;
+    }
+  }
+
+  .indent {
+    text-align: justify; 
+    text-indent: 1rem;
+  }
+  
+  &.no-border {
+    border-bottom: none;
+  }
+  
+  &.no-vert-padding {
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+  }
 }
 
 section:last-child {

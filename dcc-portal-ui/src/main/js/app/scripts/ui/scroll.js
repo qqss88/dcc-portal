@@ -2,9 +2,49 @@
 
 angular.module('icgc.ui.scroll', [
   'icgc.ui.scroll.scrollto',
-  'icgc.ui.scroll.scrollSpy'
+  'icgc.ui.scroll.scrollSpy',
+  'icgc.ui.scroll.resetScroll'
 ]);
 
+
+angular.module('icgc.ui.scroll.resetScroll', []).directive('resetScroll', function($location, $timeout) {
+  return {
+    restrict: 'A',
+    scope: {
+      resetScroll: '@'
+    },
+    link: function (scope, elem) {
+      var _scrollOffset = scope.resetScroll, 
+          _top = 0;
+      
+      // Do not scroll if we are trying to anchor within another page.    
+      if ($location.hash()) {
+        return;
+      }
+      
+      if (! isNaN(_scrollOffset)) {
+        _top = Math.round(elem.offset().top + parseInt(_scrollOffset, 10));
+      }
+      else if (angular.isString(_scrollOffset)) {        
+        
+        switch (_scrollOffset.toLowerCase()) {  
+          case 'top':
+           _top = 0;
+          break;
+          
+          default:
+            _top = 0;
+          break;
+        }
+        
+      }
+      
+      $timeout(function() { 
+        jQuery('body,html').scrollTop(_top); 
+        }, 100);
+    }
+  };
+});
 
 angular.module('icgc.ui.scroll.scrollto', []).directive('scrollto', function () {
   return function (scope, elm, attrs) {

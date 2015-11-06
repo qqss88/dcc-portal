@@ -267,22 +267,72 @@
   // https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
   // modified for our needs
   module
-    .value('$anchorScroll', angular.noop)
-    .run(function($state, $stateParams, $window, $rootScope) {
+    //.value('$anchorScroll', angular.noop)
+    .run(function($state, $location, $window, $timeout, $rootScope) {
       function scroll() {
-        var state, offset, to;
-        state = $state.$current;
+         //var state = $state.$current, offset, to;
+        
+        
 
-        // Prevents browser window from jumping around while navigating analyses
-        if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
+        function _doInlineScroll(hash) {
+          // Give angular some time to do digests then check for a
+          // in page scroll
+          
+          var match = hash.match(/^!([\w\-]+)$/i),
+            to = 0,
+            HEADER_HEIGHT = 40; 
+          
+          
+          if (match && match.length > 1) {
+            hash = match[1];
+            //$location.hash(hash);
+            to = - HEADER_HEIGHT;
+          }
+          
+          var el = jQuery('#' + hash);
+          
+          if (el.length === 0) {
+            console.warn('Could not find inline anchor with id ' + hash +
+              '\nAborting inline scroll...');
+            return;
+          }
+          console.log(to);
+          to += el.offset().top;
+          console.log(to);
+          jQuery('body,html').scrollTop( to );
+        }
+        
+        /////
+        
+        
+        // Prevents browser window from jumping around while navigating analysis
+        if (['analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
 
+        var _hash = $location.hash();
+        
+        if (_hash) {
+          $timeout(function () { 
+            _doInlineScroll(_hash);
+          }, 200);
+          return;
+        }
+        else {
+          $window.scrollTo(0, 0);
+        }
 
+        
+
+        
+        /* Don't see this code ever referenced so I am temporarily disabling
+         * it to see if there are any adverse affects 
+         * */
+         
         // Default behaviour is to scroll to top
         // Any string that isn't [top,none] is treated as a jq selector
         // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
-        if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
+        /* if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
           $window.scrollTo(0, 0);
         } else {
           offset = jQuery(state.scrollTo).offset();
@@ -290,12 +340,17 @@
             to = offset.top - 40;
             jQuery('body,html').animate({ scrollTop: to }, 800);
           }
-        }
+        } */
 
       }
 
       $rootScope.$on('$viewContentLoaded', scroll);
       $rootScope.$on('$stateChangeSuccess', scroll);
+      
+      // Add UI Router Debug if there is a fatal state change error
+      $rootScope.$on('$stateChangeError', function () { 
+        console.error('State Change Error Occurred. Error occurred with arguments: ', arguments);
+      });
     });
 
 
@@ -310,15 +365,20 @@
   });
 
 
+
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
                           markdownConverterProvider, localStorageServiceProvider, API) {
-
+                            
+    // Let ngClip know where the fallback flash app for copying and pasting is
+    //ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
+    
+    
     // Disables debugging information
     $compileProvider.debugInfoEnabled(false);
 
     // Combine calls - needs more testing
-    // $httpProvider.useApplyAsync(true);
+    $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
@@ -382,7 +442,8 @@
 
     var ignoreNotFound = [
       '/analysis/',
-      '/list'
+      '/list',
+      '/ui/reactome'
     ];
 
     Restangular.setErrorInterceptor(function (response) {

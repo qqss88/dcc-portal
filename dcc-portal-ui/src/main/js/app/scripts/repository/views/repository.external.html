@@ -1,21 +1,91 @@
+<div class="h1-wrap">
+    <h1 data-ui-scrollfix=79>
+        <span class="t_badge t_badge_icon t_badge__data_repositories">
+          <span class="icon-download-cloud" />
+        </span>
+        {{:: ExternalRepoController.dataRepoTitle }}
+    </h1>
+</div>
+
+<div>
+<section style="border-bottom: none;">
+The ICGC DCC is periodically aggregating and indexing ICGC data hosted in multiple archives
+and <a href="/icgc-in-the-cloud/">cloud</a> repositories worldwide.
+More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">here</a>.
+</section>
+
 <aside class="t_sidebar">
+
+  <div class="t_tabs">
+    <div class="t_tabs__tab t_tabs__tab__file"
+      ng-class="{ active: ExternalRepoController.isOnFilesTab() }"
+      ng-click="ExternalRepoController.setTabToFiles()">
+      Files
+    </div>
+    <div class="t_tabs__tab t_tabs__tab__donor"
+      ng-class="{ active: ExternalRepoController.isOnDonorsTab() }"
+      ng-click="ExternalRepoController.setTabToDonors()">
+      Donors
+    </div>
+  </div>
+
   <div style="position: relative; margin-right: -2rem">
-    <ul class="t_facets">
-      <li data-tags-facet
+    <div class="t_tab_pane"
+      ng-class="{ active: ExternalRepoController.isOnFilesTab() }"
+      ng-show="ExternalRepoController.isOnFilesTab()">
+      <ul class="t_facets">
+        <li data-tags-facet
           data-type="file"
           data-facet-name="id"
           data-proxy-type="file"
           data-proxy-facet-name="id"
           data-label="File"
-          data-placeholder="Enter File ID, Name or Object ID" ></li>
-      <li data-tags-facet
+          data-placeholder="Enter File ID, Name or Object ID" />
+        <terms data-type="file"
+          data-facet-name="repoName"
+          data-facet="ExternalRepoController.files.termFacets.repoName"
+          data-label="Repository"
+          data-icon-getter="ExternalRepoController.repoIconClass" />
+        <terms data-type="file"
+          data-facet-name="dataType"
+          data-label="Data Type"
+          data-facet="ExternalRepoController.files.termFacets.dataType" />
+        <terms data-type="file"
+          data-facet-name="experimentalStrategy"
+          data-label="Experimental Strategy"
+          data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"
+          data-defined="true" />
+        <terms data-type="file"
+          data-facet-name="study"
+          data-label="Only Files in Study"
+          data-missing-text="None"
+          data-facet="ExternalRepoController.files.termFacets.study" />
+        <terms data-type="file"
+          data-facet-name="fileFormat"
+          data-label="File Format"
+          data-facet="ExternalRepoController.files.termFacets.fileFormat" />
+        <terms data-type="file" data-facet-name="software"
+          data-label="Analysis Software"
+          data-facet="ExternalRepoController.files.termFacets.software" />
+        <terms data-type="file"
+          data-facet-name="access"
+          data-label="Access"
+          data-collapsed="true"
+          data-facet="ExternalRepoController.files.termFacets.access" />
+      </ul>
+    </div>
+
+    <div class="t_tab_pane"
+      ng-class="{ active: ExternalRepoController.isOnDonorsTab() }"
+      ng-show="ExternalRepoController.isOnDonorsTab()">
+      <ul class="t_facets">
+        <li data-tags-facet
           data-type="file-donor"
           data-facet-name="id"
           data-label="Donor"
           data-placeholder="e.g. DO45299, SA501608"
           data-proxy-type="file"
           data-proxy-facet-name="donorId"></li>
-
       <terms data-type="file" data-facet-name="projectCode"
              data-label="Project"
              data-facet="ExternalRepoController.files.termFacets.projectCode"
@@ -26,32 +96,21 @@
       <terms data-type="file" data-facet-name="specimenType"
              data-facet="ExternalRepoController.files.termFacets.specimenType"
              data-label="Specimen Type"></terms>
-      <terms data-type="file" data-facet-name="repoName"
-             data-facet="ExternalRepoController.files.termFacets.repoName"
-             data-label="Repository"
-             data-icon-getter="ExternalRepoController.repoIconClass" />
-      <terms data-type="file" data-facet-name="dataType"
-             data-label="Data Type"
-             data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
       <terms data-type="file" data-facet-name="experimentalStrategy"
              data-label="Experimental Strategy"
              data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"
              data-defined="true"></terms>
-      <terms data-type="file" data-facet-name="study"
-             data-label="Only Files in Study"
-             data-missing-text="None"
-             data-facet="ExternalRepoController.files.termFacets.study"></terms>
-      <terms data-type="file" data-facet-name="fileFormat"
-             data-label="File Format"
-             data-facet="ExternalRepoController.files.termFacets.fileFormat"></terms>
-      <terms data-type="file" data-facet-name="access"
-             data-label="Access"
-             data-facet="ExternalRepoController.files.termFacets.access"></terms>
       <terms data-type="file" data-facet-name="donorStudy"
              data-label="Only Donors in Study"
              data-missing-text="None"
              data-facet="ExternalRepoController.files.termFacets.donorStudy"></terms>
     </ul>
+    <section>
+        For more complex queries, use <a href="{{:: ExternalRepoController.advancedSearchInfo.href }}">
+          {{:: ExternalRepoController.advancedSearchInfo.title}}</a> and
+          click on "View in {{:: ExternalRepoController.dataRepoTitle }}"
+      </section>
+    </div>
   </div>
 </aside>
 
@@ -145,7 +204,7 @@
 
                     <td style="min-width: 6rem; max-width: 8rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
                        <i class="{{ row.access === 'open' ? 'icon-lock-open' : 'icon-lock' }}" />
-                       <a href="/repository/external/files/{{ row.id }}"
+                       <a href="{{:: ExternalRepoController.dataRepoFileUrl }}{{ row.id }}"
                         tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}"
                         ng-bind="row.id" />
                     </td>
@@ -191,3 +250,4 @@
         </div>
     </section>
 </article>
+</div>
