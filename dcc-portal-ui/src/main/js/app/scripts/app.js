@@ -305,8 +305,8 @@
         /////
         
         
-        // Prevents browser window from jumping around while navigating analyses
-        if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
+        // Prevents browser window from jumping around while navigating analysis
+        if (['analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
 

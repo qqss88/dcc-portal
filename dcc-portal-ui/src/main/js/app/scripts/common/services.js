@@ -135,10 +135,24 @@
       }
     };
   });
+  
+  
+  // Prevent the settings service from being requested several times
+  var _settingsPromise = null;
 
   module.service('Settings', function (RestangularNoCache) {
+    
     this.get = function () {
-      return RestangularNoCache.one('settings').get();
+
+      if (_settingsPromise) {
+        return _settingsPromise;
+      }
+
+      _settingsPromise = RestangularNoCache.one('settings').get();
+      
+      _settingsPromise.then(function () { _settingsPromise = null; });
+
+      return _settingsPromise;
     };
   });
 
@@ -178,7 +192,7 @@
         title: 'Advanced Search'
       },
       dataAnalysis: {
-        href: href ('analyses'),
+        href: href ('analysis.sets'), // Default to the sets tab
         title: 'Data Analysis'
       },
       dataReleases: {
