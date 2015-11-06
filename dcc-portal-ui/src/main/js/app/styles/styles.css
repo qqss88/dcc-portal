@@ -1887,16 +1887,17 @@ footer .dcc-col {
 .analysis .sidepanel {
   vertical-align: top;
   margin-right: 1rem;
-  min-width: 13rem;
+  min-width: 17rem;
+  max-width: 19rem;
   height: 100%;
   padding: 0rem 0rem 2rem 0rem;
 }
-/* line 78, _sections/_analysis.scss */
+/* line 79, _sections/_analysis.scss */
 .analysis .content {
   display: table-cell;
   min-height: 20rem;
 }
-/* line 88, _sections/_analysis.scss */
+/* line 89, _sections/_analysis.scss */
 .analysis .multi-line-heading {
   line-height: 1.5rem;
 }
