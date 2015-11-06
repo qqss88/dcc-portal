@@ -1,19 +1,18 @@
 function movingLineD3(container) {
-   var margin = {top: 0, right: 30, bottom: 30, left: 30},
-          width = $(container).width()*0.98 - margin.left - margin.right,
+   var margin = {top: 0, right: 15, bottom: 30, left: 15},
+          width = $(container).width()*1.02 - margin.left - margin.right,
           height = $(container).height()*0.60 - margin.top - margin.bottom;
 
    var numBins = 20;
    
    var x = d3.scale.linear()
        .range([0, width]);
-       
    var brush = d3.svg.brush()
       .x(x);
           
    var svg = d3.select(container).append("svg")
       .attr("width", '98%')
-      .attr("height", '60%')
+      .attr("height", '100%')
       .attr('viewBox',"0 0 " + parseInt(width+margin.left+margin.right) + " " + parseInt(height+margin.top+margin.bottom))
       .attr("preserveAspectRatio", "none")
       .append("g")
@@ -47,14 +46,14 @@ function movingLineD3(container) {
       .append("div")
       .attr('class', 'iobio-tooltip')
       .style('left', '0px')
-      .style('top', '0px');
+      .style('top', '0px')
+      .style('opacity', 0);
       
       //.style("visibility", "hidden");
       
        // add mouseover
        var formatter = d3.format(',');
        svg.on("mouseover", function() {  
-         console.log (d3.event.pageX, d3.event.pageY);
          div.transition()        
                  .duration(200)      
                  .style("opacity", .9);      
@@ -64,7 +63,7 @@ function movingLineD3(container) {
                  .style("top", (d3.event.pageY - 24) + "px");    
              })                  
          .on("mousemove", function() {       
-            div.html(formatter(parseInt(x.invert(d3.event.pageX - $(this).position().left))))
+            div.html(formatter(parseInt(x.invert(d3.event.pageX - $(this).offset().left))))
                .style("left", (d3.event.pageX) + "px") 
                .style("top", (d3.event.pageY - 24) + "px");
           })               
@@ -86,7 +85,6 @@ function movingLineD3(container) {
            .attr('class', "read-depth-path")
            .attr("d", line(data))
            .attr("stroke", "steelblue")
-           .attr("stroke-width", "2")
            .attr("fill", "none");
 
          var totalLength = path.node().getTotalLength();

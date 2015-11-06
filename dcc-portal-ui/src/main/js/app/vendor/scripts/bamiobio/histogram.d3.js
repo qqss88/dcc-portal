@@ -11,10 +11,18 @@ function histogramD3() {
       yAxis = d3.svg.axis().scale(y).orient("left").ticks(6),
       brush = d3.svg.brush().x(x);
       
+  var div = d3.select('body')
+      .append("div")
+      .attr('class', 'iobio-tooltip')
+      .style('left', '0px')
+      .style('top', '0px')
+      .style('opacity', 0);
+
   function chart(selection, options) {
     // merge options and defaults
     options = $.extend(defaults,options);
     var innerHeight = height - margin.top - margin.bottom;
+    
     selection.each(function(data) {
        // set svg element
        var svg = d3.select(this);
@@ -87,12 +95,6 @@ function histogramD3() {
       var barEnter = bar.enter().append("g")
             .attr("class", "bar")
             .attr("transform", function(d) { return "translate(" + x(d[0]) + "," + innerHeight + ")"; });      
-      
-      var div = d3.select('body')
-      .append("div")
-      .attr('class', 'iobio-tooltip')
-      .style('left', '0px')
-      .style('top', '0px');
       
       //  Add new bars.
       barEnter.append("rect")
