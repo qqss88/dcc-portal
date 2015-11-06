@@ -86,7 +86,7 @@
             refreshOrder = [_ctrl.Gene, _ctrl.Donor,  _ctrl.Mutation];
             break;  
           default: // donor
-             refreshOrder = [_ctrl.Donor, _ctrl.Gene, _ctrl.Mutation];
+            refreshOrder = [_ctrl.Donor, _ctrl.Gene, _ctrl.Mutation];
             break;
         }
         _.forEach(refreshOrder, function (refreshOrderObject, order) {
@@ -104,7 +104,7 @@
           else {
             $timeout(function () {
               refreshFunction.call(this); 
-            }, 250);
+            }, 25);
           }
         });
         _ctrl.hasGeneFilter = angular.isObject(filters) ?  filters.hasOwnProperty('gene') : false;
@@ -692,13 +692,13 @@
         mParams.include = ['facets', 'consequences'];
         Mutations.getList(mParams).then(
           function (mutationsList) {
-            deferred.resolve();
+            //deferred.resolve();
             _this.mSuccess(mutationsList);
           }
           );
         Occurrences.getList(LocationService.getJsonParam('occurrences'))
           .then(function(occurrencesList) {
-            //deferred.resolve();
+            deferred.resolve();
             _this.oSuccess(occurrencesList);
           });
         
