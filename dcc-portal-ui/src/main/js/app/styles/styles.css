@@ -1823,32 +1823,34 @@ footer .dcc-col {
 .analysis {
   display: table;
   width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
-/* line 5, _sections/_analysis.scss */
+/* line 7, _sections/_analysis.scss */
 .analysis h3 {
   margin-top: 0;
 }
-/* line 9, _sections/_analysis.scss */
+/* line 11, _sections/_analysis.scss */
 .analysis .analysis-tiles {
   display: block;
   padding-left: 1rem;
   display: table;
 }
-/* line 15, _sections/_analysis.scss */
+/* line 17, _sections/_analysis.scss */
 .analysis .analysis-tile-container {
   float: left;
   width: 15rem;
   height: 14rem;
   margin: 0.5rem;
 }
-/* line 21, _sections/_analysis.scss */
+/* line 23, _sections/_analysis.scss */
 .analysis .analysis-tile-container .analysis-tile-extra {
   font-size: 0.8rem;
   line-height: 1rem;
   padding: 0.25rem 0.75rem;
   color: #999999;
 }
-/* line 28, _sections/_analysis.scss */
+/* line 30, _sections/_analysis.scss */
 .analysis .analysis-tile-container .analysis-tile {
   height: 12rem;
   border: 1px solid #999999;
@@ -1857,14 +1859,14 @@ footer .dcc-col {
   padding: 0.5rem;
   transition: color .5s, background .5s;
 }
-/* line 38, _sections/_analysis.scss */
+/* line 40, _sections/_analysis.scss */
 .analysis .analysis-tile-container .analysis-tile:hover {
   cursor: pointer;
   color: white;
   background: #166aa2;
   text-decoration: none;
 }
-/* line 45, _sections/_analysis.scss */
+/* line 47, _sections/_analysis.scss */
 .analysis .analysis-tile-container .analysis-tile.in-progress {
   border-style: dashed;
   transition: none;
@@ -1872,18 +1874,18 @@ footer .dcc-col {
   color: #999999;
   display: block;
 }
-/* line 52, _sections/_analysis.scss */
+/* line 54, _sections/_analysis.scss */
 .analysis .analysis-tile-container .analysis-tile.in-progress:hover {
   color: #999999;
   background: none;
 }
-/* line 58, _sections/_analysis.scss */
+/* line 60, _sections/_analysis.scss */
 .analysis .analysis-tile-container .analysis-tile .analysis-tile-detail {
   margin-top: 0.5rem;
   font-size: 0.8rem;
   line-height: 1.25rem;
 }
-/* line 66, _sections/_analysis.scss */
+/* line 68, _sections/_analysis.scss */
 .analysis .sidepanel {
   vertical-align: top;
   margin-right: 1rem;
@@ -1892,12 +1894,12 @@ footer .dcc-col {
   height: 100%;
   padding: 0rem 0rem 2rem 0rem;
 }
-/* line 79, _sections/_analysis.scss */
+/* line 81, _sections/_analysis.scss */
 .analysis .content {
   display: table-cell;
   min-height: 20rem;
 }
-/* line 89, _sections/_analysis.scss */
+/* line 92, _sections/_analysis.scss */
 .analysis .multi-line-heading {
   line-height: 1.5rem;
 }

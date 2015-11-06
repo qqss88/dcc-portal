@@ -1,6 +1,8 @@
 .analysis {
    display: table;
    width: 100%;
+   padding-left: 1rem;
+   padding-right: 1rem;
    
    h3 {
       margin-top: 0;
@@ -81,6 +83,7 @@
       //clear: right;
       display: table-cell;
       //width: 76%;
+      
       min-height: 20rem; // Prevent complete collapse when switching content
    }
 
