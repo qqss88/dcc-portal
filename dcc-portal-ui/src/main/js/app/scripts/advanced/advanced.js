@@ -55,8 +55,7 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
-      AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings,
-      $timeout) {
+      AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings) {
 
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
@@ -75,38 +74,106 @@
 
 
       function refresh() {
-        var filters = LocationService.filters();
-        var refreshOrder = [];
+        var filters = LocationService.filters(),
+            _controllers = [
+              { 'controller': _ctrl.Donor, id: 'donor', startRunTime: null },
+              { 'controller': _ctrl.Gene, id: 'gene', startRunTime: null},
+              { 'controller': _ctrl.Mutation, id: 'mutation', startRunTime: null}
+            ],
+            refreshOrder = [];
         
+        // Based on the tab we are on make sure we exec
+        // our refreshes in the correct order.
         switch (_ctrl.state.tab) {
           case 'mutation':
-            refreshOrder = [_ctrl.Mutation, _ctrl.Gene, _ctrl.Donor];
+            refreshOrder = _controllers.reverse();
             break;
           case 'gene':
-            refreshOrder = [_ctrl.Gene, _ctrl.Donor,  _ctrl.Mutation];
+            refreshOrder = [
+              _controllers[1],
+              _controllers[0],
+              _controllers[2]
+            ];
             break;  
           default: // donor
-            refreshOrder = [_ctrl.Donor, _ctrl.Gene, _ctrl.Mutation];
+            refreshOrder = _controllers;
             break;
         }
-        _.forEach(refreshOrder, function (refreshOrderObject, order) {
-          var refreshFunction = refreshOrderObject.refresh;
-
-          if (order === 0) {
-            Page.startWork();
-
-            refreshFunction.call(this)
-              .then(function () {
-                Page.stopWork();
-              });
+        
+       
+        // Handy function used to perform our refresh requests
+        // and unblock when certain conditions are met
+        function _execRefresh(controllerObj) {
+          controllerObj.startRunTime = new Date().getTime();
+          
+          var refreshPromise = controllerObj.controller.refresh.apply(_ctrl);
+                  
+          controllerObj.promiseCount = ++_promiseCount;
+          console.log('Promise #' + controllerObj.promiseCount + ' - Controller ID "' + controllerObj.id +
+                        '" started refresh...');
+          
+          refreshPromise.then(
+            function () {
               
-          } 
-          else {
-            $timeout(function () {
-              refreshFunction.call(this); 
-            }, 25);
-          }
+              var nowTime = new Date().getTime(),
+                  timeDelta = nowTime - _workStartTime;
+                
+              _totalMSElapsed += timeDelta;
+
+              // If we have resolved all our promises in under _MAX_REFRESH_BLOCK_TIME
+              // or we have waitied at least _MAX_REFRESH_BLOCK_TIME before
+              // the first resolve then unblock...
+              if ( ( _pageUnblockedTime === null &&
+                    (_promiseCount === _refreshControllerLength ||
+                    _totalMSElapsed >= _MAX_REFRESH_BLOCK_TIME)
+                  ) ) {
+                
+                _pageUnblockedTime = nowTime;
+                console.log('Advanced Search Page blocking stopped in ' + timeDelta + 'ms...');
+                Page.stopWork();
+              }
+              
+              console.log('Promise #' + controllerObj.promiseCount + ' - Controller ID "' +
+                controllerObj.id + '" refreshed in ' +
+                          (nowTime - controllerObj.startRunTime) + 'ms...');
+             
+            });
+           
+          return refreshPromise;
+        }
+       
+        var _refreshControllerLength = refreshOrder.length,
+            _firstRefreshController = refreshOrder.shift(),
+            _workStartTime = null,
+            _promiseCount = 0,
+            _totalMSElapsed = 0,
+            _pageUnblockedTime = null,
+           
+            _MAX_REFRESH_BLOCK_TIME = 500; // Block for 500ms max
+
+        // Reset our refresh variables before executing the refresh
+        _pageUnblockedTime = null;
+        _totalMSElapsed = 0;
+        _promiseCount = 0;
+        _workStartTime = new Date().getTime();
+
+        Page.startWork();
+        _execRefresh(_firstRefreshController);
+       
+       
+       
+       
+        
+        // Fire the other requests once using
+        // one digest cycle --> $http forceAsync has been turned on
+        // in Angular - see app.js   
+        
+        _.forEach(refreshOrder, function (refreshControllerObj) {
+          _execRefresh(refreshControllerObj);
         });
+          
+        
+        
         _ctrl.hasGeneFilter = angular.isObject(filters) ?  filters.hasOwnProperty('gene') : false;
       }
 
@@ -692,13 +759,12 @@
         mParams.include = ['facets', 'consequences'];
         Mutations.getList(mParams).then(
           function (mutationsList) {
-            //deferred.resolve();
+            deferred.resolve();
             _this.mSuccess(mutationsList);
           }
           );
         Occurrences.getList(LocationService.getJsonParam('occurrences'))
           .then(function(occurrencesList) {
-            deferred.resolve();
             _this.oSuccess(occurrencesList);
           });
         
