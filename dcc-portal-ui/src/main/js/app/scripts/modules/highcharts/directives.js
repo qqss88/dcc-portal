@@ -45,22 +45,22 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
         return datum;
       };
 
-      var summarize = function (itemsToSummarize) {
-        var count = _.size (itemsToSummarize);
+      var summarize = function (items) {
+        var count = _.size (items);
 
         if (count < 2) {
-          return itemsToSummarize.map (enrichDatum);
+          return items.map (enrichDatum);
         }
 
-        var firstItem = _.first (itemsToSummarize);
+        var firstItem = _.first (items);
 
         return {
           name: 'Others (' + count + ' ' + $attrs.heading + 's)',
           color: '#999',
-          y: _.sum (itemsToSummarize, 'y'),
+          y: _.sum (items, 'y'),
           type: firstItem.type,
           facet: firstItem.facet,
-          term: _.map (itemsToSummarize, 'name')
+          term: _.map (items, 'name')
         };
       };
 
