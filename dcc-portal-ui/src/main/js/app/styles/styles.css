@@ -5823,6 +5823,13 @@ h3:hover .pilcrow {
 }
 
 /* line 316, styles.scss */
+.blur {
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  filter: blur(2px);
+}
+
+/* line 320, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -5836,18 +5843,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 330, styles.scss */
+/* line 334, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 335, styles.scss */
+/* line 339, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 339, styles.scss */
+/* line 343, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;

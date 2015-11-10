@@ -313,6 +313,10 @@ h3:hover {
   }
 }
 
+.blur {
+   @include filter(blur(2px));
+}
+
 #loading-screen {
   position: fixed;
   z-index: 1000;
