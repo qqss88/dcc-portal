@@ -44,9 +44,6 @@
           return _version;
         };
 
-        this.getVersion = function() {
-          return _version;
-        };
 
         this.getBasePathURL = function() {
           return  (_host ? '//' + _host : '') +
@@ -54,21 +51,11 @@
               (_context + '/v' + _version);
         };
 
-        this.getBasePathURL = function() {
-          return  (_host ? '//' + _host : '') +
-                  (_port ? ':' + _port : '')  +
-                  (_context + '/v' + _version);
-        };
-
         this.setDebugEnabled = function(isDebugEnabled) {
           _isDebugEnabled = isDebugEnabled;
           return this;
         };
 
-        this.setDebugEnabled = function(isDebugEnabled) {
-          _isDebugEnabled = isDebugEnabled;
-          return this;
-        };
 
         this.isDebugEnabled = function() {
           return _isDebugEnabled;
@@ -368,10 +355,12 @@
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
-                          markdownConverterProvider, localStorageServiceProvider, API) {
+                          markdownConverterProvider, localStorageServiceProvider, API,
+    copyPasteProvider) {
                             
-    // Let ngClip know where the fallback flash app for copying and pasting is
-    //ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
+    // Let copyPasteProvider know where the flash app for copying and pasting is
+    var copyPastePath = window.$ICGC_DEV_CONFIG ? null : 'bower_components/zeroclipboard/dist/ZeroClipboard.swf';
+    copyPasteProvider.zeroClipboardPath(copyPastePath);
     
     
     // Disables debugging information

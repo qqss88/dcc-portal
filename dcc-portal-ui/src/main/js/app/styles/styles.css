@@ -2448,8 +2448,14 @@ input.valid:focus {
 }
 
 /* line 50, _modules/_labels.scss */
-.manifest-span {
-  min-width: 220px;
+.manifest-cell {
+  max-width: 15rem;
+}
+/* line 53, _modules/_labels.scss */
+.manifest-cell .manifest {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 22rem;
 }
 
 /* line 1, _modules/_badges.scss */
@@ -3172,6 +3178,38 @@ aside .t_tabs__tab {
 /* line 130, _modules/_tooltip.scss */
 .tooltip.hide {
   visibility: hidden;
+}
+
+/* line 3, _modules/_copyclip.scss */
+.copy-to-clip {
+  position: relative;
+  display: inline-block;
+}
+/* line 11, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container {
+  background: black;
+  position: absolute;
+  opacity: 0.9;
+  color: #fff;
+  left: 10%;
+  width: 10rem;
+  top: 0px;
+  text-align: center;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 1.1rem;
+  z-index: 0;
+  display: none;
+}
+/* line 26, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container .arrow {
+  position: absolute;
+  left: 4.4rem;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid black;
 }
 
 /* line 3, _modules/_sidenav.scss */
