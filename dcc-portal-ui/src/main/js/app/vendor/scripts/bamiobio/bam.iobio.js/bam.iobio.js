@@ -13,7 +13,6 @@ var Bam = Class.extend({
     this.iobio = {}
     var currentHost = "10.5.74.221";
     var currentPort = 80;
-    this.iobio.bamtools = "wss://" + currentHost + ":" + currentPort + "/bamtools/";
     this.iobio.samtools = "wss://" + currentHost + ":" + currentPort + "/samtools/";
     this.iobio.bamReadDepther = "wss://" + currentHost + ":" + currentPort + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "wss://" + currentHost + ":" + currentPort + "/bamstatsalive/";
@@ -71,7 +70,7 @@ var Bam = Class.extend({
     regions.forEach(function (region) {
       regionStr += " " + region.name + ":" + region.start + "-" + region.end
     });
-    var url = this.iobio.samtools + "?cmd= view -b /home/iobio/iobio/tools/dcc-storage-client/data/" + this.bamUri + regionStr + "&encoding=binary";
+    var url = "ws://localhost:8001/" + "?cmd= view -b /home/iobio/iobio/tools/dcc-storage-client/data/" + this.bamUri + regionStr + "&encoding=binary";
     return encodeURI(url);
   },
 
