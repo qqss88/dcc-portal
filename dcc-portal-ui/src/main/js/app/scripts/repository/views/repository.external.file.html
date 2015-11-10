@@ -35,7 +35,13 @@
       </tr>
       <tr>
         <th>File Object ID</th>
-        <td ng-bind="fileCtrlr.stringOrDefault (info.objectId)" />
+        <td>
+          <div data-copy-to-clip data-copy-data="info.objectId" data-show-copy-tips="true" data-prompt-on-copy="false">
+              <span data-ng-bind="fileCtrlr.stringOrDefault (info.objectId)"></span>
+              <button style="border: 0; background: transparent;" title="Copy Manifest ID" class="icon-clippy">
+              </button>
+          </div>
+        </td>
       </tr>
       <tr ng-init="accessType = info.access">
         <th>Access</th>
