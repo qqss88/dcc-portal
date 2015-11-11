@@ -12,15 +12,16 @@ $popoverBubbleMaxHeight: 30rem;
   white-space: normal;
   display: inline-block;
   margin-right: 1rem;
-  
+
   &:hover  .popover-outer-container {
-       opacity: 1;
+    opacity: 1;
+    z-index: 100;
   }
-  
+
   .popover-outer-container {
     position: absolute; 
     background: transparent;
-    z-index: 100;
+    z-index: -1;
     top: -10px;
     left: -$popoverBubbleMaxWidth - 0.2rem;
     opacity: 0;
