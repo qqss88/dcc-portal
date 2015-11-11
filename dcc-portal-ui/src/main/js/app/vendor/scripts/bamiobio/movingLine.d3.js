@@ -1,6 +1,6 @@
 function movingLineD3(container) {
    var margin = {top: 0, right: 15, bottom: 30, left: 15},
-          width = $(container).width()*1.02 - margin.left - margin.right,
+          width = $(container).width()*0.982 - margin.left - margin.right,
           height = $(container).height()*0.60 - margin.top - margin.bottom;
 
    var numBins = 20;

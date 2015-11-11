@@ -5474,7 +5474,7 @@ td {
   order: 1;
   height: 250px;
   position: relative;
-  width: 80%;
+  width: 60rem;
 }
 /* line 107, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics .panel#total-reads {
@@ -5483,7 +5483,6 @@ td {
   -webkit-order: 2;
   order: 2;
   margin-right: 20px;
-  width: 150px;
 }
 /* line 115, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #percents {
@@ -5553,7 +5552,7 @@ td {
 #bam-statistics #distributions .distribution {
   -webkit-flex: 1 1 100%;
   flex: 1 1 100%;
-  height: 200px;
+  height: 20rem;
   position: relative;
   /*padding: 0px 15px 0px 15px*/
 }
@@ -5721,6 +5720,7 @@ td {
 /* line 313, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics .samplingLoader {
   font-size: 14px;
+  font-weight: lighter;
   color: #2687BE;
   position: absolute;
   width: 100%;
@@ -5728,28 +5728,28 @@ td {
   margin-left: -6px;
   display: none;
 }
-/* line 322, ../vendor/styles/bamiobio/site.scss */
+/* line 323, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics .samplingLoader img {
   height: 9px;
 }
-/* line 325, ../vendor/styles/bamiobio/site.scss */
+/* line 326, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #info {
   margin: 23px auto 0px auto;
   width: 100%;
   text-align: center;
 }
-/* line 330, ../vendor/styles/bamiobio/site.scss */
+/* line 331, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #info ul {
   margin: 0px;
   padding: 0px;
   list-style-type: none;
 }
-/* line 335, ../vendor/styles/bamiobio/site.scss */
+/* line 336, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #info li {
   display: inline;
   margin: 0px 0px 0px 50px;
 }
-/* line 339, ../vendor/styles/bamiobio/site.scss */
+/* line 340, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #footer {
   position: relative;
   margin-top: 100px;
@@ -5759,14 +5759,14 @@ td {
   font-size: 18px;
   text-align: center;
 }
-/* line 348, ../vendor/styles/bamiobio/site.scss */
+/* line 349, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #footer a {
   color: #6e6e6e;
   color: #2d8fc1;
   text-decoration: underline;
 }
 @media screen and (max-device-width: 640px), screen and (max-width: 640px) {
-  /* line 357, ../vendor/styles/bamiobio/site.scss */
+  /* line 358, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #top,
   #bam-statistics #page {
     -webkit-flex-flow: row;
@@ -5774,38 +5774,38 @@ td {
     -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
   }
-  /* line 364, ../vendor/styles/bamiobio/site.scss */
+  /* line 365, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #depth-distribution,
   #bam-statistics #total-reads {
     /* Return them to document order */
     -webkit-order: 0;
     order: 0;
   }
-  /* line 369, ../vendor/styles/bamiobio/site.scss */
+  /* line 370, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #total-reads {
     min-height: 130px;
     max-height: 130px;
   }
-  /* line 373, ../vendor/styles/bamiobio/site.scss */
+  /* line 374, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #depth-distribution.panel .title {
     padding-top: 10px;
   }
-  /* line 376, ../vendor/styles/bamiobio/site.scss */
+  /* line 377, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #depth-distribution.panel .hint {
     margin-top: -7px;
     margin-bottom: 10px;
     font-size: 11px;
   }
-  /* line 381, ../vendor/styles/bamiobio/site.scss */
+  /* line 382, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics .bedfile-button {
     top: 4px;
     font-size: 11px;
   }
-  /* line 385, ../vendor/styles/bamiobio/site.scss */
+  /* line 386, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics .axis {
     font-size: 11px;
   }
-  /* line 388, ../vendor/styles/bamiobio/site.scss */
+  /* line 389, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics section#middle {
     margin-top: 15px;
     min-height: 1000px;
@@ -5814,20 +5814,20 @@ td {
     -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
   }
-  /* line 396, ../vendor/styles/bamiobio/site.scss */
+  /* line 397, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #percents {
     width: 100%;
   }
-  /* line 399, ../vendor/styles/bamiobio/site.scss */
+  /* line 400, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #distributions {
     width: 100%;
   }
-  /* line 402, ../vendor/styles/bamiobio/site.scss */
+  /* line 403, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics #percents .percent svg {
     width: 100%;
     height: 80px;
   }
-  /* line 406, ../vendor/styles/bamiobio/site.scss */
+  /* line 407, ../vendor/styles/bamiobio/site.scss */
   #bam-statistics .logos {
     margin: 0px auto 10px auto;
     width: 1000px;
@@ -5838,7 +5838,7 @@ td {
   }
 }
 
-/* line 417, ../vendor/styles/bamiobio/site.scss */
+/* line 418, ../vendor/styles/bamiobio/site.scss */
 .iobio-tooltip {
   position: absolute;
   text-align: center;

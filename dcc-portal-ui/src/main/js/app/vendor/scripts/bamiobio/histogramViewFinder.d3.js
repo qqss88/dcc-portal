@@ -53,9 +53,9 @@ function histogramViewFinderD3() {
         
         // Otherwise create it
         gGlobal.enter()
-           .append("g").attr("class", "global-panel").attr("transform", "translate(0," + parseInt(innerHeight-(innerHeight*globalHeightRatio)) + ")")
+           .append("g").attr("class", "global-panel").attr("transform", "translate(0," + parseInt(innerHeight-(innerHeight*globalHeightRatio)-8) + ")")
            .append("text")
-              .attr("dy", innerHeight*globalHeightRatio + 18)
+              .attr("dy", innerHeight*globalHeightRatio + 25)
               .attr("dx", innerWidth/2 )
               .attr("text-anchor", 'middle')
               .attr("class", "instruction")
