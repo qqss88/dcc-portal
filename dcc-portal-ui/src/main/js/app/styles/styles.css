@@ -2449,8 +2449,14 @@ input.valid:focus {
 }
 
 /* line 50, _modules/_labels.scss */
-.manifest-span {
-  min-width: 220px;
+.manifest-cell {
+  max-width: 15rem;
+}
+/* line 53, _modules/_labels.scss */
+.manifest-cell .manifest {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 22rem;
 }
 
 /* line 1, _modules/_badges.scss */
@@ -3173,6 +3179,38 @@ aside .t_tabs__tab {
 /* line 130, _modules/_tooltip.scss */
 .tooltip.hide {
   visibility: hidden;
+}
+
+/* line 3, _modules/_copyclip.scss */
+.copy-to-clip {
+  position: relative;
+  display: inline-block;
+}
+/* line 11, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container {
+  background: black;
+  position: absolute;
+  opacity: 0.9;
+  color: #fff;
+  left: 10%;
+  width: 10rem;
+  top: 0px;
+  text-align: center;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 1.1rem;
+  z-index: 0;
+  display: none;
+}
+/* line 26, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container .arrow {
+  position: absolute;
+  left: 4.4rem;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid black;
 }
 
 /* line 3, _modules/_sidenav.scss */
@@ -6664,6 +6702,13 @@ h3:hover .pilcrow {
 }
 
 /* line 316, styles.scss */
+.blur {
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  filter: blur(2px);
+}
+
+/* line 320, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -6677,18 +6722,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 330, styles.scss */
+/* line 334, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 335, styles.scss */
+/* line 339, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 339, styles.scss */
+/* line 343, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;

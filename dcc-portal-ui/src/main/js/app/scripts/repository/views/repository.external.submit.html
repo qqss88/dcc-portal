@@ -17,23 +17,36 @@
            <th class="text-right"># Donors</th>
            <th class="text-right"># Files</th>
            <th class="text-right">Total file size</th>
+           <th class="text-right">Manifest ID</th>
          </thead>
 
          <tbody>
            <tr data-ng-repeat="(repoName, repoData) in repos">
              <td>
                {{ repoName }}
-               <span class="manifest-span pull-right"
-                  data-ng-if="repoName === 'AWS - Virginia' || repoName === 'Collaboratory'">
-                 <button class="t_button pull-right"
-                   data-ng-click="createManifestId (repoName, fileCount, $event)">
-                  Create Manifest ID
-                 </button>
-               </span>
              </td>
              <td class="text-right">{{ repoData.donorCount | number }}</td>
              <td class="text-right">{{ repoData.fileCount | number }}</td>
              <td class="text-right">{{ repoData.fileSize | bytes }}</td>
+             <td class="text-right manifest-cell">
+               <div class="manifest" data-ng-if="repoName === 'AWS - Virginia' || repoName === 'Collaboratory'">
+                 <button data-ng-if="! repoData.isGeneratingManifestID && ! repoData.manifestID" class="t_button pull-right"
+                   data-ng-click="createManifestId(repoName, repoData)">
+                  Create Manifest
+                 </button>
+                 <div data-ng-if="repoData.isGeneratingManifestID" class="pull-right">
+                   <i class="icon-spinner icon-spin"></i>
+                  </div>
+                 <div data-ng-if="repoData.manifestID" class="pull-right">
+                  <div data-copy-to-clip data-copy-data="repoData.manifestID" data-show-copy-tips="true" data-prompt-on-copy="true">
+                    <input onclick="var _this = this; setTimeout(function() { _this.setSelectionRange(0, _this.value.length); }, 250);" size="38" type="text" class="input_manifest" value="{{repoData.manifestID}}"/>
+                    <button style="border: 0; background: transparent;" title="Copy Manifest ID" class="icon-clippy">
+                    </button>
+                  </div>
+                 </div>
+               </div>
+               <span data-ng-if="repoName != 'AWS - Virginia' && repoName != 'Collaboratory'">&nbsp;</span>
+             </td>
            </tr>
          </tbody>
        </table>

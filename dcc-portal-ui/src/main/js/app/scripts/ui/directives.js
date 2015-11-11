@@ -30,7 +30,8 @@ angular.module('icgc.ui', [
   'icgc.ui.tooltip',
   'icgc.ui.scroll',
   'icgc.ui.fileUpload',
-  'icgc.ui.badges'
+  'icgc.ui.badges',
+  'icgc.ui.copyPaste'
 ]);
 
 
@@ -241,7 +242,345 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
   };
 });
 
+angular.module('icgc.ui.copyPaste', [])
+  .provider('copyPaste', function () {
+    var _provider = this,
+        _zeroClipPath = '//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.swf',
+        _copyPasteConfig = {};
+    
+    // Getter/Setter for flash fallback
+    _provider.zeroClipboardPath = function (path) {
 
+      if (typeof path !== 'string') {
+        return _zeroClipPath;
+      }
+      
+      _zeroClipPath = path;
+    }; 
+    
+    _provider.config = function (config) {
+      
+      if (! angular.isObject(config)) {
+        return _copyPasteConfig;
+      }
+      
+      _copyPasteConfig = config;
+    };
+    
+    
+    _provider.$get = function () {
+      return _provider;
+    };
+     
+  })
+  .run(function (copyPaste) {
+    
+    if (! angular.isDefined(window.ZeroClipboard) ) {
+     console.warn('The copyPaste module depends on ZeroClipboard Version 2.2.0+.' +
+        '\nPlease include this dependency!');
+     return;
+    }
+    
+    var zeroClipboardPathConfig = {
+        swfPath: copyPaste.zeroClipboardPath(),
+        trustedDomains: ['*'],
+        allowScriptAccess: 'always',
+        forceHandCursor: true,
+        debug: true
+    };
+    
+    // Configure ZeroClipboard in case we need to use it later.
+    ZeroClipboard.config(angular.extend(zeroClipboardPathConfig, copyPaste.config));
+  })
+  .directive('copyToClip', function ($document) {
+
+        return {
+          restrict: 'A',
+          transclude: true,
+          template: '<div class="copy-to-clip-container">' +
+                      '<div class="copy-to-clip-message-container">' +
+                        '<div class="copy-to-clip-message-content"></div>' +
+                        '<div class="arrow"></div>' +
+                      '</div>' +
+                      '<div class="copy-to-clip-content" data-ng-transclude></div>' +
+                    '</div>',         
+            scope: {
+                onCopy: '&',
+                onError: '&',
+                copyData: '='
+            },
+            link: function (scope, element, attrs) {
+              
+             
+              function _showTipMessage(isSuccess, overrideMessage) {
+
+                if (!_showCopyTips) {
+                  return;
+                }
+                
+                var msg = '',
+                    copyPasteCommandKey = 'Ctrl',
+                    copyCommandAlphaKey = 'c',
+                    pasteCommandAlphaKey = 'v';  
+                    
+                
+                
+                if (typeof overrideMessage === 'string') {
+                  msg = overrideMessage;
+                }
+                else {
+                  switch (_browserOSPlatform) {
+                    case 'mac':
+                      copyPasteCommandKey = '&#x2318;';
+                      break;
+                    default:
+                      break;
+                  }
+
+                  if (isSuccess) {
+                    msg = 'Press ' + copyPasteCommandKey +
+                    '-' + pasteCommandAlphaKey + ' to paste.';
+                  }
+                  else {
+                    msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +
+                    ' to copy and ' + copyPasteCommandKey + '-' +
+                    pasteCommandAlphaKey + ' to paste.';
+                  }
+                }
+               
+                _messageConfirmationBody.html(msg);
+                  
+                _messageBubble.css({ 
+                    top: - (_messageBubble.outerHeight() + 3)
+                });
+
+                _messageBubble.fadeIn('fast');
+              
+              
+                if (_previousMessageTimeout !== null) {
+                  clearTimeout(_previousMessageTimeout);
+                }
+              
+                _previousMessageTimeout = setTimeout(function () {
+                  _messageBubble.fadeOut('fast');
+                  _previousMessageTimeout = null;
+                }, 2500);
+              }
+              
+              //
+              function _createTextArea(text) {
+
+                if (!_textArea) {
+                  _textArea = _document.createElement('textarea');
+                  _textArea.style.position = 'absolute';
+                  _textArea.style.top = '-10000px';
+                  _textArea.style.left = '0px';
+                  _documentBody.appendChild(_textArea);
+                }  
+                  
+                _textArea.textContent = text;
+
+                return _textArea;
+              }
+                
+          
+              //
+              function _copyTextArea(textArea) {
+                   
+                  // Set inline style to override css styles
+                  _documentBody.style.webkitUserSelect = 'initial';
+
+                  var selection = _document.getSelection();
+                  selection.removeAllRanges();
+                  textArea.select();
+
+                  if (! _document.execCommand('copy')) {
+                      throw new Error('Failure to perform copy using built-in copy-and-paste!');
+                  }
+                  
+                  selection.removeAllRanges();
+
+                  // Reset inline style
+                  _documentBody.style.webkitUserSelect = '';
+              }
+                
+              //
+              function _initCopyZeroClipboard() {
+
+                if (_zeroClipBoardClient !== null) {
+                  return;     
+                }
+
+                var isNativeCopySupported = false;
+               
+                _zeroClipBoardClient = new ZeroClipboard(_targetElement);
+                
+                _zeroClipBoardClient.on({
+                  'copy': function (e) {
+                    e.clipboardData.setData(_dataMimeType, scope.copyData);
+                  },
+                  'beforecopy': function () {
+                    // In our listener look to see if we can use the native copy
+                    if (_testNativeCopy()) {
+                      isNativeCopySupported = true;
+                    }
+                  },
+                  'aftercopy': function () { 
+                    // Execute this in the angular context...
+                    scope.$apply(scope.onCopy);
+                    _showTipMessage(true);
+                    
+                    // After the first copy if native copy is supported
+                    // kill this client
+                    if (isNativeCopySupported) {
+                      setTimeout(function () { 
+                        _zeroClipBoardClient.destroy();
+                        _zeroClipBoardClient = null;
+                        _initNativeCopyClipboard();
+                      }, 10);
+                    }                 
+                  },
+                  'ready': function () {
+                    // We are good to go!
+                    
+                  },
+                  'error': function (e) {
+                    // Something bad happened
+                     if (scope.onError) {
+                        scope.onError({error: e});
+                     }
+                  }
+
+                });
+          
+              }
+              
+              function _initNativeCopyClipboard() {
+                _targetElement.on('click', function (event) {
+                    
+                    event.stopPropagation();
+
+                    try {
+                      _copyText(scope.copyData);
+
+                      if (scope.onCopy) {
+                        scope.onCopy();
+                      }
+
+                      _showTipMessage(true);
+
+                    }
+                    catch (e) {
+
+                      _showTipMessage(false);
+
+                      if (scope.onError) {
+                        scope.onError({ error: e });
+                      }
+                    }
+
+                  });
+              }
+                
+              //
+              function _copyText(text) {
+
+                try {
+                  _copyTextArea(_createTextArea(text));
+                }
+                catch (e) {
+                  // Remove the textarea we just created since we can't reuse it/
+                  _documentBody.removeChild(_textArea);
+                  _textArea = null;
+                  
+                  throw new Error('Failure to perform copy using native copy command!');
+                  
+                }
+                  
+              }
+              
+              //
+              function _testNativeCopy() {
+                var isNativeCopySupported = true;
+                
+                try {
+                  _copyTextArea(_createTextArea('.'));
+                }
+                catch (e) {
+                  isNativeCopySupported = false;
+                }
+                
+                return isNativeCopySupported;
+              }
+              
+              //
+              function _init() {
+ 
+                ////////////////////////////////////////////////////////////////
+                // Copy strategy
+                ////////////////////////////////////////////////////////////////
+                // 1. Load ZeroClipboard flash if it's supported. If native
+                //    copy is supported on the first copy it will fallback to 
+                //    it and destroy the flash movie being used. If not it will
+                //    continue to use it.
+                //
+                // 2. If flash is not supported it will try to use the native 
+                //    copy. If the native copy fails it will call the optional
+                //    onError method which can be passed into the directive
+                //    from a parent scope (controller).
+                ////////////////////////////////////////////////////////////////
+
+                element.addClass('copy-to-clip');
+                
+                if (_zeroClipboardSupported) {
+                  _initCopyZeroClipboard();
+                }
+                else {
+                  _initNativeCopyClipboard();
+                }
+                
+                 if (_promptOnCopy) {
+                  _showTipMessage(null, 'Click here to copy to your clipboard.');
+                }
+                
+                // Destroy the ZeroClipboard Client if it exists...and remove listeners
+                scope.$on('$destroy', function () {
+                  if (_zeroClipBoardClient !== null) {
+                    _zeroClipBoardClient.destroy();
+                  }
+                  
+                  // Cleanup the textarea if it's there...
+                  if (_textArea !== null) {
+                    _documentBody.removeChild(_textArea);
+                  }
+                  
+                  _targetElement.unbind('click');
+                });
+              }
+              
+              
+              var _zeroClipBoardClient = null,
+                // Do some tests to see if we have a chance with Flash
+                _zeroClipboardSupported = !ZeroClipboard.isFlashUnusable(),
+                _document = $document[0],
+                _dataMimeType = attrs.mimeType || 'text/plain',
+                _documentBody = _document.body,
+                _textArea = null,
+                _showCopyTips = attrs.showCopyTips === 'false' ? false : true,
+                _promptOnCopy = attrs.promptOnCopy === 'true' ? true : false,
+                _targetElement = element.find('.copy-to-clip-content'),
+                _messageConfirmationBody = element.find('.copy-to-clip-message-content'),
+                _messageBubble = element.find('.copy-to-clip-message-container'),
+                _previousMessageTimeout = null,
+                _browserOSPlatform = window.navigator.platform ?
+                  (navigator.platform.toLowerCase().indexOf('mac') >= 0 ? 'mac' : 'win') : 'win';
+              
+            
+              _init(); 
+                
+            }
+        };
+    });
 /**
  * Used in keyword search, should rename - DC
  */
@@ -283,27 +622,27 @@ angular.module('app.ui.toggle', []).directive('toggleParam', function (LocationS
   };
 });
 
-angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
+angular.module('icgc.ui.badges', []).directive('pcawgBadge', function () {
   return {
     restrict: 'E',
     replace: true,
     template: '<span class="badge pcawg-badge">PCAWG</span>'
   };
 })
-.directive('studyBadge', function() {
-  return {
-    restrict: 'E',
-    replace: true,
-    scope: {
-      study: '@',
-      text: '@'
-    },
-    template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div>' +
+  .directive('studyBadge', function () {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        study: '@',
+        text: '@'
+      },
+      template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div>' +
       '<div><span data-ng-if="!isPcawg">{{ text }}</span></div></div>',
-    link: function (scope) {
-      scope.isPcawg = (scope.study || '').toUpperCase() === 'PCAWG';
-      // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
-      scope.text = scope.text || scope.study;
-    }
-  };
-});
+      link: function (scope) {
+        scope.isPcawg = (scope.study || '').toUpperCase() === 'PCAWG';
+        // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
+        scope.text = scope.text || scope.study;
+      }
+    };
+  });

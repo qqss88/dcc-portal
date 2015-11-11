@@ -231,14 +231,12 @@
       }
       $scope.cancel();
     };
-
-    $scope.createManifestId = function (repoName, fileCount, event) {
-      var docRoot = $document [0];
-      var canCopyToClipboard = docRoot.queryCommandSupported ('copy');
-      var parentNode = event.target.parentNode;
-      var domNode = jQuery (parentNode);
-      domNode.html ('<i class="icon-spinner icon-spin pull-right" />');
-
+    
+    $scope.createManifestId = function (repoName, repoData) {
+      
+      repoData.isGeneratingManifestID = true;
+      repoData.manifestID = false;
+      
       var selectedFiles = $scope.selectedFiles;
       var filters = LocationService.filters();
 
@@ -249,7 +247,7 @@
       filters = _.set (filters, 'file.repoName.is', [repoName]);
 
       var params = {
-        size: fileCount,
+        size: repoData.fileCount,
         isTransient: true,
         filters: filters
       };
@@ -259,27 +257,9 @@
           console.log('No Manifest UUID is returned from API call.');
           return;
         }
-
-        var widgetHtml = '<input class="input_manifest' +
-          (canCopyToClipboard ? '' : ' pull-right') +
-          '" type="text" size="38" readonly ' +
-          'onClick="this.setSelectionRange (0, this.value.length)" value="' +
-           data.id + '" />';
-
-        if (canCopyToClipboard) {
-          widgetHtml += '<button style="border: 0; background: transparent;" title="Copy Manifest ID">' +
-            '<span class="icon-clippy" /></button>';
-        }
-
-        domNode.html (widgetHtml);
-
-        if (canCopyToClipboard) {
-          domNode.children ('button').click (function () {
-            domNode.children ('input[type=text]').select();
-            docRoot.execCommand('copy');
-          });
-        }
-        domNode.children ('input[type=text]').select();
+        repoData.isGeneratingManifestID = false;
+        repoData.manifestID = data.id;
+       
      });
     };
 
