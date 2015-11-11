@@ -18,7 +18,7 @@ $shadowColor: $tooltipShadowColor;
    //color: #fff;
    color: #000;
    left: 10%;
-   width: 12rem;
+   width: 14rem;
    top: -3px;
    text-align: center;
    padding: 5px;
@@ -45,7 +45,7 @@ $shadowColor: $tooltipShadowColor;
    .arrow {
      position: absolute;
      left: 45%;
-     top: 50px;
+     top: 100%;
      content: ' ';
      border-left: 8px solid transparent;
      border-right: 8px solid transparent;

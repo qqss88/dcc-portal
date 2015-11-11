@@ -380,9 +380,12 @@ angular.module('icgc.ui.copyPaste', [])
                   }
 
                   if (isSuccess) {
-                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage + '<br />' : '';
-                    msg += 'Press ' + copyPasteCommandKey +
-                    '-' + pasteCommandAlphaKey + ' to paste.';
+                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage : '';
+
+                    if (! msg) {
+                      msg += 'Press ' + copyPasteCommandKey +
+                             '-' + pasteCommandAlphaKey + ' to paste.';
+                    }
                   }
                   else {
                     msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +
