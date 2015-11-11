@@ -33,6 +33,7 @@
 
   "globals": {
     "$icgcApp": false,
+    "ZeroClipboard": false,
     "angular": false,
     "jQuery": false,
     "Highcharts": false,
