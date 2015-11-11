@@ -31,7 +31,8 @@ angular.module('icgc.ui', [
   'icgc.ui.scroll',
   'icgc.ui.fileUpload',
   'icgc.ui.badges',
-  'icgc.ui.copyPaste'
+  'icgc.ui.copyPaste',
+  'icgc.ui.popover'
 ]);
 
 
@@ -239,6 +240,33 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
         return index;
       });
     }
+  };
+});
+//Mike
+angular.module('icgc.ui.popover', [])
+  .directive('popover', function ($sce) {
+    return {
+      restrict: 'AE',
+      transclude: true,
+      replace: true,
+      scope: {
+        'popoverAnchorText': '@popoverAnchorLabel',
+        'popoverTitle': '@',
+        'assistIconClass': '@popoverAssistIconClass',
+        'assistIconPositionBefore': '@popoverAssistIconPositionBefore',
+        'isOpen': '=popoverIsOpen'
+      },
+      templateUrl: '/scripts/ui/views/popover.html',
+      link: function (scope) {
+      
+        function _init() {
+          scope.title = $sce.trustAsHtml(scope.popoverTitle);
+          scope.anchorText = $sce.trustAsHtml(scope.popoverAnchorText); 
+          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false; 
+        }
+
+        _init();
+      }
   };
 });
 

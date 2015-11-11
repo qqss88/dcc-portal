@@ -17,7 +17,17 @@
            <th class="text-right"># Donors</th>
            <th class="text-right"># Files</th>
            <th class="text-right">Total file size</th>
-           <th class="text-right">Manifest ID</th>
+           <th class="text-right">
+             <popover class="light"
+                      popover-title="Creating a Manifest ID" 
+                      popover-anchor-label="Create Manifest ID" 
+                      popover-assist-icon-class="icon-help-circled"
+                      popover-assist-icon-position-before="false">
+                 A manifest ID is used to reference the desired respository you wish to 
+                 obtain the manifest file for in the Data Portal. Please see the <a href="/icgc-in-the-cloud/guide#!storage-manifest-section" target="_blank">User Guide</a> to learn more.
+                 </a> 
+             </popover>
+             </th>
          </thead>
 
          <tbody>
@@ -32,7 +42,7 @@
                <div class="manifest" data-ng-if="repoName === 'AWS - Virginia' || repoName === 'Collaboratory'">
                  <button data-ng-if="! repoData.isGeneratingManifestID && ! repoData.manifestID" class="t_button pull-right"
                    data-ng-click="createManifestId(repoName, repoData)">
-                  Create Manifest
+                  Create Manifest ID
                  </button>
                  <div data-ng-if="repoData.isGeneratingManifestID" class="pull-right">
                    <i class="icon-spinner icon-spin"></i>

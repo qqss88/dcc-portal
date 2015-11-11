@@ -195,7 +195,8 @@
          <h3>Install from Tarball</h3>
          <p>To begin using the Storage Client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
 
-         <pre class="language-shell"><code class="language-shell">wget -o dcc-storage-client.tar.gz https://dcc.icgc.org/api/v1/ui/software/dcc-storage-client/latest</code></pre>
+         <pre class="language-shell"><code class="language-shell">wget -O dcc-storage-client.tar.gz https://dcc.icgc.org/api/v1/ui/software/dcc-storage-client/latest
+tar -xvzf dcc-storage-client.tar.gz</code></pre>
 
          <p>After untaring the archive, the Storage Client will be available at <code>bin/dcc-storage-client</code>. Steps to verify the authenticity and integrity of the download can be found on our <a href="/software">software</a> page.</p>
          <h3>Install from Docker Image</h3>
@@ -314,7 +315,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
 
          <p>Downloads will be stored in the <code>--output-dir</code>.</p>
 
-         <h4>Manifest</h4>
+         <h4 id="storage-manifest-section">Manifest</h4>
 
          <p>Using a Manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repositories" target="_blank">repository file search</a> allows one to generate a Manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
 
@@ -324,7 +325,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
 
          <h3>Manifest Command</h3>
          <p>
-           The <code>manifest</code> command allows a user to quickly view the contents of a download Manfiest produced by the Data Portal. A Manifest can come from:
+           The <code>manifest</code> command allows a user to quickly view the contents of a download Manifest produced by the Data Portal. A Manifest can come from:
          </p>
          <ul>
             <li>The local file system</li>
@@ -477,8 +478,13 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <p>
            <code>samtools</code> doesn&rsquo;t support the HTTPS
-            protocol, which is required by ICGC to access S3-stored data files.
-            Use the client <code>view</code> command to pipe data to samtools, download the desired files locally, or use the mount command to create a FUSE mount of the ICGC data files.
+            protocol<span style="color: rgb(160, 58, 58);">*</span>, which is required by ICGC to access S3-stored data files.
+            Use the client <code>view</code> command to pipe data to samtools, download the desired files locally, or use the mount command to create a FUSE mount of the ICGC data files. 
+         </p>
+         <p>
+            <span style="color: rgb(160, 58, 58);">*</span> <strong>Update</strong>: 
+            As of commit <a href="https://github.com/samtools/htslib/commit/fe1f08a3a80b8a5a17fa56b3fc1808ab2ac25d63" target="_blank"><i class="icon-external-link"></i>fe1f08a</a> 
+            <code>samtools</code> now supports file access over HTTPS and Amazon S3.
          </p>
 
          <h5>How do I report a bug in the software?</h5>

@@ -1,0 +1,129 @@
+$popoverBorderRadius: 5px;
+$popoverOutsetBorder: 0.4rem;
+$popoverBubbleMaxWidth: 28rem;
+$popoverBubbleMaxHeight: 30rem;
+
+.popover {
+  transition-duration: all;
+  transition: ease-in-out 0.25s;
+  position: relative;
+  text-align: left;
+  float: none;
+  white-space: normal;
+  display: inline-block;
+  margin-right: 1rem;
+  
+  &:hover  .popover-outer-container {
+       opacity: 1;
+  }
+  
+  .popover-outer-container {
+    position: absolute; 
+    background: transparent;
+    z-index: 100;
+    top: -10px;
+    left: -$popoverBubbleMaxWidth - 0.2rem;
+    opacity: 0;
+    transition: opacity ease-in-out 0.25s;
+   
+    
+    
+    
+    .popover-inner-container-border {
+      position: absolute;
+      background: #000;
+      opacity: 0.7;
+      height: 100%;
+      width: 100%;
+      z-index: 0;
+      top: -$popoverOutsetBorder; 
+      left: -$popoverOutsetBorder; 
+      border-radius: $popoverBorderRadius;
+      box-sizing: content-box;
+      padding: $popoverOutsetBorder $popoverOutsetBorder;
+      -webkit-box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
+      -moz-box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
+      box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
+      
+      .arrow {
+        position: absolute;
+        opacity: 1;
+        right: -8px;
+        top: 17px;
+        width: 0; 
+        height: 0; 
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        
+        border-left: 10px solid #000;
+      }
+      
+    }
+    
+    .popover-inner-container {
+      position:relative;
+      background: #fff;
+      padding: 0.5rem 0.5rem;
+      border-radius: $popoverBorderRadius;
+      z-index: 100;
+      width:100%;
+      height: 100%;
+      word-wrap: break-word;
+      max-width: $popoverBubbleMaxWidth - 1rem;
+      max-height: $popoverBubbleMaxHeight;
+      line-height: 1.8rem;
+      font-size: 1.1rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+      
+    
+    
+      .popover-title {
+        font-size: 1.4rem;
+        margin: 0 auto 0.5rem auto;
+        font-weight: bold;
+      }
+      
+      
+      
+      .popover-body {
+        width: 100%;
+        height: 100%;
+        font-size: 1.2rem;
+      }
+      
+    }
+  }
+  
+  .popover-anchor-container {
+    text-decoration: none;
+    color: #000;
+     
+     
+     &:hover  {
+      cursor: pointer;
+      color: #0E5E94
+    }
+  }
+  
+  .popover-icon-before {
+    margin-right: 1rem;
+  }
+  
+  .popover-icon-after {
+     margin-left: 0.1rem; 
+  }
+  
+  .popover-label {
+    display: inline-block;
+    border-bottom: 1px dashed;
+    line-height: 1.1rem;
+  }
+  
+  [class^="icon-"] {
+    border: none;
+  }
+  
+ 
+
+}
