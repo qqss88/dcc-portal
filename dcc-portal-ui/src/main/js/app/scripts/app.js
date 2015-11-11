@@ -267,7 +267,7 @@
           
           var match = hash.match(/^!([\w\-]+)$/i),
             to = 0,
-            HEADER_HEIGHT = 40; 
+            HEADER_HEIGHT = 79; 
           
           
           if (match && match.length > 1) {
