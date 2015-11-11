@@ -140,18 +140,15 @@
     flex-wrap: wrap;
     width: 60%;
   }
-  .checkbox.checked,
-  .checkbox.checked .icons {
-    color: #267FAD;
-  }
   .checkbox {
-    padding-left: 18px;
+    padding-left: 20px;
   }
   .checkbox,
   .checkbox .icons {
     height: 13px;
     line-height: 13px;
     font-size: 13px;
+    font-weight:lighter;
   }
   .hint {
     font-size: 13px;

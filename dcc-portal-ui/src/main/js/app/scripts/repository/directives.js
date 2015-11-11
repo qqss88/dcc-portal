@@ -149,7 +149,18 @@
 
           goBam(region);
         }
-
+        
+        scope.checkboxCheck = function(event){
+          var checkbox = $(event.toElement);
+          if (checkbox.hasClass ("checked")){
+            checkbox.removeClass ("icon-ok");
+            checkbox.addClass ("icon-check-empty");
+          } else {
+            checkbox.removeClass ("icon-check-empty");
+            checkbox.addClass ("icon-ok");
+          }
+        };
+        
         function getUrlParameter(sParam) {
           var sPageURL = window.location.search.substring(1);
           var sURLVariables = sPageURL.split('&');

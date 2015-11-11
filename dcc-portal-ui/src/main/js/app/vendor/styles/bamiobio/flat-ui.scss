@@ -103,23 +103,27 @@
   opacity: 0;
   filter: alpha(opacity=0);
 }
-.checkbox:hover .first-icon,
+.checkbox:hover,
 .radio:hover .first-icon {
-  opacity: 0;
-  filter: alpha(opacity=0);
+  color: #ce6503;
+  cursor:pointer;
 }
 .checkbox:hover .second-icon,
 .radio:hover .second-icon {
   opacity: 1;
+  color: #ce6503;
+  cursor:pointer;
   filter: alpha(opacity=100);
 }
 .checkbox.checked,
 .radio.checked {
-  color: red;
+  color: #1693c0;
+  transition: color 0.5s;
 }
 .checkbox.checked .icons,
 .radio.checked .icons {
-  color: red;
+  color: #166aa2;
+  transition: color 0.5s;
 }
 .checkbox.checked .first-icon,
 .radio.checked .first-icon {

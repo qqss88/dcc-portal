@@ -64,7 +64,7 @@
         <div>
           <div class="chart-chooser"><span class="selected length-chart" data-outlier="false" data-id="frag_hist" data-ng-click="toggleChart($event, 'lengthChart')">Insert Length</span> | <span class="length-chart" data-id="length_hist" data-outlier="true" data-ng-click="toggleChart($event, 'lengthChart')">Read Length</span></div>
         </div>
-        <label class="checkbox" for="checkbox2" style="position:absolute;right:10px;top:24px;cursor:pointer">
+        <label class="checkbox icon-check-empty" data-ng-click="checkboxCheck($event)" for="checkbox2" style="position:absolute;right:10px;top:24px;cursor:pointer">
           <input type="checkbox" value="" class="outlier" data-toggle="checkbox"> Outliers
         </label>
         <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
@@ -80,6 +80,6 @@
     </div>
   </section>
   <div style="float:right">
-    <p>Powered by <a href="http://iobio.io/">Iobio</a></p>
+    <p>Powered by <a href="https://10.5.74.221:80/">Iobio</a></p>
   </div>
 </div>
