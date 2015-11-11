@@ -500,7 +500,7 @@ angular.module('icgc.ui.copyPaste', [])
               }
               
               function _initNativeCopyClipboard() {
-                _targetElement.on('click', function () {
+                _targetElement.on('click', function (event) {
                     
                     event.stopPropagation();
 
