@@ -23,6 +23,9 @@
   &:focus {
   }
 
+  &.no-animate {
+    transition: none;
+  }
 
   // For destructive actions
   &.t_button__destructive {

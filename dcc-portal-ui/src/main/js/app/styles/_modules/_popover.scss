@@ -4,14 +4,14 @@ $popoverBubbleMaxWidth: 28rem;
 $popoverBubbleMaxHeight: 30rem;
 
 .popover {
-  transition-duration: all;
-  transition: ease-in-out 0.25s;
+  transition: all ease-in-out 0.25s;
   position: relative;
   text-align: left;
   float: none;
   white-space: normal;
   display: inline-block;
   margin-right: 1rem;
+  padding-left: 0.5rem;
 
   &:hover  .popover-outer-container {
     opacity: 1;
@@ -23,7 +23,7 @@ $popoverBubbleMaxHeight: 30rem;
     background: transparent;
     z-index: -1;
     top: -10px;
-    left: -$popoverBubbleMaxWidth - 0.2rem;
+    left: -$popoverBubbleMaxWidth + 0.5rem;
     opacity: 0;
     transition: opacity ease-in-out 0.25s;
    

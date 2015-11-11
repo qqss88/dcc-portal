@@ -1935,40 +1935,44 @@ footer .dcc-col {
   background: #ce6503;
   text-decoration: none;
 }
-/* line 28, _modules/_button.scss */
+/* line 26, _modules/_button.scss */
+.t_button.no-animate, a.t_button.no-animate {
+  transition: none;
+}
+/* line 31, _modules/_button.scss */
 .t_button.t_button__destructive, a.t_button.t_button__destructive {
   background: #dc502e;
 }
-/* line 31, _modules/_button.scss */
+/* line 34, _modules/_button.scss */
 .t_button.t_button__destructive:hover, a.t_button.t_button__destructive:hover {
   background: #bd3200;
 }
 
-/* line 38, _modules/_button.scss */
+/* line 41, _modules/_button.scss */
 .t_button_large {
   font-size: 1.1rem;
   padding: .5rem 1rem;
 }
 
-/* line 43, _modules/_button.scss */
+/* line 46, _modules/_button.scss */
 .t_button[disabled] {
   color: #999999;
   background: #f2f2f2;
   border: 1px solid #999999;
 }
-/* line 48, _modules/_button.scss */
+/* line 51, _modules/_button.scss */
 .t_button[disabled]:hover {
   cursor: not-allowed;
   color: #999999;
   background: #f2f2f2;
 }
 
-/* line 57, _modules/_button.scss */
+/* line 60, _modules/_button.scss */
 .t_button_info {
   background: #5b7fa4;
   border-color: #5b7fa4;
 }
-/* line 61, _modules/_button.scss */
+/* line 64, _modules/_button.scss */
 .t_button_info:hover {
   background: #3f5973;
 }
@@ -2447,15 +2451,12 @@ input.valid:focus {
   background-color: #666666;
 }
 
-/* line 50, _modules/_labels.scss */
-.manifest-cell {
-  max-width: 15rem;
-}
 /* line 53, _modules/_labels.scss */
 .manifest-cell .manifest {
   display: inline-block;
   vertical-align: middle;
-  max-width: 22rem;
+  width: 18rem;
+  height: 26px;
 }
 
 /* line 1, _modules/_badges.scss */
@@ -3192,7 +3193,7 @@ aside .t_tabs__tab {
   opacity: 0.9;
   color: #fff;
   left: 10%;
-  width: 10rem;
+  width: 12rem;
   top: 0px;
   text-align: center;
   padding: 0.5rem 0.5rem;
@@ -3204,7 +3205,7 @@ aside .t_tabs__tab {
 /* line 26, _modules/_copyclip.scss */
 .copy-to-clip .copy-to-clip-message-container .arrow {
   position: absolute;
-  left: 4.4rem;
+  left: 5.3rem;
   width: 0;
   height: 0;
   border-left: 10px solid transparent;
@@ -3309,14 +3310,14 @@ aside .t_tabs__tab {
 
 /* line 6, _modules/_popover.scss */
 .popover {
-  transition-duration: all;
-  transition: ease-in-out 0.25s;
+  transition: all ease-in-out 0.25s;
   position: relative;
   text-align: left;
   float: none;
   white-space: normal;
   display: inline-block;
   margin-right: 1rem;
+  padding-left: 0.5rem;
 }
 /* line 16, _modules/_popover.scss */
 .popover:hover .popover-outer-container {
@@ -3329,11 +3330,11 @@ aside .t_tabs__tab {
   background: transparent;
   z-index: -1;
   top: -10px;
-  left: -28.2rem;
+  left: -27.5rem;
   opacity: 0;
   transition: opacity ease-in-out 0.25s;
 }
-/* line 34, _modules/_popover.scss */
+/* line 33, _modules/_popover.scss */
 .popover .popover-outer-container .popover-inner-container-border {
   position: absolute;
   background: #000;
@@ -3350,7 +3351,7 @@ aside .t_tabs__tab {
   -moz-box-shadow: -2px 4px 14px -1px rgba(0, 0, 0, 0.75);
   box-shadow: -2px 4px 14px -1px rgba(0, 0, 0, 0.75);
 }
-/* line 50, _modules/_popover.scss */
+/* line 49, _modules/_popover.scss */
 .popover .popover-outer-container .popover-inner-container-border .arrow {
   position: absolute;
   opacity: 1;
@@ -3362,7 +3363,7 @@ aside .t_tabs__tab {
   border-bottom: 10px solid transparent;
   border-left: 10px solid #000;
 }
-/* line 65, _modules/_popover.scss */
+/* line 64, _modules/_popover.scss */
 .popover .popover-outer-container .popover-inner-container {
   position: relative;
   background: #fff;
@@ -3379,43 +3380,43 @@ aside .t_tabs__tab {
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* line 83, _modules/_popover.scss */
+/* line 82, _modules/_popover.scss */
 .popover .popover-outer-container .popover-inner-container .popover-title {
   font-size: 1.4rem;
   margin: 0 auto 0.5rem auto;
   font-weight: bold;
 }
-/* line 91, _modules/_popover.scss */
+/* line 90, _modules/_popover.scss */
 .popover .popover-outer-container .popover-inner-container .popover-body {
   width: 100%;
   height: 100%;
   font-size: 1.2rem;
 }
-/* line 100, _modules/_popover.scss */
+/* line 99, _modules/_popover.scss */
 .popover .popover-anchor-container {
   text-decoration: none;
   color: #000;
 }
-/* line 105, _modules/_popover.scss */
+/* line 104, _modules/_popover.scss */
 .popover .popover-anchor-container:hover {
   cursor: pointer;
   color: #0e5e94;
 }
-/* line 111, _modules/_popover.scss */
+/* line 110, _modules/_popover.scss */
 .popover .popover-icon-before {
   margin-right: 1rem;
 }
-/* line 115, _modules/_popover.scss */
+/* line 114, _modules/_popover.scss */
 .popover .popover-icon-after {
   margin-left: 0.1rem;
 }
-/* line 119, _modules/_popover.scss */
+/* line 118, _modules/_popover.scss */
 .popover .popover-label {
   display: inline-block;
   border-bottom: 1px dashed;
   line-height: 1.1rem;
 }
-/* line 125, _modules/_popover.scss */
+/* line 124, _modules/_popover.scss */
 .popover [class^="icon-"] {
   border: none;
 }

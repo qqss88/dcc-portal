@@ -335,11 +335,25 @@ angular.module('icgc.ui.copyPaste', [])
             scope: {
                 onCopy: '&',
                 onError: '&',
-                copyData: '='
+                copyData: '=',
+                onCopyFocusOn: '@',
+                onCopySuccessMessage: '@'
             },
             link: function (scope, element, attrs) {
               
-             
+             function _focusCopyEl() {
+               if (! _focusOnCopySelector || _focusOnCopySelector.length === 0) {
+                 return;
+               }
+
+               _focusOnCopySelector.focus();
+
+              if (_focusOnCopySelector.is(':input')) {
+                _focusOnCopySelector[0].setSelectionRange(0, _focusOnCopySelector.val().length)
+              }
+
+             }
+
               function _showTipMessage(isSuccess, overrideMessage) {
 
                 if (!_showCopyTips) {
@@ -366,7 +380,8 @@ angular.module('icgc.ui.copyPaste', [])
                   }
 
                   if (isSuccess) {
-                    msg = 'Press ' + copyPasteCommandKey +
+                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage + '<br />' : '';
+                    msg += 'Press ' + copyPasteCommandKey +
                     '-' + pasteCommandAlphaKey + ' to paste.';
                   }
                   else {
@@ -446,6 +461,7 @@ angular.module('icgc.ui.copyPaste', [])
                 _zeroClipBoardClient.on({
                   'copy': function (e) {
                     e.clipboardData.setData(_dataMimeType, scope.copyData);
+                    _focusCopyEl();
                   },
                   'beforecopy': function () {
                     // In our listener look to see if we can use the native copy
@@ -486,10 +502,12 @@ angular.module('icgc.ui.copyPaste', [])
               function _initNativeCopyClipboard() {
                 _targetElement.on('click', function (event) {
                     
-                    event.stopPropagation();
+                    //event.stopPropagation();
 
                     try {
                       _copyText(scope.copyData);
+
+                      _focusCopyEl();
 
                       if (scope.onCopy) {
                         scope.onCopy();
@@ -599,6 +617,7 @@ angular.module('icgc.ui.copyPaste', [])
                 _targetElement = element.find('.copy-to-clip-content'),
                 _messageConfirmationBody = element.find('.copy-to-clip-message-content'),
                 _messageBubble = element.find('.copy-to-clip-message-container'),
+                _focusOnCopySelector = scope.onCopyFocusOn ? element.find(scope.onCopyFocusOn) : false,
                 _previousMessageTimeout = null,
                 _browserOSPlatform = window.navigator.platform ?
                   (navigator.platform.toLowerCase().indexOf('mac') >= 0 ? 'mac' : 'win') : 'win';
