@@ -349,7 +349,7 @@ angular.module('icgc.ui.copyPaste', [])
                _focusOnCopySelector.focus();
 
               if (_focusOnCopySelector.is(':input')) {
-                _focusOnCopySelector[0].setSelectionRange(0, _focusOnCopySelector.val().length)
+                _focusOnCopySelector[0].setSelectionRange(0, _focusOnCopySelector.val().length);
               }
 
              }
@@ -500,9 +500,9 @@ angular.module('icgc.ui.copyPaste', [])
               }
               
               function _initNativeCopyClipboard() {
-                _targetElement.on('click', function (event) {
+                _targetElement.on('click', function () {
                     
-                    //event.stopPropagation();
+                    event.stopPropagation();
 
                     try {
                       _copyText(scope.copyData);
