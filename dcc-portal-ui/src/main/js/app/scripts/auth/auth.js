@@ -160,7 +160,9 @@
               Auth.login(data);
               $scope.params.user = Auth.getUser();
               $state.transitionTo($state.current, $stateParams,
-                { reload: true, inherit: false, notify: true });
+                { reload: true, inherit: true, notify: true, location: false });
+
+              $scope.closeLoginPopup();
               console.log('logged in as: ', $scope.params.user);
             });
         }
