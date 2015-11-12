@@ -2451,12 +2451,15 @@ input.valid:focus {
   background-color: #666666;
 }
 
+/* line 50, _modules/_labels.scss */
+.manifest-cell {
+  width: 28%;
+  min-height: 31px;
+}
 /* line 53, _modules/_labels.scss */
 .manifest-cell .manifest {
   display: inline-block;
   vertical-align: middle;
-  width: 18rem;
-  height: 26px;
 }
 
 /* line 1, _modules/_badges.scss */
