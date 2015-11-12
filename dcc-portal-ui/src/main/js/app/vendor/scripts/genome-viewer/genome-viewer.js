@@ -24809,19 +24809,19 @@ SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
         }
 
         if (this.sequence[chromosome] == null) {
-            this.sequence[chromosome] = seqResponse.sequence;
+            this.sequence[chromosome] = seqResponse[0].sequence;
         } else {
             if (queryStart == this.start[chromosome]) {
-                this.sequence[chromosome] = seqResponse.sequence + this.sequence[chromosome];
+                this.sequence[chromosome] = seqResponse[0].sequence + this.sequence[chromosome];
             } else {
-                this.sequence[chromosome] = this.sequence[chromosome] + seqResponse.sequence;
+                this.sequence[chromosome] = this.sequence[chromosome] + seqResponse[0].sequence;
             }
         }
 
         if (this.sender == "move" && throwNotify == true) {
             this.trigger('data:ready', {
                 items: {
-                    sequence: seqResponse.sequence,
+                    sequence: seqResponse[0].sequence,
                     start: queryStart,
                     end: queryEnd
                 },
@@ -24834,9 +24834,9 @@ SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
     if (this.sender != "move" && throwNotify == true) {
         this.trigger('data:ready', {
             items: {
-                sequence: this.sequence[chromosome],
-                start: this.start[chromosome],
-                end: this.end[chromosome]
+                sequence: seqResponse[0].sequence,
+                start: seqResponse[0].start,
+                end: seqResponse[0].end
             },
             params: params,
             sender: this
