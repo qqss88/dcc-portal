@@ -3182,36 +3182,60 @@ aside .t_tabs__tab {
   visibility: hidden;
 }
 
-/* line 3, _modules/_copyclip.scss */
+/* line 5, _modules/_copyclip.scss */
 .copy-to-clip {
   position: relative;
   display: inline-block;
 }
-/* line 11, _modules/_copyclip.scss */
+/* line 14, _modules/_copyclip.scss */
 .copy-to-clip .copy-to-clip-message-container {
-  background: black;
+  background: white;
   position: absolute;
-  opacity: 0.9;
-  color: #fff;
+  opacity: 0.95;
+  color: #000;
   left: 10%;
-  width: 12rem;
-  top: 0px;
+  width: 14rem;
+  top: -3px;
   text-align: center;
-  padding: 0.5rem 0.5rem;
-  border-radius: 0.3rem;
-  font-size: 1.1rem;
+  padding: 5px;
+  font-weight: 300;
+  line-height: 1.6rem;
+  font-size: .9rem;
   z-index: 0;
   display: none;
+  border: 1px solid #b3b3b3;
+  border-radius: 3px;
+  -webkit-filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  -moz-box-shadow: 0 1px 3px rgba(180, 180, 180, 0.43);
+  filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
 }
-/* line 26, _modules/_copyclip.scss */
+/* line 37, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container:after {
+  border-width: 6px;
+}
+/* line 41, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container:before {
+  border-width: 7px;
+}
+/* line 45, _modules/_copyclip.scss */
 .copy-to-clip .copy-to-clip-message-container .arrow {
   position: absolute;
-  left: 5.3rem;
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid black;
+  left: 45%;
+  top: 100%;
+  content: ' ';
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #b3b3b3;
+}
+/* line 54, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container .arrow:before {
+  content: ' ';
+  position: absolute;
+  left: -8px;
+  top: -9px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid white;
 }
 
 /* line 3, _modules/_sidenav.scss */

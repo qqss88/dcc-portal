@@ -340,6 +340,26 @@ angular.module('icgc.ui.copyPaste', [])
                 onCopySuccessMessage: '@'
             },
             link: function (scope, element, attrs) {
+
+             function _selectText() {
+
+                var textEl = _focusOnCopySelector[0],
+                    range = null;
+
+                if (window.getSelection) {  // The cool browsers...
+                   var selection = window.getSelection();
+                   range = _document.createRange();
+                   range.selectNodeContents(textEl);
+                   selection.removeAllRanges();
+                   selection.addRange(range);
+                }
+                else if (_document.body.createTextRange) { // Fail... M$
+                  range = _document.body.createTextRange();
+                  range.moveToElementText(textEl);
+                  range.select();
+                }
+
+             }
               
              function _focusCopyEl() {
                if (! _focusOnCopySelector || _focusOnCopySelector.length === 0) {
@@ -350,6 +370,9 @@ angular.module('icgc.ui.copyPaste', [])
 
               if (_focusOnCopySelector.is(':input')) {
                 _focusOnCopySelector[0].setSelectionRange(0, _focusOnCopySelector.val().length);
+              }
+              else {
+                _selectText();
               }
 
              }
@@ -380,9 +403,12 @@ angular.module('icgc.ui.copyPaste', [])
                   }
 
                   if (isSuccess) {
-                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage + '<br />' : '';
-                    msg += 'Press ' + copyPasteCommandKey +
-                    '-' + pasteCommandAlphaKey + ' to paste.';
+                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage : '';
+
+                    if (! msg) {
+                      msg += 'Press ' + copyPasteCommandKey +
+                             '-' + pasteCommandAlphaKey + ' to paste.';
+                    }
                   }
                   else {
                     msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +

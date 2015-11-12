@@ -25,6 +25,8 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 import java.util.List;
 import java.util.Map;
 
+import lombok.experimental.UtilityClass;
+
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
@@ -32,8 +34,6 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import lombok.experimental.UtilityClass;
 
 /**
  * TypeModel for Repository File index type
@@ -112,8 +112,8 @@ public class RepositoryFileTypeModel extends TypeModel {
     public final String LAST_MODIFIED = "lastModified";
     public final String LAST_UPDATED = "lastUpdated";
 
-    public final String INDEX_FILE_UUID = INDEX_FILE + ".id";
-    public final String INDEX_FILE_ID = INDEX_FILE + ".fileId";
+    public final String INDEX_FILE_ID = INDEX_FILE + ".id";
+    public final String INDEX_OBJECT_UUID = INDEX_FILE + ".objectId";
     public final String INDEX_FILE_NAME = INDEX_FILE + ".fileName";
     public final String INDEX_FILE_FORMAT = INDEX_FILE + ".fileFormat";
     public final String INDEX_FILE_MD5SUM = INDEX_FILE + ".fileMd5sum";
@@ -182,8 +182,8 @@ public class RepositoryFileTypeModel extends TypeModel {
 
     private ObjectFieldModel indexFile() {
       return object("index_file", INDEX_FILE,
-          string("id", INDEX_FILE_UUID),
-          string("file_id", INDEX_FILE_ID),
+          string("id", INDEX_FILE_ID),
+          string("object_id", INDEX_OBJECT_UUID),
           string("file_name", INDEX_FILE_NAME),
           string("file_format", INDEX_FILE_FORMAT),
           string("file_md5sum", INDEX_FILE_MD5SUM),
