@@ -24802,26 +24802,22 @@ SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
         var queryId = queryResponse.id;
         var seqResponse = queryResponse.result;
 
-
-        var chromosome = seqResponse.chromosome;
-        if (typeof chromosome === 'undefined') {
-            chromosome = seqResponse.sequenceName;
-        }
+        var chromosome = seqResponse[0].sequenceName;
 
         if (this.sequence[chromosome] == null) {
-            this.sequence[chromosome] = seqResponse.sequence;
+            this.sequence[chromosome] = seqResponse[0].sequence;
         } else {
             if (queryStart == this.start[chromosome]) {
-                this.sequence[chromosome] = seqResponse.sequence + this.sequence[chromosome];
+                this.sequence[chromosome] = seqResponse[0].sequence + this.sequence[chromosome];
             } else {
-                this.sequence[chromosome] = this.sequence[chromosome] + seqResponse.sequence;
+                this.sequence[chromosome] = this.sequence[chromosome] + seqResponse[0].sequence;
             }
         }
 
         if (this.sender == "move" && throwNotify == true) {
             this.trigger('data:ready', {
                 items: {
-                    sequence: seqResponse.sequence,
+                    sequence: seqResponse[0].sequence,
                     start: queryStart,
                     end: queryEnd
                 },
