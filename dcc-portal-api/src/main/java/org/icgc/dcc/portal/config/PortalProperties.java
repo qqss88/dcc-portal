@@ -21,7 +21,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.inject.Stage.DEVELOPMENT;
 import static org.icgc.dcc.downloader.core.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -94,6 +96,10 @@ public class PortalProperties extends Configuration {
   @Valid
   @JsonProperty
   OAuthProperties oauth = new OAuthProperties();
+
+  @Valid
+  @JsonProperty
+  Map<String, Boolean> features = new HashMap<String, Boolean>();
 
   @Data
   public static class CacheProperties {

@@ -184,3 +184,7 @@ setOperation:
 release:
   releaseDate: "Month Day, Year"
   dataVersion: 2
+
+#Feature Flags
+#features:
+#  <name>: <boolean>
