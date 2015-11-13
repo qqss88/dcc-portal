@@ -158,7 +158,7 @@
            <div class="guide-callout-content">
             <h4>Collaboratory</h4>
             <p>
-              In order to run within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To begin the enrollment process, please send an email to <a href="help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
+              In order to run within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To begin the enrollment process, please send an email to <a href="mailto:help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
             </p>
             </div>
          </div>
@@ -193,7 +193,7 @@
          <p>This section describes how to install the Storage Client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>
 
          <h3>Install from Tarball</h3>
-         <p>To begin using the Storage Client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
+         <p>To begin using the Storage Client, the first step is to download the distribution. The latest version can be downloaded from <a href="/icgc-in-the-cloud/aws#downloads">here</a>.</p>
 
          <pre class="language-shell"><code class="language-shell">wget -O dcc-storage-client.tar.gz https://dcc.icgc.org/api/v1/ui/software/dcc-storage-client/latest
 tar -xvzf dcc-storage-client.tar.gz</code></pre>
@@ -254,7 +254,7 @@ tar -xvzf dcc-storage-client.tar.gz</code></pre>
          <p>Finding files of interest can be done via the Data Portal. Objects are identified by their <em>Object ID</em>.</p>
 
          <ul>
-            <li>Navigate to <a href="https://dcc.icgc.org/repositories">repository file search</a></li>
+            <li>Navigate to <a href="/repositories">repository file search</a></li>
             <li>Click on the <code>AWS</code> or <code>Collaboratory</code> filter in the left hand pane</li>
             <li>Filter based on properties of interest (e.g. donor id, specimen id, etc.)</li>
             <li>Export a <em>Manifest</em> for future use with the Storage Client</li>
@@ -317,7 +317,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
 
          <h4 id="storage-manifest-section">Manifest</h4>
 
-         <p>Using a Manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repositories" target="_blank">repository file search</a> allows one to generate a Manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
+         <p>Using a Manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="/repositories" target="_blank"><i class="icon-external-link"></i>repository file search</a> allows one to generate a Manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
 
          <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
 

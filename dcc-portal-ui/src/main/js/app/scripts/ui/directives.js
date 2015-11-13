@@ -347,11 +347,11 @@ angular.module('icgc.ui.copyPaste', [])
                     range = null;
 
                 if (window.getSelection) {  // The cool browsers...
-                   var selection = window.getSelection();
-                   range = _document.createRange();
-                   range.selectNodeContents(textEl);
-                   selection.removeAllRanges();
-                   selection.addRange(range);
+                  var selection = window.getSelection();
+                  range = _document.createRange();
+                  range.selectNodeContents(textEl);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
                 }
                 else if (_document.body.createTextRange) { // Fail... M$
                   range = _document.body.createTextRange();
