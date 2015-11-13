@@ -31,7 +31,8 @@ angular.module('icgc.ui', [
   'icgc.ui.scroll',
   'icgc.ui.fileUpload',
   'icgc.ui.badges',
-  'icgc.ui.copyPaste'
+  'icgc.ui.copyPaste',
+  'icgc.ui.popover'
 ]);
 
 
@@ -241,6 +242,33 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
     }
   };
 });
+//Mike
+angular.module('icgc.ui.popover', [])
+  .directive('popover', function ($sce) {
+    return {
+      restrict: 'AE',
+      transclude: true,
+      replace: true,
+      scope: {
+        'popoverAnchorText': '@popoverAnchorLabel',
+        'popoverTitle': '@',
+        'assistIconClass': '@popoverAssistIconClass',
+        'assistIconPositionBefore': '@popoverAssistIconPositionBefore',
+        'isOpen': '=popoverIsOpen'
+      },
+      templateUrl: '/scripts/ui/views/popover.html',
+      link: function (scope) {
+      
+        function _init() {
+          scope.title = $sce.trustAsHtml(scope.popoverTitle);
+          scope.anchorText = $sce.trustAsHtml(scope.popoverAnchorText); 
+          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false; 
+        }
+
+        _init();
+      }
+  };
+});
 
 angular.module('icgc.ui.copyPaste', [])
   .provider('copyPaste', function () {
@@ -307,11 +335,48 @@ angular.module('icgc.ui.copyPaste', [])
             scope: {
                 onCopy: '&',
                 onError: '&',
-                copyData: '='
+                copyData: '=',
+                onCopyFocusOn: '@',
+                onCopySuccessMessage: '@'
             },
             link: function (scope, element, attrs) {
+
+             function _selectText() {
+
+                var textEl = _focusOnCopySelector[0],
+                    range = null;
+
+                if (window.getSelection) {  // The cool browsers...
+                   var selection = window.getSelection();
+                   range = _document.createRange();
+                   range.selectNodeContents(textEl);
+                   selection.removeAllRanges();
+                   selection.addRange(range);
+                }
+                else if (_document.body.createTextRange) { // Fail... M$
+                  range = _document.body.createTextRange();
+                  range.moveToElementText(textEl);
+                  range.select();
+                }
+
+             }
               
-             
+             function _focusCopyEl() {
+               if (! _focusOnCopySelector || _focusOnCopySelector.length === 0) {
+                 return;
+               }
+
+               _focusOnCopySelector.focus();
+
+              if (_focusOnCopySelector.is(':input')) {
+                _focusOnCopySelector[0].setSelectionRange(0, _focusOnCopySelector.val().length);
+              }
+              else {
+                _selectText();
+              }
+
+             }
+
               function _showTipMessage(isSuccess, overrideMessage) {
 
                 if (!_showCopyTips) {
@@ -338,8 +403,12 @@ angular.module('icgc.ui.copyPaste', [])
                   }
 
                   if (isSuccess) {
-                    msg = 'Press ' + copyPasteCommandKey +
-                    '-' + pasteCommandAlphaKey + ' to paste.';
+                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage : '';
+
+                    if (! msg) {
+                      msg += 'Press ' + copyPasteCommandKey +
+                             '-' + pasteCommandAlphaKey + ' to paste.';
+                    }
                   }
                   else {
                     msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +
@@ -418,6 +487,7 @@ angular.module('icgc.ui.copyPaste', [])
                 _zeroClipBoardClient.on({
                   'copy': function (e) {
                     e.clipboardData.setData(_dataMimeType, scope.copyData);
+                    _focusCopyEl();
                   },
                   'beforecopy': function () {
                     // In our listener look to see if we can use the native copy
@@ -462,6 +532,8 @@ angular.module('icgc.ui.copyPaste', [])
 
                     try {
                       _copyText(scope.copyData);
+
+                      _focusCopyEl();
 
                       if (scope.onCopy) {
                         scope.onCopy();
@@ -571,6 +643,7 @@ angular.module('icgc.ui.copyPaste', [])
                 _targetElement = element.find('.copy-to-clip-content'),
                 _messageConfirmationBody = element.find('.copy-to-clip-message-content'),
                 _messageBubble = element.find('.copy-to-clip-message-container'),
+                _focusOnCopySelector = scope.onCopyFocusOn ? element.find(scope.onCopyFocusOn) : false,
                 _previousMessageTimeout = null,
                 _browserOSPlatform = window.navigator.platform ?
                   (navigator.platform.toLowerCase().indexOf('mac') >= 0 ? 'mac' : 'win') : 'win';

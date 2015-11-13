@@ -48,11 +48,13 @@
 }
 
 .manifest-cell {
-  max-width: 15rem;
-  
+
+
   .manifest {
     display: inline-block;
     vertical-align: middle;
-    max-width: 22rem;
+    width: 18rem;
+    height: 26px;
+
   }
 }

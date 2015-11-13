@@ -1936,40 +1936,44 @@ footer .dcc-col {
   background: #ce6503;
   text-decoration: none;
 }
-/* line 28, _modules/_button.scss */
+/* line 26, _modules/_button.scss */
+.t_button.no-animate, a.t_button.no-animate {
+  transition: none;
+}
+/* line 31, _modules/_button.scss */
 .t_button.t_button__destructive, a.t_button.t_button__destructive {
   background: #dc502e;
 }
-/* line 31, _modules/_button.scss */
+/* line 34, _modules/_button.scss */
 .t_button.t_button__destructive:hover, a.t_button.t_button__destructive:hover {
   background: #bd3200;
 }
 
-/* line 38, _modules/_button.scss */
+/* line 41, _modules/_button.scss */
 .t_button_large {
   font-size: 1.1rem;
   padding: .5rem 1rem;
 }
 
-/* line 43, _modules/_button.scss */
+/* line 46, _modules/_button.scss */
 .t_button[disabled] {
   color: #999999;
   background: #f2f2f2;
   border: 1px solid #999999;
 }
-/* line 48, _modules/_button.scss */
+/* line 51, _modules/_button.scss */
 .t_button[disabled]:hover {
   cursor: not-allowed;
   color: #999999;
   background: #f2f2f2;
 }
 
-/* line 57, _modules/_button.scss */
+/* line 60, _modules/_button.scss */
 .t_button_info {
   background: #5b7fa4;
   border-color: #5b7fa4;
 }
-/* line 61, _modules/_button.scss */
+/* line 64, _modules/_button.scss */
 .t_button_info:hover {
   background: #3f5973;
 }
@@ -2448,15 +2452,12 @@ input.valid:focus {
   background-color: #666666;
 }
 
-/* line 50, _modules/_labels.scss */
-.manifest-cell {
-  max-width: 15rem;
-}
 /* line 53, _modules/_labels.scss */
 .manifest-cell .manifest {
   display: inline-block;
   vertical-align: middle;
-  max-width: 22rem;
+  width: 18rem;
+  height: 26px;
 }
 
 /* line 1, _modules/_badges.scss */
@@ -3181,36 +3182,60 @@ aside .t_tabs__tab {
   visibility: hidden;
 }
 
-/* line 3, _modules/_copyclip.scss */
+/* line 5, _modules/_copyclip.scss */
 .copy-to-clip {
   position: relative;
   display: inline-block;
 }
-/* line 11, _modules/_copyclip.scss */
+/* line 14, _modules/_copyclip.scss */
 .copy-to-clip .copy-to-clip-message-container {
-  background: black;
+  background: white;
   position: absolute;
-  opacity: 0.9;
-  color: #fff;
+  opacity: 0.95;
+  color: #000;
   left: 10%;
-  width: 10rem;
-  top: 0px;
+  width: 14rem;
+  top: -3px;
   text-align: center;
-  padding: 0.5rem 0.5rem;
-  border-radius: 0.3rem;
-  font-size: 1.1rem;
+  padding: 5px;
+  font-weight: 300;
+  line-height: 1.6rem;
+  font-size: .9rem;
   z-index: 0;
   display: none;
+  border: 1px solid #b3b3b3;
+  border-radius: 3px;
+  -webkit-filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  -moz-box-shadow: 0 1px 3px rgba(180, 180, 180, 0.43);
+  filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
 }
-/* line 26, _modules/_copyclip.scss */
+/* line 37, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container:after {
+  border-width: 6px;
+}
+/* line 41, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container:before {
+  border-width: 7px;
+}
+/* line 45, _modules/_copyclip.scss */
 .copy-to-clip .copy-to-clip-message-container .arrow {
   position: absolute;
-  left: 4.4rem;
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid black;
+  left: 45%;
+  top: 100%;
+  content: ' ';
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #b3b3b3;
+}
+/* line 54, _modules/_copyclip.scss */
+.copy-to-clip .copy-to-clip-message-container .arrow:before {
+  content: ' ';
+  position: absolute;
+  left: -8px;
+  top: -9px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid white;
 }
 
 /* line 3, _modules/_sidenav.scss */
@@ -3306,6 +3331,119 @@ aside .t_tabs__tab {
 .open-id-provider.active {
   border-bottom-style: solid;
   border-bottom-color: #e9931c;
+}
+
+/* line 6, _modules/_popover.scss */
+.popover {
+  transition: all ease-in-out 0.25s;
+  position: relative;
+  text-align: left;
+  float: none;
+  white-space: normal;
+  display: inline-block;
+  margin-right: 1rem;
+  padding-left: 0.5rem;
+}
+/* line 16, _modules/_popover.scss */
+.popover:hover .popover-outer-container {
+  opacity: 1;
+  z-index: 100;
+}
+/* line 21, _modules/_popover.scss */
+.popover .popover-outer-container {
+  position: absolute;
+  background: transparent;
+  z-index: -1;
+  top: -10px;
+  left: -27.5rem;
+  opacity: 0;
+  transition: opacity ease-in-out 0.25s;
+}
+/* line 33, _modules/_popover.scss */
+.popover .popover-outer-container .popover-inner-container-border {
+  position: absolute;
+  background: #000;
+  opacity: 0.7;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  top: -0.4rem;
+  left: -0.4rem;
+  border-radius: 5px;
+  box-sizing: content-box;
+  padding: 0.4rem 0.4rem;
+  -webkit-box-shadow: -2px 4px 14px -1px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: -2px 4px 14px -1px rgba(0, 0, 0, 0.75);
+  box-shadow: -2px 4px 14px -1px rgba(0, 0, 0, 0.75);
+}
+/* line 49, _modules/_popover.scss */
+.popover .popover-outer-container .popover-inner-container-border .arrow {
+  position: absolute;
+  opacity: 1;
+  right: -8px;
+  top: 17px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid #000;
+}
+/* line 64, _modules/_popover.scss */
+.popover .popover-outer-container .popover-inner-container {
+  position: relative;
+  background: #fff;
+  padding: 0.5rem 0.5rem;
+  border-radius: 5px;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  word-wrap: break-word;
+  max-width: 27rem;
+  max-height: 30rem;
+  line-height: 1.8rem;
+  font-size: 1.1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+/* line 82, _modules/_popover.scss */
+.popover .popover-outer-container .popover-inner-container .popover-title {
+  font-size: 1.4rem;
+  margin: 0 auto 0.5rem auto;
+  font-weight: bold;
+}
+/* line 90, _modules/_popover.scss */
+.popover .popover-outer-container .popover-inner-container .popover-body {
+  width: 100%;
+  height: 100%;
+  font-size: 1.2rem;
+}
+/* line 99, _modules/_popover.scss */
+.popover .popover-anchor-container {
+  text-decoration: none;
+  color: #000;
+}
+/* line 104, _modules/_popover.scss */
+.popover .popover-anchor-container:hover {
+  cursor: pointer;
+  color: #0e5e94;
+}
+/* line 110, _modules/_popover.scss */
+.popover .popover-icon-before {
+  margin-right: 1rem;
+}
+/* line 114, _modules/_popover.scss */
+.popover .popover-icon-after {
+  margin-left: 0.1rem;
+}
+/* line 118, _modules/_popover.scss */
+.popover .popover-label {
+  display: inline-block;
+  border-bottom: 1px dashed;
+  line-height: 1.1rem;
+}
+/* line 124, _modules/_popover.scss */
+.popover [class^="icon-"] {
+  border: none;
 }
 
 /* line 1, _modules/_highcharts.scss */

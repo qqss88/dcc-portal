@@ -200,7 +200,7 @@ public class RepositoryFileService {
       Fields.FILE_NAME,
       Fields.FILE_SIZE,
       Fields.FILE_MD5SUM,
-      Fields.INDEX_FILE_UUID,
+      Fields.INDEX_OBJECT_UUID,
       Fields.DONOR_ID,
       Fields.PROJECT_CODE,
       Fields.STUDY);
@@ -530,14 +530,14 @@ public class RepositoryFileService {
 
   private static Map<String, String> getFileCopyMap(FileCopy fileCopy) {
     val indexFile = fileCopy.getIndexFile();
-    val indexFileId = (null == indexFile) ? "" : defaultString(indexFile.getId());
+    val indexObjectId = (null == indexFile) ? "" : defaultString(indexFile.getObjectId());
 
     return ImmutableMap.<String, String> builder()
         .put(Fields.FILE_NAME, defaultString(fileCopy.getFileName()))
         .put(Fields.FILE_FORMAT, defaultString(fileCopy.getFileFormat()))
         .put(Fields.FILE_MD5SUM, defaultString(fileCopy.getFileMd5sum()))
         .put(Fields.FILE_SIZE, String.valueOf(fileCopy.getFileSize()))
-        .put(Fields.INDEX_FILE_UUID, indexFileId)
+        .put(Fields.INDEX_OBJECT_UUID, indexObjectId)
         .put(Fields.REPO_CODE, defaultString(fileCopy.getRepoCode()))
         .put(Fields.REPO_TYPE, defaultString(fileCopy.getRepoType()))
         .put(Fields.REPO_BASE_URL, defaultString(fileCopy.getRepoBaseUrl()))
