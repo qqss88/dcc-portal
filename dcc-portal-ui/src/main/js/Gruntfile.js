@@ -341,17 +341,37 @@ function ICGCGruntConfigProvider() {
         }
       }
     },
+    // Renames files for browser caching purposes
+    filerev: {
+      dist: {
+        src: [
+          '<%= yeoman.dist %>/scripts/{,*/**/}*.js',
+          '<%= yeoman.dist %>/styles/{,*/**/}*.css',
+          '<%= yeoman.dist %>/images/{,*/**/}*.{png,jpg,jpeg,gif,webp,svg}',
+          '<%= yeoman.dist %>/styles/fonts/*'
+        ]
+      }
+    },
     useminPrepare: {
       html: '<%= yeoman.app %>/index.html',
       options: {
-        dest: '<%= yeoman.dist %>'
+        dest: '<%= yeoman.dist %>',
+        flow: {
+          html: {
+            steps: {
+              js: ['concat'/*, 'uglifyjs'*/],
+              css: ['cssmin']
+            },
+            post: {}
+          }
+        }
       }
     },
     usemin: {
-      html: ['<%= yeoman.dist %>/{,*/}*.html'],
-      css: ['<%= yeoman.dist %>/styles/{,*/}*.css'],
+      html: ['<%= yeoman.dist %>/**/*.html'],
+      css: ['<%= yeoman.dist %>/styles/{,*/**/}*.css'],
       options: {
-        dirs: ['<%= yeoman.dist %>']
+        assetsDirs: ['<%= yeoman.dist %>', '<%= yeoman.dist %>/images']
       }
     },
     imagemin: {
@@ -399,7 +419,7 @@ function ICGCGruntConfigProvider() {
           {
             expand: true,
             cwd: '<%= yeoman.app %>',
-            src: ['*.html', 'views/*.html'],
+            src: ['*.html', 'views/**/*.html'],
             dest: '<%= yeoman.dist %>'
           }
         ]
@@ -425,6 +445,7 @@ function ICGCGruntConfigProvider() {
               'styles/fonts/*',
               'views/**/*',
               'scripts/**/*.html',
+              'scripts/**/*.map',
               'data/*'
             ]
           },
@@ -435,7 +456,13 @@ function ICGCGruntConfigProvider() {
             src: [
               'generated/*'
             ]
-          },
+          },/*,
+          {
+            expand: true,
+            cwd: '.tmp/concat',
+            dest: '<%= yeoman.dist %>/scripts',
+            src: ['** /*.js']
+          }*/
           // Genome viewer
           {
             expand: true,
@@ -484,16 +511,49 @@ function ICGCGruntConfigProvider() {
         ]
       }
     },
-    uglify: {
-      options: {
-        sourceMap: true
-      },
+    // ngAnnotate tries to make the code safe for minification automatically by
+    // using the Angular long form for dependency injection. It doesn't work on
+    // things like resolve or inject so those have to be done manually.
+    ngAnnotate: {
       dist: {
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: '*.js',
+          dest: '<%= yeoman.dist %>/scripts'
+        }]
+      }
+    },
+    uglify: {
+      generated: {
+        options: {
+          sourceMap: true,
+          sourceMapName: function(path) {
+            var map = path.replace('.js', '.map');
+            grunt.log.writeln('Creating map from: ' + path + ' to ' + map);
+            return path.replace('.js', '.map');
+          },
+          compress: true,
+          mangle: true
+        },
         files: {
-          '<%= yeoman.dist %>/scripts/scripts.js': [
+          '<%= yeoman.dist %>/scripts/scripts.min.js': [
             '<%= yeoman.dist %>/scripts/scripts.js'
           ]
         }
+        /*files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: ['*.js'],
+          dest: '<%= yeoman.dist %>/scripts'
+        }]*/
+        /*files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: '** /*.js',
+          dest: '<%= yeoman.dist %>/scripts'
+        }]*/
+
       }
     },
     injector: {
@@ -553,10 +613,12 @@ function ICGCGruntConfigProvider() {
     'concat',
     'copy',
 //    'cdnify',
-    'ngmin',
+    //'ngmin',
+    'ngAnnotate',
     'cssmin',
     'uglify',
-    'rev',
+    //'rev',
+    //'filerev',
     'usemin'
   ]);
 
