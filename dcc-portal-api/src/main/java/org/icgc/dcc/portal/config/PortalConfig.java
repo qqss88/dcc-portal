@@ -168,6 +168,7 @@ public class PortalConfig {
     val release = properties.getRelease();
     val download = properties.getDownload();
     val setAnalysis = properties.getSetOperation();
+    val features = properties.getFeatures();
 
     return Settings.builder()
         .ssoUrl(crowd.getSsoUrl())
@@ -177,6 +178,7 @@ public class PortalConfig {
         .downloadEnabled(download.isEnabled())
         .maxNumberOfHits(setAnalysis.maxNumberOfHits)
         .maxMultiplier(setAnalysis.maxMultiplier)
+        .featureFlags(features)
         .build();
   }
 
