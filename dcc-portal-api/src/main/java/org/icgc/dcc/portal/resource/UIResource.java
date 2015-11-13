@@ -91,6 +91,7 @@ public class UIResource {
   private final MutationService mutationService;
   private final ClientService clientService;
   private static final String PUBLIC_KEY_PATH = "data/jenkins_pub.gpg";
+  private static final String COLLAB_META_URL = "https://www.cancercollaboratory.org:9080/oicr.icgc.meta/metadata/";
 
   private final String REACTOME_PREFIX = "R-HSA-";
   private final String REACTOME_PREFIX_OLD = "REACT_";
@@ -243,6 +244,14 @@ public class UIResource {
         .type("text/plain")
         .header("Content-Disposition", "attachment; filename=\"icgc-software.pub\"")
         .build();
+  }
+  
+  @Path("/collaboratory/oicr.icgc.meta/metadata/{objectId}")
+  @GET
+  @SneakyThrows
+  public Response collabMeta(@PathParam("objectId") String objectId) {
+    InputStream input = new URL(COLLAB_META_URL + objectId).openStream();
+    return Response.ok(input).type("text/xml").build();
   }
 
   private Boolean isInvalidPathwayId(String id) {
