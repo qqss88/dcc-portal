@@ -6,6 +6,8 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -30,6 +32,7 @@ import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.DonorCentricTypeModel.Fields;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -41,6 +44,7 @@ import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,27 +59,32 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
-  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
+
+  private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
+  private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
 
   private Donors buildDonors(SearchResponse response, Query query) {
     val hits = response.getHits();
-
-    boolean includeScore = !query.hasFields() || query.getFields().contains("ssmAffectedGenes");
-
+    val includeScore = !query.hasFields() || query.getFields().contains("ssmAffectedGenes");
     val list = ImmutableList.<Donor> builder();
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.DONOR);
-      if (includeScore) fieldMap.put("_score", hit.getScore());
+
+      if (includeScore) {
+        fieldMap.put("_score", hit.getScore());
+      }
+
       list.add(new Donor(fieldMap));
     }
 
-    Donors donors = new Donors(list.build());
-    donors.addFacets(aggregationsConverter.convert(response.getAggregations()));
+    val donors = new Donors(list.build());
+    donors.addFacets(AGGS_TO_FACETS_CONVERTER.convert(response.getAggregations()));
     donors.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return donors;
@@ -121,8 +130,20 @@ public class DonorService {
     return result;
   }
 
+  @NonNull
   public Donors findAllCentric(Query query) {
-    return buildDonors(donorRepository.findAllCentric(query), query);
+    return findAllCentric(query, false);
+  }
+
+  @NonNull
+  public Donors findAllCentric(Query query, boolean facetsOnly) {
+    val pql =
+        facetsOnly ? QUERY_CONVERTER.convertCount(query, DONOR_CENTRIC) : QUERY_CONVERTER.convert(query, DONOR_CENTRIC);
+    log.info("PQL of findAllCentric is: {}", pql);
+
+    val pqlAst = parse(pql);
+
+    return buildDonors(donorRepository.findAllCentric(pqlAst), query);
   }
 
   @NonNull
@@ -146,7 +167,7 @@ public class DonorService {
         i -> geneIds.get(i),
         i -> {
           final SearchResponse item = responseItems[i].getResponse();
-          return aggregationsConverter.convert(item.getAggregations()).get(facetName);
+          return AGGS_TO_FACETS_CONVERTER.convert(item.getAggregations()).get(facetName);
         }));
   }
 
@@ -176,9 +197,9 @@ public class DonorService {
   }
 
   public Donors getDonorAndSampleByProject(String projectId) {
-    Query query = new Query();
-    query.setSort("_id");
-    query.setOrder("desc");
+    val query = new Query()
+        .setSort("_id")
+        .setOrder("desc");
     return buildDonors(donorRepository.getDonorSamplesByProject(projectId), query);
   }
 
