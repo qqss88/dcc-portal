@@ -149,7 +149,8 @@
     this.svg.selectAll('.RenderableCompartmentText').data(compartments).enter().append('foreignObject').attr({
         'class':function(d){return d.type+'Text RenderableCompartmentText';},
         'x':function(d){return d.text.position.x;},
-        'y':function(d){return d.text.position.y;},
+        // A little bit of top padding so compartment text does not intersect with nodes. 
+        'y':function(d){return d.text.position.y+10;},
         'width':function(d){return d.size.width;},
         'height':function(d){return d.size.height;},
         'pointer-events':'none',
