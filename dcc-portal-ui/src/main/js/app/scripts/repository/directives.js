@@ -19,10 +19,6 @@
 
   var module = angular.module('icgc.repository.directives', []);
 
-
-  module.controller('BAMstatscontroller', function ($scope) {
-
-  });
   module.directive('bamstats', function () {
     return {
       replace: true,
@@ -31,8 +27,7 @@
         bamId: '='
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
-      controller: 'BAMstatscontroller',
-      link: function (scope, element) {
+      link: function (scope) {
 
         $('#length-distribution input[type=\'checkbox\']').change(
           function () {
@@ -58,13 +53,13 @@
             });
           });
 
-//        $(document).on('click', '.length-chart', function (event) {
-//          toggleChart(event.toElement, 'lengthChart');
-//        });
-//
-//        $(document).on('click', '.quality-chart', function (event) {
-//          toggleChart(event.toElement, 'qualityChart');
-//        });
+        //        $(document).on('click', '.length-chart', function (event) {
+        //          toggleChart(event.toElement, 'lengthChart');
+        //        });
+        //
+        //        $(document).on('click', '.quality-chart', function (event) {
+        //          toggleChart(event.toElement, 'qualityChart');
+        //        });
 
         // initialize charts
         // get height width of histogram charts and set viewboxes
@@ -89,6 +84,16 @@
           return d * 100 + '%';
         });
 
+        function tickFormatter(d) {
+          if ((d / 1000000) >= 1){
+            d = d / 1000000 + 'M';
+          }
+          else if ((d / 1000) >= 1){
+            d = d / 1000 + 'K';
+          }
+          return d;
+        }
+        
         // setup length histrogram chart
         // window.lengthChart = histogramD3()
         window.lengthChart = histogramViewFinderD3().width(width)
@@ -119,7 +124,66 @@
         window.sampleMultiplierLimit = 4;
 
         window.bam = undefined;
+
+        function getUrlParameter(sParam) {
+          var sPageURL = window.location.search.substring(1);
+          var sURLVariables = sPageURL.split('&');
+          for (var i = 0; i < sURLVariables.length; i++) {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] === sParam) {
+              return sParameterName[1];
+            }
+          }
+        }
+
         window.sampling = getUrlParameter('sampling');
+
+
+        scope.chromosomes = [];
+
+        function goBam(region) {
+          // get read depth
+          window.bam
+            .estimateBaiReadDepth(function (id) {
+              scope.chromosomes.push({
+                id: id,
+                selected: false
+              });
+              // setup first time and sample
+              if ($('.seq-buttons').length === 0) {
+                // turn off read depth loading msg
+                $('#ref-label').css('visibility', 'visible');
+                $('#readDepthLoadingMsg').css('display', 'none');
+                // turn on sampling message
+                $('.samplingLoader').css('display', 'block');
+
+                // update depth distribution
+                window.depthChart.on('brushend', function (x, brush) {
+                  var options = {
+                    sequenceNames: [getSelectedSeqId()]
+                  };
+                  if (!brush.empty()) {
+                    options.start = parseInt(brush.extent()[0]);
+                    options.end = parseInt(brush.extent()[1]);
+                    scope.region = {
+                      chr: getSelectedSeqId(),
+                      'start': options.start,
+                      'end': options.end
+                    };
+                    setUrlRegion(region);
+                  }
+
+                  goSampling(options);
+                });
+
+                if (scope.region && scope.region.chr === id) {
+                  scope.setSelectedSeq($('.seq-buttons[data-id=\'' + scope.region.chr + '\']')[0],
+                    scope.region.start, scope.region.end);
+                }
+              }
+              scope.$apply();
+            });
+        }
 
         //TODO here
         //                var bamUrl = getUrlParameter('bam')
@@ -149,105 +213,36 @@
 
           goBam(region);
         }
-        
-        scope.checkboxCheck = function(event){
+
+        scope.checkboxCheck = function (event) {
           var checkbox = $(event.toElement);
-          if (checkbox.hasClass ("checked")){
-            checkbox.removeClass ("icon-ok");
-            checkbox.addClass ("icon-check-empty");
+          if (checkbox.hasClass('checked')) {
+            checkbox.removeClass('icon-ok');
+            checkbox.addClass('icon-check-empty');
           } else {
-            checkbox.removeClass ("icon-check-empty");
-            checkbox.addClass ("icon-ok");
-          }
-        };
-        
-        function getUrlParameter(sParam) {
-          var sPageURL = window.location.search.substring(1);
-          var sURLVariables = sPageURL.split('&');
-          for (var i = 0; i < sURLVariables.length; i++) {
-            var sParameterName = sURLVariables[i].split('=');
-            if (sParameterName[0] === sParam) {
-              return sParameterName[1];
-            }
+            checkbox.removeClass('icon-check-empty');
+            checkbox.addClass('icon-ok');
           }
         };
         
         scope.highlightSelectedSeq = function (chrId) {
-          scope.chromosomes.forEach(function (chr){
-            if (chr.id === chrId){
+          scope.chromosomes.forEach(function (chr) {
+            if (chr.id === chrId) {
               chr.selected = true;
-            }
-            else {
+            } else {
               chr.selected = false;
             }
           });
           scope.setSelectedSeq(chrId);
         };
-        
-        scope.chromosomes = [];
 
-        function goBam(region) {
-          // get read depth
-          window.bam
-            .estimateBaiReadDepth(function (id, points) {
-              scope.chromosomes.push({
-                id:id,
-                selected:false
-              });
-              // setup first time and sample
-              if ($('.seq-buttons').length === 0) {
-                // turn off read depth loading msg
-                $('#ref-label').css('visibility', 'visible');
-                $('#readDepthLoadingMsg').css('display', 'none');
-                // turn on sampling message
-                $('.samplingLoader').css('display', 'block');
-
-                // update depth distribution
-                window.depthChart.on('brushend', function (x, brush) {
-                  var options = {
-                    sequenceNames: [getSelectedSeqId()]
-                  };
-                  if (!brush.empty()) {
-                    options.start = parseInt(brush.extent()[0]);
-                    options.end = parseInt(brush.extent()[1]);
-                    scope.region = {
-                      chr: getSelectedSeqId(),
-                      'start': options.start,
-                      'end': options.end
-                    };
-                    setUrlRegion(region);
-                  }
-
-                  goSampling(options);
-                });
-
-                // create seq buttons
-                //                          var htmlstr = "<span class='seq-buttons' data-ng-click='setSelectedSeq(this)' data-id='"
-                //                              + id + "'>" + id + "</span>";
-                //                          $('#seq-list').append(htmlstr);
-
-                //                        } else {
-                // create seq buttons
-                //                          var htmlstr = "<span class='seq-buttons' data-ng-click='setSelectedSeq(this)' data-id='"
-                //                              + id + "'>" + id + "</span>";
-                //                          $('#seq-list').append(htmlstr);
-                //                        }
-                if (scope.region && scope.region.chr === id) {
-                  setSelectedSeq($('.seq-buttons[data-id=\'' + scope.region.chr + '\']')[0],
-                    scope.region.start, scope.region.end);
-                }
-              }
-              scope.$apply();
-            });
-        };
-
-        function resetRegionStats() {
-          window.regionStats = {
-            'Total reads': {
-              number: 0
-            }
-          };
-        }
+//        function resetRegionStats() {
+//          window.regionStats = {
+//            'Total reads': {
+//              number: 0
+//            }
+//          };
+//        }
 
         function resetBrush() {
           var brush = window.depthChart.brush();
@@ -295,29 +290,31 @@
               sequenceNames: [dataId]
             });
           }
-        }
+        };
 
         function setUrlRegion(region) {
           if (window.bam.sourceType === 'url' && region !== undefined) {
+            var regionStr;
             if (region.start !== undefined && region.end !== undefined) {
-              var regionStr = region.chr + ':' + region.start + '-' + region.end;
+              regionStr = region.chr + ':' + region.start + '-' + region.end;
             } else {
-              var regionStr = region.chr;
+              regionStr = region.chr;
             }
             var extraParams = '';
-            if (window.sampling)
-              extraParams += '&sampling=' + window.sampling
+            if (window.sampling){
+              extraParams += '&sampling=' + window.sampling;
+            }
             window.history.pushState({
               'index.html': 'bar'
-            }, null, "?bam=" + window.bam.bamUri + "&region=" + regionStr + extraParams);
+            }, null, '?bam=' + window.bam.bamUri + '&region=' + regionStr + extraParams);
           }
         }
 
         function goSampling(options) {
           // add default options
           options = $.extend({
-            exomeSampling: 'checked' == $("#depth-distribution input")
-              .attr("checked"),
+            exomeSampling: 'checked' === $('#depth-distribution input')
+              .attr('checked'),
             bed: window.bed,
             onEnd: function () {
               NProgress.done();
@@ -325,8 +322,8 @@
           }, options);
 
           // turn on sampling message and off svg
-          $("section#middle svg").css("display", "none");
-          $(".samplingLoader").css("display", "block");
+          $('section#middle svg').css('display', 'none');
+          $('.samplingLoader').css('display', 'block');
           updateTotalReads(0);
           NProgress.start();
           // update selected stats
@@ -334,38 +331,42 @@
             .sampleStats(
               function (data) {
                 // turn off sampling message
-                $(".samplingLoader").css("display", "none");
-                $("section#middle svg").css("display", "block");
-                $("div#percents svg").css("padding-left", "9%");
+                $('.samplingLoader').css('display', 'none');
+                $('section#middle svg').css('display', 'block');
+                $('div#percents svg').css('padding-left', '9%');
                 window.sampleStats = data;
                 // update progress bar
-                if (options.start != null && options.end != null) {
-                  var length = options.end - options.start;
-                  var percentDone = Math
+                var length, percentDone;
+                if (options.start !== null && options.end !== null) {
+                  length = options.end - options.start;
+                  percentDone = Math
                     .round(((data.last_read_position - options.start) / length) * 100) / 100;
                 } else {
-                  var length = window.bam.header.sq.reduce(
+                  length = window.bam.header.sq.reduce(
                     function (prev, curr) {
-                      if (prev)
+                      if (prev){
                         return prev;
-                      if (curr.name == options.sequenceNames[0])
+                      }
+                      if (curr.name === options.sequenceNames[0]){
                         return curr;
+                      }
                     }, false).end;
-                  var percentDone = Math
+                  percentDone = Math
                     .round((data.last_read_position / length) * 100) / 100;
                 }
-                if (NProgress.status < percentDone)
+                if (NProgress.status < percentDone){
                   NProgress.set(percentDone);
+                }
                 // update charts
-                updatePercentCharts(data, window.sampleDonutChart)
+                updatePercentCharts(data, window.sampleDonutChart);
                 updateTotalReads(data.total_reads);
-                updateHistogramCharts(data, undefined, "sampleBar")
+                updateHistogramCharts(data, undefined, 'sampleBar');
               }, options);
         }
 
-        scope.sampleMore = function() {
+        scope.sampleMore = function () {
           if (window.sampleMultiplier >= window.sampleMultiplierLimit) {
-            alert("You've reached the sampling limit");
+            window.alert('You\'ve reached the sampling limit');
             return;
           }
           window.sampleMultiplier += 1;
@@ -373,54 +374,57 @@
             sequenceNames: [getSelectedSeqId()],
             binNumber: window.binNumber + parseInt(window.binNumber / 4 * window.sampleMultiplier),
             binSize: window.binSize + parseInt(window.binSize / 4 * window.sampleMultiplier)
-          }
-          if (window.depthChart.brush().extent().length != 0 && window.depthChart.brush().extent().toString() != "0,0") {
+          };
+          if (window.depthChart.brush().extent().length !== 0 &&
+              window.depthChart.brush().extent().toString() !== '0,0') {
             options.start = parseInt(window.depthChart.brush().extent()[0]);
             options.end = parseInt(window.depthChart.brush().extent()[1]);
           }
           goSampling(options);
-        }
+        };
 
         function getSelectedSeqId() {
-          return $(".seq-buttons.selected").attr("data-id");
+          return $('.seq-buttons.selected').attr('data-id');
         }
 
         function updatePercentCharts(stats, donutChart) {
           var pie = d3.layout.pie().sort(null);
-          var value = undefined;
+//          var value;
 
           // update percent charts
-          var keys = ['mapped_reads', "proper_pairs",
-                      "forward_strands", "singletons", "both_mates_mapped",
-                      "duplicates"]
+          var keys = ['mapped_reads', 'proper_pairs',
+                      'forward_strands', 'singletons', 'both_mates_mapped',
+                      'duplicates'];
             // var colors = ["rgb(45,143,193)", 'rgb(231, 76, 60)',
             // "rgb(243, 156, 18)",
             // "rgb(155, 89, 182)", "rgb(46, 204, 113)", "rgb(241, 196,
             // 15)"];
-          keys.forEach(function (key, i) {
+          keys.forEach(function (key) {
             var stat = stats[key];
-            var data = [stat, stats['total_reads'] - stat];
-            var arc = d3.select('#' + key + " svg").selectAll(".arc")
+            var data = [stat, stats.total_reads - stat];
+            var arc = d3.select('#' + key + ' svg').selectAll('.arc')
               .data(pie(data));
             donutChart(arc);
           });
 
         }
 
-        function updateHistogramCharts(histograms, otherMinMax, klass) {
+        function updateHistogramCharts(histograms) {
 
           // check if coverage is zero
-          if (Object.keys(histograms.coverage_hist).length == 0)
+          if (Object.keys(histograms.coverage_hist).length === 0){
             histograms.coverage_hist[0] = '1.0';
+          }
           // update read coverage histogram
-          var d = Object.keys(histograms.coverage_hist).filter(
+          var d, selection;
+          d = Object.keys(histograms.coverage_hist).filter(
             function (i) {
-              return histograms.coverage_hist[i] != "0"
+              return histograms.coverage_hist[i] !== '0';
             }).map(function (k) {
-            return [+k, +histograms.coverage_hist[k]]
+            return [+k, +histograms.coverage_hist[k]];
           });
-          var selection = d3
-            .select("#read-coverage-distribution-chart").datum(d);
+          selection = d3
+            .select('#read-coverage-distribution-chart').datum(d);
           window.readCoverageChart(selection);
           if (histograms.coverage_hist[0] > 0.65) {
             // most likely exome
@@ -433,73 +437,81 @@
           }
 
           // update read length distribution
-          if ($("#length-distribution .selected").attr("data-id") == "frag_hist")
-            var d = Object.keys(histograms.frag_hist).filter(
+          if ($('#length-distribution .selected').attr('data-id') === 'frag_hist'){
+            d = Object.keys(histograms.frag_hist).filter(
               function (i) {
-                return histograms.frag_hist[i] != "0"
+                return histograms.frag_hist[i] !== '0';
               }).map(function (k) {
-              return [+k, +histograms.frag_hist[k]]
+              return [+k, +histograms.frag_hist[k]];
             });
-          else
-            var d = Object.keys(histograms.length_hist).map(
+          }
+          else {
+            d = Object.keys(histograms.length_hist).map(
               function (k) {
-                return [+k, +histograms.length_hist[k]]
+                return [+k, +histograms.length_hist[k]];
               });
+          }
           // remove outliers if outliers checkbox isn't explicity
           // checked
-          var outliers = $("#length-distribution .checkbox").hasClass(
-            "checked");
-          var selection = d3.select("#length-distribution-chart")
+          var outliers = $('#length-distribution .checkbox').hasClass(
+            'checked');
+          selection = d3.select('#length-distribution-chart')
             .datum(d);
           window.lengthChart(selection, {
             'outliers': outliers
           });
 
           // update map quality distribution
-          if ($("#mapping-quality-distribution .selected").attr(
-              "data-id") == "mapq_hist")
-            var d = Object.keys(histograms.mapq_hist).map(function (k) {
-              return [+k, +histograms.mapq_hist[k]]
+          if ($('#mapping-quality-distribution .selected').attr(
+              'data-id') === 'mapq_hist') {
+            d = Object.keys(histograms.mapq_hist).map(function (k) {
+              return [+k, +histograms.mapq_hist[k]];
             });
-          else
-            var d = Object.keys(histograms.baseq_hist).map(function (k) {
-              return [+k, +histograms.baseq_hist[k]]
+          }
+          else {
+            d = Object.keys(histograms.baseq_hist).map(function (k) {
+              return [+k, +histograms.baseq_hist[k]];
             });
-          var selection = d3.select(
-            "#mapping-quality-distribution-chart").datum(d);
+          }
+          selection = d3.select(
+            '#mapping-quality-distribution-chart').datum(d);
           window.qualityChart(selection);
         }
 
-        scope.toggleChart = function(event, chartId) {
+        scope.toggleChart = function (event, chartId) {
           var elem = event.toElement;
-          if ($(elem).hasClass("selected"))
+          if ($(elem).hasClass('selected')){
             return;
+          }
           // toggle selected
           var pair = [elem, $(elem).siblings()[0]];
           $(pair).toggleClass('selected');
 
           // redraw chart
-          var dataId = elem.getAttribute("data-id")
+          var dataId = elem.getAttribute('data-id');
             // var outlier = elem.getAttribute('data-outlier') === 'true'
             // ||
             // elem.getAttribute('data-outlier') == null;
           var h = window.sampleStats[dataId];
           var d = Object.keys(h).map(function (k) {
-            return [+k, +h[k]]
+            return [+k, +h[k]];
           });
           var selection = d3.select($(elem).parent().parent().parent()
-            .find('svg')[0])
+            .find('svg')[0]);
           selection.datum(d);
           window[chartId](selection);
-        }
+        };
 
         function shortenNumber(num) {
-          if (num.toString().length <= 3)
+          if (num.toString().length <= 3) {
             return [num];
-          else if (num.toString().length <= 6)
-            return [Math.round(num / 1000), "thousand"];
-          else
-            return [Math.round(num / 1000000), "million"];
+          }
+          else if (num.toString().length <= 6) {
+            return [Math.round(num / 1000), 'thousand'];
+          }
+          else {
+            return [Math.round(num / 1000000), 'million'];
+          }
         }
 
         // function hist2array(hist) {
@@ -514,20 +526,7 @@
         // return a;
         // }
 
-        function tickFormatter(d) {
-          if ((d / 1000000) >= 1)
-            d = d / 1000000 + "M";
-          else if ((d / 1000) >= 1)
-            d = d / 1000 + "K";
-          return d;
-        }
-
-        if (scope.$last === true) {
-          $timeout(function () {
-            scope.$emit('ngRepeatFinished');
-          });
-        }
       }
-    }
-  })
+    };
+  });
 })(jQuery);

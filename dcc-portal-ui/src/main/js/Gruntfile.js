@@ -487,7 +487,7 @@ function ICGCGruntConfigProvider() {
     },
     uglify: {
       options: {
-        sourceMap: true
+        //sourceMap: true
       },
       dist: {
         files: {
