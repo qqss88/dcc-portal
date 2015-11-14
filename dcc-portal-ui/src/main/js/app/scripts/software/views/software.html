@@ -32,7 +32,7 @@
             <h3>Latest Release Tarball</h3>
             <p>Users are encouraged to use the latest version of our software to keep current with bug fixes, enhancements and new features. Click on the following to download the latest client package:</p>
             <p>
-               <a id="latest-version" class="t_button" target="_blank" href="api/v1/ui/software/dcc-storage-client/latest">Download</a>
+               <a id="latest-version" class="t_button" target="_blank" href="api/v1/ui/software/icgc-storage-client/latest">Download</a>
             </p>
             <h3>Previous Release Tarballs</h3>
             <p>It is strongly recommended to use the latest release to take advantage of newest features and bug fixes.</p>
@@ -41,14 +41,23 @@
             <table class="table table-striped">
                <thead>
                   <tr>
-                     <th>Version</th> <th>Dist</th> <th>MD5</th> <th>Signature</th>
+                     <th>Version</th>
+                     <th>Dist</th>
+                     <th>MD5</th>
+                     <th>Signature</th>
                   </tr>
                </thead>
                <tbody id="versions">
+                  <tr data-ng-repeat="v in versions">
+                     <td>{{ v.version }}</td>
+                     <td><a target="_blank" href="api/v1/ui/software/{{ artifactId }}/{{ v.version }}">{{ artifactId }}-{{ v.version }}-dist.tar.gz</a></td>
+                     <td><a target="_blank" href="api/v1/ui/software/{{ artifactId }}/{{ v.version }}/md5">{{ artifactId }}-{{ v.version }}-dist.tar.gz.md5</a></td>
+                     <td><a target="_blank" href="api/v1/ui/software/{{ artifactId }}/{{ v.version }}/asc">{{ artifactId }}-{{ v.version }}-dist.tar.gz.asc</a></td>
+                  </tr>
                </tbody>
             </table>
             <h3>Docker Images</h3>
-            <p>For Docker images, please visit <a href="https://hub.docker.com/r/icgc/dcc-storage-client">Docker Hub</a>.</p>
+            <p>For Docker images, please visit <a href="https://hub.docker.com/r/icgc/icgc-storage-client">Docker Hub</a>.</p>
          </div>
       </section>
    </article>
@@ -69,11 +78,11 @@
             <p>From a key server:<pre>$ gpg  --recv-key 0xAFE5D0B6</pre></p>
             <p>From a file:<pre>$ gpg --import icgc-software.pub</pre></p>
             <p>Once the public key has been imported you can verify the signature:</p>
-            <p><pre>$ gpg dcc-storage-client-0.0.27-dist.tar.gz.asc</pre></p>
+            <p><pre>$ gpg icgc-storage-client-0.0.27-dist.tar.gz.asc</pre></p>
             <p>If successful, the ouput should contain the following:</p>
             <p>
 <pre>
-gpg: assuming signed data in 'dcc-storage-client-0.0.27-dist.tar.gz'
+gpg: assuming signed data in 'icgc-storage-client-0.0.27-dist.tar.gz'
 gpg: Signature made Mon  5 Oct 12:38:09 2015 EDT using RSA key ID AFE5D0B6
 gpg: Good signature from "ICGC DCC (Sign public software releases) &lt;dcc-support@icgc.org&gt;"
 </pre>
