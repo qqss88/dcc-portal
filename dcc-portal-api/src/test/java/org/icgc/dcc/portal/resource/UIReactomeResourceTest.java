@@ -35,7 +35,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.yammer.dropwizard.testing.ResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UIResourceTest extends ResourceTest {
+public class UIReactomeResourceTest extends ResourceTest {
 
   private final static String RESOURCE = "/v1/ui";
   private final static int BAD_REQUEST_CODE = ClientResponse.Status.BAD_REQUEST.getStatusCode();
@@ -44,7 +44,7 @@ public class UIResourceTest extends ResourceTest {
   private DiagramService service;
 
   @InjectMocks
-  private UIResource resource;
+  private UICollaboratoryResource resource;
 
   @Override
   protected final void setUpResources() {

@@ -319,6 +319,10 @@
     function isGnos (repoType) {
       return equalsIgnoringCase (repoType, 'GNOS');
     }
+    
+    function isCollab (repoCode) {
+      return equalsIgnoringCase (repoCode, 'collaboratory');
+    }
 
     // Public functions
     this.projectName = function (projectCode) {
@@ -332,9 +336,14 @@
     };
 
     this.buildMetaDataUrl = function (fileCopy, fileInfo) {
-      var parts = isS3 (fileCopy.repoType) ?
-        [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath] :
-        [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, fileInfo.dataBundle.dataBundleId];
+      var parts = [];
+      if (isS3 (fileCopy.repoType) && isCollab(fileCopy.repoCode)) {
+        parts = ['api/v1/ui/collaboratory/',fileCopy.repoMetadataPath];
+      } else if (isS3 (fileCopy.repoType) && !isCollab(fileCopy.repoCode)) {
+        parts = [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath];
+      } else {
+        parts = [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, fileInfo.dataBundle.dataBundleId];
+      }
 
       return _.map (parts, removeBookendingSlash)
         .join (slash);

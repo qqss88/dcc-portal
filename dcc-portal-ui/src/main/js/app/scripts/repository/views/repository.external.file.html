@@ -177,7 +177,7 @@
               ng-init="metaDataUrl = fileCtrlr.buildMetaDataUrl (fileCopy, info); isS3 = fileCtrlr.isS3 (fileCopy.repoType);">
               <br>
               <a ng-if="isS3"
-                href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}">
+                href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}" target="_blank">
                 <i class="icon-download" />Metadata
               </a>
               <a ng-if="! isS3"

@@ -171,7 +171,7 @@
         bar.total = 0;
         bar.stack = [];
 
-	     gene.uiFIProjects.sort(function(a, b) { return a.count - b.count; }).forEach(function(p) {
+        gene.uiFIProjects.sort(function(a, b) { return a.count - b.count; }).forEach(function(p) {
           bar.stack.push({
             name: p.id,
             y0: bar.total,
@@ -185,7 +185,7 @@
         });
         list.push(bar);
       });
-	   return list.sort(function(a, b) { return b.total - a.total; });
+      return list.sort(function(a, b) { return b.total - a.total; });
     }
 
     _ctrl.donutChartSubTitle = function () {
@@ -274,7 +274,7 @@
         });
 
         // Get project-donor-mutation distribution of exon impacted ssm
-        Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
+        Restangular.one('ui', '').one('search/projects/donor-mutation-counts', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
           _ctrl.distribution = data;
@@ -304,7 +304,7 @@
           aggregationAjaxAbort = $q.defer();
           _ctrl.isLoadingData = true;
 
-          Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
+          Restangular.one ('ui').one('search').one('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
             .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
             .get ({'filters': mutationFilter})
             .then (function (geneProjectFacets) {

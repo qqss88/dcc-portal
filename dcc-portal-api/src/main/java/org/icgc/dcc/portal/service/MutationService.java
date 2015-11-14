@@ -1,5 +1,7 @@
 package org.icgc.dcc.portal.service;
 
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
@@ -8,12 +10,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.MutationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,26 +30,35 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class MutationService {
 
+  private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
+  private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
+
   private final MutationRepository mutationRepository;
-  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
+  @NonNull
   public Mutations findAllCentric(Query query) {
+    return findAllCentric(query, false);
+  }
 
-    val response = mutationRepository.findAllCentric(query);
+  @NonNull
+  public Mutations findAllCentric(Query query, boolean facetsOnly) {
+    val pql =
+        facetsOnly ? QUERY_CONVERTER.convertCount(query, MUTATION_CENTRIC) :
+            QUERY_CONVERTER.convert(query, MUTATION_CENTRIC);
+    log.info("PQL of findAllCentric is: {}", pql);
+
+    val pqlAst = parse(pql);
+    val response = mutationRepository.findAllCentric(pqlAst);
 
     val hits = response.getHits();
 
     // Include _score if either: no custom fields or custom fields include affectedDonorCountFiltered
-    boolean includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
+    val includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
 
     val list = ImmutableList.<Mutation> builder();
 
@@ -52,7 +69,7 @@ public class MutationService {
     }
 
     val mutations = new Mutations(list.build());
-    mutations.addFacets(aggregationsConverter.convert(response.getAggregations()));
+    mutations.addFacets(AGGS_TO_FACETS_CONVERTER.convert(response.getAggregations()));
     mutations.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return mutations;
@@ -70,7 +87,7 @@ public class MutationService {
       list.add(new Mutation(map));
     }
     val mutations = new Mutations(list.build());
-    mutations.addFacets(aggregationsConverter.convert(response.getAggregations()));
+    mutations.addFacets(AGGS_TO_FACETS_CONVERTER.convert(response.getAggregations()));
     mutations.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
     return mutations;
   }

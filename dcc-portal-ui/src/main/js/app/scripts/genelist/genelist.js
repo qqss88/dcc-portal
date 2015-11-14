@@ -55,7 +55,7 @@
     this.fileContent = function(filepath) {
       var data = new FormData();
       data.append('filepath', filepath);
-      return Restangular.one('ui').withHttpConfig({transformRequest: angular.identity})
+      return Restangular.one('ui').one('search').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, 'file', {}, {'Content-Type': undefined});
     };
 

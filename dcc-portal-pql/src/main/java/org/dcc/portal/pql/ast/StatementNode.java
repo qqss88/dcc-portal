@@ -19,6 +19,7 @@ package org.dcc.portal.pql.ast;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,8 +82,11 @@ public class StatementNode extends PqlNode {
   }
 
   public void setFacets(@NonNull FacetsNode node) {
-    canUpdateField();
     addChildren(node);
+  }
+
+  public void setFacets(@NonNull Collection<FacetsNode> facetsNodes) {
+    addChildren(facetsNodes);
   }
 
   public boolean isCount() {
@@ -145,6 +149,10 @@ public class StatementNode extends PqlNode {
   @Override
   public StatementNode toStatementNode() {
     return this;
+  }
+
+  public void addChildren(@NonNull Collection<? extends PqlNode> children) {
+    addChildren(children.stream().toArray(PqlNode[]::new));
   }
 
   @Override

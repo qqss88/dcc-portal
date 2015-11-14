@@ -84,7 +84,7 @@ public class GeneResourceTest extends ResourceTest {
 
   @Test
   public final void test_findAll() throws IOException {
-    when(geneService.findAllCentric(any(Query.class))).thenReturn(GENES);
+    when(geneService.findAllCentric(any(Query.class), any(Boolean.class))).thenReturn(GENES);
 
     val response = resource("");
 
