@@ -137,7 +137,7 @@
         $scope.genes.from += pageSize;
         genes({scroll: true});
       };
-      
+
       function handleMutationResponse(response, settings) {
         $scope.mutations.isFinished = response.pagination.total - $scope.mutations.from < pageSize;
         $scope.mutations.isBusy = false;
@@ -160,8 +160,8 @@
           var donorId = LocationService.filters().donor.id.is[0];
           var filters = LocationService.filters();
           delete filters.donor.id;
-          
-          Restangular.one('ui/donor-mutations').get({
+
+          Restangular.one('ui').one('search').one('donor-mutations').get({
             filters: filters,
             donorId: donorId,
             include: 'consequences',

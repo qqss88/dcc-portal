@@ -43,7 +43,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@Path("/v1/ui")
+@Path("/v1/ui/reactome")
 @Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UIReactomeResource {
@@ -59,7 +59,7 @@ public class UIReactomeResource {
    */
   private final DiagramService diagramService;
 
-  @Path("/reactome/protein-map")
+  @Path("/protein-map")
   @GET
   public Map<String, DiagramProtein> getReactomeProteinMap(
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId,
@@ -70,7 +70,7 @@ public class UIReactomeResource {
     return diagramService.mapProteinIds(pathwayId, impactFilter.get());
   }
 
-  @Path("/reactome/pathway-diagram")
+  @Path("/pathway-diagram")
   @GET
   @Produces(APPLICATION_XML)
   public Response getReactomePathwayDiagram(
@@ -81,7 +81,7 @@ public class UIReactomeResource {
     return Response.ok(diagramService.getPathwayDiagramString(pathwayId), APPLICATION_XML).build();
   }
 
-  @Path("/reactome/pathway-sub-diagram")
+  @Path("/pathway-sub-diagram")
   @GET
   public List<String> getShownPathwaySection(
       @ApiParam(value = "A non-diagrammed pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {

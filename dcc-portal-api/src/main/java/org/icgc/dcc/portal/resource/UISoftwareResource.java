@@ -40,7 +40,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 @Component
-@Path("/v1/ui")
+@Path("/v1/ui/software")
 @Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UISoftwareResource {
@@ -60,7 +60,7 @@ public class UISoftwareResource {
    * Resources - Software.
    */
 
-  @Path("/artifacts/icgc-storage-client")
+  @Path("/icgc-storage-client/versions")
   @GET
   @Produces(APPLICATION_JSON)
   public List<MavenArtifactVersion> getArtifacts() {
@@ -68,7 +68,7 @@ public class UISoftwareResource {
     return results;
   }
 
-  @Path("/software/icgc-storage-client/latest")
+  @Path("/icgc-storage-client/latest")
   @GET
   @SneakyThrows
   public Response getLatest() {
@@ -76,7 +76,7 @@ public class UISoftwareResource {
     return Response.seeOther(redirect.toURI()).build();
   }
 
-  @Path("/software/icgc-storage-client/{version}")
+  @Path("/icgc-storage-client/{version}")
   @GET
   @SneakyThrows
   public Response getVersion(@PathParam("version") String version) {
@@ -84,7 +84,7 @@ public class UISoftwareResource {
     return Response.seeOther(redirect.toURI()).build();
   }
 
-  @Path("/software/icgc-storage-client/{version}/md5")
+  @Path("/icgc-storage-client/{version}/md5")
   @GET
   @SneakyThrows
   public Response getVersionChecksum(@PathParam("version") String version) {
@@ -92,7 +92,7 @@ public class UISoftwareResource {
     return Response.seeOther(redirect.toURI()).build();
   }
 
-  @Path("/software/icgc-storage-client/{version}/asc")
+  @Path("/icgc-storage-client/{version}/asc")
   @GET
   @SneakyThrows
   public Response getVersionSignature(@PathParam("version") String version) {
@@ -100,7 +100,7 @@ public class UISoftwareResource {
     return Response.seeOther(redirect.toURI()).build();
   }
 
-  @Path("/software/key")
+  @Path("/key")
   @GET
   @SneakyThrows
   public Response getKey() {

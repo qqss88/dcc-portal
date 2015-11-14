@@ -74,7 +74,7 @@ public class StorageClientService {
   public String getVersionUrl(String version) {
     val artifactId = PARAMS.get("artifactId");
     val classifier = PARAMS.get("classifier");
-    return getGroupUrl() + artifactId + "/" + version + "/" + artifactId + "-" + version + "-"
+    return getGroupUrl() + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "-"
         + classifier + ".tar.gz";
   }
 

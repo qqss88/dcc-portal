@@ -27,18 +27,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
 @Component
-@Path("/v1/ui")
+@Path("/v1/ui/collaboratory")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
-public class UICloudResource {
+public class UICollaboratoryResource {
 
   /**
    * Constants.
@@ -49,7 +46,7 @@ public class UICloudResource {
    * Resources - Collaboratory.
    */
 
-  @Path("/collaboratory/oicr.icgc.meta/metadata/{objectId}")
+  @Path("/oicr.icgc.meta/metadata/{objectId}")
   @GET
   @SneakyThrows
   public Response collabMeta(@PathParam("objectId") String objectId) {

@@ -209,7 +209,7 @@
         }
         filters.donor.projectId = { is: [ donor.projectId ]};
 
-        Restangular.one('ui/donor-mutations').get({
+        Restangular.one('ui').one('search').one('donor-mutations').get({
           filters: filters,
           donorId: d.id,
           include: 'consequences'

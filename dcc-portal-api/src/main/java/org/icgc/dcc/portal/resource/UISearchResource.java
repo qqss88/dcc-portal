@@ -64,7 +64,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@Path("/v1/ui")
+@Path("/v1/ui/search")
 @Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UISearchResource {
