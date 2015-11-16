@@ -1,5 +1,5 @@
-/*! genome-viewer November 16, 2015 12:30:39 */
-/*! lib November 16, 2015 12:30:37 */
+/*! genome-viewer November 16, 2015 12:40:36 */
+/*! lib November 16, 2015 12:40:34 */
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -20167,7 +20167,7 @@ FeatureTemplateAdapter.prototype = {
      * [ [r1,r2,r3,r4], [r5,r6,r7,r8] ]
      */
     _groupQueries: function (uncachedRegions) {
-        // modify region end to chromosome length
+        // modify region end to chromosome length.
         for (var i = 0; i < uncachedRegions.length; i++) {
             var r = uncachedRegions[i];
             this._computeRegionSize(r);
@@ -20181,7 +20181,7 @@ FeatureTemplateAdapter.prototype = {
         return queriesLists;
     },
     _singleQueries: function (uncachedRegions) {
-        // modify region end to chromosome length
+        // modify region end to chromosome length.
         for (var i = 0; i < uncachedRegions.length; i++) {
             var r = uncachedRegions[i];
             this._computeRegionSize(r);
@@ -20190,7 +20190,6 @@ FeatureTemplateAdapter.prototype = {
         var queriesLists = [];
         for (var i = 0; i < uncachedRegions.length; i++) {
             var region = uncachedRegions[i];
-            console.log(region);
             queriesLists.push(region.toString());
         }
         return queriesLists;
@@ -22601,6 +22600,8 @@ FeatureChunkCache.prototype = {
      });
      },*/
 };
+
+
 
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
