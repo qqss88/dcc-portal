@@ -170,7 +170,6 @@
                       'start': options.start,
                       'end': options.end
                     };
-                    setUrlRegion(region);
                   }
 
                   goSampling(options);
@@ -184,11 +183,7 @@
               scope.$apply();
             });
         }
-
-        //TODO here
-        //                var bamUrl = getUrlParameter('bam')
         var bamId = scope.bamId;
-        //                var bamId = 'http://s3.amazonaws.com/iobio/NA12878/NA12878.autsome.bam'
         // check if url to bam file is supplied in url and sample it
         if (bamId !== undefined) {
           // remove https if present
@@ -236,23 +231,11 @@
           scope.setSelectedSeq(chrId);
         };
 
-//        function resetRegionStats() {
-//          window.regionStats = {
-//            'Total reads': {
-//              number: 0
-//            }
-//          };
-//        }
-
         function resetBrush() {
           var brush = window.depthChart.brush();
           var g = d3.selectAll('#depth-distribution .brush');
           brush.clear();
           brush(g);
-          // remove brush region from url
-          setUrlRegion({
-            chr: getSelectedSeqId()
-          });
           // no need to trigger event? since setSelected sq will do it
           // brush.event(g);
         }
@@ -269,11 +252,6 @@
           window.depthChart(window.bam.readDepth[dataId]);
           // reset brush
           resetBrush();
-          setUrlRegion({
-            chr: dataId,
-            'start': start,
-            'end': end
-          });
           // start sampling
           if (start !== undefined && end !== undefined) {
             goSampling({
@@ -291,24 +269,6 @@
             });
           }
         };
-
-        function setUrlRegion(region) {
-          if (window.bam.sourceType === 'url' && region !== undefined) {
-            var regionStr;
-            if (region.start !== undefined && region.end !== undefined) {
-              regionStr = region.chr + ':' + region.start + '-' + region.end;
-            } else {
-              regionStr = region.chr;
-            }
-            var extraParams = '';
-            if (window.sampling){
-              extraParams += '&sampling=' + window.sampling;
-            }
-            window.history.pushState({
-              'index.html': 'bar'
-            }, null, '?bam=' + window.bam.bamUri + '&region=' + regionStr + extraParams);
-          }
-        }
 
         function goSampling(options) {
           // add default options

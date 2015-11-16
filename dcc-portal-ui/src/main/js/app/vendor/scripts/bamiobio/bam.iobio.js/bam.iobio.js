@@ -266,15 +266,15 @@ var Bam = Class.extend({
       if (Object.keys(me.readDepth).length > 0)
         cb();
     });
+
     if (Object.keys(me.readDepth).length > 0)
       callback(me.readDepth)
+
     else if (me.sourceType == 'dcc') {
       var client = BinaryClient(me.iobio.bamReadDepther);
       var url = encodeURI(me.iobio.bamReadDepther + '?cmd=-i /home/iobio/iobio/tools/dcc-storage-client/data/' + me.bamUri + ".bai")
         //this._lastUpdateTimer = new Date().getTime();
       client.on('open', function (stream) {
-        //TODO: slow
-//        console.log("bamreaddepther");
         var stream = client.createStream({
           event: 'run',
           params: {
@@ -283,7 +283,6 @@ var Bam = Class.extend({
         });
         var currentSequence;
         stream.on('data', function (data, options) {
-          //TODO UNCOMMENT
           data = data.split("\n");
           for (var i = 0; i < data.length; i++) {
             if (data[i][0] == '#') {
@@ -303,7 +302,6 @@ var Bam = Class.extend({
             }
           }
         });
-        //TODO UNCOMMENT
         stream.on('end', function () {
           cb();
         });
@@ -319,8 +317,6 @@ var Bam = Class.extend({
       var client = BinaryClient(me.iobio.samtools);
       var url = encodeURI(me.iobio.samtools + '?cmd=view -h /home/iobio/iobio/tools/dcc-storage-client/data/' + this.bamUri);
       client.on('open', function (stream) {
-        //TODO: slow
-//        console.log("samtools");
         var stream = client.createStream({
           event: 'run',
           params: {
@@ -328,11 +324,6 @@ var Bam = Class.extend({
           }
         });
         var rawHeader = ""
-          //        stream.on('data', function (data, options) {
-          //          rawHeader += data;
-          //          console.log(data);
-          //        });
-          //TODO UNCOMMENT
         stream.on('data', function (data, options) {
           rawHeader += data;
         });
@@ -403,8 +394,6 @@ var Bam = Class.extend({
     var client = BinaryClient(this.iobio.bamstatsAlive);
     var url = encodeURI(this.iobio.bamstatsAlive + '?cmd=-u 1000 -s ' + start + " -l " + parseInt(end - start) + " " + encodeURIComponent(this._getBamUrl(name, start, end)));
     client.on('open', function (stream) {
-      //TODO: slow
-//      console.log("bam stats alive");
       var stream = client.createStream({
         event: 'run',
         params: {
@@ -488,8 +477,6 @@ var Bam = Class.extend({
       var url = encodeURI(me.iobio.bamstatsAlive + '?cmd=-u 500 -k 1 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
       var buffer = "";
       client.on('open', function (stream) {
-        //TODO: slow
-//        console.log("bamstatsalive");
         var stream = client.createStream({
           event: 'run',
           params: {
