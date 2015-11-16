@@ -317,6 +317,34 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
       var genomeViewer, navigationBar, tracks = {};
       var availableSpecies;
 
+      var chromosomeSizes = {
+          "1": 249250621,
+          "2": 243199373,
+          "3": 198022430,
+          "4": 191154276,
+          "5": 180915260,
+          "6": 171115067,
+          "7": 159138663,
+          "8": 146364022,
+          "9": 141213431,
+          "10": 135534747,
+          "11": 135006516,
+          "12": 133851895,
+          "13": 115169878,
+          "14": 107349540,
+          "15": 102531392,
+          "16": 90354753,
+          "17": 81195210,
+          "18": 78077248,
+          "19": 59128983,
+          "20": 63025520,
+          "21": 48129895,
+          "22": 51304566,
+          "X": 155270560,
+          "Y": 59373566,
+          "MT": 16569
+      };
+
       function getSpecies(callback) {
         CellBaseManager.get({
           host: GMService.getConfiguration().cellBaseHost,
@@ -470,7 +498,8 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
             uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene',
             cacheConfig: {
               chunkSize: 100000
-            }
+            },
+            chromosomeSizes: chromosomeSizes
           })
         });
         genomeViewer.addOverviewTrack(tracks.icgcGeneOverviewTrack);
@@ -490,6 +519,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
             cacheConfig: {
               chunkSize: 100000
             },
+            chromosomeSizes: chromosomeSizes,
             parse: function (response) {
               // adapt feature keys to fit with GeneRenderer
               var res = [];
@@ -598,7 +628,8 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
             uriTemplate: 'https://dcc.icgc.org/api/browser/mutation?segment={region}&resource=mutation',
             cacheConfig: {
               chunkSize: 10000
-            }
+            },
+            chromosomeSizes: chromosomeSizes
           })
         });
         genomeViewer.addTrack(tracks.icgcMutationsTrack);
