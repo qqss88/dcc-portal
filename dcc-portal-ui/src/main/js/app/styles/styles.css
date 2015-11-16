@@ -3427,36 +3427,37 @@ aside .t_tabs__tab {
 .popover .popover-outer-container .popover-inner-container .popover-body {
   width: 100%;
   height: 100%;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
+  line-height: 1.6rem;
 }
-/* line 124, _modules/_popover.scss */
+/* line 126, _modules/_popover.scss */
 .popover .popover-outer-container .popover-inner-container .popover-body [class^="icon-"]:before {
   width: auto;
 }
-/* line 132, _modules/_popover.scss */
+/* line 134, _modules/_popover.scss */
 .popover .popover-anchor-container {
   text-decoration: none;
   color: #000;
 }
-/* line 137, _modules/_popover.scss */
+/* line 139, _modules/_popover.scss */
 .popover .popover-anchor-container:hover {
   cursor: pointer;
   color: #0e5e94;
 }
-/* line 143, _modules/_popover.scss */
+/* line 145, _modules/_popover.scss */
 .popover .popover-icon-before {
   margin-right: 1rem;
 }
-/* line 147, _modules/_popover.scss */
+/* line 149, _modules/_popover.scss */
 .popover .popover-icon-after {
   margin-left: 0.1rem;
 }
-/* line 151, _modules/_popover.scss */
+/* line 153, _modules/_popover.scss */
 .popover .popover-label {
   display: inline-block;
   line-height: 1.1rem;
 }
-/* line 157, _modules/_popover.scss */
+/* line 159, _modules/_popover.scss */
 .popover [class^="icon-"] {
   border: none;
 }

@@ -79,8 +79,8 @@
         var filters = LocationService.filters(),
             _controllers = [
               { 'controller': _ctrl.Donor, id: 'donor', startRunTime: null },
-              { 'controller': _ctrl.Gene, id: 'gene', startRunTime: null},
-              { 'controller': _ctrl.Mutation, id: 'mutation', startRunTime: null}
+              { 'controller': _ctrl.Gene, id: 'gene', startRunTime: null },
+              { 'controller': _ctrl.Mutation, id: 'mutation', startRunTime: null }
             ],
             refreshOrder = [];
         
@@ -423,8 +423,16 @@
         donor.embedQuery = encodeURIComponent(JSON.stringify(donor.embedQuery));
 
       });
+
+
+
       _this.donors = donors;
-      _this.ajax();
+
+      var donorHitsLength = _.get(donors, 'hits.length', false);
+
+      if (donorHitsLength) {
+        _this.ajax();
+      }
     };
 
     _this.refresh = function () {
@@ -434,9 +442,22 @@
       //console.log('Start Donor Work!');
       var params = LocationService.getJsonParam('donors');
       params.include = 'facets';
-      Donors.getList(params).then(function (donorList) {
-         deferred.resolve();
-        _this.success(donorList);
+      params.facetsOnly = true;
+
+      Donors.getList(params).then(function (facetDonorList) {
+
+        deferred.resolve();
+
+        delete params.facetsOnly;
+        delete params.include;
+
+        _this.success(facetDonorList);
+
+        Donors.getList(params).then(function(hitsDonorList) {
+          facetDonorList.hits =  hitsDonorList.hits;
+          facetDonorList.hitsLoaded = true;
+          _this.success( facetDonorList );
+        });
       });
       
       return deferred.promise;
@@ -575,8 +596,15 @@
         gene.embedQuery = encodeURIComponent(JSON.stringify(gene.embedQuery));
 
       });
+
       _this.genes = genes;
-      _this.ajax();
+
+      var geneHitsLength = _.get(genes, 'hits.length', false);
+
+      if (geneHitsLength) {
+        _this.ajax();
+      }
+
     };
 
     _this.refresh = function () {
@@ -586,10 +614,21 @@
       //console.log('Start Gene Work!');
       var params = LocationService.getJsonParam('genes');
       params.include = 'facets';
+      params.facetsOnly = true;
       
-      Genes.getList(params).then(function (geneList) {
+      Genes.getList(params).then(function (facetGeneList) {
         deferred.resolve();
-        _this.success(geneList);
+
+        delete params.facetsOnly;
+        delete params.include;
+
+        _this.success(facetGeneList);
+
+        Genes.getList(params).then(function(hitsGenesList) {
+          facetGeneList.hits =  hitsGenesList.hits;
+          facetGeneList.hitsLoaded = true;
+          _this.success( facetGeneList );
+        });
       });
       
       return deferred.promise;
@@ -738,7 +777,12 @@
 
         });
         _this.mutations = mutations;
-        _this.ajax();
+
+        var mutationHitsLength = _.get(mutations, 'hits.length', false);
+
+        if (mutationHitsLength) {
+          _this.ajax();
+        }
       };
 
       _this.oSuccess = function (occurrences) {
@@ -759,12 +803,24 @@
 
         var mParams = LocationService.getJsonParam('mutations');
         mParams.include = ['facets', 'consequences'];
-        Mutations.getList(mParams).then(
-          function (mutationsList) {
+        mParams.facetsOnly = true;
+
+        Mutations.getList(mParams).then(function (mutationsFacetsList) {
             deferred.resolve();
-            _this.mSuccess(mutationsList);
+
+            delete mParams.facetsOnly;
+            mParams.include.shift();
+
+            _this.mSuccess(mutationsFacetsList);
+
+            Mutations.getList(mParams).then(function(hitsMutationsList) {
+              mutationsFacetsList.hits = hitsMutationsList.hits;
+              mutationsFacetsList.hitsLoaded = true;
+              _this.mSuccess( mutationsFacetsList );
+            });
+
           }
-          );
+        );
         Occurrences.getList(LocationService.getJsonParam('occurrences'))
           .then(function(occurrencesList) {
             _this.oSuccess(occurrencesList);
