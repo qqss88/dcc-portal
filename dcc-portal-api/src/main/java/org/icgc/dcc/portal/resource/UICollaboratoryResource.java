@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.io.InputStream;
 import java.net.URL;
 
 import javax.ws.rs.GET;
@@ -27,32 +28,42 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.icgc.dcc.portal.service.RepositoryFileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
 @Component
 @Path("/v1/ui/collaboratory")
 @Produces(APPLICATION_JSON)
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UICollaboratoryResource {
 
   /**
-   * Constants.
+   * Dependencies
    */
-  private static final String COLLAB_META_URL = "https://www.cancercollaboratory.org:9080/oicr.icgc.meta/metadata/";
+  private final RepositoryFileService repositoryService;
 
   /**
    * Resources - Collaboratory.
    */
 
-  @Path("/oicr.icgc.meta/metadata/{objectId}")
+  @Path("/metadata/{fileId}")
   @GET
   @SneakyThrows
-  public Response collabMeta(@PathParam("objectId") String objectId) {
-    val input = new URL(COLLAB_META_URL + objectId).openStream();
+  public Response collabMeta(@PathParam("fileId") String fileId) {
 
-    return Response.ok(input).type("text/xml").build();
+    val url = repositoryService.getCollabMetaUrl(fileId);
+
+    if (url != null && !url.isEmpty()) {
+      InputStream input = new URL(url).openStream();
+      return Response.ok(input).type("text/xml").build();
+    }
+
+    return Response.serverError().status(400).build();
   }
 
 }

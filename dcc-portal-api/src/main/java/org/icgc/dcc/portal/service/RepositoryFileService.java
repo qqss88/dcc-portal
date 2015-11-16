@@ -72,14 +72,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
@@ -115,9 +107,17 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
@@ -312,9 +312,9 @@ public class RepositoryFileService {
     val valueMap = hit.getFields();
     val maps = DATA_TABLE_EXPORT_FIELD_PROCESSORS.entrySet().stream().map(fieldsProcessorPair -> {
       // Takes a collection of fields and its processor and produces a map of field and its value.
-        return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
-            field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
-      });
+      return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
+          field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
+    });
 
     return combineMaps(maps);
   }
@@ -446,6 +446,20 @@ public class RepositoryFileService {
     generateRepoManifestFile(output, awsRepoCode, searchResult, timestamp);
   }
 
+  public String getCollabMetaUrl(@NonNull String fileId) {
+    log.info("Get Collabratory MetaData URL for: '{}'.", fileId);
+    val file = parse(repositoryFileRepository.findOneByObjectId(fileId).getSourceAsString());
+    val copies = file.getFileCopies();
+
+    for (val copy : copies) {
+      if (copy.getRepoCode().equalsIgnoreCase("collaboratory")) {
+        return createCollabMetaUrl(copy);
+      }
+    }
+
+    return null;
+  }
+
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {
     val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
     log.debug("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
@@ -563,8 +577,8 @@ public class RepositoryFileService {
   private static void generateTarEntry(TarArchiveOutputStream tar, List<Map<String, String>> allFileInfoOfOneRepo,
       String repoCode, String repoType, Date timestamp) {
     val isGnos = RepoTypes.isGnos(repoType);
-    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo, entry ->
-        isGnos ? buildGnosDownloadUrl(entry) : buildDownloadUrl(entry));
+    val downloadUrlGroups =
+        Multimaps.index(allFileInfoOfOneRepo, entry -> isGnos ? buildGnosDownloadUrl(entry) : buildDownloadUrl(entry));
 
     @Cleanup
     val buffer = new ByteArrayOutputStream(BUFFER_SIZE);
@@ -633,7 +647,8 @@ public class RepositoryFileService {
 
   @SneakyThrows
   @NonNull
-  private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
+  private static void generateAwsTextFile(OutputStream buffer,
+      Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
     val tsv = createTsv(buffer);
     tsv.writeHeader(AWS_TSV_HEADERS);
@@ -808,6 +823,20 @@ public class RepositoryFileService {
 
   public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
     return repositoryFileRepository.getRepoStats(repoName);
+  }
+
+  private String createCollabMetaUrl(FileCopy file) {
+    val baseUrl = file.getRepoBaseUrl();
+    val metaPath = file.getRepoMetadataPath();
+
+    // We expect the base to end with a "/" and the meta data to start with a "/". Otherwise notify with exception.
+    if (baseUrl.endsWith("/") && metaPath.startsWith("/")) {
+      return baseUrl.substring(0, baseUrl.length() - 1) + metaPath;
+    } else {
+      throw new IllegalStateException(
+          String.format("File Copy %s had an unexpected format in URL.",
+              file.getFileName()));
+    }
   }
 
 }
