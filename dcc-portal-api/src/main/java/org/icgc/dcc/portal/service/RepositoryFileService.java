@@ -424,8 +424,6 @@ public class RepositoryFileService {
       } else {
         generateTextFile(buffer, downloadUrlGroups);
       }
-
-      break;
     }
   }
 
