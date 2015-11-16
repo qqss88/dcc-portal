@@ -304,6 +304,8 @@ $compartmentBorder:#ffc38b;
   opacity: 0.95;
 }
 
+
+
 .pathway-info-content{
   line-height: 1.4rem;
   padding:5%;
@@ -320,6 +322,10 @@ $compartmentBorder:#ffc38b;
   padding-bottom: 0.5em !important;
   padding-top:0.5em !important;
   text-align: center !important;
+}
+
+.gene-overlap-result .pathway-gene-label  a {
+  color: #ff9900;
 }
 
 .pathway-gene-header-label{

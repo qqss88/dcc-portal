@@ -4589,19 +4589,19 @@ td {
   opacity: 0.95;
 }
 
-/* line 307, _modules/_pathwayviewer.scss */
+/* line 309, _modules/_pathwayviewer.scss */
 .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 313, _modules/_pathwayviewer.scss */
+/* line 315, _modules/_pathwayviewer.scss */
 .pathway-info-content .pathway-gene-table {
   margin: 2rem auto;
 }
 
-/* line 318, _modules/_pathwayviewer.scss */
+/* line 320, _modules/_pathwayviewer.scss */
 .pathway-gene-label, .pathway-gene-header-label {
   font-weight: lighter;
   padding-bottom: 0.5em !important;
@@ -4609,22 +4609,27 @@ td {
   text-align: center !important;
 }
 
-/* line 325, _modules/_pathwayviewer.scss */
+/* line 327, _modules/_pathwayviewer.scss */
+.gene-overlap-result .pathway-gene-label a {
+  color: #ff9900;
+}
+
+/* line 331, _modules/_pathwayviewer.scss */
 .pathway-gene-header-label {
   font-weight: normal !important;
 }
 
-/* line 329, _modules/_pathwayviewer.scss */
+/* line 335, _modules/_pathwayviewer.scss */
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell {
   font-size: 10px;
 }
 
-/* line 333, _modules/_pathwayviewer.scss */
+/* line 339, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   margin-top: 0.5em;
 }
 
-/* line 337, _modules/_pathwayviewer.scss */
+/* line 343, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4 {
   margin-left: 1em;
   margin-right: 1em;
@@ -4636,44 +4641,44 @@ td {
   padding-top: 0.5em;
 }
 
-/* line 348, _modules/_pathwayviewer.scss */
+/* line 354, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   float: left;
   margin-left: -1.6em;
   font-size: 1.5em;
 }
 
-/* line 354, _modules/_pathwayviewer.scss */
+/* line 360, _modules/_pathwayviewer.scss */
 .pathway-info-svg {
   padding-left: 15%;
   padding-right: 15%;
   max-height: 150px;
 }
 
-/* line 360, _modules/_pathwayviewer.scss */
+/* line 366, _modules/_pathwayviewer.scss */
 .failed-reaction {
   stroke: red;
   stroke-width: 2px;
 }
 
-/* line 365, _modules/_pathwayviewer.scss */
+/* line 371, _modules/_pathwayviewer.scss */
 .lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode {
   background-color: #b5f9a7;
   border: 2px dotted red;
 }
 
-/* line 370, _modules/_pathwayviewer.scss */
+/* line 376, _modules/_pathwayviewer.scss */
 .lof-RenderableComplex, .lof-RenderableEntitySet {
   background-color: #b6e2ff;
   border: 2px dotted red;
 }
 
-/* line 375, _modules/_pathwayviewer.scss */
+/* line 381, _modules/_pathwayviewer.scss */
 .lof-cell {
   padding: 0px;
 }
 
-/* line 379, _modules/_pathwayviewer.scss */
+/* line 385, _modules/_pathwayviewer.scss */
 .node-text-body {
   -ms-word-break: break-all;
   -ms-word-wrap: break-all;
@@ -4685,7 +4690,7 @@ td {
   -moz-hyphens: auto;
 }
 
-/* line 390, _modules/_pathwayviewer.scss */
+/* line 396, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4704,57 +4709,57 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 408, _modules/_pathwayviewer.scss */
+/* line 414, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
   top: 0;
   background: white;
 }
-/* line 414, _modules/_pathwayviewer.scss */
+/* line 420, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 420, _modules/_pathwayviewer.scss */
+/* line 426, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
-/* line 425, _modules/_pathwayviewer.scss */
+/* line 431, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .subpath-link {
   padding-top: 4rem;
 }
 
-/* line 432, _modules/_pathwayviewer.scss */
+/* line 438, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 438, _modules/_pathwayviewer.scss */
+/* line 444, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
-/* line 443, _modules/_pathwayviewer.scss */
+/* line 449, _modules/_pathwayviewer.scss */
 :-moz-full-screen .subpath-link {
   padding-top: 4rem;
 }
 
-/* line 450, _modules/_pathwayviewer.scss */
+/* line 456, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 456, _modules/_pathwayviewer.scss */
+/* line 462, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
-/* line 461, _modules/_pathwayviewer.scss */
+/* line 467, _modules/_pathwayviewer.scss */
 :fullscreen .subpath-link {
   padding-top: 4rem;
 }
@@ -4762,7 +4767,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 469, _modules/_pathwayviewer.scss */
+/* line 475, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }
