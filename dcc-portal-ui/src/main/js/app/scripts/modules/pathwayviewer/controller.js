@@ -224,6 +224,15 @@ angular.module('icgc.pathwayviewer.directives.controller', ['icgc.pathwayviewer.
             }
           });
         });
+
+        _.keys(overlaps).forEach(function (dbId) {
+            // Only highlight overlaps it if it's part of the pathway we're zooming in on
+            // And only hide parts of it we are zooming in on a pathway
+            if((nodesInPathway.length !== 0 && ! _.contains(nodesInPathway,dbId))){
+              delete overlaps[dbId];
+            }
+        });
+
         this.renderer.highlightEntity(highlights, overlaps, this.model);
       };
 
