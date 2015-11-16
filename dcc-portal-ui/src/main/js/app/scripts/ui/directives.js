@@ -257,13 +257,98 @@ angular.module('icgc.ui.popover', [])
         'isOpen': '=popoverIsOpen'
       },
       templateUrl: '/scripts/ui/views/popover.html',
-      link: function (scope) {
+      link: function (scope, element) {
+
+        function Popover(id) {
+          var _popoverEl = element.find(id),
+              _outerBorder = _popoverEl.find('.popover-inner-container-border'),
+              _popoverContent = _popoverEl.find('.popover-inner-container'),
+              _self = this,
+              _containerHoverCount = 0,
+              _timeout_in_ms = 700;
+
+          function _init() {
+
+            _popoverEl.hover(function() {
+              _self.show();
+            },
+            function() {
+              _self.hide();
+            });
+
+          }
+
+          function _popoverStatusCheck() {
+            setTimeout(_popoverShow, _timeout_in_ms);
+          }
+
+          function _popoverShow(shouldShow) {
+
+            if (shouldShow === true) {
+              _popoverEl.show();
+              _outerBorder.fadeIn('fast');
+              _popoverContent.fadeIn('fast');
+            }
+            else if (_containerHoverCount === 0) {
+              _popoverContent.fadeOut('fast');
+              _outerBorder.fadeOut('fast', function() {
+                _popoverEl.hide();
+              });
+
+            }
+          }
+
+
+          _init();
+
+
+          // Popover Public API
+          this.show = function() {
+            _containerHoverCount++;
+
+            _popoverShow(true);
+            _popoverStatusCheck();
+          };
+
+          this.hide = function() {
+            _containerHoverCount  = Math.max(0, _containerHoverCount - 1 );
+            _popoverStatusCheck();
+          };
+
+          this.popoverTimeout = function(timeoutInMS) {
+
+            if (arguments.length > 0) {
+              _timeout_in_ms = timeoutInMS;
+            }
+
+            return _timeout_in_ms;
+          };
+
+
+        }
       
         function _init() {
+          var popover = new Popover('.popover-outer-container');
           scope.title = $sce.trustAsHtml(scope.popoverTitle);
           scope.anchorText = $sce.trustAsHtml(scope.popoverAnchorText); 
-          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false; 
+          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false;
+
+
+          element.hover(
+            function() {
+              popover.show();
+            },
+            function() {
+              setTimeout(function() {
+                popover.hide();
+              }, popover.popoverTimeout());
+            }
+          );
+
         }
+
+
+
 
         _init();
       }
