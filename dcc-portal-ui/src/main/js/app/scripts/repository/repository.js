@@ -338,7 +338,7 @@
     this.buildMetaDataUrl = function (fileCopy, fileInfo) {
       var parts = [];
       if (isS3 (fileCopy.repoType) && isCollab(fileCopy.repoCode)) {
-        parts = ['api/v1/ui/collaboratory/',fileCopy.repoMetadataPath];
+        parts = ['api/v1/ui/collaboratory/metadata/',fileInfo.id];
       } else if (isS3 (fileCopy.repoType) && !isCollab(fileCopy.repoCode)) {
         parts = [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath];
       } else {

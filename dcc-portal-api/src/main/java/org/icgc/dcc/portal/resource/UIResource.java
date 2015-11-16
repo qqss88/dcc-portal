@@ -62,6 +62,7 @@ import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.MutationService;
 import org.icgc.dcc.portal.service.OccurrenceService;
+import org.icgc.dcc.portal.service.RepositoryFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,8 +91,8 @@ public class UIResource {
   private final DiagramService diagramService;
   private final MutationService mutationService;
   private final ClientService clientService;
+  private final RepositoryFileService repositoryService;
   private static final String PUBLIC_KEY_PATH = "data/jenkins_pub.gpg";
-  private static final String COLLAB_META_URL = "https://www.cancercollaboratory.org:9080/oicr.icgc.meta/metadata/";
 
   private final String REACTOME_PREFIX = "R-HSA-";
   private final String REACTOME_PREFIX_OLD = "REACT_";
@@ -245,13 +246,20 @@ public class UIResource {
         .header("Content-Disposition", "attachment; filename=\"icgc-software.pub\"")
         .build();
   }
-  
-  @Path("/collaboratory/oicr.icgc.meta/metadata/{objectId}")
+
+  @Path("/collaboratory/metadata/{fileId}")
   @GET
   @SneakyThrows
-  public Response collabMeta(@PathParam("objectId") String objectId) {
-    InputStream input = new URL(COLLAB_META_URL + objectId).openStream();
-    return Response.ok(input).type("text/xml").build();
+  public Response collabMeta(@PathParam("fileId") String fileId) {
+
+    val url = repositoryService.getCollabMetaUrl(fileId);
+
+    if (url != null && !url.isEmpty()) {
+      InputStream input = new URL(url).openStream();
+      return Response.ok(input).type("text/xml").build();
+    }
+
+    return Response.serverError().status(400).build();
   }
 
   private Boolean isInvalidPathwayId(String id) {
