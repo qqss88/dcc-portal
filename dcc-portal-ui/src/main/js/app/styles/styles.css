@@ -4852,6 +4852,7 @@ td {
   position: relative;
   display: table-cell;
   vertical-align: top;
+  width: 50%;
   height: 100%;
 }
 /* line 109, _modules/_repositories.scss */
