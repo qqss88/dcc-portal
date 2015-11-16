@@ -17,6 +17,9 @@
 
 package org.icgc.dcc.portal.service;
 
+import java.util.Optional;
+
+import org.icgc.dcc.common.client.api.ICGCEntityNotFoundException;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.cud.User;
@@ -48,6 +51,24 @@ public class AuthService {
   private DACOClient dacoClient;
   @NonNull
   private ICGCProperties icgcConfig;
+
+  public Optional<org.icgc.dcc.common.client.api.daco.User> getDacoUser(UserType userType, String userId) {
+    try {
+      val dacoUsers = dacoClient.getUsersByType(userType, userId);
+      if (dacoUsers.size() > 1) {
+        log.warn("Received more that 1 DACO approved user for userID '{}'. Can't decide which one to use. Declining "
+            + "DACO access. Users: {}", userId, dacoUsers);
+
+        return Optional.empty();
+      }
+
+      return Optional.of(dacoUsers.get(0));
+    } catch (ICGCEntityNotFoundException e) {
+      log.debug("User '{}' does not have DACO access", userId);
+
+      return Optional.empty();
+    }
+  }
 
   /**
    * Checks Central User Directory(CUD) if <tt>username</tt> has DACO access.
