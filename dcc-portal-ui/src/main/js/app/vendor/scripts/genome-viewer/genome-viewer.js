@@ -1,5 +1,5 @@
-/*! genome-viewer October 19, 2015 17:13:53 */
-/*! lib October 19, 2015 17:13:50 */
+/*! genome-viewer November 16, 2015 10:56:23 */
+/*! lib November 16, 2015 10:56:21 */
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -39,8 +39,11 @@ var Utils = {
         text = text.charAt(0).toUpperCase() + text.slice(1);
         return text;
     },
-    camelCase: function(input) {
-        return input.toLowerCase().replace(/[.-_\s](.)/g, function(match, group1) {
+    titleCase: function(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);;
+    },
+    camelCase: function(str) {
+        return str.toLowerCase().replace(/[.-_\s](.)/g, function(match, group1) {
             return group1.toUpperCase();
         })
     },
@@ -48,11 +51,21 @@ var Utils = {
         var result = str.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
         return result.charAt(0).toUpperCase() + result.slice(1);
     },
+    closest: function(element, selector) {
+        var matches = (element.matches) ? 'matches' : 'msMatchesSelector';
+        while (element) {
+            if (element[matches](selector)) {
+                break;
+            }
+            element = element.parentElement;
+        }
+        return element;
+    },
     isFunction: function(s) {
         return typeof(s) === 'function' || s instanceof Function;
     },
     parseDate: function(strDate) {
-        return strDate.substring(0, 4) + "-" + strDate.substring(4, 6) + "-" + strDate.substring(6, 8) + " " + strDate.substring(8, 10) + ":" + strDate.substring(10, 12) + ":" + strDate.substring(12, 14);
+        return strDate.substring(4, 6) + "/" + strDate.substring(6, 8) + "/" + strDate.substring(0, 4) + " " + strDate.substring(8, 10) + ":" + strDate.substring(10, 12) + ":" + strDate.substring(12, 14);
     },
     genId: function(prefix) {
         prefix = prefix || '';
@@ -129,7 +142,7 @@ var Utils = {
         for (var phylos in availableSpecies) {
             for (var i = 0; i < availableSpecies[phylos].length; i++) {
                 var species = availableSpecies[phylos][i];
-                if (this.getSpeciesCode(species.id) == speciesCode) {
+                if (species.id === speciesCode || species.scientificName.toLowerCase() === speciesCode.toLowerCase()) {
                     return species;
                 }
             }
@@ -443,6 +456,56 @@ var Utils = {
     },
     clone: function(obj) {
         return JSON.parse(JSON.stringify(obj));
+    },
+    timeDiff: function(timeStart, timeEnd) {
+        var ts = new Date(Date.parse(timeStart));
+        var te = new Date(Date.parse(timeEnd));
+
+        if (isNaN(ts) || isNaN(te)) {
+            return "";
+        }
+
+        if (ts < te) {
+            var milisec_diff = te - ts;
+        } else {
+            var milisec_diff = ts - te;
+        }
+
+        var days = Math.floor(milisec_diff / 1000 / 60 / (60 * 24));
+        var daysMessage = days + " Days ";
+        if (days === 0) {
+            daysMessage = '';
+        }
+        var date_diff = new Date(milisec_diff);
+        var hours = date_diff.getHours() - 1;
+        var hoursMessage = hours + " hour";
+        var minutesMessage = date_diff.getMinutes() + " minute";
+        var secondsMessage = date_diff.getSeconds() + " second";
+        if (hours !== 1) {
+            hoursMessage += 's ';
+        } else {
+            hoursMessage += ' ';
+        }
+        if (date_diff.getMinutes() !== 1) {
+            minutesMessage += 's ';
+        } else {
+            minutesMessage += ' ';
+        }
+        if (date_diff.getSeconds() !== 1) {
+            secondsMessage += 's ';
+        } else {
+            secondsMessage += ' ';
+        }
+        if (hours === 0) {
+            hoursMessage = '';
+        }
+        if (date_diff.getMinutes() === 0) {
+            minutesMessage = '';
+        }
+        if (date_diff.getSeconds() === 0) {
+            secondsMessage = '';
+        }
+        return daysMessage + hoursMessage + minutesMessage + secondsMessage;
     },
     deleteIndexedDB: function() {
         window.indexedDB.webkitGetDatabaseNames().onsuccess = function(sender, args) {
@@ -1138,7 +1201,7 @@ var CellBaseManager = {
     get: function(args) {
         var success = args.success;
         var error = args.error;
-        var async = (args.async == false) ? false : true;
+        var async = (args.async == false) ? false: true;
 
         // remove XMLHttpRequest keys
         var ignoreKeys = ['success', 'error', 'async'];
@@ -1153,7 +1216,10 @@ var CellBaseManager = {
         if (typeof url === 'undefined') {
             return;
         }
-        console.log(url);
+        
+        if (window.CELLBASE_LOG != null && CELLBASE_LOG === true) {
+            console.log(url);
+        }
 
         var d;
         var request = new XMLHttpRequest();
@@ -1239,6 +1305,7 @@ var CellBaseManager = {
         return url;
     }
 };
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -1324,153 +1391,164 @@ var CellBaseManager = {
  *    http://cafetal:8080/opencga/rest/files/17/fetch?sid=eUZtTdnA9EU89vjACyAe&region=20%3A80000-82000&view_as_pairs=false&include_coverage=true&process_differences=false
  */
 var OpencgaManager = {
-//    host: (typeof OPENCGA_HOST === 'undefined') ? 'http://ws.bioinfo.cipf.es/opencga/rest' : OPENCGA_HOST,
-    host: (typeof OPENCGA_HOST === 'undefined') ? 'http://cafetal:8080/opencga/rest' : OPENCGA_HOST,
+    // host: (typeof OPENCGA_HOST === 'undefined') ? 'http://ws.bioinfo.cipf.es/opencga/rest' : OPENCGA_HOST,
+    // host: (typeof OPENCGA_HOST === 'undefined') ? 'http://cafetal:8080/opencga/rest' : OPENCGA_HOST,
+    host: window.OPENCGA_HOST,
     version: (typeof OPENCGA_VERSION === 'undefined') ? 'v1' : OPENCGA_VERSION,
 
     users: {
-        login: function (args) {
+        login: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'login');
         },
-        logout: function (args) {
+        logout: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'logout');
         },
-        read: function (args) {
+        read: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'info');
         },
-        update: function (args) {
+        update: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'update');
         },
-        updateEmail: function (args) {
+        updateEmail: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'change-email');
         },
-        updatePassword: function (args) {
+        updatePassword: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'change-password');
         },
-        resetPassword: function (args) {
+        resetPassword: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'reset-password');
         },
-        create: function (args) {
+        create: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'create');
         },
-        delete: function (args) {
+        delete: function(args) {
             return OpencgaManager._doRequest(args, 'users', 'delete');
         }
     },
 
     projects: {
-        list: function (args) {
+        list: function(args) {
             return OpencgaManager._doRequest(args, 'projects', 'all-projects');
         },
-        read: function (args) {
+        read: function(args) {
             return OpencgaManager._doRequest(args, 'projects', 'info');
         },
-        update: function (args) {
+        update: function(args) {
             return OpencgaManager._doRequest(args, 'projects', 'update');
         },
-        create: function (args) {
+        create: function(args) {
             return OpencgaManager._doRequest(args, 'projects', 'create');
         },
-        delete: function (args) {
+        delete: function(args) {
             return OpencgaManager._doRequest(args, 'projects', 'delete');
         },
-        studies: function (args) {
+        studies: function(args) {
             return OpencgaManager._doRequest(args, 'projects', 'studies');
         }
     },
 
     studies: {
-        list: function (args) {
+        list: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'all-studies');
         },
-        read: function (args) {
+        read: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'info');
         },
-        update: function (args) {
+        update: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'update');
         },
-        create: function (args) {
+        create: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'create');
         },
-        delete: function (args) {
+        delete: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'delete');
         },
-        analysis: function (args) {
+        analysis: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'analysis');
         },
-        jobs: function (args) {
+        jobs: function(args) {
             return OpencgaManager._doRequest(args, 'studies', 'jobs');
+        },
+        samples: function (args) {
+            return OpencgaManager._doRequest(args, 'studies', 'samples');
         }
     },
 
     files: {
-        list: function (args) {
+        list: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'list');
         },
-        fetch: function (args) {
+        fetch: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'fetch');
         },
-        alignments: function (args) {
+        alignments: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'alignments');
         },
-        variants: function (args) {
+        variants: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'variants');
         },
-        read: function (args) {
+        read: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'info');
         },
-        info: function (args) {
+        info: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'info');
         },
-        delete: function (args) {
+        delete: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'delete');
         },
-        index: function (args) {
+        index: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'index');
         },
-        search: function (args) {
+        search: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'search');
         },
-        filesByFolder: function (args) {
+        filesByFolder: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'files');
         },
-        content: function (args) {
+        content: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'content');
         },
-        contentGrep: function (args) {
+        contentGrep: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'content-grep');
         },
-        createFolder: function (args) {
+        createFolder: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'create-folder');
         },
-        setHeader: function (args) {
+        setHeader: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'set-header');
         },
-        contentExample: function (args) {
+        contentExample: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'content-example');
         },
-        downloadExample: function (args) {
+        downloadExample: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'download-example');
         },
-        update: function (args) {
+        update: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'update');
         },
-        download: function (args) {
+        download: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'download');
         },
-        upload: function (args) {
+        upload: function(args) {
             return OpencgaManager._doRequest(args, 'files', 'upload');
         },
-        upload2: function (args) {
+        upload2: function(args) {
             /** Check if exists a file with the same name **/
+            var query = {
+                sid: Cookies('bioinfo_sid'),
+                studyId: args.studyId,
+            };
+            // if (window.OPENCGA_OLD_URL_FORMAT != null && OPENCGA_OLD_URL_FORMAT === true) {
+            //     var splitIndex = args.relativeFilePath.lastIndexOf("/") + 1;
+            //     query.name = args.relativeFilePath.substring(splitIndex);
+            //     query.directory = args.relativeFilePath.substring(0, splitIndex);
+            // } else {
+            // }
+            query.path = args.relativeFilePath;
             OpencgaManager.files.search({
-                query: {
-                    sid: Cookies('bioinfo_sid'),
-                    studyId: args.studyId,
-                    path: args.relativeFilePath
-                },
+                query: query,
                 request: {
-                    success: function (response) {
+                    success: function(response) {
                         if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
                             if (response.response[0].result.length == 0) {
 
@@ -1484,7 +1562,6 @@ var OpencgaManager = {
                                 args.url = url;
                                 OpencgaManager._uploadFile(args);
 
-
                             } else {
                                 args.error('File already exists');
                             }
@@ -1492,7 +1569,7 @@ var OpencgaManager = {
                             args.error(response.response[0].errorMsg);
                         }
                     },
-                    error: function () {
+                    error: function() {
                         args.error('Server error, try again later.');
                     }
                 }
@@ -1501,21 +1578,38 @@ var OpencgaManager = {
 
     },
     jobs: {
-        create: function (args) {
+        create: function(args) {
             return OpencgaManager._doRequest(args, 'jobs', 'create');
         },
-        delete: function (args) {
+        delete: function(args) {
             return OpencgaManager._doRequest(args, 'jobs', 'delete');
         }
     },
     samples: {
-        search: function (args) {
+        search: function(args) {
             return OpencgaManager._doRequest(args, 'samples', 'search');
         }
     },
     util: {
-        proxy: function (args) {
+        proxy: function(args) {
             return OpencgaManager._doRequest(args, 'util', 'proxy');
+        }
+    },
+    tools: {
+        search: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'search');
+        },
+        info: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'info');
+        },
+        help: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'help');
+        },
+        update: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'update');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'delete');
         }
     },
     //analysis: {
@@ -1525,7 +1619,7 @@ var OpencgaManager = {
     //    create: function (args) {
     //        return OpencgaManager._doRequest(args, 'analysis', 'create');
     //},
-    _url: function (args, api, action) {
+    _url: function(args, api, action) {
         var host = OpencgaManager.host;
         if (typeof args.request.host !== 'undefined' && args.request.host != null) {
             host = args.request.host;
@@ -1540,20 +1634,20 @@ var OpencgaManager = {
         }
 
         var url = host + '/webservices/rest/' + version + '/' + api + id + '/' + action;
-        if (window.OPENCGA_OLD_URL_FORMAT != null && OPENCGA_OLD_URL_FORMAT === true) {
-            if(action == 'jobs'){
-                action = 'job'
-            }
-            if(api == 'jobs'){
-                api = 'job'
-            }
-            url = host + '/rest/' + api + id + '/' + action;
-        }
+        // if (window.OPENCGA_OLD_URL_FORMAT != null && OPENCGA_OLD_URL_FORMAT === true) {
+        //     if (action == 'jobs') {
+        //         action = 'job'
+        //     }
+        //     if (api == 'jobs') {
+        //         api = 'job'
+        //     }
+        //     url = host + '/rest/' + api + id + '/' + action;
+        // }
         url = Utils.addQueryParamtersToUrl(args.query, url);
         return url;
     },
 
-    _doRequest: function (args, api, action) {
+    _doRequest: function(args, api, action) {
         var url = OpencgaManager._url(args, api, action);
         if (args.request.url === true) {
             return url;
@@ -1567,9 +1661,11 @@ var OpencgaManager = {
                 async = args.request.async;
             }
 
-            console.log(url);
+            if (window.OPENCGA_LOG != null && OPENCGA_LOG === true) {
+                console.log(url);
+            }
             var request = new XMLHttpRequest();
-            request.onload = function () {
+            request.onload = function() {
                 var contentType = this.getResponseHeader('Content-Type');
                 if (contentType === 'application/json') {
                     args.request.success(JSON.parse(this.response), this);
@@ -1577,7 +1673,7 @@ var OpencgaManager = {
                     args.request.success(this.response, this);
                 }
             };
-            request.onerror = function () {
+            request.onerror = function() {
                 args.request.error(this);
             };
             request.open(method, url, async);
@@ -1585,7 +1681,7 @@ var OpencgaManager = {
             return url;
         }
     },
-    _uploadFile: function (args) {
+    _uploadFile: function(args) {
         var url = args.url;
         var inputFile = args.inputFile;
         var fileName = args.fileName;
@@ -1610,22 +1706,22 @@ var OpencgaManager = {
         var end;
 
 
-        var getResumeInfo = function (formData) {
+        var getResumeInfo = function(formData) {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, false);//false = sync call
+            xhr.open('POST', url, false); //false = sync call
             xhr.send(formData);
             var response = JSON.parse(xhr.responseText);
             return response.response[0];
         };
-        var checkChunk = function (id, size, resumeInfo) {
+        var checkChunk = function(id, size, resumeInfo) {
             if (typeof resumeInfo[id] === 'undefined') {
                 return false;
-            } else if (resumeInfo[id].size != size /*|| resumeInfo[id].hash != hash*/) {
+            } else if (resumeInfo[id].size != size /*|| resumeInfo[id].hash != hash*/ ) {
                 return false;
             }
             return true;
         };
-        var processChunk = function (c) {
+        var processChunk = function(c) {
             var chunkBlob = blob.slice(c.start, c.end);
 
             if (checkChunk(c.id, chunkBlob.size, resumeInfo) == false) {
@@ -1646,7 +1742,7 @@ var OpencgaManager = {
                     formData.append("bioFormat", bioFormat);
                     formData.append("description", description);
                 }
-                uploadChunk(formData, c, function (chunkResponse) {
+                uploadChunk(formData, c, function(chunkResponse) {
                     callbackProgress(c, NUM_CHUNKS, chunkResponse);
                     if (!c.last) {
                         processChunk(chunkMap[(c.id + 1)]);
@@ -1664,10 +1760,10 @@ var OpencgaManager = {
             }
 
         };
-        var uploadChunk = function (formData, chunk, callback) {
+        var uploadChunk = function(formData, chunk, callback) {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, true);
-            xhr.onload = function (e) {
+            xhr.onload = function(e) {
                 chunk.done = true;
                 console.log("chunk done");
                 callback(JSON.parse(xhr.responseText));
@@ -1708,217 +1804,217 @@ var OpencgaManager = {
         }
         processChunk(chunkMap[0]);
 
-    },
-
-
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    /**/
-    resourceTypes: {
-        USERS: "users",
-        PROJECTS: "projects",
-        STUDIES: "studies",
-        FILES: "files",
-        ANALYSES: "analyses",
-        JOBS: "jobs"
-    },
-    actions: {
-        LOGIN: "login",
-        LOGOUT: "logout",
-        CREATE: "create",
-        UPLOAD: "upload",
-        INFO: "info",
-        LIST: "list",
-        FETCH: "fetch",
-        UPDATE: "update",
-        DELETE: "delete"
-    },
-    httpMethods: {},    // defined after OpencgaManager
-
-    /**
-     * @param queryParams required: password, sid (sessionId)
-     * @return sid (sessionId)
-     */
-    login: function (userId, queryParams, args) {
-        this._call(this.resourceTypes.USERS, userId, this.actions.LOGIN, queryParams, args);
-    },
-    /**
-     * @param queryParams required: sid (sessionId)
-     */
-    logout: function (userId, queryParams, args) {
-        this._call(this.resourceTypes.USERS, "", this.actions.LOGOUT, queryParams, args);
-    },
-    /**
-     * @param queryParams required: {resource}Id, password, sid (sessionId)
-     */
-    create: function (resourceType, queryParams, args) {
-        this._call(resourceType, "", this.actions.CREATE, queryParam, args);
-    },
-    /**
-     * @param queryParams required: sid (sessionId)
-     */
-    upload: function (resourceType, queryParams, args) {
-        this._call(resourceType, "", this.actions.UPLOAD, queryParams, args);
-    },
-    /**
-     * @param action restricted to OpencgaManager.actions.INFO, OpencgaManager.actions.FETCH
-     * @param queryParams required: sid (sessionId)
-     */
-    get: function (resourceType, resourceId, action, queryParams, args) {
-//        resourceId = "7";
-        _.extend(queryParams, {
-            sid: "RNk4P0ttFGHyqLA3YGS8",
-            view_as_pairs: 'false',
-            include_coverage: 'true',
-            process_differences: 'false'
-        });
-        this._call(resourceType, resourceId, action, queryParams, args);
-    },
-    /**
-     * @param queryParams required: sid (sessionId)
-     */
-    list: function (resourceType, queryParams, args) {
-        this._call(resourceType, "", this.actions.LIST, queryParams, args);
-    },
-    /**
-     * @param queryParams required: sid (sessionId)
-     */
-    update: function (resourceType, resourceId, queryParams, args) {
-        this._call(resourceType, resourceId, this.actions.UPDATE, queryParams, args);
-    },
-    /**
-     * @param queryParams required: sid (sessionId)
-     */
-    delete: function (resourceType, resourceId, queryParams, args) {
-        this._call(resourceType, resourceId, this.actions.DELETE, queryParams, args);
-    },
-
-    _call: function (resourceType, resourceId, action, queryParams, args) {
-        var url = this._url(resourceType, resourceId, action, queryParams, args);
-
-        if (typeof url === 'undefined' || url == null) {
-            return;
-        }
-        console.log(url);
-        var async = (_.isUndefined(args.async) || _.isNull(args.async) ) ? true : args.async;
-        var success = args.success;
-        var error = args.error;
-
-        var d;
-        $.ajax({
-            type: OpencgaManager.httpMethods[resourceType],
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            async: async,
-            success: function (data, textStatus, jqXHR) {
-                if ($.isPlainObject(data) || $.isArray(data)) {
-//                    data.params = args.params;
-//                    data.resource = args.resource;
-//                    data.category = args.category;
-//                    data.subCategory = args.subCategory;
-                    if (_.isFunction(success)) {
-                        success(data);
-                    }
-                    d = data;
-                } else {
-                    console.log('Cellbase returned a non json object or list, please check the url.');
-                    console.log(url);
-                    console.log(data)
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
-                if (_.isFunction(error)) {
-                    error(jqXHR, textStatus, errorThrown);
-                }
-            }
-        });
-        return url;
-    },
-
-    _url2: function (resourceType, resourceId, action, queryParams, args) {
-        if (resourceId == undefined || resourceId == null) {
-            resourceId = "";
-        } else {
-            resourceId = resourceId + "/";
-        }
-        var host = this.host;
-        if (typeof args.host !== 'undefined' && args.host != null) {
-            host = args.host;
-        }
-        var opencga = this.opencga;
-        if (typeof args.opencga !== 'undefined' && args.opencga != null) {
-            opencga = args.opencga;
-        }
-        /* still no version in the REST api
-         var version = this.version;
-         if(typeof args.version !== 'undefined' && args.version != null){
-         version = args.version
-         }
-         */
-        var url = host + opencga + resourceType + '/' + resourceId + action;
-        /*
-         _.extend(queryParams, {
-         sid: 'RNk4P0ttFGHyqLA3YGS8',
-         view_as_pairs: 'false',
-         include_coverage: 'true',
-         process_differences: 'false'
-         });*/
-
-        url = Utils.addQueryParamtersToUrl(queryParams, url);
-        return url;
     }
+};
 
-    /*
-     get: function (args) {
-     var success = args.success;
-     var error = args.error;
-     var async = (_.isUndefined(args.async) || _.isNull(args.async) ) ? true : args.async;
-     var urlConfig = _.omit(args, ['success', 'error', 'async']);
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+// resourceTypes: {
+//     USERS: "users",
+//     PROJECTS: "projects",
+//     STUDIES: "studies",
+//     FILES: "files",
+//     ANALYSES: "analyses",
+//     JOBS: "jobs"
+// },
+// actions: {
+//     LOGIN: "login",
+//     LOGOUT: "logout",
+//     CREATE: "create",
+//     UPLOAD: "upload",
+//     INFO: "info",
+//     LIST: "list",
+//     FETCH: "fetch",
+//     UPDATE: "update",
+//     DELETE: "delete"
+// },
+// httpMethods: {}, // defined after OpencgaManager
+//
+// /**
+//  * @param queryParams required: password, sid (sessionId)
+//  * @return sid (sessionId)
+//  */
+// login: function(userId, queryParams, args) {
+//     this._call(this.resourceTypes.USERS, userId, this.actions.LOGIN, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// logout: function(userId, queryParams, args) {
+//     this._call(this.resourceTypes.USERS, "", this.actions.LOGOUT, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: {resource}Id, password, sid (sessionId)
+//  */
+// create: function(resourceType, queryParams, args) {
+//     this._call(resourceType, "", this.actions.CREATE, queryParam, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// upload: function(resourceType, queryParams, args) {
+//     this._call(resourceType, "", this.actions.UPLOAD, queryParams, args);
+// },
+// /**
+//  * @param action restricted to OpencgaManager.actions.INFO, OpencgaManager.actions.FETCH
+//  * @param queryParams required: sid (sessionId)
+//  */
+// get: function(resourceType, resourceId, action, queryParams, args) {
+//     //        resourceId = "7";
+//     _.extend(queryParams, {
+//         sid: "RNk4P0ttFGHyqLA3YGS8",
+//         view_as_pairs: 'false',
+//         include_coverage: 'true',
+//         process_differences: 'false'
+//     });
+//     this._call(resourceType, resourceId, action, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// list: function(resourceType, queryParams, args) {
+//     this._call(resourceType, "", this.actions.LIST, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// update: function(resourceType, resourceId, queryParams, args) {
+//     this._call(resourceType, resourceId, this.actions.UPDATE, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// delete: function(resourceType, resourceId, queryParams, args) {
+//     this._call(resourceType, resourceId, this.actions.DELETE, queryParams, args);
+// },
+//
+// _call: function(resourceType, resourceId, action, queryParams, args) {
+//     var url = this._url(resourceType, resourceId, action, queryParams, args);
+//
+//     if (typeof url === 'undefined' || url == null) {
+//         return;
+//     }
+//     console.log(url);
+//     var async = (_.isUndefined(args.async) || _.isNull(args.async)) ? true: args.async;
+//     var success = args.success;
+//     var error = args.error;
+//
+//     var d;
+//     $.ajax({
+//         type: OpencgaManager.httpMethods[resourceType],
+//         url: url,
+//         dataType: 'json', //still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//         async: async,
+//         success: function(data, textStatus, jqXHR) {
+//             if ($.isPlainObject(data) || $.isArray(data)) {
+//                 //                    data.params = args.params;
+//                 //                    data.resource = args.resource;
+//                 //                    data.category = args.category;
+//                 //                    data.subCategory = args.subCategory;
+//                 if (_.isFunction(success)) {
+//                     success(data);
+//                 }
+//                 d = data;
+//             } else {
+//                 console.log('Cellbase returned a non json object or list, please check the url.');
+//                 console.log(url);
+//                 console.log(data)
+//             }
+//         },
+//         error: function(jqXHR, textStatus, errorThrown) {
+//             console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
+//             if (_.isFunction(error)) {
+//                 error(jqXHR, textStatus, errorThrown);
+//             }
+//         }
+//     });
+//     return url;
+// },
+//
+// _url2: function(resourceType, resourceId, action, queryParams, args) {
+//     if (resourceId == undefined || resourceId == null) {
+//         resourceId = "";
+//     } else {
+//         resourceId = resourceId + "/";
+//     }
+//     var host = this.host;
+//     if (typeof args.host !== 'undefined' && args.host != null) {
+//         host = args.host;
+//     }
+//     var opencga = this.opencga;
+//     if (typeof args.opencga !== 'undefined' && args.opencga != null) {
+//         opencga = args.opencga;
+//     }
+//     /* still no version in the REST api
+//      var version = this.version;
+//      if(typeof args.version !== 'undefined' && args.version != null){
+//      version = args.version
+//      }
+//      */
+//     var url = host + opencga + resourceType + '/' + resourceId + action;
+//     /*
+//      _.extend(queryParams, {
+//      sid: 'RNk4P0ttFGHyqLA3YGS8',
+//      view_as_pairs: 'false',
+//      include_coverage: 'true',
+//      process_differences: 'false'
+//      });*/
+//
+//     url = Utils.addQueryParamtersToUrl(queryParams, url);
+//     return url;
+// }
 
-     var url = OpencgaManager.url(urlConfig);
-     if(typeof url === 'undefined'){
-     return;
-     }
-     console.log(url);
+/*
+ get: function (args) {
+ var success = args.success;
+ var error = args.error;
+ var async = (_.isUndefined(args.async) || _.isNull(args.async) ) ? true : args.async;
+ var urlConfig = _.omit(args, ['success', 'error', 'async']);
 
-     var d;
-     $.ajax({
-     type: "GET",
-     url: url,
-     dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-     async: async,
-     success: function (data, textStatus, jqXHR) {
-     if($.isPlainObject(data) || $.isArray(data)){
-     //                    data.params = args.params;
-     //                    data.resource = args.resource;
-     //                    data.category = args.category;
-     //                    data.subCategory = args.subCategory;
-     if (_.isFunction(success)) {
-     success(data);
-     }
-     d = data;
-     }else{
-     console.log('Cellbase returned a non json object or list, please check the url.');
-     console.log(url);
-     console.log(data)
-     }
-     },
-     error: function (jqXHR, textStatus, errorThrown) {
-     console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
-     if (_.isFunction(error)) error(jqXHR, textStatus, errorThrown);
-     }
-     });
-     return d;
-     },*/
+ var url = OpencgaManager.url(urlConfig);
+ if(typeof url === 'undefined'){
+ return;
+ }
+ console.log(url);
+
+ var d;
+ $.ajax({
+ type: "GET",
+ url: url,
+ dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+ async: async,
+ success: function (data, textStatus, jqXHR) {
+ if($.isPlainObject(data) || $.isArray(data)){
+ //                    data.params = args.params;
+ //                    data.resource = args.resource;
+ //                    data.category = args.category;
+ //                    data.subCategory = args.subCategory;
+ if (_.isFunction(success)) {
+ success(data);
+ }
+ d = data;
+ }else{
+ console.log('Cellbase returned a non json object or list, please check the url.');
+ console.log(url);
+ console.log(data)
+ }
+ },
+ error: function (jqXHR, textStatus, errorThrown) {
+ console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
+ if (_.isFunction(error)) error(jqXHR, textStatus, errorThrown);
+ }
+ });
+ return d;
+ },*/
 //////// old version
 //    host: (typeof OPENCGA_HOST === 'undefined') ? 'http://ws.bioinfo.cipf.es/opencga/rest' : OPENCGA_HOST,
 //    getHost: function () {
@@ -2764,18 +2860,18 @@ var OpencgaManager = {
 ////        OpencgaManager.doPost(url, args.formData ,success, error);
 //        //	console.log(url);
 //    }
-};
+// };
 
 
-OpencgaManager.httpMethods[OpencgaManager.actions.LOGIN] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.LOGOUT] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.CREATE] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.UPLOAD] = "POST";
-OpencgaManager.httpMethods[OpencgaManager.actions.INFO] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.LIST] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.FETCH] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.UPDATE] = "GET";
-OpencgaManager.httpMethods[OpencgaManager.actions.DELETE] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.LOGIN] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.LOGOUT] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.CREATE] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.UPLOAD] = "POST";
+// OpencgaManager.httpMethods[OpencgaManager.actions.INFO] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.LIST] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.FETCH] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.UPDATE] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.DELETE] = "GET";
 
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
@@ -9910,3257 +10006,6 @@ VariantWidget.prototype = {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function NetworkFileWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('NetworkFileWidget');
-
-    this.targetId;
-    this.title = 'Network widget abstract class';
-    this.width = 600;
-    this.height = 300;
-    this.layoutSelector = true;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.dataAdapter;
-    this.content;
-
-    this.on(this.handlers);
-};
-
-NetworkFileWidget.prototype.getTitleName = function () {
-    return Ext.getCmp(this.id + "_title").getValue();
-};
-
-NetworkFileWidget.prototype.getFileUpload = function () {
-    /* to implemtent on child class */
-};
-
-NetworkFileWidget.prototype.addCustomComponents = function () {
-    /* to implemtent on child class */
-};
-
-NetworkFileWidget.prototype.draw = function () {
-    var _this = this;
-
-    if (this.panel == null) {
-        /** Bar for the file upload browser **/
-        var browseBar = Ext.create('Ext.toolbar.Toolbar', {dock: 'top'});
-        browseBar.add(this.getFileUpload());
-
-        this.infoLabel = Ext.create('Ext.toolbar.TextItem', {text: 'Please select a network saved file'});
-        this.countLabel = Ext.create('Ext.toolbar.TextItem');
-        this.infobar = Ext.create('Ext.toolbar.Toolbar', {dock: 'bottom'});
-        this.infobar.add(['->', this.infoLabel, this.countLabel]);
-
-//		/** Container for Preview **/
-//		var previewContainer = Ext.create('Ext.container.Container', {
-//			id:this.previewId,
-//			cls:'x-unselectable',
-//			flex:1,
-//			autoScroll:true
-//		});
-
-
-        /** Grid for Preview **/
-        this.gridStore = Ext.create('Ext.data.Store', {
-            pageSize: 50,
-            proxy: {
-                type: 'memory'
-            },
-            fields: ["0", "1", "2"]
-        });
-        this.grid = Ext.create('Ext.grid.Panel', {
-            border: false,
-            flex: 1,
-            store: this.gridStore,
-            loadMask: true,
-            plugins: ['bufferedrenderer'],
-            dockedItems: [
-                this.infobar
-            ],
-            columns: [
-                {"header": "Source node", "dataIndex": "0", flex: 1},
-                {"header": "Relation", "dataIndex": "1", flex: 1, menuDisabled: true},
-                {"header": "Target node", "dataIndex": "2", flex: 1}
-            ]
-        });
-
-        var comboLayout;
-        if (this.layoutSelector) {
-            var comboLayout = Ext.create('Ext.form.field.ComboBox', {
-                margin: "0 0 0 5",
-                width: 240,
-                editable: false,
-                labelWidth: 90,
-                fieldLabel: 'Apply layout',
-                displayField: 'name',
-                valueField: 'name',
-                value: "Force directed",
-                store: new Ext.data.SimpleStore({
-                    fields: ['name'],
-                    data: [
-                        ["Force directed"],
-                        ["Random"],
-                        ["Circle"],
-                        ["none"]
-                    ]
-                })
-            });
-        }
-
-        this.panel = Ext.create('Ext.window.Window', {
-            title: this.title,
-            resizable: false,
-            items: {
-                border: false,
-                width: this.width,
-                height: this.height,
-                layout: { type: 'vbox', align: 'stretch'},
-                items: [
-                    this.grid
-                ],
-                tbar: browseBar,
-                bbar: {
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        comboLayout,
-                        '->',
-                        {text: 'Ok', handler: function () {
-                            var layout;
-                            if (comboLayout) {
-                                layout = comboLayout.getValue()
-                            }
-                            _this.trigger('okButton:click', {content: _this.content, layout: layout, sender: _this});
-                            _this.panel.close();
-                        }
-                        },
-                        {text: 'Cancel', handler: function () {
-                            _this.panel.close();
-                        }}
-                    ]
-
-                }
-            },
-            listeners: {
-                scope: this,
-                minimize: function () {
-                    this.panel.hide();
-                },
-                destroy: function () {
-                    delete this.panel;
-                }
-            }
-        });
-        this.addCustomComponents();
-
-    }
-    this.panel.show();
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeLayoutConfigureWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeLayoutConfigureWidget');
-
-    this.width = 400;
-    this.height = 300;
-    this.networkViewer;
-    this.window;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    this.network = this.networkViewer.network;
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-AttributeLayoutConfigureWidget.prototype = {
-    render: function () {
-        var _this = this;
-
-        this.vertexAttributeManager = this.networkViewer.network.vertexAttributeManager;
-        this.vertexAttributeStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: this.vertexAttributeManager.attributes
-        });
-        this.vertexAttributeManager.on('change:attributes', function () {
-            _this.vertexAttributeStore.loadData(_this.vertexAttributeManager.attributes);
-        });
-
-        this.xAtributeCombo = Ext.create('Ext.form.field.ComboBox', {
-//            labelAlign: 'top',
-            labelWidth: 70,
-            fieldLabel: 'X',
-            store: this.vertexAttributeStore,
-            allowBlank: false,
-            editable: false,
-            displayField: 'name',
-            valueField: 'name',
-            queryMode: 'local',
-            forceSelection: true,
-            listeners: {
-                afterrender: function () {
-                    this.select(this.getStore().getAt(0));
-                },
-                change: function (field, e) {
-                    var value = field.getValue();
-                    if (value != null) {
-                        //
-                    }
-                }
-            }
-        });
-
-        this.yAtributeCombo = Ext.create('Ext.form.field.ComboBox', {
-//            labelAlign: 'top',
-            labelWidth: 70,
-            fieldLabel: 'Y',
-            store: this.vertexAttributeStore,
-            allowBlank: false,
-            editable: false,
-            displayField: 'name',
-            valueField: 'name',
-            queryMode: 'local',
-            forceSelection: true,
-            listeners: {
-                afterrender: function () {
-                    this.select(this.getStore().getAt(0));
-                },
-                change: function (field, e) {
-                    var value = field.getValue();
-                    if (value != null) {
-                        //
-                    }
-                }
-            }
-        });
-
-        this.normalizeCheckBox = Ext.create('Ext.form.field.Checkbox', {
-            fieldLabel: 'Normalize',
-            labelWidth: 70,
-            checked: true
-        });
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: this.id + 'window',
-            title: 'Attribute layout configuration',
-            closable: false,
-            minimizable: true,
-            constrain: true,
-            collapsible: true,
-            items: {
-                bodyPadding: 10,
-                width: this.width,
-                layout: {
-                    type: 'vbox',
-                    align: 'stretch'
-                },
-                items: [
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px'
-                        },
-                        html: 'Select attribute as node position'
-                    },
-                    {
-                        xtype: 'container',
-                        style: {
-                            marginBottom: '20px'
-                        },
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            this.xAtributeCombo,
-                            this.yAtributeCombo,
-                            this.normalizeCheckBox
-                        ]
-                    }
-                ],
-                bbar: {
-                    layout : {
-                        pack : 'end'
-                    },
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        {
-                            text: 'Apply',
-                            handler: function () {
-                                _this.setLayout();
-                            }
-                        }
-                    ]
-                }
-            },
-
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    draw: function () {
-        var _this = this;
-
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    },
-    setLayout: function () {
-        var _this = this;
-        var xAttributeName = this.xAtributeCombo.getValue();
-        var yAttributeName = this.yAtributeCombo.getValue();
-
-        var normalize = this.normalizeCheckBox.getValue();
-
-        if (normalize) {//normalized
-            var xMax, xMin, yMax, yMin;
-            this.vertexAttributeManager.eachRecord(function (record) {
-                var x = parseFloat(record.get(xAttributeName));
-                var y = parseFloat(record.get(yAttributeName));
-
-                if (!isNaN(x)) {
-                    if (typeof xMax === 'undefined') {
-                        xMax = x;
-                        xMin = x;
-                    }
-                    xMax = Math.max(x, xMax);
-                    xMin = Math.min(x, xMin);
-                }
-                if (!isNaN(y)) {
-                    if (typeof yMax === 'undefined') {
-                        yMax = y;
-                        yMin = y;
-                    }
-                    yMax = Math.max(y, yMax);
-                    yMin = Math.min(y, yMin);
-                }
-            });
-            var xRange = (xMax === xMin) ? 1 : xMax - xMin;
-            var yRange = (yMax === yMin) ? 1 : yMax - yMin;
-
-
-            var width = this.networkViewer.getLayoutWidth();
-            var height = this.networkViewer.getLayoutHeight();
-
-            this.vertexAttributeManager.eachRecord(function (record) {
-                var x = parseFloat(record.get(xAttributeName));
-                var y = parseFloat(record.get(yAttributeName));
-
-                //zero based
-                x = (x - xMin) * width / xRange;
-                y = (y - yMin) * height / yRange;
-
-                if (!isNaN(x) && !isNaN(y)) {
-                    _this.network.setVertexCoordsById(record.get("id"), x, y);
-                }
-            });
-
-
-        } else {
-
-            this.vertexAttributeManager.eachRecord(function (record) {
-                var x = parseFloat(record.get(xAttributeName));
-                var y = parseFloat(record.get(yAttributeName));
-                if (!isNaN(x) && !isNaN(y)) {
-                    _this.network.setVertexCoordsById(record.get("id"), x, y);
-                }
-            });
-        }
-
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeNetworkFileWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeNetworkFileWidget');
-
-    this.targetId;
-    this.title = 'Open an attributes file';
-    this.width = 600;
-    this.height = 350;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.dataAdapter;
-
-    this.previewId = this.id + '-preview';
-
-    this.on(this.handlers);
-};
-
-AttributeNetworkFileWidget.prototype.getTitleName = function () {
-    return Ext.getCmp(this.id + "_title").getValue();
-};
-
-AttributeNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'Attributes tabular file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                var file = document.getElementById(f.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                var attributeNetworkDataAdapter = new AttributeNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this.processData(attributeNetworkDataAdapter);
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-AttributeNetworkFileWidget.prototype.processData = function (attributesDataAdapter) {
-    var _this = this;
-    this.content = attributesDataAdapter.getAttributesJSON(); //para el onOK.notify event
-
-    this.gridTbar.removeAll();
-    this.infoLabel.setText("", false);
-
-    var existNameColumn = false;
-    var cbgItems = [];
-    this.columnsGrid = [];
-    this.gridColumnNameFields = [];
-
-    for (var i = 0; i < _this.content.attributes.length; i++) {
-        var name = this.content.attributes[i].name;
-
-        this.columnsGrid.push({
-            "text": name,
-            "dataIndex": name,
-            "flex": 1,
-            "editor": {xtype: 'textfield', allowBlank: true}
-        });
-
-        this.gridColumnNameFields.push({
-            xtype: 'textfield',
-            value: name,
-            index: i,
-            vtype: 'alphanum',
-            "flex": 1,
-            readOnly: (name === "Id") ? true : false,
-            listeners: {
-                change: function (me, newValue) {
-                    var cols = _this.grid.down('headercontainer').getGridColumns();
-                    cols[me.index].setText(newValue);
-                    _this.columnsGrid[me.index].text = newValue;
-                    _this.content.attributes[me.index].name = newValue;
-//                    console.log(cols[me.index]);
-                    cbgItems[me.index].setBoxLabel(newValue);
-                    cbgItems[me.index].updateLayout();
-                }
-            }
-        });
-
-        var disabled = false;
-        if (name == "id") {
-            disabled = true;
-            existNameColumn = true;
-        }
-        cbgItems.push(Ext.create('Ext.form.field.Checkbox', {
-            boxLabel: name,
-            name: 'attr',
-            margin: '0 0 0 5',
-            checked: true,
-            disabled: disabled
-        }));
-    }
-
-    var uniqueNameValues = true;
-    var nameValues = {};
-    for (var i = 0; i < this.content.data.length; i++) {
-        var name = this.content.data[i][0];
-        if (nameValues[name]) {
-            uniqueNameValues = false;
-            break;
-        }
-        else {
-            nameValues[name] = true;
-        }
-    }
-
-    if (!existNameColumn) {
-        this.infoLabel.setText("<span class='err'>Invalid file. The column 'id' is required.</span>", false);
-    }
-    else if (!uniqueNameValues) {
-        this.infoLabel.setText("<span class='err'>Invalid file. The values for 'id' column must be uniques.</span>", false);
-    }
-    else {
-        this.cbgAttributes.add(cbgItems);
-        this.fieldContainer.show();
-        Ext.getCmp(this.id + 'okBtn').setDisabled(false);
-    }
-
-    this.gridTbar.add(this.gridColumnNameFields);
-
-    this.gridStore.setFields(this.content.attributes);
-
-    this.grid.reconfigure(this.gridStore, this.columnsGrid);
-
-    this.gridStore.loadData(this.content.data);
-};
-
-
-AttributeNetworkFileWidget.prototype.filterColumnsToImport = function () {
-    var checkeds = this.cbgAttributes.getChecked();
-
-    var data = {};
-    var newAttrArray = [];
-    var indexToImport = {};
-
-    data.content = {};
-    data.createNodes = this.createNodesCkb.getValue();
-    if (checkeds.length < this.content.attributes.length) {
-        var columnsToImport = {};
-        for (var i = 0; i < checkeds.length; i++) {
-            columnsToImport[checkeds[i].boxLabel] = true;
-        }
-
-        for (var i = 0; i < this.content.attributes.length; i++) {
-            var name = this.content.attributes[i].name;
-            if (columnsToImport[name]) {
-                newAttrArray.push(this.content.attributes[i]);
-                indexToImport[i] = true;
-            }
-        }
-
-        data.content.data = [];
-        for (var i = 0; i < this.content.data.length; i++) {
-            data.content.data.push([]);
-            for (var j = 0; j < this.content.data[i].length; j++) {
-                if (indexToImport[j]) {
-                    data.content.data[i].push(this.content.data[i][j]);
-                }
-            }
-        }
-
-        data.content.attributes = newAttrArray;
-    }
-    else {
-        data.content = this.content;
-    }
-
-    return data;
-};
-
-AttributeNetworkFileWidget.prototype.draw = function () {
-    var _this = this;
-
-    if (this.panel == null) {
-        /** Bar for the file upload browser **/
-        var browseBar = Ext.create('Ext.toolbar.Toolbar', {cls: 'bio-border-false', dock: 'top'});
-        browseBar.add(this.getFileUpload());
-
-
-        this.infoLabel = Ext.create('Ext.toolbar.TextItem', {html: 'Please select a network saved File'});
-        this.countLabel = Ext.create('Ext.toolbar.TextItem');
-        var infobar = Ext.create('Ext.toolbar.Toolbar', {cls: 'bio-border-false', dock: 'bottom'});
-        infobar.add([this.infoLabel, '->', this.countLabel]);
-
-
-        this.cbgAttributes = Ext.create('Ext.form.CheckboxGroup', {
-            fieldLabel: 'Import',
-            labelWidth: 40,
-            layout: 'hbox',
-            autoScroll: true,
-            defaultType: 'checkboxfield'
-        });
-
-        this.createNodesCkb = Ext.create('Ext.form.field.Checkbox', {
-            margin: '2 2 2 2',
-            boxLabel: "Create nodes for unrecognized names."
-        });
-
-
-        this.fieldContainer = Ext.create('Ext.form.FieldContainer', {
-            margin:'0 0 0 10',
-            hidden:true,
-            items: [this.cbgAttributes, this.createNodesCkb]
-        });
-
-
-        /** Grid for Preview **/
-        this.columnsGrid = [];
-
-        this.gridStore = Ext.create('Ext.data.Store', {
-            pageSize: 50,
-            proxy: {
-                type: 'memory'
-            },
-            fields: []
-        });
-
-        this.gridTbar = Ext.create('Ext.toolbar.Toolbar', {
-            items: []
-        });
-
-        this.grid = Ext.create('Ext.grid.Panel', {
-            border: false,
-            flex: 1,
-            tbar: this.gridTbar,
-            store: this.gridStore,
-            columns: this.columnsGrid,
-            loadMask: true,
-            plugins: ['bufferedrenderer'],
-            hideHeaders: true,
-            dockedItems: [infobar]
-        });
-
-        this.panel = Ext.create('Ext.window.Window', {
-            title: this.title,
-            resizable: false,
-            modal: true,
-            items: {
-                layout: { type: 'vbox', align: 'stretch'},
-                width: this.width,
-                height: this.height,
-                border: 0,
-                items: [
-                    this.grid,
-                    this.fieldContainer
-                ],
-                dockedItems: [
-                    browseBar
-                ],
-                bbar: {
-                    layout : {
-                        pack : 'end'
-                    },
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        {
-                            id: _this.id + 'okBtn',
-                            text: 'Ok',
-                            disabled: true,
-                            handler: function () {
-                                _this.trigger('okButton:click', {content: _this.filterColumnsToImport(), sender: _this});
-                                _this.panel.close();
-                            }
-                        },
-                        {
-                            text: 'Cancel',
-                            handler: function () {
-                                _this.panel.close();
-                            }
-                        }
-                    ]
-
-                }
-            },
-            listeners: {
-                scope: this,
-                minimize: function () {
-                    this.panel.hide();
-                },
-                destroy: function () {
-                    delete this.panel;
-                }
-            }
-        });
-    }
-    this.panel.show();
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeEditWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeEditWidget');
-
-    this.window;
-    this.grid;
-    this.accordionPanel;
-
-    this.attrMan;
-    this.type;
-
-    this.selectedFilter = new Ext.util.Filter({
-        filterFn: function (item) {
-            return item.data['Selected'] === true;
-        }
-    });
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-AttributeEditWidget.prototype = {
-    render: function () {
-        var _this = this;
-
-        this.attrMan.on('change:attributes', function () {
-            _this.reconfigureComponents();
-        });
-
-        this.comboStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: this.attrMan.attributes
-        });
-
-        /****** UI ******/
-
-        var modifyRowsFormPanel = Ext.create('Ext.form.Panel', {
-            title: 'Edit multiple values',
-            bodyPadding: 10,
-            layout: 'vbox',
-            border: 0,
-//            flex: 1,
-            defaults: {
-                width: '100%',
-                labelWidth: 55
-            },
-            dockedItems: [
-                {
-                    xtype: 'toolbar',
-                    dock: 'top',
-                    items: [
-                        {
-                            text: 'Select all rows',
-                            handler: function () {
-                                _this.grid.getSelectionModel().selectAll();
-                            }
-                        },
-                        {
-                            text: 'Deselect all rows',
-                            handler: function () {
-                                _this.grid.getSelectionModel().deselectAll();
-                            }
-                        }
-                    ]
-                }
-            ],
-            items: [
-                this.createAttributesCombo(),
-                this.createValueField(),
-                {
-                    xtype: 'button',
-                    text: 'Apply on selected rows',
-                    formBind: true, // only enabled if the form is valid
-                    disabled: true,
-                    handler: function (bt) {
-                        var newValue = bt.prev().getValue();
-                        var selectedAttr = bt.prev().prev().getValue();
-                        var selectedRecords = _this.grid.getSelectionModel().getSelection();
-                        _this.attrMan.setRecordsAttribute(selectedRecords, selectedAttr, newValue);
-                    }
-                }
-            ]
-        });
-        var addAttributeFormPanel = Ext.create('Ext.form.Panel', {
-            title: 'Add attribute',
-            bodyPadding: 10,
-            layout: 'vbox',
-            border: 0,
-//            flex: 1,
-            style: {
-                borderTopColor: 'lightgray',
-                borderTopStyle: 'solid',
-                borderTopWidth: '1px'
-            },
-            defaults: {
-                width: '100%',
-                labelWidth: 55
-            },
-            items: [
-                {
-                    xtype: 'textfield',
-                    fieldLabel: 'Name',
-                    allowBlank: false
-                },
-                {
-                    xtype: 'combo',
-                    hidden: true,
-                    store: ['string', 'int', 'float'],
-                    value: 'string',
-                    fieldLabel: 'Type',
-                    editable: false,
-                    queryMode: 'local',
-                    allowBlank: false
-                },
-//                {
-//                    xtype: 'textfield',
-//                    width: 170,
-//                    value: '',
-//                    fieldLabel: 'Default value',
-//                    labelWidth: 50
-//                },
-                {
-                    xtype: 'button',
-                    text: 'Apply',
-                    formBind: true, // only enabled if the form is valid
-                    disabled: true,
-                    handler: function (bt) {
-                        var name = bt.previousSibling('textfield[fieldLabel=Name]').getValue();
-                        var type = bt.previousSibling('combo[fieldLabel=Type]').getValue();
-//                        var defaultValue = bt.prev().getValue();
-                        var created = _this.attrMan.addAttribute({name: name, type: type, defaultValue: ''});
-                        var msg = (created === false) ? '<span class="err">Name already exists.</span>' : '';
-                        bt.next().update(msg);
-                    }
-                },
-                {
-                    xtype: 'box',
-                    margin: '10 0 0 0',
-                    html: ''
-                }
-            ]
-        });
-
-        var removeAttributeFormPanel = Ext.create('Ext.form.Panel', {
-            title: 'Remove attribute',
-            bodyPadding: 10,
-            layout: 'vbox',
-            border: 0,
-//            flex: 1,
-            style: {
-                borderTopColor: 'lightgray',
-                borderTopStyle: 'solid',
-                borderTopWidth: '1px'
-            },
-            defaults: {
-                width: '100%',
-                labelWidth: 55
-            },
-            items: [
-                this.createAttributesCombo(),
-                {
-                    xtype: 'button',
-                    text: 'Apply',
-                    formBind: true, // only enabled if the form is valid
-                    disabled: true,
-                    handler: function (bt) {
-                        var attributeName = bt.prev().getValue();
-                        var removed = _this.attrMan.removeAttribute(attributeName);
-                        var msg = (removed === false) ? '<span class="err">Impossible to remove.</span>' : '';
-                        bt.next().update(msg);
-                    }
-                },
-                {
-                    xtype: 'box',
-                    margin: "10 0 0 0"
-                }
-            ]
-        });
-
-        var toolbar = Ext.create('Ext.toolbar.Toolbar', {
-            dock: 'top',
-            items: [
-//                {
-//                    xtype: 'button',
-//                    text: '<span style="font-size: 12px">Columns <span class="caret"></span></span>',
-//                    handler: function (bt, e) {
-//                        var menu = _this.grid.headerCt.getMenu().down('menuitem[text=Columns]').menu;
-//                        menu.showBy(bt);
-//                    }
-//                },
-//                '-',
-                {
-//                    toolbar.down('radiogroup').getValue() --> {selection: "all"}
-                    xtype: 'radiogroup',
-                    id: this.id + 'selectMode',
-                    fieldLabel: 'Show',
-                    labelWidth: 30,
-                    width: 230,
-                    margin: '0 0 0 10',
-                    defaults: {
-                        margin: '0 0 0 10'
-                    },
-                    layout: 'hbox',
-                    items: [
-                        {
-                            boxLabel: 'All',
-                            checked: true,
-                            name: this.id + 'selection',
-                            inputValue: 'all'
-                        },
-                        {
-                            boxLabel: 'Network selection',
-                            name: this.id + 'selection',
-                            inputValue: 'selected'
-                        }
-                    ],
-                    listeners: {
-                        change: function (radiogroup, newValue, oldValue, eOpts) {
-                            _this.checkSelectedFilter();
-                        }
-                    }
-                },
-                '->',
-                {
-                    xtype: 'tbtext',
-                    text: '<span style="color:gray">Use double-click to edit</span>'
-                },
-                {
-                    xtype: 'button',
-                    text: '<i class="fa fa-download"></i> Download as file',
-                    handler: function (bt, e) {
-                        var a = bt.getEl();
-                        var string = _this.attrMan.getAsFile();
-                        var blob = new Blob([string], {type: "data:text/tsv"});
-                        var url = URL.createObjectURL(blob);
-                        var link = document.createElement('a');
-                        link.href = url;
-                        link.download = _this.type + ".attr"
-                        var event = new MouseEvent('click', {
-                            'view': window,
-                            'bubbles': true,
-                            'cancelable': true
-                        });
-                        link.dispatchEvent(event);
-                    }
-                }
-            ]
-        });
-
-        this.grid = Ext.create('Ext.grid.Panel', {
-            store: this.attrMan.store,
-            columns: this.attrMan.columnsGrid,
-            flex: 1,
-            border: 0,
-            selModel: {
-                selType: 'rowmodel',
-                mode: 'MULTI'
-            },
-            loadMask: true,
-            plugins: [
-                {
-                    ptype: 'bufferedrenderer'
-                },
-                {
-                    ptype: 'cellediting',
-                    clicksToEdit: 2
-                }
-            ],
-            viewConfig:{
-                markDirty:false
-            },
-            listeners: {
-                validateedit: function (editor, context, eOpts) {
-                    _this.attrMan.setRecordsAttribute([context.record], context.field, context.value);
-                    return false;
-                }
-//                selectionchange: function (model, selected) {
-//                    console.log('selection change')
-//                    var nodeList = [];
-//                    for (var i = 0; i < selected.length; i++) {
-//                        nodeList.push(selected[i].getData().Id);
-//                    }
-//                }
-            },
-            dockedItems: [toolbar]
-
-        });
-
-        this.accordionPanel = Ext.create('Ext.container.Container', {
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
-            width: 230,
-            border: '0 1 0 0',
-            style: {
-                borderColor: 'lightgray',
-                borderStyle: 'solid',
-                backgroundColor: '#ffffff'
-            },
-            items: [
-                modifyRowsFormPanel,
-                addAttributeFormPanel,
-                removeAttributeFormPanel,
-//                editAttrFormPanel
-            ]
-        });
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: "edit" + this.type + "AttrWindow",
-            title: "Edit " + this.type.toLowerCase() + " attributes",
-            width: 850,
-            height: 600,
-            closable: false,
-            minimizable: true,
-            maximizable: true,
-            constrain: true,
-            collapsible: true,
-            layout: {
-                type: 'hbox',
-                align: 'stretch'
-            },
-            renderTo: Ext.getBody(),
-            items: [this.accordionPanel, this.grid],
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    draw: function () {
-        this.window.show();
-        this.checkSelectedFilter();
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    },
-//    setAttributeManager: function (attrMan) {
-//        var _this = this;
-//        this.attrMan = attrMan;
-//        this.attrMan.on('change:attributes', function () {
-//            _this.reconfigureComponents();
-//        });
-//        this.reconfigureComponents();
-//    },
-    reconfigureComponents: function () {
-        this.grid.reconfigure(this.attrMan.store, this.attrMan.columnsGrid);
-
-        this.reloadComboStore();
-    },
-    reloadComboStore: function () {
-        this.comboStore.loadData(this.attrMan.attributes);
-    },
-    checkSelectedFilter: function () {
-        this.attrMan.store.clearFilter();
-        var value = Ext.getCmp(this.id + 'selectMode').getValue();
-        if (value[this.id + 'selection'] === 'selected') {
-            this.attrMan.store.setFilters(this.selectedFilter);
-        }
-    },
-
-
-    /** Create components **/
-    createAttributesCombo: function () {
-        return {
-            xtype: 'combo',
-            store: this.comboStore,
-            displayField: 'name',
-            valueField: 'name',
-            allowBlank: false,
-            fieldLabel: 'Attribute',
-            editable: false,
-            queryMode: 'local'
-        }
-    },
-    createValueField: function () {
-        return {
-            xtype: 'textfield',
-            fieldLabel: 'Value',
-            allowBlank: false
-        }
-    }
-
-
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeFilterWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeFilterWidget');
-
-    this.attrMan;
-    this.type;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.attrMan.store.on('datachanged', function () {
-        if (Ext.getCmp("filterAttrWindow")) {
-            _this.updateNumRowsLabel();
-        }
-    });
-
-//	this.onSelectNodes = new Event(this);
-//	this.onDeselectNodes = new Event(this);
-//	this.onFilterNodes = new Event(this);
-//	this.onRestoreNodes = new Event(this);
-
-    this.on(this.handlers);
-};
-
-AttributeFilterWidget.prototype.draw = function (selectedNodes) {
-    var _this = this;
-
-    var attrNameStore = Ext.create('Ext.data.Store', {
-        id: this.id + "attrNameStore",
-        fields: ['name'],
-        data: this.getAttributeNames()
-    });
-
-    var addFilterFormPanel = Ext.create('Ext.form.Panel', {
-        title: 'Add new filter',
-        border: false,
-        bodyStyle: 'background: #dedcd8',
-        bodyPadding: "10 5 10 5",
-        layout: 'hbox',
-        items: [
-            {
-                xtype: 'text',
-                margin: "4 0 0 0",
-                text: 'Filter name:'
-            },
-            {
-                xtype: 'textfield',
-                id: this.id + "filterName",
-                width: 105,
-                margin: "0 0 0 4",
-                allowBlank: false
-            },
-            {
-                xtype: 'text',
-                margin: "4 0 0 10",
-                text: 'Attribute:'
-            },
-            {
-                xtype: 'combo',
-                id: this.id + "selectedAttr",
-                margin: "0 0 0 4",
-                width: 105,
-                allowBlank: false,
-                mode: 'local',
-                editable: false,
-                displayField: 'name',
-                valueField: 'name',
-                store: attrNameStore
-            },
-            {
-                xtype: 'text',
-                margin: "4 0 0 10",
-                text: 'Attr. value:'
-            },
-            {
-                xtype: 'textfield',
-                id: this.id + "attrValue",
-                width: 105,
-                margin: "0 0 0 4",
-                allowBlank: false
-            },
-            {
-                xtype: 'button',
-                text: 'Add',
-                iconCls: 'icon-add',
-                margin: "0 15 0 10",
-                formBind: true, // only enabled if the form is valid
-                disabled: true,
-                handler: function () {
-                    var filterName = Ext.getCmp(_this.id + "filterName").getValue();
-                    var selectedAttr = Ext.getCmp(_this.id + "selectedAttr").getValue();
-                    var attrValue = Ext.getCmp(_this.id + "attrValue").getValue();
-
-                    if (_this.attrMan.addFilter(filterName, selectedAttr, attrValue)) {
-                        // Active filters menu
-                        Ext.getCmp(_this.id + "filterMenu").menu.add({
-                            id: filterName,
-                            text: filterName,
-                            checked: true,
-                            handler: function () {
-                                if (this.checked) {
-                                    // apply filter
-                                    _this.attrMan.enableFilter(this.text);
-
-                                    // select nodes of filter
-                                    _this.selectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    Ext.getCmp(this.id + "_main").setChecked(true);
-                                }
-                                else {
-                                    // remove filter
-                                    _this.attrMan.disableFilter(this.text);
-                                    _this.deselectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    Ext.getCmp(this.id + "_main").setChecked(false);
-                                }
-                            }
-                        });
-
-                        //add to main menu
-                        Ext.getCmp("filters" + _this.type + "AttrMenu").add({
-                            id: filterName + "_main",
-                            text: filterName,
-                            checked: true,
-                            handler: function () {
-                                if (this.checked) {
-                                    // apply filter
-                                    _this.attrMan.enableFilter(this.text);
-
-                                    // select nodes of filter
-                                    _this.selectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    if (Ext.getCmp(this.text)) {
-                                        Ext.getCmp(this.text).setChecked(true);
-                                    }
-                                }
-                                else {
-                                    // remove filter
-                                    _this.attrMan.disableFilter(this.text);
-                                    _this.deselectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    if (Ext.getCmp(this.text)) {
-                                        Ext.getCmp(this.text).setChecked(false);
-                                    }
-                                }
-                            }
-                        });
-
-                        // Remove filter menu
-                        Ext.getCmp(_this.id + "rmFilterMenu").menu.add({
-                            text: filterName,
-                            handler: function () {
-                                var item = this;
-                                Ext.Msg.show({
-                                    title: 'Delete',
-                                    msg: 'Confirm delete. Are you sure?',
-                                    buttons: Ext.Msg.YESNO,
-                                    icon: Ext.Msg.QUESTION,
-                                    fn: function (resp) {
-                                        if (resp == "yes") {
-                                            _this.attrMan.removeFilter(item.text);
-                                            Ext.getCmp(_this.id + "rmFilterMenu").menu.remove(item);
-                                            Ext.getCmp(_this.id + "filterMenu").menu.remove(item.text);
-                                            Ext.getCmp("filters" + _this.type + "AttrMenu").remove(Ext.getCmp(item.text + "_main"));
-                                            _this.deselectNodesOnGraph();
-                                        }
-                                    }
-                                });
-                            }
-                        });
-
-                        // select nodes of added filter
-                        _this.selectNodesOnGraph();
-                    }
-                    else {
-                        Ext.Msg.show({
-                            title: "Error",
-                            msg: "Already exists a filter with this name.",
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.Msg.ERROR
-                        });
-                    }
-                }
-            }
-        ]
-    });
-
-    var restoreBtn = Ext.create('Ext.Button', {
-        disabled: true,
-        text: 'Restore original graph',
-        handler: function () {
-            this.setDisabled(true);
-
-            _this.trigger('vertices:restore', {sender: _this});
-        }
-    });
-
-    this.grid = Ext.create('Ext.grid.Panel', {
-        store: this.attrMan.store,
-        columns: this.attrMan.columnsGrid,
-        height: 400,
-        width: 400,
-        selModel: {
-            selType: 'rowmodel',
-            mode: 'MULTI'
-        },
-        border: 0,
-        dockedItems: [
-            {
-                xtype: 'toolbar',
-                dock: 'bottom',
-                items: [
-                    {
-                        xtype: 'tbtext',
-                        id: this.id + "numRowsLabel"
-                    },
-                    '->',
-                    {
-                        xtype: 'button',
-                        text: 'Export...',
-                        handler: function () {
-                            if (!Ext.getCmp("exportWindow")) {
-                                var cbgItems = [];
-                                var attrList = _this.attrMan.getAttrNameList();
-
-                                cbgItems.push({
-                                    boxLabel: attrList[1],
-                                    name: 'attr',
-                                    inputValue: attrList[1],
-                                    checked: true,
-                                    disabled: true
-                                });
-
-                                for (var i = 2; i < attrList.length; i++) {
-                                    cbgItems.push({
-                                        boxLabel: attrList[i],
-                                        name: 'attr',
-                                        inputValue: attrList[i],
-                                        checked: true
-                                    });
-                                }
-
-
-                                Ext.create('Ext.window.Window', {
-                                    id: "exportWindow",
-                                    title: "Export attributes",
-                                    height: 250,
-                                    maxHeight: 250,
-                                    width: 400,
-                                    autoScroll: true,
-                                    layout: "vbox",
-                                    modal: true,
-                                    items: [
-                                        {
-                                            xtype: 'checkboxgroup',
-                                            id: _this.id + "cbgAttributes",
-                                            layout: 'vbox',
-//		            	        				        	   width: 380,
-//		            	        				        	   height: 200,
-//		            	        				        	   maxHeight: 200,
-//		            	        				        	   autoScroll: true,
-//		            	        				        	   defaultType: 'checkboxfield',
-//		            	        				        	   columns: 1,
-//		            	        				        	   vertical: true,
-                                            items: cbgItems
-                                        }
-                                    ],
-                                    buttons: [
-                                        {
-                                            xtype: 'textfield',
-                                            id: _this.id + "fileName",
-                                            emptyText: "enter file name",
-                                            flex: 1
-                                        },
-                                        {
-                                            text: 'Download',
-                                            href: "none",
-                                            handler: function () {
-                                                //Download file
-//		            	        			  	            		 document.location = 'data:Application/octet-stream,'+encodeURIComponent(content);
-                                                var fileName = Ext.getCmp(_this.id + "fileName").getValue();
-                                                if (fileName == "") {
-                                                    fileName = "attributes";
-                                                }
-                                                var columns = Ext.getCmp(_this.id + "cbgAttributes").getChecked();
-                                                var content = _this.attrMan.exportToTab(columns, false);
-                                                this.getEl().child("em").child("a").set({
-                                                    href: 'data:text/csv,' + encodeURIComponent(content),
-                                                    download: fileName + ".txt"
-                                                });
-//		            	        			  	            		 Ext.getCmp("exportWindow").close();
-                                            }
-                                        }
-                                    ]
-                                }).show();
-                            }
-                        }
-                    }
-                ]
-            },
-            {
-                xtype: 'toolbar',
-                dock: 'bottom',
-                items: addFilterFormPanel
-            },
-            {
-                xtype: 'toolbar',
-                dock: 'top',
-                layout: {
-                    pack: 'hbox',
-                    align: 'right'
-                },
-                items: [
-                    {
-                        id: this.id + "filterMenu",
-                        text: 'Active filters',
-                        menu: []
-                    },
-                    {
-                        id: this.id + "rmFilterMenu",
-                        text: 'Remove filter',
-                        menu: []
-                    },
-                    {
-                        xtype: 'button',
-                        text: 'Select on graph',
-                        handler: function () {
-                            _this.selectNodesOnGraph();
-                        }
-                    },
-                    {
-                        xtype: 'button',
-                        text: 'Filter on graph',
-                        handler: function () {
-                            restoreBtn.setDisabled(false);
-                            _this.grid.getSelectionModel().selectAll();
-                            var selection = _this.grid.getSelectionModel().getSelection();
-                            var nodeList = {};
-                            for (var i = 0; i < selection.length; i++) {
-                                nodeList[selection[i].getData().Id] = true;
-                            }
-                            _this.trigger('vertices:filter', {vertices: nodeList, sender: _this});
-                        }
-                    },
-                    restoreBtn
-                ]
-            }
-        ],
-        plugins: [
-            // double click to edit cell
-            Ext.create('Ext.grid.plugin.CellEditing', {
-                clicksToEdit: 2
-            })
-        ],
-        renderTo: Ext.getBody(),
-        listeners: {
-            afterrender: function () {
-                var menu = this.headerCt.getMenu();
-                menu.add([
-                    {
-                        text: 'Reset to default',
-                        handler: function () {
-                            var columnDataIndex = menu.activeHeader.dataIndex;
-                            alert('custom item for column "' + columnDataIndex + '" was pressed');
-                        }
-                    }
-                ]);
-            },
-            selectionchange: function (model, selected) {
-                var nodeList = [];
-                for (var i = 0; i < selected.length; i++) {
-                    nodeList.push(selected[i].getData().Id);
-                }
-                _this.trigger('vertices:select', {vertices: nodeList, sender: _this});
-            }
-        }
-    });
-
-    Ext.create('Ext.window.Window', {
-        id: "filter" + this.type + "AttrWindow",
-        title: "Filter " + this.type.toLowerCase() + " attributes",
-        height: 450,
-        width: 600,
-        layout: "fit",
-        items: this.grid
-    }).show();
-
-    //Add created filters to menus
-    for (var filter in this.attrMan.filters) {
-        // Active filters menu
-        Ext.getCmp(this.id + "filterMenu").menu.add({
-            id: filter,
-            text: filter,
-            checked: this.attrMan.filters[filter].active,
-            handler: function () {
-                if (this.checked) {
-                    // apply filter
-                    _this.attrMan.enableFilter(this.text);
-
-                    // select nodes of filter
-                    _this.selectNodesOnGraph();
-
-                    // check item in the other menu
-                    Ext.getCmp(this.id + "_main").setChecked(true);
-                }
-                else {
-                    // remove filter
-                    _this.attrMan.disableFilter(this.text);
-                    _this.deselectNodesOnGraph();
-
-                    // check item in the other menu
-                    Ext.getCmp(this.id + "_main").setChecked(false);
-                }
-            }
-        });
-
-        // Remove filter menu
-        Ext.getCmp(this.id + "rmFilterMenu").menu.add({
-            text: filter,
-            handler: function () {
-                _this.attrMan.removeFilter(this.text);
-                Ext.getCmp(_this.id + "rmFilterMenu").menu.remove(this);
-                Ext.getCmp(_this.id + "filterMenu").menu.remove(this.text);
-                Ext.getCmp("filters" + _this.type + "AttrMenu").remove(Ext.getCmp(this.text + "_main"));
-                _this.deselectNodesOnGraph();
-            }
-        });
-    }
-
-    this.selectRowsById(selectedNodes);
-    this.updateNumRowsLabel();
-};
-
-AttributeFilterWidget.prototype.getAttributeNames = function () {
-    var names = [];
-    var nameList = this.attrMan.getAttrNameList();
-    for (var i = 0; i < nameList.length; i++) {
-        var attr = nameList[i];
-        if (attr != "Id") {
-            names.push({"name": attr});
-        }
-    }
-    return names;
-};
-
-AttributeFilterWidget.prototype.selectNodesOnGraph = function () {
-    if (Ext.getCmp("filterAttrWindow")) {
-        this.grid.getSelectionModel().selectAll();
-    }
-
-    var nodeList = [];
-    this.attrMan.store.each(function (record) {
-        nodeList.push(record.getData().Id);
-    });
-    this.trigger('vertices:select', {vertices: nodeList, sender: this});
-};
-
-AttributeFilterWidget.prototype.deselectNodesOnGraph = function () {
-    this.trigger('vertices:deselect', {sender: this});
-};
-
-AttributeFilterWidget.prototype.selectRowsById = function (arrayNodes) {
-    this.grid.getSelectionModel().deselectAll();
-    for (var i = 0; i < arrayNodes.length; i++) {
-        var idx = this.attrMan.store.find("Id", arrayNodes[i]);
-        this.grid.getSelectionModel().select(idx, true);
-    }
-};
-
-AttributeFilterWidget.prototype.updateNumRowsLabel = function () {
-    Ext.getCmp(this.id + "numRowsLabel").setText(this.attrMan.getNumberOfRows() + " rows");
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-//DOTNetworkFileWidget.prototype.draw = NetworkFileWidget.prototype.draw;
-
-function DOTNetworkFileWidget(args) {
-    args.title = 'Import a Network DOT file';
-    NetworkFileWidget.prototype.constructor.call(this, args);
-};
-
-
-DOTNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'DOT network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f,v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id='+f.getInputId()+']');
-                node.value = v.replace("C:\\fakepath\\","");
-
-                _this.dataAdapter = new DOTDataAdapter({
-                    dataSource: new FileDataSource({file:file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            try {
-                                var network = event.network;
-                                _this.content = network; //para el onOK.notify event
-                                var verticesLength = network.graph.vertices.length;
-                                var edgesLength = network.graph.edges.length;
-
-                                var edges = network.graph.edges;
-                                for (var i = 0; i < edges.length; i++) {
-                                    var edge = edges[i];
-                                    var edgeConfig = network.getEdgeConfig(edge);
-                                    var link = (edgeConfig.type = "directed") ? "->" : "--";
-
-                                    _this.gridStore.loadData([
-                                        [edge.source.name, link, edge.target.name]
-                                    ], true);
-                                }
-
-                                _this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-                                _this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-                            } catch (e) {
-                                _this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-                            }
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-JSONNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function JSONNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Open a Network JSON file';
-    this.id = Utils.genId('JSONNetworkFileWidget');
-};
-
-JSONNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'JSON network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function () {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-
-                _this.dataAdapter = new JSONNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            try {
-                                var networkJSON = event.jsonObject;
-                                _this.content = networkJSON;
-
-                                var data = [];
-                                for (var i = 0; i < networkJSON.graph.edges.length; i++) {
-                                    var edge = networkJSON.graph.edges[i];
-                                    data.push([edge.source.id, edge.relation, edge.target.id]);
-                                }
-                                _this.gridStore.loadData(data);
-
-
-                                var verticesLength = networkJSON.graph.vertices.length;
-                                var edgesLength = networkJSON.graph.edges.length;
-
-                                _this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-                                _this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span>&nbsp;&nbsp; Edges:<span class="info">' + edgesLength + '</span>', false);
-
-                            } catch (e) {
-                                _this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-                            }
-                            _this.panel.setLoading(false);
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function LayoutConfigureWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('LayoutConfigureWidget');
-
-    this.width = 450;
-    this.height = 300;
-    this.window;
-    this.networkViewer;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    this.network = this.networkViewer.network;
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-LayoutConfigureWidget.prototype = {
-    render: function () {
-        var _this = this;
-
-        this.edgeAttributeManager = this.network.edgeAttributeManager;
-        this.edgeAttributeStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: [
-                {name: 'Non weighted'}
-            ].concat(this.edgeAttributeManager.attributes)
-        });
-        this.edgeAttributeManager.on('change:attributes', function () {
-            _this.edgeAttributeStore.loadData([
-                {name: 'Non weighted'}
-            ].concat(_this.edgeAttributeManager.attributes));
-        });
-
-        this.vertexAttributeManager = this.network.vertexAttributeManager;
-        this.vertexAttributeStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: [
-                {name: 'Non weighted'}
-            ].concat(this.vertexAttributeManager.attributes)
-        });
-        this.vertexAttributeManager.on('change:attributes', function () {
-            _this.vertexAttributeStore.loadData([
-                {name: 'Non weighted'}
-            ].concat(_this.vertexAttributeManager.attributes));
-        });
-
-        var nodeChargeAttributeCombo = this.createComponent({
-            text: 'Charge',
-            store: this.vertexAttributeStore,
-            value: -30,
-//            maxValue: 100,
-//            minValue: -100,
-            step: 1,
-            changeNumberField: function () {
-            },
-            changeCombo: function () {
-            }
-
-        });
-
-        var edgeDistanceAttributeCombo = this.createComponent({
-            text: 'Link distance',
-            store: this.edgeAttributeStore,
-            value: 20,
-//            maxValue: 100,
-            minValue: 0,
-            step: 1,
-            changeNumberField: function () {
-            },
-            changeCombo: function () {
-            }
-        });
-
-        var edgeStrengthAttributeCombo = this.createComponent({
-            text: 'Link strength',
-            store: this.edgeAttributeStore,
-            value: 1,
-            maxValue: 1,
-            minValue: 0,
-            step: 0.1,
-            changeNumberField: function () {
-            },
-            changeCombo: function () {
-            }
-        });
-
-        var frictionField = Ext.create('Ext.form.field.Number', {
-            xtype: 'numberfield',
-            fieldLabel: '<span style="font-family: Oxygen">Friction</span>',
-            value: 0.9,
-            maxValue: 1,
-            minValue: 0,
-            step: 0.1,
-            listeners: {
-                change: {
-                    buffer: 100,
-                    fn: function (field, newValue) {
-                        if (newValue != null) {
-                            console.log(newValue);
-                        }
-                    }
-                }
-            }
-        });
-        var gravityField = Ext.create('Ext.form.field.Number', {
-            xtype: 'numberfield',
-            fieldLabel: '<span style="font-family: Oxygen">Gravity</span>',
-            value: 0.1,
-//                            maxValue: ,
-            minValue: 0,
-            step: 0.1,
-            listeners: {
-                change: {
-                    buffer: 100,
-                    fn: function (field, newValue) {
-                        if (newValue != null) {
-                            console.log(newValue);
-                        }
-                    }
-                }
-            }
-        });
-        var chargeDistanceField = Ext.create('Ext.form.field.Number', {
-            xtype: 'numberfield',
-            fieldLabel: '<span style="font-family: Oxygen">Charge distance</span>',
-            value: 500,
-//            maxValue: 100,
-            minValue: 0,
-            step: 1,
-            listeners: {
-                change: {
-                    buffer: 100,
-                    fn: function (field, newValue) {
-                        if (newValue != null) {
-                            console.log(newValue);
-                        }
-                    }
-                }
-            }
-        });
-
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: this.id + 'window',
-            title: 'Force directed layout configuration',
-            closable: false,
-            minimizable: true,
-            constrain: true,
-            collapsible: true,
-            layout: 'fit',
-            items: {
-                layout: {
-                    type: 'vbox',
-                    align: 'stretch'
-                },
-                width: this.width,
-                bodyPadding: 10,
-                border: false,
-                items: [
-                    {
-                        xtype: 'box',
-                        style: {
-                            textAlign: 'right'
-                        },
-                        html: '<a target="_blank" href="https://github.com/mbostock/d3/wiki/Force-Layout">About force directed layout </a>'
-                    },
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px'
-                        },
-                        html: 'Node related settings'
-                    },
-                    {
-                        xtype: 'container',
-                        style: {
-                            marginBottom: '20px'
-                        },
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            nodeChargeAttributeCombo
-                        ]
-                    },
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px'
-                        },
-                        html: 'Edge related settings'
-                    },
-                    {
-                        xtype: 'container',
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            edgeDistanceAttributeCombo,
-                            edgeStrengthAttributeCombo
-                        ]
-                    },
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px',
-                            marginTop: '20px'
-                        },
-                        html: 'Global settings'
-                    },
-                    {
-                        xtype: 'container',
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            frictionField,
-                            gravityField,
-                            chargeDistanceField
-
-                        ]
-                    }
-                ],
-                bbar: {
-                    layout: {
-                        pack: 'end'
-                    },
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        {
-                            text: 'Apply',
-                            handler: function () {
-
-                                var linkDistanceValue = edgeDistanceAttributeCombo.down('combo').getValue();
-                                var linkStrengthValue = edgeStrengthAttributeCombo.down('combo').getValue();
-                                var chargeValue = nodeChargeAttributeCombo.down('combo').getValue();
-
-                                var linkDistanceDefaultValue = edgeDistanceAttributeCombo.down('numberfield').getValue();
-                                var linkStrengthDefaultValue = edgeStrengthAttributeCombo.down('numberfield').getValue();
-                                var chargeDefaultValue = nodeChargeAttributeCombo.down('numberfield').getValue();
-
-                                linkDistanceValue = linkDistanceValue === 'Non weighted' ? linkDistanceDefaultValue : linkDistanceValue;
-                                linkStrengthValue = linkStrengthValue === 'Non weighted' ? linkStrengthDefaultValue : linkStrengthValue;
-                                chargeValue = chargeValue === 'Non weighted' ? chargeDefaultValue : chargeValue;
-
-                                GraphLayout.force({
-                                    network: _this.network,
-                                    width: _this.networkViewer.networkSvgLayout.getWidth(),
-                                    height: _this.networkViewer.networkSvgLayout.getHeight(),
-                                    linkDistance: linkDistanceValue,
-                                    linkStrength: linkStrengthValue,
-                                    charge: chargeValue,
-                                    multipliers: {
-                                        linkDistance: linkDistanceDefaultValue,
-                                        linkStrength: linkStrengthDefaultValue,
-                                        charge: chargeDefaultValue
-                                    },
-                                    friction: frictionField.getValue(),
-                                    gravity: gravityField.getValue(),
-                                    chargeDistance: chargeDistanceField.getValue(),
-
-                                    simulation: false,
-                                    end: function (verticesArray) {
-                                        for (var i = 0, l = verticesArray.length; i < l; i++) {
-                                            var v = verticesArray[i];
-                                            _this.networkViewer.setVertexCoords(v.id, v.x, v.y);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    ]
-                }
-            },
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    draw: function () {
-        var _this = this;
-
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    },
-    createComponent: function (args) {
-        var _this = this;
-        return Ext.create('Ext.container.Container', {
-            layout: 'hbox',
-            defaults: {
-                margin: '0 1 0 1'
-            },
-            items: [
-                {
-                    xtype: 'numberfield',
-                    fieldLabel: '<span style="font-family: Oxygen">' + args.text + '</span>',
-                    value: args.value,
-                    maxValue: args.maxValue,
-                    minValue: args.minValue,
-                    step: args.step,
-                    margin: '0 10 0 0',
-                    listeners: {
-                        change: {
-                            buffer: 100,
-                            fn: function (field, newValue) {
-                                if (newValue != null) {
-                                    args.changeNumberField(newValue);
-                                }
-                            }
-                        }
-                    }
-                },
-                {
-                    xtype: 'combo',
-                    store: args.store,
-                    displayField: 'name',
-                    valueField: 'name',
-                    width: 100,
-                    queryMode: 'local',
-                    forceSelection: true,
-                    editable: false,
-                    listeners: {
-                        afterrender: function () {
-                            this.select(this.getStore().getAt(0));
-                        },
-                        change: function (field, e) {
-                            var value = field.getValue();
-                            if (value != null) {
-                                args.changeCombo(value);
-                            }
-                        }
-                    }
-                }
-            ]
-        })
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function NetworkEditWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('NetworkEditWidget');
-
-    this.window;
-    this.grid;
-    this.network;
-    this.networkViewer;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-NetworkEditWidget.prototype = {
-    render: function () {
-        var _this = this;
-        this.store = Ext.create('Ext.data.Store', {
-            id: this.id + 'store',
-            pageSize: 50,
-            proxy: {
-                type: 'memory'
-            },
-            fields: [
-                {name: 'relation', type: 'string'}
-            ],
-            data: this.getElements()
-        });
-
-        this.network.on('add:vertex add:edge remove:vertex remove:edge remove:vertices load:json clean draw batch:end', function () {
-            _this.store.loadRawData(_this.getElements());
-        });
-    },
-    draw: function () {
-        var _this = this;
-
-
-        this.sourceTextfield = Ext.create('Ext.form.field.Text', {
-            xtype: 'textfield',
-            vtype: 'alphanum',
-            emptyText: 'Source id',
-            flex: 1
-        });
-
-        this.relationTextfield = Ext.create('Ext.form.field.Text', {
-            xtype: 'textfield',
-            vtype: 'alphanum',
-            emptyText: 'Relation',
-            flex: 1
-        });
-
-        this.targetTextfield = Ext.create('Ext.form.field.Text', {
-            xtype: 'textfield',
-            vtype: 'alphanum',
-            emptyText: 'Target id',
-            flex: 1
-        });
-
-        this.grid = Ext.create('Ext.grid.Panel', {
-            id: this.id + 'grid',
-            store: this.store,
-            columns: [
-                {"header": "Source node", xtype: 'templatecolumn', tpl: '{source.id}', flex: 1, editor: {allowBlank: false}},
-                {"header": "Relation", "dataIndex": "relation", flex: 1, editor: {allowBlank: false}},
-                {"header": "Target node", xtype: 'templatecolumn', tpl: '{target.id}', flex: 1, editor: {allowBlank: false}}
-            ],
-            flex: 1,
-            border: 0,
-            loadMask: true,
-            selModel: {
-                selType: 'rowmodel',
-                mode: 'MULTI'
-            },
-            plugins: ['bufferedrenderer',
-//                Ext.create('Ext.grid.plugin.RowEditing', {
-//                    clicksToMoveEditor: 1,
-//                    autoCancel: false
-//                })
-//                Ext.create('Ext.grid.plugin.CellEditing', {
-//                    double click to edit cell
-//                    clicksToEdit: 2
-//                })
-            ],
-
-            listeners: {
-//                selectionchange: function (model, selected) {
-//                    console.log('selection change')
-//                    var vertexList = [];
-//                    for (var i = 0; i < selected.length; i++) {
-//                        vertexList.push(selected[i].getData().Id);
-//                    }
-//                }
-            },
-            dockedItems: [
-                {
-                    xtype: 'toolbar',
-                    dock: 'top',
-                    items: [
-                        {
-                            xtype: 'button',
-                            text: 'Remove selected interactions',
-                            handler: function (bt, e) {
-                                var grid = _this.grid;
-                                var selectedRecords = _this.grid.getSelectionModel().getSelection();
-                                _this.network.batchStart();
-                                for (var i = 0; i < selectedRecords.length; i++) {
-                                    var record = selectedRecords[i];
-                                    var edge = _this.network.getEdgeById(record.get('id'));
-                                    if (typeof edge !== 'undefined') {
-                                        _this.network.removeEdge(edge);
-                                        _this.network.removeVertex(_this.network.getVertexById(record.get('source').id));
-                                        _this.network.removeVertex(_this.network.getVertexById(record.get('target').id));
-                                    } else {
-                                        var vertex = _this.network.getVertexById(record.get('source').id);
-                                        if(vertex){
-                                            _this.network.removeVertex(vertex);
-                                        }
-                                    }
-                                }
-//                                var vertices = _this.network.graph.vertices;
-//                                for (var i = 0; i < vertices.length; i++) {
-//                                    var vertex = vertices[i];
-//                                    if (typeof vertex !== 'undefined') {
-//                                        if (vertex.edges.length == 0) {
-//                                            _this.network.removeVertex(vertex);
-//                                        }
-//                                    }
-//                                }
-                                _this.network.batchEnd();
-                                _this.network.vertexAttributeManager.trigger('change:data', {sender: this});
-                                _this.network.edgeAttributeManager.trigger('change:data', {sender: this});
-                            }
-                        },
-                        '->',
-                        {
-                            xtype: 'button',
-                            text: 'Download as SIF file',
-                            handler: function (bt, e) {
-                                var a = bt.getEl();
-                                var string = _this.network.graph.getAsSIF();
-                                var blob = new Blob([string], {type: "data:text/tsv"});
-                                var url = URL.createObjectURL(blob);
-                                var link = document.createElement('a');
-                                link.href = url;
-                                link.download = "network.sif";
-                                var event = new MouseEvent('click', {
-                                    'view': window,
-                                    'bubbles': true,
-                                    'cancelable': true
-                                });
-                                link.dispatchEvent(event);
-                            }
-                        }
-                    ]
-                }
-            ]
-        });
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: this.id + 'window',
-            title: "Network editor",
-            width: 800,
-            height: 600,
-            closable: false,
-            minimizable: true,
-            constrain: true,
-            collapsible: true,
-            layout: {
-                type: 'hbox',
-                align: 'stretch'
-            },
-            items: [
-                {
-                    xtype: 'panel',
-                    title: 'Add interaction',
-                    width: 200,
-                    border: 0,
-                    bodyPadding: 10,
-                    style: {
-                        borderRight: '1px solid lightgray'
-                    },
-                    defaults: {
-                        width: '100%',
-                        labelWidth: 55
-                    },
-                    items: [
-                        this.sourceTextfield,
-                        this.relationTextfield,
-                        this.targetTextfield,
-                        {
-                            xtype: 'button',
-                            text: 'Add interaction',
-                            handler: function (bt, e) {
-                                var sourceId = _this.sourceTextfield.getValue();
-                                var targetId = _this.targetTextfield.getValue();
-                                var relation = _this.relationTextfield.getValue();
-                                if (sourceId !== '' && targetId !== '' && relation !== '') {
-                                    var edgeId = sourceId + '_' + relation + '_' + targetId;
-
-                                    var sourceVertex = _this.network.getVertexById(sourceId);
-                                    if (typeof sourceVertex === 'undefined') {
-                                        sourceVertex = new Vertex({
-                                            id: sourceId
-                                        });
-                                        _this.network.addVertex({
-                                            vertex: sourceVertex,
-                                            vertexConfig: new VertexConfig({
-                                                rendererConfig: _this.networkViewer.session.getVertexDefaults()
-                                            })
-                                        }, true);
-                                    }
-                                    var targetVertex = _this.network.getVertexById(targetId);
-                                    if (typeof targetVertex === 'undefined') {
-                                        targetVertex = new Vertex({
-                                            id: targetId
-                                        });
-                                        _this.network.addVertex({
-                                            vertex: targetVertex,
-                                            vertexConfig: new VertexConfig({
-                                                rendererConfig: _this.networkViewer.session.getVertexDefaults()
-                                            })
-                                        }, true);
-                                    }
-                                    var edge = new Edge({
-                                        id: edgeId,
-                                        relation: relation,
-                                        source: sourceVertex,
-                                        target: targetVertex,
-                                        weight: 1,
-                                        directed: true
-                                    });
-                                    _this.network.addEdge({
-                                        edge: edge,
-                                        edgeConfig: new EdgeConfig({
-                                            rendererConfig: _this.networkViewer.session.getEdgeDefaults()
-                                        })
-                                    });
-
-                                    _this.networkViewer.refreshNetwork();
-                                }
-                            }
-                        }
-                    ]
-                },
-                this.grid
-            ],
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    getElements: function () {
-        var edges = this.network.graph.edges;
-        var vertices = this.network.graph.vertices;
-        var elements = [];
-        var verticesHash = {};
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                elements.push(edge);
-                verticesHash[edge.source.id] = edge.source;
-                verticesHash[edge.target.id] = edge.target;
-            }
-        }
-        for (var i = 0; i < vertices.length; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                if (vertex.edges.length == 0 && typeof verticesHash[vertex.id] === 'undefined') {
-                    elements.push({source: vertex});
-                }
-            }
-        }
-        return elements;
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-SIFNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function SIFNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Import a Network SIF file';
-    this.id = Utils.genId('SIFNetworkFileWidget');
-};
-
-
-SIFNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'SIF network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                _this.dataAdapter = new SIFNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this.processData(event.graph);
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-SIFNetworkFileWidget.prototype.processData = function (graph) {
-    var _this = this;
-    try {
-        this.content = graph; //para el onOK.notify event
-        var verticesLength = graph.vertices.length;
-        var edgesLength = graph.edges.length;
-
-        var edges = graph.edges;
-        var storeData = [];
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            storeData.push([edge.source.id, edge.relation, edge.target.id]);
-        }
-        this.gridStore.loadData(storeData);
-
-        this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-        this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-    } catch (e) {
-        this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-    }
-    this.panel.setLoading(false);
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-TextNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function TextNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Import a Network Text file';
-    this.id = Utils.genId('TextNetworkFileWidget');
-
-    this.columnsNumberStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'num'],
-        data: []
-    });
-
-    this.height = 450;
-
-    this.sourceColumnIndex;
-    this.relationColumnIndex;
-    this.targetColumnIndex;
-};
-
-
-TextNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'Text network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                _this.dataAdapter = new TextNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this._processColumns(event.sender);
-                            _this.parsePanel.show();
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-TextNetworkFileWidget.prototype.addCustomComponents = function () {
-    var _this = this;
-
-    this.sourceCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose source column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.sourceColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.relationCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose relation column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        displayField: 'name',
-        allowBlank: false,
-        valueField: 'num',
-        queryMode: 'local',
-        value: 'none',
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                if (value !== null) {
-                    _this.relationColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.targetCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        fieldLabel: 'Choose target column',
-        flex: 1,
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.targetColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-
-    var separatorStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'value'],
-        data: [
-            {name: 'Tab', value: '\t'},
-            {name: 'Comma', value: ','},
-            {name: 'Semicolon', value: ';'}
-        ]
-    });
-    this.separatorCombo = Ext.create('Ext.form.field.ComboBox', {
-        xtype: 'combo',
-        labelAlign: 'top',
-        width: 185,
-        labelWidth: 125,
-        fieldLabel: 'Choose field separator',
-        store: separatorStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'value',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            afterrender: function () {
-                this.select(this.getStore().getAt(0));
-            },
-            change: function (field, e) {
-                var value = field.getValue();
-                if (value != null) {
-                    if (typeof _this.dataAdapter !== 'undefined') {
-                        _this.dataAdapter.separator = value;
-                        _this.dataAdapter.parse();
-                        _this._processColumns(_this.dataAdapter);
-                        _this.grid.store.removeAll();
-                    }
-                }
-            }
-        }
-    });
-
-    this.parsePanel = Ext.create('Ext.panel.Panel', {
-        dock: 'top',
-        hidden: true,
-        border: false,
-//        title: 'Parse options',
-        layout: {
-            type: 'vbox',
-            align: 'stretch'
-        },
-        bodyPadding: 5,
-        items: [
-            {
-                xtype: 'container',
-                margin: 3,
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                items: [
-                    this.separatorCombo,
-                ]
-            },
-            {
-                xtype: 'container',
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                defaults: {
-                    margin: 3
-                },
-                items: [
-                    this.sourceCombo,
-                    this.relationCombo,
-                    this.targetCombo
-                ]
-            }
-        ]
-    });
-
-    this.panel.down().addDocked(this.parsePanel);
-};
-
-
-TextNetworkFileWidget.prototype._processColumns = function (adapter) {
-    var _this = this;
-
-    var columnsNumbers = [];
-    for (var i = 0; i < adapter.columnLength; i++) {
-        columnsNumbers.push({name: 'Column ' + (i + 1), num: i + 1});
-    }
-    this.columnsNumberStore.loadData(columnsNumbers);
-
-    delete this.sourceColumnIndex;
-    delete this.relationColumnIndex;
-    delete this.targetColumnIndex;
-    this.sourceCombo.reset();
-    this.relationCombo.reset();
-    this.targetCombo.reset();
-
-    this.infoLabel.setText('<span class="info">Parse complete using <span class="key">' + this.separatorCombo.getRawValue() + '</span> character.</span>', false);
-
-    this.panel.setLoading(false);
-};
-
-TextNetworkFileWidget.prototype.processColumnNumbers = function () {
-    var _this = this;
-
-    if (typeof this.sourceColumnIndex !== 'undefined' && typeof this.targetColumnIndex !== 'undefined') {
-        this.panel.setLoading(true);
-        var relationDefaultName = this.relationCombo.getValue();
-        if (isNaN(this.relationColumnIndex) || this.relationColumnIndex == '') {
-            this.relationColumnIndex = -1;
-        } else {
-            this.relationColumnIndex -= 1;
-        }
-        if (relationDefaultName === '') {
-            relationDefaultName = 'none';
-        }
-        var graph = this.dataAdapter.parseColumns(this.sourceColumnIndex - 1, this.targetColumnIndex - 1, this.relationColumnIndex, relationDefaultName);
-        this.processData(graph);
-    }
-
-};
-
-TextNetworkFileWidget.prototype.processData = function (graph) {
-    var _this = this;
-    try {
-        this.content = graph; //para el onOK.notify event
-        var verticesLength = graph.vertices.length;
-        var edgesLength = graph.edges.length;
-
-        var edges = graph.edges;
-        var storeData = [];
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            storeData.push([edge.source.id, edge.relation, edge.target.id]);
-        }
-        this.gridStore.loadData(storeData);
-
-        this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-        this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-    } catch (e) {
-        this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-    }
-    this.panel.setLoading(false);
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-XLSXNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function XLSXNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Import a Network XLSX file';
-    this.id = Utils.genId('XLSXNetworkFileWidget');
-
-    this.sheetStore = Ext.create('Ext.data.Store', {
-        fields: ['name'],
-        data: []
-    });
-    this.columnsNumberStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'num'],
-        data: []
-    });
-
-    this.height = 450;
-
-    this.textNetworkDataAdapter;
-
-    this.sourceColumnIndex;
-    this.relationColumnIndex;
-    this.targetColumnIndex;
-};
-
-
-XLSXNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'XLSX network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                _this.dataAdapter = new XLSXNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file, type: 'binary'}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this.processWorkbook(event.sender);
-                            _this.parsePanel.show();
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-
-XLSXNetworkFileWidget.prototype.addCustomComponents = function () {
-    var _this = this;
-
-    this.sheetCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        fieldLabel: 'Select Sheet',
-        labelWidth: 40,
-        store: this.sheetStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'name',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                if (value != null) {
-                    _this.processSheet(value)
-                }
-            }
-        }
-    });
-
-    this.sourceCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose source column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.sourceColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.relationCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose relation column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.relationColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.targetCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        fieldLabel: 'Choose target column',
-        flex: 1,
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.targetColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-
-    this.parsePanel = Ext.create('Ext.panel.Panel', {
-        dock: 'top',
-        hidden: true,
-        layout: {
-            type: 'vbox',
-            align: 'stretch'
-        },
-        bodyPadding: 5,
-        items: [
-            {
-                xtype: 'container',
-                margin: 3,
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                items: [
-                    this.sheetCombo,
-                ]
-            },
-            {
-                xtype: 'container',
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                defaults: {
-                    margin: 3
-                },
-                items: [
-                    this.sourceCombo,
-                    this.relationCombo,
-                    this.targetCombo
-                ]
-            }
-        ]
-    });
-
-    this.panel.addDocked(this.parsePanel);
-
-}
-
-XLSXNetworkFileWidget.prototype.processWorkbook = function (adapter) {
-    var _this = this;
-
-    var sheets = [];
-    for (var sheet in  adapter.xlsx.Sheets) {
-        sheets.push({name: sheet});
-    }
-    this.sheetStore.loadData(sheets);
-
-    this.panel.setLoading(false);
-};
-
-XLSXNetworkFileWidget.prototype.processSheet = function (sheetName) {
-    var _this = this;
-
-    this.panel.setLoading(true);
-
-    delete this.sourceColumnIndex;
-    delete this.relationColumnIndex;
-    delete this.targetColumnIndex;
-    this.sourceCombo.reset();
-    this.relationCombo.reset();
-    this.targetCombo.reset();
-
-    this.grid.store.removeAll();
-
-    var csv = this.dataAdapter.parseSheet(sheetName);
-
-    this.textNetworkDataAdapter = new TextNetworkDataAdapter({
-        dataSource: new StringDataSource(csv),
-        separator: ',',
-        handlers: {
-            'data:load': function (event) {
-                _this._processColumns(event.sender);
-            },
-            'error:parse': function (event) {
-                _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                _this.panel.setLoading(false);
-            }
-        }
-    });
-
-
-//    var sifNetworkDataAdapter = new SIFNetworkDataAdapter({
-//        dataSource: new StringDataSource(csv),
-//        separator: ',',
-//        handlers: {
-//            'data:load': function (event) {
-//                _this.processData(event.graph);
-//            }
-//        }
-//    });
-
-};
-
-
-XLSXNetworkFileWidget.prototype._processColumns = function (adapter) {
-    var _this = this;
-
-    var columnsNumbers = [];
-    for (var i = 0; i < adapter.columnLength; i++) {
-        columnsNumbers.push({name: 'Column ' + (i + 1), num: i + 1});
-    }
-    this.columnsNumberStore.loadData(columnsNumbers);
-
-    delete this.sourceColumnIndex;
-    delete this.relationColumnIndex;
-    delete this.targetColumnIndex;
-    this.sourceCombo.reset();
-    this.relationCombo.reset();
-    this.targetCombo.reset();
-
-    this.infoLabel.setText('<span class="info">Parse complete', false);
-
-    this.panel.setLoading(false);
-};
-
-XLSXNetworkFileWidget.prototype.processColumnNumbers = function () {
-    var _this = this;
-
-    if (typeof this.sourceColumnIndex !== 'undefined' && typeof this.relationColumnIndex !== 'undefined' && typeof this.targetColumnIndex !== 'undefined') {
-        this.panel.setLoading(true);
-        var graph = this.textNetworkDataAdapter.parseColumns(this.sourceColumnIndex - 1, this.relationColumnIndex - 1, this.targetColumnIndex - 1);
-        this.processData(graph);
-    }
-
-};
-
-
-XLSXNetworkFileWidget.prototype.processData = function (graph) {
-    var _this = this;
-    try {
-        this.content = graph; //para el onOK.notify event
-        var verticesLength = graph.vertices.length;
-        var edgesLength = graph.edges.length;
-
-        var edges = graph.edges;
-        var storeData = [];
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            storeData.push([edge.source.id, edge.relation, edge.target.id]);
-        }
-        this.gridStore.loadData(storeData);
-
-        this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-        this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-    } catch (e) {
-        this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-    }
-    this.panel.setLoading(false);
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
 function CheckBrowser(appName){
 
     if(Ext.isIE){
@@ -19103,1256 +15948,6 @@ UploadWidget.prototype.uploadFailed = function (response) {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function AttributeManagerIDB(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeManager');
-    this.dbName = 'AttributeManager';
-
-    this._deleteDatabase();
-    this._createDatabase();
-};
-
-AttributeManagerIDB.prototype = {
-    _createDatabase: function () {
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event)
-        };
-        openRequest.onsuccess = function (event) {
-            console.log(event)
-        };
-
-        openRequest.onupgradeneeded = function (event) {
-            var db = event.target.result;
-
-            // Create an objectStore to hold information about our customers. We're
-            // going to use "ssn" as our key path because it's guaranteed to be
-            // unique.
-            var attributesObjectStore = db.createObjectStore("attribute", { autoIncrement: true });
-            var attributeNameIdObjectStore = db.createObjectStore("attributeNameId", { autoIncrement: true });
-
-            // Create an index to search customers by name. We may have duplicates
-            // so we can't use a unique index.
-            attributesObjectStore.createIndex("name", "name", { unique: false });
-            attributesObjectStore.createIndex("attrId", "attrId", { unique: false });
-            attributeNameIdObjectStore.createIndex("name", "name", { unique: true });
-        };
-    },
-    _deleteDatabase: function () {
-        // delete database
-        var deleteRequest = indexedDB.deleteDatabase(this.dbName);
-        deleteRequest.onsuccess = function (event) {
-            console.log(event)
-        };
-        deleteRequest.onerror = function (event) {
-            console.log(event)
-        };
-    },
-
-    addAttribute: function (vertices, name, type, defaultValue) {
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event)
-        };
-        openRequest.onsuccess = function (event) {
-            var db = openRequest.result;
-            var transaction = db.transaction(["attribute", "attributeNameId"], "readwrite");
-            var attributesObjectStore = transaction.objectStore("attribute");
-            var attributeNameIdObjectStore = transaction.objectStore("attributeNameId");
-
-            var addAttribute = attributeNameIdObjectStore.add({
-                name: name,
-                type: type
-            });
-
-            addAttribute.onsuccess = function (event) {
-                var attributeKey = event.target.result;
-                for (var i = 0; i < vertices.length; i++) {
-                    var vertex = vertices[i];
-                    attributesObjectStore.add({
-                        name: vertex.name,
-                        attrId: attributeKey,
-                        value: defaultValue
-                    });
-                }
-            };
-        };
-    },
-    removeAttribute: function (name) {
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event);
-        };
-        openRequest.onsuccess = function (event) {
-
-            var db = openRequest.result;
-            var transaction = db.transaction(["attribute", "attributeNameId"], "readwrite");
-
-
-            var attributesObjectStore = transaction.objectStore("attribute");
-            var attributeNameIdObjectStore = transaction.objectStore("attributeNameId");
-
-
-            var index = attributeNameIdObjectStore.index("name");
-            index.getKey(name).onsuccess = function (event) {
-                var attributeKey = event.target.result
-                attributeNameIdObjectStore.delete(attributeKey);
-
-
-                var attrIdIndex = attributesObjectStore.index("attrId");
-                var singleKeyRange = IDBKeyRange.only(attributeKey);
-                attrIdIndex.openKeyCursor(singleKeyRange).onsuccess = function (event) {
-                    var cursor = event.target.result;
-                    console.log(cursor)
-                    if (cursor) {
-                        attributesObjectStore.delete(cursor.primaryKey);
-                        cursor.continue();
-                    }
-                };
-            };
-
-        };
-    },
-    getVertexAttributes: function (vertex,success) {
-        var attributes = {};
-
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event);
-        };
-        openRequest.onsuccess = function (event) {
-
-            var db = openRequest.result;
-            var transaction = db.transaction(["attribute", "attributeNameId"]);//read
-
-            var attributesObjectStore = transaction.objectStore("attribute");
-            var attributeNameIdObjectStore = transaction.objectStore("attributeNameId");
-
-
-            var index = attributesObjectStore.index("name");
-            var singleKeyRange = IDBKeyRange.only(vertex.name);
-            index.openCursor(singleKeyRange).onsuccess = function (event) {
-                var cursor = event.target.result;
-                if (cursor) {
-                    var attrId = event.target.result.value.attrId;
-                    var value = event.target.result.value.value;
-                    attributeNameIdObjectStore.get(attrId).onsuccess = function (event) {
-                        var attr = event.target.result.name;
-                        attributes[attr] = value;
-                    };
-                    cursor.continue();
-                } else {
-                    success(attributes);
-                }
-
-            }
-        };
-
-    }
-
-}
-
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeManagerMemory(args) {
-    var _this = this;
-
-    this.columns = [];
-    this.columnsIndex = {};
-    this.columnsCount = 0;
-
-    this.data = [];
-    this.dataIndex = {};
-    this.dataCount = 0;
-
-    this.selected = [];
-
-    if (args instanceof Object) {
-        if (args.data != null) {
-            this.data = [];
-        }
-        if (args.columns != null) {
-            this.columns = [];
-        }
-    }
-};
-
-AttributeManagerMemory.prototype = {
-    containsRow: function (row) {
-        if (typeof row !== 'undefined') {
-            return this.containsRowById(row.id);
-        } else {
-            return false;
-        }
-    },
-    containsRowById: function (id) {
-        if (typeof this.dataIndex[id] !== 'undefined') {
-            return true;
-        } else {
-            return false;
-        }
-    },
-    addRow: function (row) {
-        if (this.containsRow(row)) {
-            return false;
-        }
-        var insertPosition = this.data.push(row) - 1;
-        this.dataIndex[row.id] = insertPosition;
-        this.dataCount++;
-        return true;
-    },
-    removeRow: function (row) {
-        if (!this.containsRow(row)) {
-            return;
-        }
-        var position = this.dataIndex[row.id];
-        var removedRow = this.data.splice(position, 1);
-        this._rebuildDataIndex();
-
-        return removedRow;
-    },
-    removeRows: function (rows) {
-        for (var i = 0, l = rows.length; i < l; i++) {
-            var row = rows[i];
-            if (this.containsRow(row)) {
-                this.data[this.dataIndex[row.id]] = null;
-            }
-        }
-        this._rebuildData();
-    },
-    removeRowById: function (id) {
-        return this.removeRow(this.data[this.dataIndex[id]]);
-    },
-    removeRowsByIds: function (ids) {
-        for (var i = 0, l = ids.length; i < l; i++) {
-            var id = ids[i];
-            if (this.containsRowById(id)) {
-                this.data[this.dataIndex[id]] = null;
-            }
-        }
-        this._rebuildData();
-    },
-    getRow: function (id) {
-        return this.data[this.dataIndex[id]]
-    },
-
-    _update: function () {
-        if (this.data.length > 0) {
-            this._updateRow(this.data[0]);
-        }
-    },
-    _updateRow: function (row) {
-        var r = {};
-        for (var i in row) {
-            if (row.hasOwnProperty(i)) {
-                r[i] = row[i];
-            }
-        }
-        this.data[this.dataIndex[r.id]] = r;
-    },
-
-    _rebuildData: function () {
-        var newData = [];
-        for (var i = 0, l = this.data.length; i < l; i++) {
-            var row = this.data[i];
-            if (row != null) {
-                newData.push(row);
-            }
-        }
-        this.data = newData;
-        this._rebuildDataIndex();
-    },
-    _rebuildDataIndex: function () {
-        this.dataIndex = {};
-        for (var i = 0, l = this.data.length; i < l; i++) {
-            var row = this.data[i];
-            this.dataIndex[row.id] = i;
-        }
-    },
-    /*
-     * Columns
-     * */
-    containsColumn: function (column) {
-        if (typeof column !== 'undefined') {
-            return this.containsColumnByName(column.name);
-        } else {
-            return false;
-        }
-    },
-    containsColumnByName: function (name) {
-        if (typeof this.columnsIndex[name] !== 'undefined') {
-            return true;
-        } else {
-            return false;
-        }
-    },
-    addColumn: function (column) {
-        if (this.containsColumn(column)) {
-            return false;
-        }
-        var insertPosition = this.columns.push(column) - 1;
-        this.columnsIndex[column.name] = insertPosition;
-        this.columnsCount++;
-        return true;
-    },
-    removeColumn: function (column) {
-        if (!this.containsColumn(column) || column.name == 'id') {
-            return false;
-        }
-        var position = this.columnsIndex[column.name];
-        var removedColumn = this.columns.splice(position, 1);
-        this._rebuildColumnsIndex();
-
-        return removedColumn;
-    },
-    removeColumnByName: function (name) {
-        return this.removeColumn(this.columns[this.columnsIndex[name]]);
-    },
-    _rebuildColumnsIndex: function () {
-        this.columnsIndex = {};
-        for (var i = 0, l = this.columns.length; i < l; i++) {
-            var col = this.columns[i];
-            this.columnsIndex[col.name] = i;
-        }
-    },
-
-    /* Selection */
-    select: function (id) {
-        this.selected = [this.getRow(id)];
-    },
-    addToSelection: function (id) {
-        this.selected.push(this.getRow(id));
-    },
-    removeFromSelection: function (id) {
-        var index = this.selected.indexOf(this.getRow(id));
-        this.selected.splice(index, 1);
-    },
-    selectAll: function () {
-        var selection = [];
-        for (var i = 0; i < this.data.length; i++) {
-            var row = this.data[i];
-            selection.push(row);
-        }
-        this.selected = selection;
-    },
-    deselectAll: function () {
-        this.selected = [];
-    },
-    selectByIds: function (ids) {
-        var selected = [];
-        for (var i = 0; i < ids.length; i++) {
-            var id = ids[i];
-            selected.push(this.getRow(id));
-        }
-        this.selected = selected;
-    },
-    selectByColumnValue: function (column, value) {
-        var selected = [];
-        for (var i = 0; i < this.data.length; i++) {
-            var row = this.data[i];
-            if (row[column] === value) {
-                selected.push(row);
-            }
-        }
-        this.selected = selected;
-    },
-    selectByColumnContainsValue: function (column, value, notContains) {
-        var selected = [];
-        if (notContains == true) {
-            for (var i = 0; i < this.data.length; i++) {
-                var row = this.data[i];
-                if (row[column].indexOf(value) == -1) {
-                    selected.push(row);
-                }
-            }
-        } else {
-            for (var i = 0; i < this.data.length; i++) {
-                var row = this.data[i];
-                if (row[column].indexOf(value) != -1) {
-                    selected.push(row);
-                }
-            }
-        }
-        this.selected = selected;
-    },
-    selectByColumnComparationValue: function (column, value, comparation, includeValue) {
-        if (!isNaN(value)) {
-            var selected = [];
-            if (comparation == '>') {
-                if (includeValue) {
-                    for (var i = 0; i < this.data.length; i++) {
-                        var row = this.data[i];
-                        if (!isNaN(row[column]) && parseFloat(row[column]) >= parseFloat(value)) {
-                            selected.push(row);
-                        }
-                    }
-                } else {
-                    for (var i = 0; i < this.data.length; i++) {
-                        var row = this.data[i];
-                        if (!isNaN(row[column]) && parseFloat(row[column]) > parseFloat(value)) {
-                            selected.push(row);
-                        }
-                    }
-                }
-            } else if (comparation == '<') {
-                if (includeValue) {
-                    for (var i = 0; i < this.data.length; i++) {
-                        var row = this.data[i];
-                        if (!isNaN(row[column]) && parseFloat(row[column]) <= parseFloat(value)) {
-                            selected.push(row);
-                        }
-                    }
-                } else {
-                    for (var i = 0; i < this.data.length; i++) {
-                        var row = this.data[i];
-                        if (!isNaN(row[column]) && parseFloat(row[column]) < parseFloat(value)) {
-                            selected.push(row);
-                        }
-                    }
-                }
-            }
-            this.selected = selected;
-        }
-    },
-    removeSelected: function () {
-        this.removeRows(this.selected);
-        this.deselectAll();
-    },
-
-    /* Edition */
-    updateRows: function (newRows) {
-        for (var i = 0, l = newRows.length; i < l; i++) {
-            var newRow = newRows[i];
-            var row = this.getRow(newRow.id);
-            if (row) {
-                for (key in newRows) {
-                    row[key] = newRows;
-                }
-            }
-        }
-    },
-    updateRowsColumn: function (rows, column, value) {
-        for (var i = 0, l = rows.length; i < l; i++) {
-            var row = this.getRow(rows[i].id);
-            if (row) {
-                row[column] = value;
-            }
-        }
-    },
-    fromJSON: function (json) {
-        for (var i = 0, l = json.columns.length; i < l; i++) {
-            this.addColumn(json.columns[i]);
-        }
-        for (var i = 0, l = json.data.length; i < l; i++) {
-            this.addRow(json.data[i]);
-        }
-    },
-    toJSON: function () {
-        return {columns: this.columns, data: this.data};
-    },
-    getAsFile: function (separator) {
-        if (!separator) {
-            separator = '\t';
-        }
-        // Attribute names
-        var text = '';
-
-        var lc = this.columns.length
-        text += '#';
-        for (var i = 0; i < lc; i++) {
-            var attrName = this.columns[i].name;
-            text += attrName + separator;
-        }
-        text += '\n';
-
-        var row, attr;
-        for (var i = 0, l = this.data.length; i < l; i++) {
-            row = this.data[i];
-            for (var j = 0; j < lc; j++) {
-                attr = this.columns[j].name;
-                text += row[attr] + separator;
-            }
-            text += '\n';
-        }
-        return text;
-    }
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeManagerStore(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeManagerStore');
-
-    this.store = Ext.create('Ext.data.Store', {
-//        groupField: 'selected',
-        pageSize: 50,
-        proxy: {
-            type: 'memory'
-        },
-        fields: [],
-//        model: this.model,
-        listeners: {
-            update: function (st, record, operation, modifiedFieldNames) {
-                if (modifiedFieldNames && modifiedFieldNames[0] != 'Selected') {
-                    console.log("AttributeManagerStore - update")
-                    _this.trigger('change:recordsAttribute', {records: [record], attributeName: modifiedFieldNames[0], sender: this});
-                }
-            }
-//            remove: function () {
-//                console.log("AttributeManagerStore - remove")
-//                _this.trigger('change:data', {sender: this});
-//            },
-//            add: function () {
-//                console.log("AttributeManagerStore - add")
-//                _this.trigger('change:data', {sender: this});
-//            }
-        }
-    });
-
-    this.columnsGrid = [];
-    this.attributes = [];
-    this.filters = {};
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    this._processAttribute({name: "Selected", type: "boolean", defaultValue: false});
-    for (var i = 0; i < this.attributes.length; i++) {
-        this._processAttribute(this.attributes[i]);
-    }
-};
-
-AttributeManagerStore.prototype = {
-    containsAttribute: function (attribute) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name == attribute.name) return true; //if exists one with the same name
-        }
-        return false;
-    },
-    isAttributeLocked: function (attributeName) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name == attributeName && this.attributes[i].locked === true) {
-                return true;
-            }
-        }
-        return false;
-    },
-    addAttribute: function (attribute, fireChangeEvent) {
-        if (this.containsAttribute(attribute)) {
-            return false;
-        }
-        this.attributes.push(attribute);
-        this._processAttribute(attribute);
-        if (fireChangeEvent !== false) {
-            console.log('addAttribute - change:attributes');
-            this.trigger('change:attributes', {sender: this});
-        }
-        return true;
-    },
-    _processAttribute: function (attribute) {
-        attribute.id = attribute.name;
-        /** Id column is not editable **/
-        var editor;
-        if (attribute.name !== 'id') {
-            editor = {xtype: 'textfield', allowBlank: true};
-        }
-
-        var columnConfig = {
-            "text": attribute.name,
-            "dataIndex": attribute.name,
-            "editor": editor
-        };
-
-        if (attribute.name !== 'Selected') {
-            this.columnsGrid.push(columnConfig);
-        }
-
-        // set model fields
-        this.store.setFields(this.attributes);
-    },
-    addAttributes: function (attributes) {
-        for (var i = 0; i < attributes.length; i++) {
-            this.addAttribute(attributes[i], false);
-        }
-        console.log('addAttributes - change:attributes');
-        this.trigger('change:attributes', {sender: this});
-    },
-    removeAttribute: function (attributeName) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name === attributeName &&
-                this.attributes[i].locked !== true &&
-                this.attributes[i].name !== 'Selected') {
-                this.columnsGrid.splice(i, 1);
-                this.attributes.splice(i, 1);
-
-                this.store.setFields(this.attributes);
-                console.log('removeAttribute - change:attributes');
-                this.trigger('change:attributes', {sender: this});
-                return true;
-            }
-        }
-        return false;
-    },
-    updateAttribute: function () {
-        console.log('TODO');
-    },
-    getAttribute: function (attributeName) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name == attributeName) {
-                return this.attributes[i];
-            }
-        }
-    },
-    getAttributeNames: function () {
-        var nameList = [];
-        for (var i = 0; i < this.attributes.length; i++) {
-            nameList.push(this.attributes[i].name);
-        }
-        return nameList;
-    },
-    // END attribute methods
-
-
-    setRecordAttributeById: function (id, attributeName, value) {
-        if (this.isAttributeLocked(attributeName)) {
-            return false;
-        }
-        var record = this.store.getById(id);
-        if (record) {
-            record.set(attributeName, value);
-//            record.commit();
-        }
-    },
-    setRecordAttributeByIds: function (records) {
-        this.store.suspendEvents();
-//        console.time('AttributeManagerStore.setRecordAttributeByIds');
-        for (var i = 0; i < records.length; i++) {
-            var recordObject = records[i];
-            if (!this.isAttributeLocked(recordObject.attributeName)) {
-                var record = this.store.getById(recordObject.id);
-                if (record) { // if exists a row with this name
-                    record.beginEdit();
-                    for (var attributeName in recordObject) {
-                        if (attributeName !== 'id') {
-                            record.set(attributeName, recordObject[attributeName]);
-                        }
-                    }
-//                    record.commit();
-                    record.endEdit();
-                }
-            }
-        }
-//        console.timeEnd('AttributeManagerStore.setRecordAttributeByIds');
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-        for (var attributeName in recordObject) {
-            this.trigger('change:recordsAttribute', {records: records, attributeName: attributeName, sender: this});
-        }
-    },
-    setRecordsAttribute: function (records, attributeName, value) {
-        if (this.isAttributeLocked(attributeName)) {
-            return false;
-        }
-        this.store.suspendEvents();
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            record.set(attributeName, value);
-//            record.commit();
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-        this.trigger('change:recordsAttribute', {records: records, attributeName: attributeName, sender: this});
-    },
-//    addRecord: function (data, append) {
-//        this.store.loadData(data, append);
-//    },
-    addRecord: function (data) {
-        this.store.add(data);
-    },
-    removeRecordById: function (id) {
-        var record = this.store.getById(id);
-        if (record) {
-            this.store.remove(record);
-        }
-    },
-    getValueByAttributeAndId: function (id, attribute) {
-        var record = this.store.getById(id);
-        if (record) {
-            var value = record.get(attribute);
-            if (value) {
-                return value;
-            } else {
-                return '';
-            }
-        }
-    },
-    getOrderedIdsByAttribute: function (attributeName) {
-        var records = this.store.query().items;
-        var values = [];
-
-        var type = 'float';
-        var checkType = true;
-
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            var id = record.get('id');
-            var value = record.get(attributeName);
-            if (!value) {
-                value = '';
-            }
-
-            /* detect number or string */
-            if (checkType) {
-                var parseResult = parseFloat(value);
-                if (isNaN(parseResult)) {
-                    var type = 'string';
-                    checkType = false;
-                }
-            }
-            /* - - - - - - - - - - - - */
-
-            values.push({id: id, value: value});
-        }
-        switch (type) {
-            case 'float':
-                values.sort(function (a, b) {
-                    return a.value - b.value;
-                });
-                break;
-            /* string */
-            default:
-                values.sort(function (a, b) {
-                    return a.value.localeCompare(b.value);
-                });
-        }
-
-        return values;
-    },
-    getIdsByAttributeValue: function (attribute, value) {
-        var dupHash = {};
-        var ids = [];
-        var mixedCollection = this.store.query(attribute, value, false, false, true);
-        for (var i = 0; i < mixedCollection.items.length; i++) {
-            var item = mixedCollection.items[i];
-            var id = item.data["id"];
-            if (dupHash[id] !== true) {
-                ids.push(item.data["id"]);
-            }
-            dupHash[id] = true;
-        }
-        return ids;
-    },
-    eachRecord: function (eachFunction) {
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            eachFunction(record);
-        }
-    },
-    getRecords: function () {
-        var records = this.store.query().items;
-        return records;
-    },
-    getValuesByAttribute: function (attributeName) {
-        var records = this.store.query().items;
-        var values = [];
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            var value = record.get(attributeName);
-            var id = record.get('id');
-            if (value != null && value !== '') {
-                values.push({value: value, id: id});
-            }
-        }
-        return values;
-    },
-    getSelectedValuesByAttribute: function (attributeName) {
-        var records = this.store.query().items;
-        var values = [];
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            var value = record.get(attributeName);
-            var id = record.get('id');
-            var selected = record.get('Selected');
-            if (selected === true && value != null && value !== '') {
-                values.push({value: value, id: id})
-            }
-        }
-        return values;
-    },
-//    getRecordsByItem: function (items) {
-//        var records = [];
-//        for (var i = 0; i < items.length; i++) {
-//            var item = items[i];
-//            var record = this.store.findRecord('id', item.id);
-//            records.push(record);
-//        }
-//        return records;
-//    },
-    selectByItems: function (items) {
-        this.store.suspendEvents();
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var record = this.store.getById(item.id);
-            if (record) {
-                record.set('Selected', true);
-//                record.commit();
-            }
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    deselectByItems: function (items) {
-        this.store.suspendEvents();
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var record = this.store.getById(item.id);
-            if (record) {
-                record.set('Selected', false);
-//                record.commit();
-            }
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    selectAll: function () {
-        this.store.suspendEvents();
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            record.set('Selected', true);
-//            record.commit();
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    deselectAll: function () {
-        this.store.suspendEvents();
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            record.set('Selected', false);
-//            record.commit();
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    clean: function () {
-        this.attributes = [];
-        this.columnsGrid = [];
-        this.attributes = [];
-        this.filters = {};
-
-        this.store.removeAll();
-        this._processAttribute({name: "Selected", type: "boolean", defaultValue: false});
-        this.store.setFields(this.attributes);
-
-        console.log('clean - change:attributes');
-        this.trigger('change:attributes', {sender: this});
-    },
-    getAsFile: function (separator) {
-        if (typeof separator === 'undefined') {
-            separator = '\t';
-        }
-        // Attribute names
-        var text = '';
-
-        text += '#';
-        for (var i = 0; i < this.attributes.length; i++) {
-            var attrName = this.attributes[i].name;
-            if (attrName !== 'Selected') {
-                text += attrName;
-            }
-            if ((i + 1) >= this.attributes.length) {
-                break;
-            }
-            text += separator;
-        }
-        text += '\n';
-
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            for (var j = 0; j < this.attributes.length; j++) {
-                var attrName = this.attributes[j].name;
-                if (attrName !== 'Selected') {
-                    text += record.get(attrName);
-                }
-                if ((j + 1) >= this.attributes.length) {
-                    break;
-                }
-                text += separator;
-            }
-            text += '\n';
-        }
-        return text;
-    },
-    //save
-    toJSON: function () {
-        var json = {};
-        json.attributes = this.attributes;
-        json.filters = this.filters;
-        json.data = [];
-
-        // add row values to data matrix
-        var records = this.store.query().items;
-        for (var j = 0; j < records.length; j++) {
-            json.data.push([]);
-            for (var i = 0; i < this.attributes.length; i++) {
-                json.data[j].push(records[j].getData()[this.attributes[i].name]);
-            }
-        }
-        return json;
-    },
-    loadJSON: function () {
-
-    }
-}
-
-// TODO CHECK
-AttributeManagerStore.prototype.updateAttribute = function (oldName, newName, type, defaultValue) {
-    for (var i = 0; i < this.attributes.length; i++) {
-        if (oldName != newName && this.attributes[i].name == newName) return false;
-    }
-
-    for (var i = 0; i < this.attributes.length; i++) {
-        if (this.attributes[i].name == oldName) {
-            if (oldName != newName) {
-                this.columnsGrid[i].text = newName;
-                this.columnsGrid[i].dataIndex = newName;
-                this.attributes[i].name = newName;
-            }
-            this.attributes[i].type = type;
-            this.attributes[i].defaultValue = defaultValue;
-
-            this.store.setFields(this.attributes);
-
-            return true;
-        }
-    }
-    return false;
-};
-
-
-//-------------------------------modifyAttributeOfRows---------------------------//
-//Descripcion:
-//Modifica un atributo del conjunto de filas seleccionadas, poniendole el mismo 
-//valor en todas. 
-//Parametros: 
-//selectRows: (array de objetos) informacion de las filas seleccionadas
-//attributeModify: (string) atributo que se desea modificar
-//value: (string) valor nuevo de ese atributo
-//-------------------------------------------------------------------------------//
-
-
-//-----------------------removeRow----------------------------------------------//
-//Descripcion:
-//Borra una fila identificada a partir del valor de un campo
-//Parametros:
-//attribute: (string) campo en el que buscar
-//value: (string) nombre del campo que buscar
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.removeRow = function (attribute, value) {
-    //obtenemos la posicion del dato y lo borramos
-    this.store.removeAt(this.store.find(attribute, value));
-};
-
-
-//-----------------------removeRows----------------------------------------------//
-//Descripcion:
-//Borra todas las filas que tengan el valor indicado en el atributo indicado
-//Parametros:
-//attribute: (string) campo en el que buscar
-//value: (string) nombre del campo que buscar
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.removeRows = function (attribute, value) {
-    //obtenemos la posicion del dato y lo borramos
-    this.store.removeAt(this.store.find(attribute, value));
-
-    var i = -1;
-
-    while (this.store.find(attribute, value) != -1) {
-        //cada vez busca a partir de donde se quedó la ultima vez
-        i = this.store.find(attribute, value, i + 1);
-        this.store.removeAt(i);
-
-        console.log(i);
-    }
-};
-
-/**
- * Remove all stored attributes.
- */
-AttributeManagerStore.prototype.removeAll = function () {
-    this.store.removeAll(true);
-};
-
-
-//-----------------------getNumberOfRows----------------------------------------//
-//Descripcion:
-//Cuenta cuantos datos tenemos
-//Parametros: (ninguno)
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getNumberOfRows = function () {
-    return this.store.count();
-};
-
-
-//-----------------------getUniqueByAttribute-----------------------------//
-//Descripcion:
-//Devuelve los diferentes datos que hay en un atributo
-//Parametros:
-//attribute: (string) nombre del atributo 
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getUniqueByAttribute = function (attribute) {
-    return this.store.collect(attribute, false, true);
-};
-
-
-//-----------------------getPositionOfRow---------------------------------------//
-//Descripcion:
-//Devuelve la posicion de un dato identificado un atributo y su valor
-//Parametros:
-//attribute: (string) atributo por la que queremos buscar
-//value: (string) valor del atributo por la que queremos buscar
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getPositionOfRow = function (attribute, value) {
-    var aux = this.store.find(attribute, value);
-    return(aux);
-};
-
-
-//-----------------------getRowByIndex------------------------------------------//
-//Descripcion:
-//Muestra el dato que se encuentran en el indice indicado
-//Parametros:
-//index:(number) index del dato del que queremos obtener informacion
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getRowByIndex = function (index) {
-    var aux = this.store.getAt(index);
-    console.log(aux.data);
-};
-
-
-//-----------------------getRowRangeIndex---------------------------------------//
-//Descripcion:
-//Muestra los datos que se encuentran entre los dos indices que le pasamos
-//Parametros:
-//startIndex: (number) index por el cual empezamos
-//endIndex: (number) index por el cual acabamos
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getRowRangeIndex = function (startIndex, endIndex) {
-    var aux = this.store.getRange(startIndex, endIndex);
-
-    for (var i = 0; i < aux.length; i++) {
-        console.log(aux[i].data);
-    }
-};
-
-
-AttributeManagerStore.prototype.addFilter = function (filterName, attribute, value) {
-    if (!this.filters[filterName] && attribute != null && value != null) {
-        this.filters[filterName] = {"active": false, "attribute": attribute, "value": value};
-        this.enableFilter(filterName);
-        return true;
-    }
-    return false;
-};
-
-AttributeManagerStore.prototype.removeFilter = function (filterName) {
-    if (this.filters[filterName]) {
-        this.disableFilter(filterName);
-        delete this.filters[filterName];
-        return true;
-    }
-    return false;
-};
-
-AttributeManagerStore.prototype.enableFilter = function (filterName) {
-    this.filters[filterName].active = true;
-
-    //this.store.filter(this.filters[filterName].attribute, this.filters[filterName].value); //filter for exactly match
-    var reg = new RegExp("" + this.filters[filterName].value);
-    this.store.filter(Ext.create('Ext.util.Filter', {property: this.filters[filterName].attribute, value: reg, root: 'data'}));
-};
-
-AttributeManagerStore.prototype.disableFilter = function (filterName) {
-    this.filters[filterName].active = false;
-
-    this.store.clearFilter(false);
-    for (var filter in this.filters) {
-        if (this.filters[filter].active) {
-            //this.store.filter(this.filters[filterName].attribute, this.filters[filterName].value); //para filtrar cuando este escrito el nombre entero bien
-            var reg = new RegExp("" + this.filters[filter].value);
-            this.store.filter(Ext.create('Ext.util.Filter', {property: this.filters[filter].attribute, value: reg, root: 'data'}));
-        }
-    }
-};
-
-//-----------------------checkFilters-------------------------------------------//
-//Descripcion:
-//Comprueba si hay aplicado algun filtro
-//Parametros: (ninguno)
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.checkFilters = function () {
-    console.log(this.store.isFiltered());
-    return this.store.isFiltered();
-};
-
-
-//-----------------------clearFilters-------------------------------------------//
-//Descripcion:
-//Quita los filtros aplicados a los datos
-//Parametros: (ninguno)
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.clearFilters = function () {
-    this.store.clearFilter(false);
-};
-
-
-AttributeManagerStore.prototype.loadJSON = function (json) {
-    this.attributes = [];
-    this.columnsGrid = [];
-    console.log(json);
-    this.filters = json.filters;
-
-    // add attributes
-    for (var i = 0; i < json.attributes.length; i++) {
-        this.addAttribute(json.attributes[i].name, json.attributes[i].type, json.attributes[i].defaultValue);
-    }
-
-    // add rows
-    this.addRows(json.data, false);
-};
-
-AttributeManagerStore.prototype.setName = function (vertexId, newName) {
-    var register = this.store.getAt(this.store.find("id", vertexId));
-    register.set("Name", newName);
-    register.commit();
-};
-
-AttributeManagerStore.prototype.setAttributeByName = function (name, attribute, value) {
-    var register = this.store.getAt(this.store.find("Name", name));
-    if (register) { // if exists a row with this name
-        register.set(attribute, value);
-        register.commit();
-    }
-};
-
-
-AttributeManagerStore.prototype.exportToTab = function (columns, clearFilter) {
-    if (clearFilter) {
-        this.store.clearFilter(false);
-    }
-
-    var colNames = [];
-    var headerLine = "", typeLine = "", defValLine = "";
-    for (var i = 0; i < columns.length; i++) {
-        headerLine += columns[i].inputValue + "\t";
-        colNames.push(columns[i].inputValue);
-    }
-
-    for (var i = 0; i < colNames.length; i++) {
-        for (var j = 0; j < this.attributes.length; j++) {
-            if (colNames[i] == this.attributes[j].name) {
-                typeLine += this.attributes[j].type + "\t";
-                defValLine += this.attributes[j].defaultValue + "\t";
-                break;
-            }
-        }
-    }
-
-    var output = "";
-    output += "#" + typeLine + "\n";
-    output += "#" + defValLine + "\n";
-    output += "#" + headerLine + "\n";
-
-    var lines = this.store.getRange();
-    for (var j = 0; j < lines.length; j++) {
-        for (var i = 0; i < colNames.length; i++) {
-            output += lines[j].getData()[colNames[i]] + "\t";
-        }
-        output += "\n";
-    }
-
-    if (clearFilter) {
-        for (var filter in this.filters) {
-            if (this.filters[filter].active) {
-                //this.store.filter(this.filters[filterName].attribute, this.filters[filterName].value); //para filtrar cuando este escrito el nombre entero bien
-                var reg = new RegExp("" + this.filters[filter].value);
-                this.store.filter(Ext.create('Ext.util.Filter', {property: this.filters[filter].attribute, value: reg, root: 'data'}));
-            }
-        }
-    }
-
-    return output;
-};
-
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
 function CircosVertexRenderer(args) {
     var _this = this;
 
@@ -20375,10 +15970,10 @@ function CircosVertexRenderer(args) {
 
 
     this.pieSlices = [
-//        {size: this.size, area: this.sliceArea, color: this.color, labelSize: this.labelSize, labelOffset: 0}
+        //        {size: this.size, area: this.sliceArea, color: this.color, labelSize: this.labelSize, labelOffset: 0}
     ];
     this.donutSlices = [
-//        {size: this.strokeSize, area: this.sliceArea, color: this.strokeColor, labelSize: this.labelSize, labelOffset: 0}
+        //        {size: this.strokeSize, area: this.sliceArea, color: this.strokeColor, labelSize: this.labelSize, labelOffset: 0}
     ];
 
     this.shapeEl;
@@ -20402,28 +15997,25 @@ function CircosVertexRenderer(args) {
     for (var prop in args) {
         if (hasOwnProperty.call(args, prop)) {
             if (args[prop] != null) {
-                this[prop] = args[prop];
+                if (!isNaN(args[prop])) {
+                    this[prop] = parseFloat(args[prop]);
+                } else {
+                    this[prop] = args[prop];
+                }
             }
         }
     }
-
-    this.size = parseFloat(this.size);
-    this.strokeSize = parseFloat(this.strokeSize);
-    this.opacity = parseFloat(this.opacity);
-    this.labelSize = parseFloat(this.labelSize);
-    this.labelPositionX = parseFloat(this.labelPositionX);
-    this.labelPositionY = parseFloat(this.labelPositionY);
-    this.area = parseFloat(this.area);
-    this.strokeArea = parseFloat(this.strokeArea);
-
 }
 
 
 CircosVertexRenderer.prototype = {
-    get: function (attr) {
+    get: function(attr) {
         return this[attr];
     },
-    set: function (attr, value, update) {
+    set: function(attr, value, update) {
+        if (!isNaN(value)) {
+            value = parseFloat(value);
+        }
         this[attr] = value;
 
         if (this._checkListProperties()) {
@@ -20439,13 +16031,10 @@ CircosVertexRenderer.prototype = {
                 case "labelSize":
                 case "labelPositionY":
                 case "labelPositionX":
-                    this.labelPositionX = parseInt(this.labelPositionX);
-                    this.labelPositionY = parseInt(this.labelPositionY);
-                    this.labelSize = parseInt(this.labelSize);
-                    this.labelEl.setAttribute('font-size', this.labelSize);
-                    this._updateLabelElPosition();
-                    this.labelEl.setAttribute('x', this.labelX);
-                    this.labelEl.setAttribute('y', this.labelY);
+                    this.labelPositionX = parseFloat(this.labelPositionX);
+                    this.labelPositionY = parseFloat(this.labelPositionY);
+                    this.labelSize = parseFloat(this.labelSize);
+                    this._renderLabelEl();
                     break;
                 case "shape":
                 case 'color':
@@ -20466,7 +16055,7 @@ CircosVertexRenderer.prototype = {
         }
 
     },
-    _checkListProperties: function () {
+    _checkListProperties: function() {
         /** Detect array values **/
         var minPieLength = 0;
         var minDonutLength = 0;
@@ -20610,12 +16199,12 @@ CircosVertexRenderer.prototype = {
         }
         /** **/
     },
-    render: function (args) {
+    render: function(args) {
 
         this.targetEl = args.target;
         //this.vertex = args.vertex;
         //this.coords = args.coords;
-        this.labelText = this.vertex.id;
+        this._setLabelText(this.vertex.id);
 
         if (this._checkListProperties()) {
             this.complex = true;
@@ -20625,17 +16214,17 @@ CircosVertexRenderer.prototype = {
         }
 
     },
-    remove: function () {
+    remove: function() {
         if (this.groupEl && this.groupEl.parentNode) {
             this.groupEl.parentNode.removeChild(this.groupEl);
         }
     },
-    update: function () {
+    update: function() {
         this.remove();
         this._render();
         console.log("update")
     },
-    select: function (color) {
+    select: function(color) {
         if (color) {
             this.selectEl.setAttribute('fill', color);
         }
@@ -20645,26 +16234,23 @@ CircosVertexRenderer.prototype = {
         }
         this.selected = true;
     },
-    deselect: function () {
+    deselect: function() {
         this._removeSelect();
         this.selected = false;
     },
-    move: function () {
+    move: function() {
         this.groupEl.setAttribute('transform', "translate(" + [this.coords.x - this.mid, this.coords.y - this.mid].join(',') + ")");
     },
-    setLabelContent: function (text) {
+    setLabelContent: function(text) {
         if (text == null) {
             text = '';
         }
-        this.labelText = text;
+        this._setLabelText(text);
         if (this.labelEl) {
-            this._updateLabelElPosition();
-            this.labelEl.setAttribute('x', this.labelX);
-            this.labelEl.setAttribute('y', this.labelY);
-            this.labelEl.textContent = this.labelText;
+            this._renderLabelEl();
         }
     },
-    getSize: function () {
+    getSize: function() {
         if (this.complex) {
             this._updateComplexDrawParameters();
         } else {
@@ -20672,7 +16258,7 @@ CircosVertexRenderer.prototype = {
         }
         return this.figureSize;
     },
-    toJSON: function () {
+    toJSON: function() {
         return {
             shape: this.shape,
             size: this.size,
@@ -20693,31 +16279,54 @@ CircosVertexRenderer.prototype = {
     },
 
     /* Private methods */
-    _updateDrawParameters: function () {
+    _setLabelText: function(text) {
+        this.labelText = text.toString();
+        this.labelLines = this.labelText.split(/\\n/);
+    },
+    _updateDrawParameters: function() {
         var midSize = (this.size + (this.strokeSize));
         this.mid = midSize / 2;
         this.figureSize = (this.size + (this.strokeSize * 2));
-        this._updateLabelElPosition();
     },
-    _updateComplexDrawParameters: function () {
+    _updateComplexDrawParameters: function() {
         //var midSize = (this.size + (this.strokeSize));
         //this.mid = midSize / 2;
         this.maxPieSize = this._slicesMax(this.pieSlices);
         this.maxDonutSize = this._slicesMax(this.donutSlices);
         this.figureSize = (this.maxPieSize + (this.maxDonutSize * 2));
         this.mid = this.figureSize / 2;
-        this._updateLabelElPosition();
     },
-    _updateLabelElPosition: function () {
-        var labelSize = this._textWidthBySize(this.labelText, this.labelSize);
-        this.labelX = this.labelPositionX + this.mid - (labelSize / 2);
-        this.labelY = this.labelPositionY + this.mid + this.labelSize / 3;
+    _textWidthBySize: function(text, pixelFontSize) {
+        return ((text.length * pixelFontSize / 2) + (text.length * pixelFontSize / 10)); //round up
     },
-    _textWidthBySize: function (text, pixelFontSize) {
-        return ((text.length * pixelFontSize / 2) + 0.5) | 0;//round up
+    _renderLabelEl: function() {
+        if (this.labelEl == null) {
+            this.labelEl = SVG.create("text", {
+                'network-type': 'vertex-label'
+            });
+        } else if (this.groupEl.contains(this.labelEl)) {
+            this.groupEl.removeChild(this.labelEl);
+        }
+        this.labelEl.setAttribute('font-size', this.labelSize);
+        this.labelEl.setAttribute('fill', this.labelColor);
+
+        this.labelEl.textContent = "";
+        var linesCount = this.labelLines.length;
+        var yStart = this.labelPositionY + this.mid + (this.labelSize / 3) - ((linesCount - 1) * this.labelSize / 2);
+        for (var i = 0; i < linesCount; i++) {
+            var line = this.labelLines[i];
+            var tspan = SVG.addChild(this.labelEl, "tspan", {
+                'network-type': 'vertex-label',
+                x: this.labelPositionX + this.mid - (this._textWidthBySize(line, this.labelSize) / 2),
+                y: yStart + (i * this.labelSize)
+            });
+            tspan.textContent = line;
+        }
+
+        this.groupEl.appendChild(this.labelEl);
     },
 
-    _drawSelectShape: function () {
+    _drawSelectShape: function() {
         if (this.complex === true) {
             this._drawSelectCircleShape();
         } else {
@@ -20737,7 +16346,7 @@ CircosVertexRenderer.prototype = {
             }
         }
     },
-    _drawSelectCircleShape: function () {
+    _drawSelectCircleShape: function() {
         this.selectEl = SVG.create("circle", {
             r: this.figureSize / 2 * 1.30,
             cx: this.mid,
@@ -20747,7 +16356,7 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _drawSelectEllipseShape: function () {
+    _drawSelectEllipseShape: function() {
         this.selectEl = SVG.create("ellipse", {
             cx: this.mid,
             cy: this.mid,
@@ -20758,7 +16367,7 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _drawSelectSquareShape: function () {
+    _drawSelectSquareShape: function() {
         this.selectEl = SVG.create("rect", {
             x: -this.mid * 0.3,
             y: -this.mid * 0.3,
@@ -20771,7 +16380,7 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _drawSelectRectangleShape: function () {
+    _drawSelectRectangleShape: function() {
         this.selectEl = SVG.create("rect", {
             x: -this.mid * 0.8,
             y: -this.mid * 0.3,
@@ -20784,12 +16393,12 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _removeSelect: function () {
+    _removeSelect: function() {
         if (this.selectEl && this.selectEl.parentNode) {
             this.selectEl.parentNode.removeChild(this.selectEl);
         }
     },
-    _render: function () {
+    _render: function() {
         if (this.complex === true) {
             this._renderSlices();
             this._drawSelectShape();
@@ -20801,7 +16410,7 @@ CircosVertexRenderer.prototype = {
                 "transform": "translate(" + [this.coords.x - this.mid, this.coords.y - this.mid].join(',') + ")",
                 "cursor": "pointer",
                 opacity: this.opacity,
-                'network-type': 'vertex-svg'
+                'network-type': 'vertex-g'
             });
             switch (this.shape) {
                 case "circle":
@@ -20853,27 +16462,20 @@ CircosVertexRenderer.prototype = {
                     break;
             }
         }
-        this.labelEl = SVG.addChild(this.groupEl, "text", {
-            "x": this.labelX,
-            "y": this.labelY,
-            "font-size": this.labelSize,
-            "fill": this.labelColor,
-            'network-type': 'vertex-label'
-        });
-        this.labelEl.textContent = this.labelText;
+        this._renderLabelEl();
         this.targetEl.appendChild(this.groupEl);
         if (this.selected) {
             this.select();
         }
     },
-    _renderSlices: function () {
+    _renderSlices: function() {
         this._updateComplexDrawParameters();
         this.groupEl = SVG.create('g', {
             "id": this.vertex.id,
             "transform": "translate(" + [this.coords.x - this.mid, this.coords.y - this.mid].join(',') + ")",
             "cursor": "pointer",
             opacity: this.opacity,
-            'network-type': 'vertex-svg'
+            'network-type': 'vertex-g'
         });
 
         var totalAreas = this._sumAreas(this.pieSlices);
@@ -21008,7 +16610,7 @@ CircosVertexRenderer.prototype = {
             }
         }
     },
-    _sumAreas: function (items) {
+    _sumAreas: function(items) {
         var total = 0;
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
@@ -21016,7 +16618,7 @@ CircosVertexRenderer.prototype = {
         }
         return total;
     },
-    _slicesMax: function (items) {
+    _slicesMax: function(items) {
         var max = 0;
         for (var i = 0; i < items.length; i++) {
             max = Math.max(max, parseFloat(items[i].size));
@@ -21027,11 +16629,11 @@ CircosVertexRenderer.prototype = {
     /*********/
     /*********/
     /*********/
-    drawLink: function (args) {
-//        var angleStart1 = args.angleStart1;
-//        var angleEnd1 = args.angleEnd1;
-//        var angleStart2 = args.angleStart2;
-//        var angleEnd2 = args.angleEnd2;
+    drawLink: function(args) {
+        //        var angleStart1 = args.angleStart1;
+        //        var angleEnd1 = args.angleEnd1;
+        //        var angleStart2 = args.angleStart2;
+        //        var angleEnd2 = args.angleEnd2;
 
         var angleStart1 = 30;
         var angleEnd1 = 60;
@@ -21070,7 +16672,7 @@ CircosVertexRenderer.prototype = {
         });
 
     },
-    drawSectors: function (args) {
+    drawSectors: function(args) {
         var coords = args.coords;
         var color = args.color;
         var targetSvg = args.target;
@@ -21096,8 +16698,8 @@ CircosVertexRenderer.prototype = {
         for (var i = 0; i < genome_d.length; i++) {
             var curve = SVG.addChild(targetSvg, "path", {
                 "d": genome_d[i],
-//                "stroke": 'lightblue',
-//                "stroke": Utils.colorLuminance(color, i/5),
+                //                "stroke": 'lightblue',
+                //                "stroke": Utils.colorLuminance(color, i/5),
                 "stroke": this.sectors[i].color,
                 "stroke-width": 10,
                 "fill": "none",
@@ -21106,6 +16708,7 @@ CircosVertexRenderer.prototype = {
         }
     }
 }
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -21143,8 +16746,8 @@ function DefaultEdgeRenderer(args) {
     this.labelSize = 0;
     this.labelColor = '#111111';
     this.labelText = '';
-//    this.labelPositionX = 5;
-//    this.labelPositionY = 45;
+    //    this.labelPositionX = 5;
+    //    this.labelPositionY = 45;
 
     this.el;
     this.edgeEl;
@@ -21175,10 +16778,13 @@ function DefaultEdgeRenderer(args) {
 }
 
 DefaultEdgeRenderer.prototype = {
-    get: function (attr) {
+    get: function(attr) {
         return this[attr];
     },
-    set: function (attr, value) {
+    set: function(attr, value) {
+        if(!isNaN(value)){
+            value = parseFloat(value);
+        }
         this[attr] = value;
         switch (attr) {
             case "color":
@@ -21198,7 +16804,7 @@ DefaultEdgeRenderer.prototype = {
                 this.updateShaft();
                 break;
             case "labelSize":
-                this.labelEl.setAttribute('font-size', this.labelSize);
+                this.labelSize = parseInt(this.labelSize);
                 this.setLabelContent(this.labelText);
                 break;
             case "opacity":
@@ -21208,7 +16814,7 @@ DefaultEdgeRenderer.prototype = {
                 this.update();
         }
     },
-    _getStrokeWidth: function () {
+    _getStrokeWidth: function() {
         return 1 + (this.size / 2);
     },
     //setConfig: function (args) {
@@ -21230,7 +16836,7 @@ DefaultEdgeRenderer.prototype = {
     //    _.extend(this, args);
     //    this.edgeEl.setAttribute('opacity', this.opacity);
     //},
-    render: function (args) {
+    render: function(args) {
         //this.edge = args.edge;
         this.targetEl = args.target;
         this.sourceCoords = this.edge.source.position;
@@ -21239,19 +16845,19 @@ DefaultEdgeRenderer.prototype = {
         this.targetRenderer = this.edge.target.renderer;
         this._render();
     },
-    remove: function () {
+    remove: function() {
         if (this.el && this.el.parentNode) {
             this.el.parentNode.removeChild(this.el);
         }
     },
-    update: function () {
+    update: function() {
         this.edgeEl.setAttribute('stroke', this.color);
         this.edgeEl.setAttribute('stroke-width', this._getStrokeWidth());
         this.labelEl.setAttribute('font-size', this.labelSize);
         this.updateShaft();
         this.updateShape();
     },
-    updateShape: function () {
+    updateShape: function() {
         if (!this.edgeEl) {
             debugger
         }
@@ -21270,7 +16876,7 @@ DefaultEdgeRenderer.prototype = {
 
         this.move();
     },
-    updateShaft: function () {
+    updateShaft: function() {
         if (!this.edgeEl) {
             debugger
         }
@@ -21281,22 +16887,22 @@ DefaultEdgeRenderer.prototype = {
             this._removeSelect();
         }
     },
-    select: function () {
+    select: function() {
         if (!this.selected) {
             this._renderSelect();
         }
     },
-    deselect: function () {
+    deselect: function() {
         if (this.selected) {
             this._removeSelect();
         }
     },
-    setLabelContent: function (text) {
+    setLabelContent: function(text) {
         if (text == null) {
             text = '';
         }
-        this.labelText = text;
-        this.labelEl.textContent = text;
+        this._setLabelText(text);
+        this._renderLabelEl();
         //var splitted = text.split("\\n");
         //var line, lineEl;
         //for (var i = 0; i < splitted.length; i++) {
@@ -21308,48 +16914,47 @@ DefaultEdgeRenderer.prototype = {
         //    lineEl.textContent = line;
         //}
     },
-//    moveSourceOff: function (coords) {
-//        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
-//        linkLine.setAttribute('x1', coords.x);
-//        linkLine.setAttribute('y1', coords.y);
-//
-//        var x1 = parseFloat(linkLine.getAttribute('x1'));
-//        var y1 = parseFloat(linkLine.getAttribute('y1'));
-//        var x2 = parseFloat(linkLine.getAttribute('x2'));
-//        var y2 = parseFloat(linkLine.getAttribute('y2'));
-//
-//        var x = (x1 + x2) / 2;
-//        var y = (y1 + y2) / 2;
-//
-//        var text = $(this.el).find('text[network-type="edge-label"]')[0];
-//        text.setAttribute('x', x);
-//        text.setAttribute('y', y);
-//    },
-//    moveTargetOff: function (coords) {
-//        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
-//        linkLine.setAttribute('x2', coords.x);
-//        linkLine.setAttribute('y2', coords.y);
-//
-//        var x1 = parseFloat(linkLine.getAttribute('x1'));
-//        var y1 = parseFloat(linkLine.getAttribute('y1'));
-//        var x2 = parseFloat(linkLine.getAttribute('x2'));
-//        var y2 = parseFloat(linkLine.getAttribute('y2'));
-//
-//        var x = (x1 + x2) / 2;
-//        var y = (y1 + y2) / 2;
-//
-//        var text = $(this.el).find('text[network-type="edge-label"]')[0];
-//        text.setAttribute('x', x);
-//        text.setAttribute('y', y);
-//
-//    },
-    move: function () {
+    //    moveSourceOff: function (coords) {
+    //        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
+    //        linkLine.setAttribute('x1', coords.x);
+    //        linkLine.setAttribute('y1', coords.y);
+    //
+    //        var x1 = parseFloat(linkLine.getAttribute('x1'));
+    //        var y1 = parseFloat(linkLine.getAttribute('y1'));
+    //        var x2 = parseFloat(linkLine.getAttribute('x2'));
+    //        var y2 = parseFloat(linkLine.getAttribute('y2'));
+    //
+    //        var x = (x1 + x2) / 2;
+    //        var y = (y1 + y2) / 2;
+    //
+    //        var text = $(this.el).find('text[network-type="edge-label"]')[0];
+    //        text.setAttribute('x', x);
+    //        text.setAttribute('y', y);
+    //    },
+    //    moveTargetOff: function (coords) {
+    //        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
+    //        linkLine.setAttribute('x2', coords.x);
+    //        linkLine.setAttribute('y2', coords.y);
+    //
+    //        var x1 = parseFloat(linkLine.getAttribute('x1'));
+    //        var y1 = parseFloat(linkLine.getAttribute('y1'));
+    //        var x2 = parseFloat(linkLine.getAttribute('x2'));
+    //        var y2 = parseFloat(linkLine.getAttribute('y2'));
+    //
+    //        var x = (x1 + x2) / 2;
+    //        var y = (y1 + y2) / 2;
+    //
+    //        var text = $(this.el).find('text[network-type="edge-label"]')[0];
+    //        text.setAttribute('x', x);
+    //        text.setAttribute('y', y);
+    //
+    //    },
+    move: function() {
         var val = this._calculateEdgePath();
         this.edgeEl.setAttribute('d', val.d);
-        this.labelEl.setAttribute('x', val.xl);
-        this.labelEl.setAttribute('y', val.yl);
+        this._renderLabelEl(val);
     },
-    _calculateEdgePath: function () {
+    _calculateEdgePath: function() {
         var d, labelX, labelY;
         if (this.edge.source === this.edge.target) {
             //calculate self edge
@@ -21365,7 +16970,8 @@ DefaultEdgeRenderer.prototype = {
                 'L', this.sourceCoords.x - length1, this.sourceCoords.y,
                 'C', this.sourceCoords.x - length2, this.sourceCoords.y, this.sourceCoords.x, this.sourceCoords.y - length2,
                 this.sourceCoords.x, this.sourceCoords.y - length1,
-                'L', this.targetCoords.x, this.targetCoords.y - rSize].join(' ');
+                'L', this.targetCoords.x, this.targetCoords.y - rSize
+            ].join(' ');
         } else {
             //calculate bezier line
             var deltaX = this.targetCoords.x - this.sourceCoords.x;
@@ -21401,14 +17007,18 @@ DefaultEdgeRenderer.prototype = {
             }
             var pp = this._getPerimeterPositions(angle);
 
-//            d = ['M', this.sourceCoords.x, this.sourceCoords.y, 'C', controlX, controlY, controlX, controlY, this.targetCoords.x, this.targetCoords.y].join(' ');
+            //            d = ['M', this.sourceCoords.x, this.sourceCoords.y, 'C', controlX, controlY, controlX, controlY, this.targetCoords.x, this.targetCoords.y].join(' ');
 
 
             d = ['M', pp.sx, pp.sy, controlPath, pp.tx, pp.ty].join(' ');
         }
-        return {d: d, xl: labelX, yl: labelY};
+        return {
+            d: d,
+            xl: labelX,
+            yl: labelY
+        };
     },
-    _getPerimeterPositions: function (angle) {
+    _getPerimeterPositions: function(angle) {
         // Calculate source and target points of the perimeter
         var sign = this.targetCoords.x >= this.sourceCoords.x ? 1 : -1;
         var srHalfSize = this.sourceRenderer.getSize() / 2;
@@ -21493,10 +17103,15 @@ DefaultEdgeRenderer.prototype = {
                     ty = this.targetCoords.y - (sign * sinAngle * trHalfSize);
             }
         }
-        return {sx: sx, sy: sy, tx: tx, ty: ty};
+        return {
+            sx: sx,
+            sy: sy,
+            tx: tx,
+            ty: ty
+        };
     },
     /* Private */
-    _render: function () {
+    _render: function() {
         this.el = SVG.create('g', {
             "cursor": "pointer",
             "id": this.edge.id,
@@ -21516,7 +17131,7 @@ DefaultEdgeRenderer.prototype = {
             "cursor": "pointer",
             fill: 'none',
             'network-type': 'edge'
-        },1);
+        }, 1);
 
         if (this.shape === 'undirected') {
             this.edgeEl.removeAttribute('marker-end');
@@ -21531,14 +17146,8 @@ DefaultEdgeRenderer.prototype = {
             }
         }
 
-        this.labelEl = SVG.addChild(this.el, "text", {
-            "x": val.xl,
-            "y": val.yl,
-            "font-size": this.labelSize,
-            "fill": this.labelColor,
-            'network-type': 'edge-label'
-        });
-        this.setLabelContent(this.edge.id);
+        this._setLabelText(this.edge.id);
+        this._renderLabelEl(val);
 
         SVG._insert(this.targetEl, this.el, 1);
 
@@ -21549,13 +17158,46 @@ DefaultEdgeRenderer.prototype = {
             this._removeSelect();
         }
     },
+    _setLabelText: function(text) {
+        this.labelText = text;
+        this.labelLines = this.labelText.split(/\\n/);
+    },
+    _renderLabelEl: function(val) {
+        if (val == null) {
+            val = this._calculateEdgePath();
+        }
+        if (this.labelEl == null) {
+            this.labelEl = SVG.create("text", {
+                'network-type': 'edge-label'
+            });
+        } else if(this.el.contains(this.labelEl)) {
+            this.el.removeChild(this.labelEl);
+        }
+        this.labelEl.setAttribute('font-size', this.labelSize);
+        this.labelEl.setAttribute('fill', this.labelColor);
 
-    _renderSelect: function () {
+        this.labelEl.textContent = "";
+        var linesCount = this.labelLines.length;
+        var yStart = val.yl - ((linesCount - 1) * this.labelSize / 2);
+        for (var i = 0; i < linesCount; i++) {
+            var line = this.labelLines[i];
+            var tspan = SVG.addChild(this.labelEl, "tspan", {
+                'network-type': 'edge-label',
+                x: val.xl,
+                y: yStart + (i * this.labelSize)
+            });
+            tspan.textContent = line;
+        }
+
+        this.el.appendChild(this.labelEl);
+    },
+
+    _renderSelect: function() {
         this.edgeEl.setAttribute('stroke-dasharray', '10, 5');
 
         this.selected = true;
     },
-    _removeSelect: function () {
+    _removeSelect: function() {
         if (this.shaft !== 'dashed') {
             this.edgeEl.removeAttribute('stroke-dasharray');
         } else {
@@ -21564,7 +17206,7 @@ DefaultEdgeRenderer.prototype = {
         this.selected = false;
     },
     /**/
-    _getMarkerArrowId: function (markerLocation) {
+    _getMarkerArrowId: function(markerLocation) {
         var offset = (this.size * -2) - 1;
         // if not exists this marker, add new one to defs
         var markerArrowId = "arrow-" + this.shape + "-" + offset.toString().replace(".", "_") + '-' + this.size.toString().replace(".", "_") + '-' + this.color.replace('#', '') + markerLocation;
@@ -21574,7 +17216,7 @@ DefaultEdgeRenderer.prototype = {
         }
         return markerArrowIdSel;
     },
-    _addArrowShape: function (type, offset, color, edgeSize, targetSvg, markerArrowId, markerLocation) {
+    _addArrowShape: function(type, offset, color, edgeSize, targetSvg, markerArrowId, markerLocation) {
         var defsEl = targetSvg.querySelector('defs');
         if (!defsEl) {
             defsEl = SVG.addChild(targetSvg, "defs", {}, 0);
@@ -21600,8 +17242,8 @@ DefaultEdgeRenderer.prototype = {
         });
         switch (type) {
             case "directed":
-                var d = ['M0,0', 'L', 1 * sign, h, 'L', 0, h * 2, 'L', w * sign, h + swh, 'L', w * sign, h - swh, 'Z'].join(' ')//"M0,0 V10 L5,5 Z"
-                //var d = ['M0,0', 'L', 1 * sign, h, 'L', 0, h * 2, 'L', w * sign, h, 'Z'].join(' ')//"M0,0 V10 L5,5 Z"
+                var d = ['M0,0', 'L', 1 * sign, h, 'L', 0, h * 2, 'L', w * sign, h + swh, 'L', w * sign, h - swh, 'Z'].join(' ') //"M0,0 V10 L5,5 Z"
+                    //var d = ['M0,0', 'L', 1 * sign, h, 'L', 0, h * 2, 'L', w * sign, h, 'Z'].join(' ')//"M0,0 V10 L5,5 Z"
                 var arrow = SVG.addChild(marker, "path", {
                     "fill": color,
                     "d": d
@@ -21641,7 +17283,7 @@ DefaultEdgeRenderer.prototype = {
                 break;
         }
     },
-    toJSON: function () {
+    toJSON: function() {
         return {
             shape: this.shape,
             shaft: this.shaft,
@@ -21657,6 +17299,7 @@ DefaultEdgeRenderer.prototype = {
         };
     }
 }
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -22158,54 +17801,6 @@ DefaultVertexRenderer.prototype = {
             labelSize: this.labelSize,
             labelColor: this.labelColor,
             labelText: this.labelText
-        };
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function EdgeConfig(args) {
-
-    this.id;
-    this.rendererConfig = {};
-    this.renderer = new DefaultEdgeRenderer(this.rendererConfig);
-    this.type;
-    this.visible;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.renderer.setConfig(this.rendererConfig);
-}
-
-EdgeConfig.prototype = {
-    render:function(args){
-        this.renderer.render(args);
-    },
-    toJSON: function () {
-        return {
-            id: this.id,
-            renderer:this.renderer,
-            type: this.type,
-            visible: this.visible
         };
     }
 }
@@ -22884,1244 +18479,6 @@ GraphLayout = {
 
 
 }
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function NetworkConfig(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('NetworkConfig');
-
-    this.session;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.vertices = {}; // [{id:"one",color:red,...},...]
-    this.edges = {};  // [{id:"one",color:red,...},...]
-
-    this.on(this.handlers);
-}
-
-NetworkConfig.prototype = {
-    clean: function () {
-        this.vertices = {};
-        this.edges = {};
-        this.general = {};
-    },
-    setVertexConfig: function (vertexConfig) {
-        this.vertices[vertexConfig.id] = vertexConfig;
-    },
-    getVertexConfig: function (vertex) {
-        var vertexConfig = this.vertices[vertex.id];
-        if (typeof vertexConfig === 'undefined') {
-            this.setVertexConfig(new VertexConfig({id: vertex.id}));
-        }
-        return this.vertices[vertex.id];
-    },
-    setEdgeConfig: function (edgeConfig) {
-        this.edges[edgeConfig.id] = edgeConfig;
-    },
-    getEdgeConfig: function (edge) {
-        var edgeConfig = this.edges[edge.id];
-        if (typeof edgeConfig === 'undefined') {
-            this.setEdgeConfig(new EdgeConfig({id: edge.id}));
-        }
-        return this.edges[edge.id];
-    },
-    removeVertex: function (vertex) {
-        delete this.vertices[vertex.id];
-    },
-    removeEdge: function (edge) {
-        delete this.edges[edge.id];
-    },
-
-    toJSON: function () {
-        return {
-            vertices: this.vertices,
-            edges: this.edges
-        }
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function NetworkSession() {
-
-
-    this.version = 2;
-    this.itemKey = 'CELLMAPS_SESSION' + this.version;
-
-    this.vertexDefaults = {
-        shape: 'circle',
-        size: 40,
-//            color: '#9fc6e7',
-        color: '#fff',
-        strokeSize: 2,
-//            strokeColor: '#9fc6e7',
-        strokeColor: '#888888',
-        opacity: 0.8,
-        labelSize: 12,
-        labelColor: '#111111',
-        labelPositionX: 0,
-        labelPositionY: 0
-    };
-    this.edgeDefaults = {
-        shape: 'undirected',
-        size: 1,
-        color: '#888888',
-//            color: '#cccccc',
-        opacity: 1,
-        labelSize: 0,
-        labelColor: '#111111'
-    };
-    this.visualSets = {};
-    this.zoom = 25;
-    this.backgroundImages = [];
-    this.backgroundColor = '#FFF';
-    this.center = {
-        x: 0,
-        y: 0
-    };
-    this.graph = new Graph();
-    this.vAttr = new AttributeManagerMemory();
-    this.eAttr = new AttributeManagerMemory();
-}
-
-NetworkSession.prototype = {
-    loadLocalStorage: function () {
-        if (localStorage.getItem(this.itemKey) !== null) {
-            this.loadJSON(JSON.parse(localStorage.getItem(this.itemKey)));
-            return true;
-        }
-        return false;
-    },
-    saveLocalStorage: function () {
-        localStorage.setItem(this.itemKey, JSON.stringify(this));
-    },
-    loadJSON: function (o) {
-        if (o.version === this.version) {
-            _.extend(this, o)
-        } else {
-            console.log('Could not load session, does not match with current version');
-            localStorage.removeItem('CELLMAPS_SESSION' + this.version);
-        }
-//        this.config = o.config;
-//        this.graph = o.graph;
-//        this.attributes = o.attributes;
-//        this.general = o.general;
-    },
-    toJSON: function () {
-        return {
-            general: this.general,
-            config: this.config,
-            graph: this.graph,
-            attributes: this.attributes,
-            version: this.version
-        };
-    }
-};
-
-
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function Network(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('Network');
-
-
-    this.vAttr = new AttributeManagerMemory();
-    this.eAttr = new AttributeManagerMemory();
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.vAttr.addColumn({
-        defaultValue: "",
-        name: "id",
-        title: "Id",
-        type: "string"
-    });
-    this.vAttr.addColumn({
-        defaultValue: "",
-        name: "name",
-        title: "Name",
-        type: "string",
-        cellTemplate: "inputTemplate"
-    });
-
-    this.eAttr.addColumn({
-        defaultValue: "",
-        name: "id",
-        title: "Id",
-        type: "string"
-    });
-    this.eAttr.addColumn({
-        defaultValue: "",
-        name: "name",
-        title: "Name",
-        type: "string",
-        cellTemplate: "inputTemplate"
-    });
-    this.eAttr.addColumn({
-        defaultValue: "",
-        name: "relation",
-        title: "Relation",
-        type: "string",
-        cellTemplate: "inputTemplate"
-    });
-
-    this.graph = new Graph();
-    this.config = new NetworkConfig();
-
-    this.on(this.handlers);
-}
-
-Network.prototype = {
-    setGraph: function (graph) {
-        console.time('Network.setGraph');
-        this.clean();
-        var edges = graph.edges;
-        var vertices = graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.addVertex({
-                    vertex: vertex,
-                    vertexConfig: new VertexConfig({
-                        rendererConfig: this.session.getVertexDefaults()
-                    })
-                });
-            }
-        }
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                this.addEdge({
-                    edge: edge,
-                    edgeConfig: new EdgeConfig({
-                        rendererConfig: this.session.getEdgeDefaults()
-                    })
-                });
-            }
-        }
-        console.timeEnd('Network.setGraph');
-    },
-    getGraph: function () {
-        return this.graph;
-    },
-    draw: function (target) {
-        console.time('Network.draw');
-        var parent = target.parentNode;
-        parent.removeChild(target);
-        var edges = this.graph.edges;
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.renderVertex(vertex, target);
-            }
-        }
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                this.renderEdge(edge, target);
-            }
-        }
-        parent.appendChild(target);
-        console.timeEnd('Network.draw');
-    },
-    addVertex: function (args) {
-        var vertex = args.vertex;
-        var vertexConfig = args.vertexConfig;
-        var target = args.target;
-        var name = args.name;
-
-        var added = this.graph.addVertex(vertex);
-        if (added) {
-            /* vertex config */
-            if (typeof vertexConfig === 'undefined') {
-                vertexConfig = new VertexConfig({
-                    rendererConfig: this.session.getVertexDefaults()
-                });
-            }
-            vertexConfig.id = vertex.id;
-            this.setVertexConfig(vertexConfig);
-
-            if (typeof target !== 'undefined') {
-                this.renderVertex(vertex, target);
-            }
-
-            var n = vertex.id;
-            //attributes
-            if (typeof name !== 'undefined') {
-                n = name;
-            }
-
-            this.vAttr.addRow({
-                'id': vertex.id,
-                'name': n
-            });
-        }
-        return added;
-    },
-    addEdge: function (args) {
-        var edge = args.edge;
-        var edgeConfig = args.edgeConfig;
-        var target = args.target;
-
-
-        var added = this.graph.addEdge(edge);
-        if (added) {
-
-            /* edge config */
-            if (typeof edgeConfig === 'undefined') {
-                edgeConfig = new EdgeConfig({
-                    rendererConfig: this.session.getEdgeDefaults()
-                });
-            }
-            edgeConfig.id = edge.id;
-            this.setEdgeConfig(edgeConfig);
-
-
-            if (typeof target !== 'undefined') {
-                this.renderEdge(edge, target);
-            }
-
-            this.eAttr.addRow({
-                'id': edge.id,
-                'name': edge.id,
-                'relation': edge.relation
-            });
-        }
-        return added;
-    },
-    setVertexConfig: function (vertexConfig) {
-        this.config.setVertexConfig(vertexConfig);
-    },
-    setEdgeConfig: function (edgeConfig) {
-        this.config.setEdgeConfig(edgeConfig);
-    },
-    getVertexConfig: function (vertex) {
-        return this.config.getVertexConfig(vertex);
-    },
-    getEdgeConfig: function (edge) {
-        return this.config.getEdgeConfig(edge);
-    },
-    getVertexById: function (vertexId) {
-        return this.graph.getVertexById(vertexId);
-    },
-    getEdgeById: function (edgeId) {
-        return this.graph.getEdgeById(edgeId);
-    },
-    removeVertex: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.remove();
-        for (var i = 0; i < vertex.edges.length; i++) {
-            var edge = vertex.edges[i];
-            var edgeConfig = this.config.getEdgeConfig(edge);
-            edgeConfig.renderer.remove();
-            this.config.removeEdge(edge);
-            this.edgeAttributeManager.removeRecordById(edge.id);
-        }
-        this.graph.removeVertex(vertex);
-        this.config.removeVertex(vertex);
-        this.vertexAttributeManager.removeRecordById(vertex.id);
-    },
-    removeEdge: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.remove();
-        this.graph.removeEdge(edge);
-        this.config.removeEdge(edge);
-        this.edgeAttributeManager.removeRecordById(edge.id);
-        if (this.batchFlag == false) {
-            this.trigger('remove:edge');
-        }
-    },
-    removeVertices: function (vertices) {
-        for (var i = 0, li = vertices.length; i < li; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.removeVertex(vertex);
-            }
-        }
-    },
-    renderVertex: function (vertex, target) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.render({
-            coords: vertexConfig.coords,
-            vertex: vertex,
-            target: target
-        });
-    },
-    renderEdge: function (edge, target) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        var sourceConfig = this.config.getVertexConfig(edge.source);
-        var targetConfig = this.config.getVertexConfig(edge.target);
-        edgeConfig.render({
-            sourceCoords: sourceConfig.coords,
-            targetCoords: targetConfig.coords,
-            sourceRenderer: sourceConfig.renderer,
-            targetRenderer: targetConfig.renderer,
-            edge: edge,
-            target: target
-        });
-    },
-    setVertexLabel: function (vertex, label) {
-        if (typeof vertex !== 'undefined') {
-            var vertexConfig = this.getVertexConfig(vertex);
-            vertexConfig.renderer.setLabelContent(label);
-        }
-        this.vertexAttributeManager.setRecordAttributeById(vertex.id, 'Name', label);
-    },
-    setVertexLabelByAttribute: function (attributeName) {
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.getVertexConfig(vertex);
-                var id = vertex.id;
-
-//              /* Name attribute is unique */
-                var label = this.vertexAttributeManager.getValueByAttributeAndId(id, attributeName);
-                vertexConfig.renderer.setLabelContent(label);
-            }
-        }
-    },
-    setEdgeLabel: function (edge, label) {
-        if (typeof edge !== 'undefined') {
-            var edgeConfig = this.getEdgeConfig(edge);
-            edgeConfig.renderer.setLabelContent(label);
-        }
-        this.edgeAttributeManager.setRecordAttributeById(edge.id, 'Name', label);
-    },
-    setEdgeLabelByAttribute: function (attributeName) {
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.getEdgeConfig(edge);
-                var id = edge.id;
-
-                /* Name attribute is unique */
-                var label = this.edgeAttributeManager.getValueByAttributeAndId(id, attributeName);
-                edgeConfig.renderer.setLabelContent(label);
-            }
-        }
-    },
-
-    selectVertex: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.select();
-        this.vertexAttributeManager.setRecordAttributeById(vertex.id, 'Selected', true);
-    },
-    selectEdge: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.select();
-        this.edgeAttributeManager.setRecordAttributeById(edge.id, 'Selected', true);
-    },
-    selectVerticesByIds: function (vertexIds) {
-        var selectedVertices = []
-        for (var i = 0, l = vertexIds.length; i < l; i++) {
-            var vertexId = vertexIds[i];
-            var vertex = this.getVertexById(vertexId);
-            var vertexConfig = this.config.getVertexConfig(vertex);
-            vertexConfig.renderer.select();
-            selectedVertices.push(vertex);
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectByArea: function (x, y, width, height) {
-        var selectedVertices = [];
-        var selectedEdges = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.getVertexConfig(vertex);
-                if (vertexConfig.coords.x >= x && vertexConfig.coords.x <= x + width && vertexConfig.coords.y >= y && vertexConfig.coords.y <= y + height) {
-                    vertexConfig.renderer.select();
-                    selectedVertices.push(vertex);
-
-                    for (var j = 0; j < vertex.edges.length; j++) {
-                        var edge = vertex.edges[j];
-                        var edgeConfig = this.config.getEdgeConfig(edge);
-                        if (edgeConfig.renderer.selected === false) {
-                            edgeConfig.renderer.select();
-                            selectedEdges.push(edge);
-                        }
-                    }
-
-                }
-            }
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        this.edgeAttributeManager.selectByItems(selectedEdges);
-        return {vertices: selectedVertices, edges: selectedEdges};
-    },
-    deselectVertex: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.deselect();
-        this.vertexAttributeManager.setRecordAttributeById(vertex.id, 'Selected', false);
-    },
-    deselectEdge: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.deselect();
-        this.edgeAttributeManager.setRecordAttributeById(edge.id, 'Selected', false);
-    },
-    deselectAllVertices: function () {
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                vertexConfig.renderer.deselect();
-            }
-        }
-        this.vertexAttributeManager.deselectAll();
-    },
-    deselectAllEdges: function () {
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.config.getEdgeConfig(edge);
-                edgeConfig.renderer.deselect();
-            }
-        }
-        this.edgeAttributeManager.deselectAll();
-    },
-    selectAllVertices: function () {
-        var selectedVertices = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                vertexConfig.renderer.select();
-                selectedVertices.push(vertex);
-            }
-        }
-        this.vertexAttributeManager.selectAll();
-        return selectedVertices;
-    },
-    selectVerticesNeighbour: function (vertices) {
-        var selectedVertices = [];
-        var selectedVerticesMap = {};
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                selectedVerticesMap[vertex.id] = vertex;
-                selectedVertices.push(vertex);
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                vertexConfig.renderer.select();
-
-                for (var j = 0; j < vertex.edges.length; j++) {
-                    var edge = vertex.edges[j];
-                    if (typeof selectedVerticesMap[edge.source.id] === 'undefined') {
-                        selectedVerticesMap[edge.source.id] = edge.source;
-                        selectedVertices.push(edge.source);
-                        var vertexConfig = this.config.getVertexConfig(edge.source);
-                        vertexConfig.renderer.select();
-                    }
-                    if (typeof selectedVerticesMap[edge.target.id] === 'undefined') {
-                        selectedVerticesMap[edge.target.id] = edge.target;
-                        selectedVertices.push(edge.target);
-                        var vertexConfig = this.config.getVertexConfig(edge.target);
-                        vertexConfig.renderer.select();
-                    }
-                }
-            }
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectEdgesNeighbour: function (vertices) {
-        var selectedEdges = [];
-        var selectedEdgesMap = {};
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                for (var j = 0; j < vertex.edges.length; j++) {
-                    var edge = vertex.edges[j];
-                    if (typeof selectedEdgesMap[edge.id] === 'undefined') {
-                        selectedEdgesMap[edge.id] = edge;
-                        selectedEdges.push(edge);
-                        var edgeConfig = this.config.getEdgeConfig(edge);
-                        edgeConfig.renderer.select();
-                    }
-                }
-            }
-        }
-        this.edgeAttributeManager.selectByItems(selectedEdges);
-        return selectedEdges;
-    },
-    selectVerticesInvert: function () {
-        var selectedVertices = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                if (vertexConfig.renderer.selected) {
-                    vertexConfig.renderer.deselect();
-                } else {
-                    selectedVertices.push(vertex);
-                    vertexConfig.renderer.select();
-                }
-            }
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectAllEdges: function () {
-        var selectedEdges = [];
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.config.getEdgeConfig(edge);
-                edgeConfig.renderer.select();
-                selectedEdges.push(edge);
-            }
-        }
-        this.edgeAttributeManager.selectAll();
-        return selectedEdges;
-    },
-    selectVerticesByAttribute: function (attributeName, attributeValue) {
-        var selectedVertices = [];
-        var ids = this.vertexAttributeManager.getIdsByAttributeValue(attributeName, attributeValue);
-        for (var i = 0, l = ids.length; i < l; i++) {
-            var id = ids[i];
-            var vertex = this.graph.getVertexById(id);
-            var vertexConfig = this.config.getVertexConfig(vertex);
-            vertexConfig.renderer.select();
-            selectedVertices.push(vertex);
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectEdgesByAttribute: function (attributeName, attributeValue) {
-        var selectedEdges = [];
-        var ids = this.edgeAttributeManager.getIdsByAttributeValue(attributeName, attributeValue);
-        for (var i = 0, l = ids.length; i < l; i++) {
-            var id = ids[i];
-            var edge = this.graph.getEdgeById(id);
-            var edgeConfig = this.config.getEdgeConfig(edge);
-            edgeConfig.renderer.select();
-            selectedEdges.push(edge);
-        }
-        this.vertexAttributeManager.selectByItems(selectedEdges);
-        return selectedEdges;
-    },
-
-
-    moveVertex: function (vertex, dispX, dispY, dispZ) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.move(dispX, dispY, dispZ);
-
-        this._updateEdgeCoords(vertex);
-    },
-    _updateEdgeCoords: function (vertex) {
-        for (var i = 0; i < vertex.edges.length; i++) {
-            var edge = vertex.edges[i];
-            var edgeConfig = this.getEdgeConfig(edge);
-            var sourceConfig = this.getVertexConfig(edge.source);
-            var targetConfig = this.getVertexConfig(edge.target);
-
-            if (vertex === edge.source) {
-//                edgeConfig.renderer.moveSource(sourceConfig.coords);
-                edgeConfig.renderer.move(sourceConfig.coords);
-            }
-            if (vertex === edge.target) {
-//                edgeConfig.renderer.moveTarget(targetConfig.coords);
-                edgeConfig.renderer.move(targetConfig.coords);
-            }
-        }
-    },
-    setVertexCoords: function (vertex, x, y, z) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.setCoords(x, y, z);
-
-        this._updateEdgeCoords(vertex);
-    },
-    setVertexCoordsById: function (vertexId, x, y, z) {
-        var vertex = this.getVertexById(vertexId);
-        this.setVertexCoords(vertex, x, y, z);
-    },
-    getVertexCoords: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        return vertexConfig.getCoords();
-    },
-
-    isVertexSelected: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        return vertexConfig.renderer.selected;
-    },
-    isEdgeSelected: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        return edgeConfig.renderer.selected;
-    },
-
-
-    /* Config Renderer Attributes */
-    setVertexRendererAttribute: function (vertex, rendererAttr, value, updateEdges) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.set(rendererAttr, value);
-
-        //By default not update edges
-        if (updateEdges === true) {
-            this._updateVertexEdgesRenderer(vertex);
-        }
-    },
-    _updateVertexEdgesRenderer: function (vertex) {
-        for (var j = 0; j < vertex.edges.length; j++) {
-            var edge = vertex.edges[j];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.getEdgeConfig(edge);
-                edgeConfig.renderer.updateShape();
-            }
-        }
-    },
-    setVerticesRendererAttribute: function (rendererAttr, value, updateEdges) {
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.setVertexRendererAttribute(vertex, rendererAttr, value, updateEdges);
-            }
-        }
-    },
-    setVerticesRendererAttributeMap: function (rendererAttr, vertexAttribute, uniqueMap, updateEdges) {
-        for (var uniqueAttrValue in uniqueMap) {
-            var rendererValue = uniqueMap[uniqueAttrValue];
-            var ids = this.vertexAttributeManager.getIdsByAttributeValue(vertexAttribute, uniqueAttrValue);
-            for (var i = 0, l = ids.length; i < l; i++) {
-                var id = ids[i];
-                var vertex = this.graph.getVertexById(id);
-                this.setVertexRendererAttribute(vertex, rendererAttr, rendererValue, updateEdges);
-            }
-        }
-    },
-    setVerticesRendererAttributeListMap: function (args) {
-        var _this = this;
-
-        var settings = args.settings;
-        var defaults = args.defaults;
-
-        if (settings.length > 0) {
-            var sortFunction = function (a, b) {
-                return b.values.length - a.values.length;
-            };
-
-            var checkEqualValuesLength = function (list) {
-                if (list.length == 1) {
-                    return true;
-                } else {
-                    var l = list[0].values.length;
-                    for (var i = 1; i < list.length; i++) {
-                        if (list[i].values.length !== l) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            };
-            var checkNotEqualValuesLength = function (list) {
-                if (list.length > 1) {
-//                var l0 = list[0].values.length;
-                    for (var i = 1; i < list.length; i++) {
-                        var li = list[i].values.length;
-                        if (li > 1) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            };
-
-            this.vertexAttributeManager.eachRecord(function (record) {
-
-
-                var slicesMap = {};
-
-                var id = record.get('id');
-
-//                if(id === 'c'){
-//                    debugger
-//                }
-
-                var vertex = _this.graph.getVertexById(id);
-                var vertexConfig = _this.config.getVertexConfig(vertex);
-
-                for (var s = 0; s < settings.length; s++) {
-                    var configs = settings[s].configs;
-                    var label = settings[s].label;
-                    var slicesName = settings[s].slicesName;
-                    var sliceDefault = defaults[slicesName];
-
-                    if (configs.length > 0) {
-
-                        var valuesAndConfigList = [];
-                        for (var i = 0; i < configs.length; i++) {
-                            var config = configs[i];
-                            if (typeof config !== 'undefined') {
-                                var value = record.get(config.attribute);
-                                if (value) {
-                                    var valueSplit = value.split(',');
-                                    valuesAndConfigList.push({values: valueSplit, config: config});
-                                }
-                            }
-                        }
-
-                        valuesAndConfigList.sort(sortFunction);
-
-                        var slices = [];
-                        if (valuesAndConfigList.length > 0) {
-                            if (checkEqualValuesLength(valuesAndConfigList)) {
-                                var valuesLength = valuesAndConfigList[0].values.length;
-                                for (var i = 0; i < valuesLength; i++) {
-                                    var slice = {};
-                                    for (var displayAttribute in sliceDefault) {
-                                        slice[displayAttribute] = sliceDefault[displayAttribute];
-                                    }
-
-                                    for (var j = 0; j < valuesAndConfigList.length; j++) {
-                                        var valuesAndConfig = valuesAndConfigList[j];
-                                        var val = valuesAndConfig.values[i];
-                                        var renderValue = valuesAndConfig.config.map[val];
-                                        if (label.enable && valuesAndConfig.config.attribute === label.attribute) {
-                                            slice['text'] = val;
-                                            slice['labelSize'] = label.size;
-                                            slice['labelOffset'] = label.offset;
-                                        }
-                                        if (typeof renderValue !== 'undefined') {
-                                            slice[valuesAndConfig.config.displayAttribute] = renderValue;
-                                        }
-                                    }
-                                    slices.push(slice);
-                                }
-                            } else if (checkNotEqualValuesLength(valuesAndConfigList)) {
-                                var valuesLength = valuesAndConfigList[0].values.length;
-                                for (var i = 0; i < valuesLength; i++) {
-                                    var slice = {};
-                                    for (var displayAttribute in sliceDefault) {
-                                        slice[displayAttribute] = sliceDefault[displayAttribute];
-                                    }
-
-                                    var valuesAndConfig = valuesAndConfigList[0];
-                                    var val = valuesAndConfig.values[i];
-                                    var renderValue = valuesAndConfig.config.map[val];
-                                    if (label.enable && valuesAndConfig.config.attribute === label.attribute) {
-                                        slice['text'] = val;
-                                        slice['labelSize'] = label.size;
-                                        slice['labelOffset'] = label.offset;
-                                    }
-                                    if (typeof renderValue !== 'undefined') {
-                                        slice[valuesAndConfig.config.displayAttribute] = renderValue;
-                                    }
-
-                                    for (var j = 1; j < valuesAndConfigList.length; j++) {
-                                        valuesAndConfig = valuesAndConfigList[j];
-                                        val = valuesAndConfig.values[0];
-                                        if (label.enable && valuesAndConfig.config.attribute === label.attribute) {
-                                            slice['text'] = val;
-                                            slice['labelSize'] = label.size;
-                                            slice['labelOffset'] = label.offset;
-                                        }
-                                        renderValue = valuesAndConfig.config.map[val];
-                                        if (typeof renderValue !== 'undefined') {
-                                            slice[valuesAndConfig.config.displayAttribute] = renderValue;
-                                        }
-                                    }
-                                    slices.push(slice);
-                                }
-                            } else {
-                                console.log(record.get('id'));
-                            }
-                        }
-                        if (slices.length > 0) {
-                            slicesMap[slicesName] = slices;
-                        }
-                    }
-                }
-                vertexConfig.renderer.updateComplex(slicesMap, defaults);
-                _this._updateEdgeCoords(vertex);
-            });
-        }
-    },
-    setEdgeRendererAttribute: function (edge, attr, value) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.set(attr, value);
-    },
-    setEdgesRendererAttribute: function (attr, value) {
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                this.setEdgeRendererAttribute(edge, attr, value);
-            }
-        }
-    },
-    setEdgesRendererAttributeMap: function (rendererAttr, vertexAttribute, uniqueMap) {
-        for (var uniqueAttrValue in uniqueMap) {
-            var rendererValue = uniqueMap[uniqueAttrValue];
-            var ids = this.edgeAttributeManager.getIdsByAttributeValue(vertexAttribute, uniqueAttrValue);
-            for (var i = 0, l = ids.length; i < l; i++) {
-                var id = ids[i];
-                var edge = this.graph.getEdgeById(id);
-                this.setEdgeRendererAttribute(edge, rendererAttr, rendererValue);
-            }
-        }
-    },
-
-
-    getVerticesLength: function () {
-        return this.graph.numberOfVertices;
-    },
-    getEdgesLength: function () {
-        return this.graph.numberOfEdges;
-    },
-    getVertices: function () {
-        var items = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                items.push(vertex);
-            }
-        }
-        return items;
-    },
-    getEdges: function () {
-        var items = [];
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                items.push(edge);
-            }
-        }
-        return items;
-    },
-    getVerticesOrdered: function (attributeName) {
-        var vertices = [];
-        var item = this.vertexAttributeManager.getOrderedIdsByAttribute(attributeName);
-        for (var i = 0, l = item.length; i < l; i++) {
-            var id = item[i].id;
-            var vertex = this.graph.getVertexById(id);
-            if (typeof vertex !== 'undefined') {
-                vertices.push(vertex);
-            }
-        }
-        return vertices;
-    },
-
-
-//    /* Attribute Manager */
-//    addAttribute: function (name, type, defaultValue) {
-//        //TODO test
-//    },
-//    removeAttribute: function (name) {
-//        //TODO test
-////        this.attributeManager.removeAttribute(name);
-//    },
-//    getVertexAttributes: function (vertex, success) {
-//        //TODO test
-////        this.attributeManager.getVertexAttributes(vertex, success);
-//    },
-
-    clean: function () {
-        console.time('Network.clean')
-        /*  graph */
-        this.graph.clean();
-        this.config.clean();
-
-        console.timeEnd('Network.clean')
-    },
-
-    getAsSIF: function (separator) {
-        return this.graph.getAsSIF(separator);
-    },
-    getAsSIFCustomRelation: function (separator, relationColumn) {
-        if (typeof separator === 'undefined') {
-            separator = '\t';
-        }
-
-        var vertices = this.graph.vertices;
-        var edges = this.graph.edges;
-
-        var sifText = "";
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var line = "";
-
-                var attrValue = this.edgeAttributeManager.getValueByAttributeAndId(edge.id, relationColumn);
-
-                line = edge.source.id + separator + attrValue + separator + edge.target.id + "\n";
-                sifText += line;
-            }
-        }
-        for (var i = 0; i < vertices.length; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var line = "";
-                if (vertex.edges.length == 0) {
-                    line = vertex.id + separator + separator + "\n";
-                }
-                sifText += line;
-            }
-        }
-        return sifText;
-    },
-
-    /** JSON import/export **/
-    /* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify */
-    saveSession: function () {
-        this.session.loadGraph(this.graph);
-        this.session.loadConfig(this.config);
-        this.session.loadVertexAttributes(this.vertexAttributeManager);
-        this.session.loadEdgeAttributes(this.edgeAttributeManager);
-//        return {
-//            graph: this.graph,
-//            config: this.config,
-//            vertexAttributes: this.vertexAttributeManager,
-//            edgeAttributes: this.edgeAttributeManager
-//        };
-    },
-    loadSession: function () {
-        this.clean();
-
-        this.batchStart();
-        console.time('Network.loadJSON');
-
-//        console.time('Network.loadJSON-Vertices');
-        for (var i = 0; i < this.session.graph.vertices.length; i++) {
-            var v = this.session.graph.vertices[i];
-            var vertex = new Vertex({
-                id: v.id
-            });
-
-            /* vertex config */
-            var config = this.session.config.vertices[v.id];
-//            console.time('Network.loadJSON-vertex');
-            if (typeof config === 'undefined') {
-                var vertexConfig = new VertexConfig({
-                    rendererConfig: this.session.getVertexDefaults()
-                });
-            } else {
-                var vertexConfig = new VertexConfig({
-                    id: v.id,
-                    coords: this.session.config.vertices[v.id].coords,
-                    rendererConfig: config.renderer
-                });
-            }
-//            console.timeEnd('Network.loadJSON-vertex');
-
-            this.addVertex({
-                vertex: vertex,
-                vertexConfig: vertexConfig
-            });
-        }
-//        console.timeEnd('Network.loadJSON-Vertices');
-//        console.time('Network.loadJSON-Edges');
-        for (var i = 0; i < this.session.graph.edges.length; i++) {
-            var e = this.session.graph.edges[i];
-
-            var source = this.getVertexById(e.source.id);
-            var target = this.getVertexById(e.target.id);
-
-            var edge = new Edge({
-                id: e.id,
-                relation: e.relation,
-                source: source,
-                target: target
-            });
-
-            /* edge config */
-            var config = this.session.config.edges[e.id];
-            if (typeof config === 'undefined') {
-                var edgeConfig = new EdgeConfig({
-                    rendererConfig: this.session.getEdgeDefaults()
-                });
-            } else {
-                var edgeConfig = new EdgeConfig({
-                    id: e.id,
-                    coords: this.session.config.edges[e.id].coords,
-                    rendererConfig: config.renderer
-                });
-            }
-
-            this.addEdge({
-                edge: edge,
-                edgeConfig: edgeConfig
-            });
-        }
-//        console.timeEnd('Network.loadJSON-Edges');
-
-        this._importAttributes(this.session.attributes.vertices, this.vertexAttributeManager);
-        this._importAttributes(this.session.attributes.edges, this.edgeAttributeManager);
-
-        this.batchEnd();
-        this.trigger('load:json');
-        console.timeEnd('Network.loadJSON');
-    },
-
-    importVertexAttributeManager: function (attributeManager) {
-        var columns = attributeManager.columns;
-        var data = attributeManager.data;
-        for (var i = 0; i < columns.length; i++) {
-            var column = columns[i];
-            this.vAttr.addColumn(column);
-        }
-        for (var i = 0; i < data.length; i++) {
-            var row = data[i];
-            if(this.graph.containsVertex({id:row.id})){
-                var added = this.vAttr.addRow(row);
-                if(added == false){
-                    var currentRow = this.vAttr.getRow(row.id);
-                    for(key in row){
-                        currentRow[key] = row[key];
-                    }
-                }
-            }
-        }
-    },
-    importEdgeAttributeManager: function (attributeManager) {
-        var columns = attributeManager.columns;
-        var data = attributeManager.data;
-        for (var i = 0; i < columns.length; i++) {
-            var column = columns[i];
-            this.eAttr.addColumn(column);
-        }
-        for (var i = 0; i < data.length; i++) {
-            var row = data[i];
-            if(this.graph.containsEdge({id:row.id})){
-                var added = this.eAttr.addRow(row);
-                if(added == false){
-                    var currentRow = this.eAttr.getRow(row.id);
-                    for(key in row){
-                        currentRow[key] = row[key];
-                    }
-                }
-            }
-        }
-    },
-
-    importVertexWithAttributes: function (data) {
-        console.time('Network.importVertexWithAttributes');
-        this.batchStart();
-        if (data.createVertices) {
-            for (var i = 0; i < data.content.data.length; i++) {
-                var id = data.content.data[i][0];
-
-                var vertex = new Vertex({
-                    id: id
-                });
-
-                this.addVertex({
-                    vertex: vertex
-                });
-            }
-        }
-        // add attributes
-        this._importAttributes(data.content, this.vertexAttributeManager);
-        this.batchEnd();
-        this.trigger('import:attributes');
-        console.timeEnd('Network.importVertexWithAttributes');
-    },
-    _importAttributes: function (data, attributeManager) {
-        if (data.attributes && data.attributes.length > 1) {
-            var attributes = data.attributes;
-            attributeManager.addAttributes(attributes);
-            // add values for attributes
-//            console.time('Network._importAttributes');
-            var values = [], recordObject, attr, value;
-            for (var i = 0; i < data.data.length; i++) {
-                recordObject = {
-                    id: data.data[i][0]
-                };
-                for (var j = 1; j < data.data[i].length; j++) {
-                    attr = attributes[j].name;
-                    value = data.data[i][j];
-                    recordObject[attr] = value;
-                }
-                values.push(recordObject);
-            }
-//            console.timeEnd('Network._importAttributes');
-            attributeManager.setRecordAttributeByIds(values);
-        }
-    },
-    importEdgesWithAttributes: function (data) {
-        console.time('Network.importEdgesWithAttributes');
-        this.batchStart();
-        // add attributes
-        this._importAttributes(data.content, this.edgeAttributeManager);
-        this.batchEnd();
-        this.trigger('import:attributes');
-        console.timeEnd('Network.importEdgesWithAttributes');
-    }
-}
 Point = function (x, y, z) {
 
     this.x = x || 0;
@@ -24168,83 +18525,6 @@ Point.prototype = {
         return {x: this.x, y: this.y, z: this.z}
     }
 };
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function VertexConfig(args) {
-
-
-    var x = Math.floor((Math.random() * 500) + 30);
-    var y = Math.floor((Math.random() * 500) + 30);
-    var z = Math.floor((Math.random() * 500) + 30);
-
-    this.id;
-    this.coords = {x: x, y: y, z: z};
-    this.rendererConfig = {};
-    this.renderer = new CircosVertexRenderer(this.rendererConfig);
-    this.type;
-    this.visible;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.renderer.setConfig(this.rendererConfig);
-}
-
-VertexConfig.prototype = {
-    setCoords: function (x, y, z) {
-        var dx = x - this.coords.x;
-        var dy = y - this.coords.y;
-        var dz = z - this.coords.z;
-
-        this.coords.x = x;
-        this.coords.y = y;
-        this.coords.z = z;
-
-        this.renderer.move(dx, dy, dz);
-    },
-    move: function (dx, dy, dz) {
-        this.coords.x += dx;
-        this.coords.y += dy;
-        if (typeof dz !== 'undefined') {
-            this.coords.z += dz;
-        }
-        this.renderer.move(dx, dy, dz);
-    },
-    getCoords: function () {
-        return this.coords;
-    },
-    render: function (args) {
-        this.renderer.render(args);
-    },
-    toJSON: function () {
-        return {
-            id: this.id,
-            coords: this.coords,
-            renderer: this.renderer,
-            type: this.type,
-            visible: this.visible
-        };
-    }
-}
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -25674,7 +19954,6 @@ EnsemblAdapter.prototype = {
 
  */
 
-
 function FeatureTemplateAdapter(args) {
 
     _.extend(this, Backbone.Events);
@@ -25682,6 +19961,7 @@ function FeatureTemplateAdapter(args) {
     this.templateVariables = {};
     this.multiRegions = true;
     this.histogramMultiRegions = true;
+    this.chromosomeSizes;
 
     _.extend(this, args);
 
@@ -25691,15 +19971,15 @@ function FeatureTemplateAdapter(args) {
 }
 
 FeatureTemplateAdapter.prototype = {
-    setSpecies: function(species) {
+    setSpecies: function (species) {
         this.species = species;
         this.configureCache();
     },
-    setHost: function(host) {
+    setHost: function (host) {
         this.configureCache();
         this.host = host;
     },
-    configureCache: function() {
+    configureCache: function () {
         var speciesString = '';
         if (this.species != null) {
             var speciesString = this.species.id + this.species.assembly.name.replace(/[/_().\ -]/g, '');
@@ -25715,7 +19995,7 @@ FeatureTemplateAdapter.prototype = {
         this.cache = new FeatureChunkCache(this.cacheConfig);
     },
 
-    getData: function(args) {
+    getData: function (args) {
         var _this = this;
 
         var params = {};
@@ -25724,17 +20004,7 @@ FeatureTemplateAdapter.prototype = {
         _.extend(params, args.params);
 
         /** 1 region check **/
-        var region = args.region;
-        var regionLimit = 300000000;
-        if (this.species != null && this.species.chromosomes[region.chromosome] != null) {
-            regionLimit = this.species.chromosomes[args.region.chromosome].end;
-        }
-        if (region.start > regionLimit || region.end < 1) {
-            return;
-        }
-
-        region.start = (region.start < 1) ? 1 : region.start;
-        region.end = (region.end > regionLimit) ? regionLimit : region.end;
+        var region = this._computeLimitedRegion(args.region);
 
         /** 2 category check **/
         var categories = ["cat_" + Utils.queryString(this.templateVariables) + Utils.queryString(params)];
@@ -25757,7 +20027,7 @@ FeatureTemplateAdapter.prototype = {
          * by the Cache TODO????
          * Cached chunks will be returned by the args.dataReady Callback.
          */
-        this.cache.get(region, categories, dataType, chunkSize, function(cachedChunks, uncachedRegions) {
+        this.cache.get(region, categories, dataType, chunkSize, function (cachedChunks, uncachedRegions) {
 
             var category = categories[0];
             var categoriesName = "";
@@ -25784,7 +20054,6 @@ FeatureTemplateAdapter.prototype = {
                 }
             }
 
-
             /** Uncached regions found **/
             if (queriesList.length > 0) {
                 args.webServiceCallCount = 0;
@@ -25798,7 +20067,7 @@ FeatureTemplateAdapter.prototype = {
                     request._queryRegion = queryRegion;
                     request._originalRegion = region;
 
-                    request.onload = function() {
+                    request.onload = function () {
                         args.webServiceCallCount--;
                         if (request.status !== 400) {
                             var response;
@@ -25816,7 +20085,7 @@ FeatureTemplateAdapter.prototype = {
                             console.log("request.status: " + request.status);
                         }
                         if (args.webServiceCallCount === 0) {
-                            chunks.sort(function(a, b) {
+                            chunks.sort(function (a, b) {
                                 return a.chunkKey.localeCompare(b.chunkKey)
                             });
                             args.done({
@@ -25827,7 +20096,7 @@ FeatureTemplateAdapter.prototype = {
                             });
                         }
                     };
-                    request.onerror = function() {
+                    request.onerror = function () {
                         console.log('Server error');
                         args.done();
                     };
@@ -25840,7 +20109,6 @@ FeatureTemplateAdapter.prototype = {
                     request.open('GET', url, true);
                     console.log(url);
                     request.send();
-
 
                 }
             } else
@@ -25856,7 +20124,7 @@ FeatureTemplateAdapter.prototype = {
         });
     },
 
-    _success: function(response, categories, dataType, queryRegion, originalRegion, chunkSize) {
+    _success: function (response, categories, dataType, queryRegion, originalRegion, chunkSize) {
         //var timeId = Utils.randomString(4) + this.resource + " save";
         //console.time(timeId);
         /** time log **/
@@ -25892,7 +20160,7 @@ FeatureTemplateAdapter.prototype = {
      * [ r1,r2,r3,r4,r5,r6,r7,r8 ]
      * [ [r1,r2,r3,r4], [r5,r6,r7,r8] ]
      */
-    _groupQueries: function(uncachedRegions) {
+    _groupQueries: function (uncachedRegions) {
         var groupSize = 50;
         var queriesLists = [];
         while (uncachedRegions.length > 0) {
@@ -25900,7 +20168,7 @@ FeatureTemplateAdapter.prototype = {
         }
         return queriesLists;
     },
-    _singleQueries: function(uncachedRegions) {
+    _singleQueries: function (uncachedRegions) {
         var queriesLists = [];
         for (var i = 0; i < uncachedRegions.length; i++) {
             var region = uncachedRegions[i];
@@ -25909,7 +20177,7 @@ FeatureTemplateAdapter.prototype = {
         return queriesLists;
     },
 
-    _getSpeciesQueryString: function(species) {
+    _getSpeciesQueryString: function (species) {
         if (species == null) {
             return '';
         }
@@ -25920,7 +20188,7 @@ FeatureTemplateAdapter.prototype = {
         }
     },
 
-    _getRegionsFromQueryRegions: function(queryRegion) {
+    _getRegionsFromQueryRegions: function (queryRegion) {
         var regions = [];
         var regionSplit = queryRegion.split(',');
         for (var i = 0; i < regionSplit.length; i++) {
@@ -25930,7 +20198,7 @@ FeatureTemplateAdapter.prototype = {
         return regions;
     },
 
-    _getRegionsFromHistogramChunks: function(intervals, chromosome) {
+    _getRegionsFromHistogramChunks: function (intervals, chromosome) {
         var regions = [];
         for (var i = 0; i < intervals.length; i++) {
             var interval = intervals[i];
@@ -25940,6 +20208,30 @@ FeatureTemplateAdapter.prototype = {
         }
         return regions;
     },
+
+    _computeLimitedRegion: function (region) {
+        var regionLimit = 300000000;
+
+        if (this.species != null && this.species.chromosomes[region.chromosome] != null) {
+            regionLimit = this.species.chromosomes[region.chromosome].end;
+        }
+
+        if (this.chromosomeSizes != null &&
+            this.chromosomeSizes[region.chromosome] != null &&
+            !isNaN(this.chromosomeSizes[region.chromosome])
+        ) {
+            regionLimit = this.chromosomeSizes[region.chromosome];
+        }
+
+        if (region.start > regionLimit || region.end < 1) {
+            return;
+        }
+
+        region.start = (region.start < 1) ? 1 : region.start;
+        region.end = (region.end > regionLimit) ? regionLimit : region.end;
+
+        return region;
+    }
 };
 
 /*
@@ -26689,12 +20981,15 @@ AttributeNetworkDataAdapter.prototype.parse = function (data) {
                 finalColumnNames[i] = "id";
             }
             if (this.ignoreColumns[i] !== true) {
-                this.columns.push({
-                    "name": finalColumnNames[i],
-                    "title": finalColumnNames[i],
-                    "type": "text",
-                    "defaultValue": ""
-                });
+                var column = {
+                    name: finalColumnNames[i].toString(),
+                    title: finalColumnNames[i].toString(),
+                    type: "text",
+                    formula: function(row) {
+                        return row.attributes[this.name];
+                    }
+                };
+                this.columns.push(column);
             }
         }
 
@@ -27197,7 +21492,7 @@ function TextNetworkDataAdapter(args) {
     this.rawData;
 
     if (this.async) {
-        this.dataSource.on('success', function (data) {
+        this.dataSource.on('success', function(data) {
             _this.rawData = data;
             _this.parse(data);
         });
@@ -27215,11 +21510,11 @@ function TextNetworkDataAdapter(args) {
 
 };
 
-TextNetworkDataAdapter.prototype.getGraph = function () {
+TextNetworkDataAdapter.prototype.getGraph = function() {
     return this.graph;
 };
 
-TextNetworkDataAdapter.prototype.parse = function (data) {
+TextNetworkDataAdapter.prototype.parse = function(data) {
     try {
         if (typeof data === 'undefined') {
             data = this.rawData;
@@ -27242,19 +21537,28 @@ TextNetworkDataAdapter.prototype.parse = function (data) {
                     }
 
                     if (fields.length !== firstLineColumnLength) {
-                        this.trigger('error:parse', {errorMsg: 'Different number of columns.', sender: this});
+                        this.trigger('error:parse', {
+                            errorMsg: 'Different number of columns.',
+                            sender: this
+                        });
                     }
                 }
             }
         }
-        this.trigger('data:load', {graph: this.lines, sender: this});
+        this.trigger('data:load', {
+            lines: this.lines,
+            sender: this
+        });
     } catch (e) {
         console.log(e);
-        this.trigger('error:parse', {errorMsg: 'Parse error', sender: this});
+        this.trigger('error:parse', {
+            errorMsg: 'Parse error',
+            sender: this
+        });
     }
 };
 
-TextNetworkDataAdapter.prototype.parseColumns = function (sourceIndex, targetIndex, relationIndex, relationDefaultName) {
+TextNetworkDataAdapter.prototype.parseColumns = function(sourceIndex, targetIndex, relationIndex, relationDefaultName) {
     this.graph = new JsoGraph();
     this.addedVertex = {};
     this.addedEdges = {};
@@ -27269,9 +21573,9 @@ TextNetworkDataAdapter.prototype.parseColumns = function (sourceIndex, targetInd
         var sourceName = fields[sourceIndex];
         var targetName = fields[targetIndex];
         var edgeName;
-        if(relationIndex < 0){
+        if (relationIndex < 0) {
             edgeName = relationDefaultName;
-        }else{
+        } else {
             edgeName = fields[relationIndex];
         }
 
@@ -27284,35 +21588,40 @@ TextNetworkDataAdapter.prototype.parseColumns = function (sourceIndex, targetInd
             this.addedVertex[sourceName] = sourceVertex;
         }
 
-        /** create target vertex **/
-        if (typeof this.addedVertex[targetName] === 'undefined') {
-            var targetVertex = new Vertex({
-                id: targetName
-            });
-            this.graph.addVertex(targetVertex);
-            this.addedVertex[targetName] = targetVertex;
+        /** Check if target column is not defined, so only the source will be added**/
+        if (targetIndex > -1) {
+
+            /** create target vertex **/
+            if (typeof this.addedVertex[targetName] === 'undefined') {
+                var targetVertex = new Vertex({
+                    id: targetName
+                });
+                this.graph.addVertex(targetVertex);
+                this.addedVertex[targetName] = targetVertex;
+            }
+            var edgeId = sourceName + '_' + edgeName + '_' + targetName;
+
+            /** create edge **/
+            if (typeof this.addedEdges[edgeId] === 'undefined') {
+                var edge = new Edge({
+                    id: edgeId,
+                    relation: edgeName,
+                    source: this.addedVertex[sourceName],
+                    target: this.addedVertex[targetName],
+                    weight: 1,
+                    directed: true
+                });
+                this.graph.addEdge(edge);
+                this.addedEdges[edgeId] = edge;
+            }
         }
 
-        var edgeId = sourceName + '_' + edgeName + '_' + targetName;
-
-        /** create edge **/
-        if (typeof this.addedEdges[edgeId] === 'undefined') {
-            var edge = new Edge({
-                id: edgeId,
-                relation: edgeName,
-                source: this.addedVertex[sourceName],
-                target: this.addedVertex[targetName],
-                weight: 1,
-                directed: true
-            });
-            this.graph.addEdge(edge);
-            this.addedEdges[edgeId] = edge;
-        }
 
     }
 
     return this.graph;
 };
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -33966,7 +28275,7 @@ AlignmentRenderer.drawBamDifferences = function (refString, differences, size, m
                 for (var j = 0; j < difference.length; j++) {
                     var char = difference.seq[j];
                     var refPos = difference.pos + j;
-                    console.log("ref:"+ refString.charAt(refPos)+" - "+"seq:"+char);
+                    // console.log("ref:"+ refString.charAt(refPos)+" - "+"seq:"+char);
                     if (char != refString.charAt(refPos)) {
                         var t = SVG.addChild(text, "tspan", {
                             "x": x,
