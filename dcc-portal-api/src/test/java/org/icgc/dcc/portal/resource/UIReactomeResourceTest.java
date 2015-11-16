@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import lombok.val;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.mapper.IllegalArgumentExceptionMapper;
@@ -34,17 +33,28 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.sun.jersey.api.client.ClientResponse;
 import com.yammer.dropwizard.testing.ResourceTest;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UIResourceTest extends ResourceTest {
+import lombok.val;
 
+@RunWith(MockitoJUnitRunner.class)
+public class UIReactomeResourceTest extends ResourceTest {
+
+  /**
+   * Constants.
+   */
   private final static String RESOURCE = "/v1/ui";
   private final static int BAD_REQUEST_CODE = ClientResponse.Status.BAD_REQUEST.getStatusCode();
 
+  /**
+   * Dependencies.
+   */
   @Mock
   private DiagramService service;
 
+  /**
+   * Subject
+   */
   @InjectMocks
-  private UIResource resource;
+  private UIReactomeResource resource;
 
   @Override
   protected final void setUpResources() {

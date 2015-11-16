@@ -70,7 +70,7 @@
       var data = new FormData();
       data.append ('filepath', filepath);
 
-      return uiEndpoint().customPOST (data, 'file', {}, {'Content-Type': undefined});
+      return uiEndpoint().customPOST (data, 'search/file', {}, {'Content-Type': undefined});
     };
 
     this.updateDonorSetIdFilter = function (donorSetId, isExternalRepo) {
