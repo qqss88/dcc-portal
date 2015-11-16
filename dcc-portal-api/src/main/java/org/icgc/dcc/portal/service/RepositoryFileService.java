@@ -312,9 +312,9 @@ public class RepositoryFileService {
     val valueMap = hit.getFields();
     val maps = DATA_TABLE_EXPORT_FIELD_PROCESSORS.entrySet().stream().map(fieldsProcessorPair -> {
       // Takes a collection of fields and its processor and produces a map of field and its value.
-      return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
-          field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
-    });
+        return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
+            field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
+      });
 
     return combineMaps(maps);
   }
@@ -342,20 +342,6 @@ public class RepositoryFileService {
 
     val response = repositoryFileRepository.findOne(fileId);
     return parse(response.getSourceAsString());
-  }
-
-  public String getCollabMetaUrl(@NonNull String fileId) {
-    log.info("Get Collabratory MetaData URL for: '{}'.", fileId);
-    val file = parse(repositoryFileRepository.findOne(fileId).getSourceAsString());
-    val copies = file.getFileCopies();
-
-    for (val copy : copies) {
-      if (copy.getRepoCode().equalsIgnoreCase("collaboratory")) {
-        return createCollabMetaUrl(copy);
-      }
-    }
-
-    return null;
   }
 
   public long getDonorCount(@NonNull Query query) {
@@ -581,7 +567,7 @@ public class RepositoryFileService {
     val isGnos = RepoTypes.isGnos(repoType);
     val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo, entry ->
         isGnos ? buildGnosDownloadUrl(entry) : buildDownloadUrl(entry));
-        
+
     @Cleanup
     val buffer = new ByteArrayOutputStream(BUFFER_SIZE);
 
@@ -649,7 +635,7 @@ public class RepositoryFileService {
 
   @SneakyThrows
   @NonNull
-private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
+  private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
     val tsv = createTsv(buffer);
     tsv.writeHeader(AWS_TSV_HEADERS);
@@ -824,20 +810,6 @@ private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Ma
 
   public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
     return repositoryFileRepository.getRepoStats(repoName);
-  }
-
-  private String createCollabMetaUrl(FileCopy file) {
-    val baseUrl = file.getRepoBaseUrl();
-    val metaPath = file.getRepoMetadataPath();
-
-    // We expect the base to end with a "/" and the meta data to start with a "/". Otherwise notify with exception.
-    if (baseUrl.endsWith("/") && metaPath.startsWith("/")) {
-      return baseUrl.substring(0, baseUrl.length() - 1) + metaPath;
-    } else {
-      throw new IllegalStateException(
-          String.format("File Copy %s had an unexpected format in URL.",
-              file.getFileName()));
-    }
   }
 
 }
