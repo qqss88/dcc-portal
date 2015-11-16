@@ -655,14 +655,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -693,14 +693,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -718,14 +718,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -753,14 +753,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -778,14 +778,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -797,14 +797,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -876,14 +876,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -992,14 +992,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -1720,14 +1720,14 @@ footer .clear-fix {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 footer .clear-fix:before, footer .clear-fix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 footer .clear-fix:after {
   clear: both;
 }
@@ -2186,14 +2186,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2210,13 +2210,14 @@ input.valid:focus {
 
 /* line 13, _modules/_suggest.scss */
 .t_suggest__input {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   border: 0.2rem solid #cccccc;
   border-radius: 0;
-  margin: 1rem 0;
+  margin: 1rem 0rem 0.3rem 0rem;
+  line-height: 2rem;
   outline: #1693c0;
   padding-top: 1rem;
-  padding-right: 2.5rem;
+  padding-right: 2rem;
   padding-bottom: 1rem;
   padding-left: 0;
   text-indent: 3rem;
@@ -2229,41 +2230,41 @@ input.valid:focus {
   }
 }
 
-/* line 33, _modules/_suggest.scss */
+/* line 34, _modules/_suggest.scss */
 .t_suggest__embedded {
   position: absolute;
 }
 
-/* line 37, _modules/_suggest.scss */
+/* line 38, _modules/_suggest.scss */
 .t_suggest__embedded__left {
   left: 1rem;
   top: 2.2rem;
 }
 
-/* line 42, _modules/_suggest.scss */
+/* line 43, _modules/_suggest.scss */
 .t_suggest__embedded__right {
   right: 1.5rem;
   top: 2.2rem;
 }
 
-/* line 47, _modules/_suggest.scss */
+/* line 48, _modules/_suggest.scss */
 .t_suggest__embedded__search {
   color: #cccccc;
   font-size: 1.5rem;
 }
 
-/* line 52, _modules/_suggest.scss */
+/* line 53, _modules/_suggest.scss */
 .t_suggest__embedded__clear {
   cursor: pointer;
 }
 
-/* line 56, _modules/_suggest.scss */
+/* line 57, _modules/_suggest.scss */
 .t_suggest__embedded__clear:hover {
   color: #ce6503;
 }
 
 /* Suggest Flyout */
-/* line 61, _modules/_suggest.scss */
+/* line 62, _modules/_suggest.scss */
 .t_suggest_flyout {
   position: absolute;
   width: 100%;
@@ -2274,7 +2275,7 @@ input.valid:focus {
   left: 0;
 }
 
-/* line 71, _modules/_suggest.scss */
+/* line 72, _modules/_suggest.scss */
 .t_suggest_flyout__hits {
   font-size: .8rem;
   padding: 0;
@@ -2282,13 +2283,13 @@ input.valid:focus {
   width: 100%;
 }
 @media (min-width: 1025px) {
-  /* line 71, _modules/_suggest.scss */
+  /* line 72, _modules/_suggest.scss */
   .t_suggest_flyout__hits {
     font-size: 1rem;
   }
 }
 
-/* line 82, _modules/_suggest.scss */
+/* line 83, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
@@ -2297,75 +2298,75 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
-/* line 88, _modules/_suggest.scss */
+/* line 89, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit:nth-child(even) {
   background: #f2f2f2;
 }
-/* line 92, _modules/_suggest.scss */
+/* line 93, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit:nth-child(odd) {
   background: #fafafa;
 }
-/* line 96, _modules/_suggest.scss */
+/* line 97, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.active, .t_suggest_flyout__hits__hit:hover {
   background: #1693c0;
   color: white;
 }
-/* line 97, _modules/_suggest.scss */
+/* line 98, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.active a, .t_suggest_flyout__hits__hit:hover a {
   color: #ade2f5;
 }
-/* line 100, _modules/_suggest.scss */
+/* line 101, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.active a:hover, .t_suggest_flyout__hits__hit:hover a:hover {
   background: none;
 }
-/* line 108, _modules/_suggest.scss */
+/* line 109, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit .t_suggest_detail {
   color: #bbbbbb;
 }
-/* line 112, _modules/_suggest.scss */
+/* line 113, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit .t_suggest_cancel {
   background: none;
   border-radius: 0.25rem;
 }
-/* line 115, _modules/_suggest.scss */
+/* line 116, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit .t_suggest_cancel:hover {
   background: #dc502e;
 }
-/* line 120, _modules/_suggest.scss */
+/* line 121, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.selected {
   background: #166aa2;
   color: white;
   cursor: default;
 }
-/* line 125, _modules/_suggest.scss */
+/* line 126, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.selected .t_suggest_detail {
   color: white;
 }
 
-/* line 131, _modules/_suggest.scss */
+/* line 132, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__type {
   vertical-align: middle;
   text-align: center;
   width: 4rem;
 }
 
-/* line 137, _modules/_suggest.scss */
+/* line 138, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__text {
   padding: .7rem 1rem;
 }
 
-/* line 141, _modules/_suggest.scss */
+/* line 142, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__text__details {
   font-style: italic;
   font-weight: 300;
@@ -2376,12 +2377,12 @@ input.valid:focus {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 153, _modules/_suggest.scss */
+  /* line 154, _modules/_suggest.scss */
   .t_suggest__embedded__left {
     top: 2.4rem;
   }
 
-  /* line 157, _modules/_suggest.scss */
+  /* line 158, _modules/_suggest.scss */
   .t_suggest__embedded__right {
     top: 2.4rem;
   }
@@ -2612,14 +2613,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2784,14 +2785,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -4326,14 +4327,14 @@ td {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:before, #pathways .pathway-filter-container .pathway-item-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:after {
   clear: both;
 }
@@ -4380,14 +4381,14 @@ td {
   padding-top: 0.2rem;
   padding-bottom: 0.6rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:before, #pathways .pathways-content .pathway-analysis-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:after {
   clear: both;
 }
@@ -4851,6 +4852,7 @@ td {
   position: relative;
   display: table-cell;
   vertical-align: top;
+  width: 50%;
   height: 100%;
 }
 /* line 109, _modules/_repositories.scss */
