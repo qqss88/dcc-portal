@@ -84,7 +84,6 @@
           }
 
           _locationFilterCache = _.extend({}, LocationService.filters());
-          console.log(_locationFilterCache);
         }
 
       );
