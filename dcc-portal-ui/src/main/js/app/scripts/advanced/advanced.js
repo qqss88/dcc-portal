@@ -50,7 +50,21 @@
 
 (function () {
   'use strict';
-  var _locationFilterCache = null;
+  var _locationFilterCache = {
+        _filters: null,
+        filters: function(filterObj) {
+
+          if (arguments.length === 0) {
+            return _.cloneDeep(this._filters);
+          }
+          else {
+            this._filters = filterObj;
+          }
+
+          return this._filters;
+        }
+      };
+
   var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services', 'icgc.sets.services']);
 
   module.controller('AdvancedCtrl',
@@ -69,9 +83,15 @@
       ///////////////////////////////////////////////////////////////////////////
       var _isInAdvancedSearchCtrl = true;
 
+      function _refreshFilterCache() {
+        _locationFilterCache.filters(LocationService.filters());
+      }
+
+
+
       // Cache the filters so we can use them during the several layers of promises
       // we perform
-      _locationFilterCache = _.extend({}, LocationService.filters());
+      _refreshFilterCache();
 
 
       $scope.$watch(
@@ -83,7 +103,7 @@
             return;
           }
 
-          _locationFilterCache = _.extend({}, LocationService.filters());
+          _refreshFilterCache();
         }
 
       );
@@ -93,7 +113,7 @@
         _isInAdvancedSearchCtrl = _.get(toState, 'data.isAdvancedSearch', false) ? true : false;
 
         if (_isInAdvancedSearchCtrl) {
-          _locationFilterCache = _.extend({}, LocationService.filters());
+          _refreshFilterCache();
         }
       });
 
@@ -111,7 +131,7 @@
 
 
       function refresh() {
-        var filters = _locationFilterCache,
+        var filters = _locationFilterCache.filters(),
             _controllers = [
               { 'controller': _ctrl.Donor, id: 'donor', startRunTime: null },
               { 'controller': _ctrl.Gene, id: 'gene', startRunTime: null },
@@ -253,7 +273,7 @@
 
       _ctrl.viewExternal = function(type, limit) {
         var params = {};
-        params.filters = _locationFilterCache;
+        params.filters = _locationFilterCache.filters();
         params.size = limit;
         params.isTransient = true;
         // Ensure scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
@@ -380,7 +400,7 @@
         Donors
           .one(_.pluck(_this.donors.hits, 'id').join(','))
           .handler
-          .one('mutations', 'counts').get({filters: _locationFilterCache}).then(function (counts) {
+          .one('mutations', 'counts').get({filters: _locationFilterCache.filters()}).then(function (counts) {
             _this.mutationCounts = counts;
           });
 
@@ -439,7 +459,7 @@
     };
 
     _this.success = function (donors) {
-      var filters = _locationFilterCache;
+      var filters =_locationFilterCache.filters();
       //Page.stopWork();
       _this.loading = false;
       
@@ -478,7 +498,7 @@
       var params = LocationService.getJsonParam('donors');
       params.include = 'facets';
       params.facetsOnly = true;
-      params.filters = _locationFilterCache;
+      params.filters = _locationFilterCache.filters();
 
       Donors.getList(params).then(function (facetDonorList) {
 
@@ -506,7 +526,7 @@
     var _this = this;
 
     _this.projectGeneQuery = function(projectId, geneId) {
-      var f = _locationFilterCache;
+      var f = _locationFilterCache.filters();
       if (f.hasOwnProperty('gene')) {
         delete f.gene.id;
         delete f.gene[Extensions.ENTITY];
@@ -537,7 +557,7 @@
 
         // Get Mutations counts
         Genes.one(geneIds).handler
-          .one('mutations', 'counts').get({filters: _locationFilterCache}).then(function (data) {
+          .one('mutations', 'counts').get({filters: _locationFilterCache.filters()}).then(function (data) {
             _this.mutationCounts = data;
           });
 
@@ -546,7 +566,7 @@
         Projects.getList().then(function (projects) {
           _this.genes.hits.forEach(function (gene) {
 
-            var geneFilter = _locationFilterCache;
+            var geneFilter = _locationFilterCache.filters();
             if (geneFilter.hasOwnProperty('gene')) {
               delete geneFilter.gene[ Extensions.ENTITY ];
               delete geneFilter.gene.id;
@@ -569,7 +589,7 @@
               gene.uiDonors = [];
               if (data.facets.projectId.terms) {
 
-                var _f = _locationFilterCache;
+                var _f = _locationFilterCache.filters();
                 if (_f.hasOwnProperty('donor')) {
                   delete _f.donor.projectId;
                   if (_.isEmpty(_f.donor)) {
@@ -619,7 +639,7 @@
       //console.log('Stop Gene Work!');
       
       genes.hits.forEach(function (gene) {
-        var filters = _locationFilterCache;
+        var filters = _locationFilterCache.filters();
         gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
 
         // Remove gene entity set because gene id is the key
@@ -678,7 +698,7 @@
       var projectCachePromise = ProjectCache.getData();
 
       _this.projectMutationQuery = function(projectId, mutationId) {
-        var f = _locationFilterCache;
+        var f = _locationFilterCache.filters();
         if (f.hasOwnProperty('mutation')) {
           delete f.mutation.id;
           delete f.mutation[Extensions.ENTITY];
@@ -708,7 +728,7 @@
           Projects.getList().then(function (projects) {
             _this.mutations.hits.forEach(function (mutation) {
 
-              var mutationFilter = _locationFilterCache;
+              var mutationFilter = _locationFilterCache.filters();
               if (mutationFilter.hasOwnProperty('mutation')) {
                 delete mutationFilter.mutation[ Extensions.ENTITY ];
                 delete mutationFilter.mutation.id;
@@ -730,7 +750,7 @@
               }).then(function (data) {
                 mutation.uiDonors = [];
                 if (data.facets.projectId.terms) {
-                  var _f = _locationFilterCache;
+                  var _f = _locationFilterCache.filters();
                   if (_f.hasOwnProperty('donor')) {
                     delete _f.donor.projectId;
                     if (_.isEmpty(_f.donor)) {
@@ -799,7 +819,7 @@
         //console.log('Stop Mutation Work!');
          
         mutations.hits.forEach(function (mutation) {
-          var filters = _locationFilterCache;
+          var filters = _locationFilterCache.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
 
           // Remove mutation entity set because mutation id is the key
@@ -840,7 +860,7 @@
         var mParams = LocationService.getJsonParam('mutations');
         mParams.include = ['facets', 'consequences'];
         mParams.facetsOnly = true;
-        mParams.filters = _locationFilterCache;
+        mParams.filters = _locationFilterCache.filters();
 
         Mutations.getList(mParams).then(function (mutationsFacetsList) {
             deferred.resolve();
