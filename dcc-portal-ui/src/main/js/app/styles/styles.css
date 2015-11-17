@@ -2143,13 +2143,35 @@ input.valid:focus {
   padding: .5rem 2rem;
 }
 
-/* line 9, _modules/_alerts.scss */
+/* line 10, _modules/_alerts.scss */
+.alert-w-icon {
+  border-radius: 0;
+  border: none;
+  margin: 0;
+  padding: 0.5rem 0.5rem;
+  display: table;
+  width: 100%;
+}
+/* line 18, _modules/_alerts.scss */
+.alert-w-icon .alert-icon-container {
+  display: table-cell;
+  font-size: 2rem;
+  vertical-align: middle;
+  text-align: center;
+}
+/* line 25, _modules/_alerts.scss */
+.alert-w-icon .alert-icon-body {
+  width: 95%;
+  display: table-cell;
+}
+
+/* line 32, _modules/_alerts.scss */
 .alert-info {
   background: #d6f1fa;
   color: #1693c0;
 }
 
-/* line 13, _modules/_alerts.scss */
+/* line 36, _modules/_alerts.scss */
 .alert-error {
   background: #fbede9;
   color: #dc502e;
