@@ -1523,7 +1523,7 @@ header #brand img {
 /* line 21, _sections/_home.scss */
 #home-page .home-landing .summary-table-container {
   margin-top: -2rem;
-  z-index: 10000;
+  z-index: 100;
   position: relative;
 }
 /* line 27, _sections/_home.scss */
