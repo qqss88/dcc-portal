@@ -940,7 +940,7 @@ h5 {
   text-align: right;
   padding: 0rem 0rem 0rem 1rem;
   border-bottom: solid 1px #ddd;
-  transition-property: colour background;
+  transition-property: colour, background;
   transition: 1s ease-in-out;
 }
 /* line 15, _sections/_preheader.scss */
@@ -966,15 +966,19 @@ h5 {
   border-left: solid 1px #cccccc;
   padding: 0rem 1rem 0rem 0.5rem;
 }
-/* line 42, _sections/_preheader.scss */
+/* line 40, _sections/_preheader.scss */
+.login-nav-bar .toolbar .tool-item.tool-item-single {
+  border: none;
+}
+/* line 46, _sections/_preheader.scss */
 .login-nav-bar .toolbar .tool-item:hover {
   background-color: white;
 }
-/* line 46, _sections/_preheader.scss */
+/* line 50, _sections/_preheader.scss */
 .login-nav-bar .toolbar .tool-item a {
   padding: 0.3rem;
 }
-/* line 49, _sections/_preheader.scss */
+/* line 53, _sections/_preheader.scss */
 .login-nav-bar .toolbar .tool-item a:hover {
   background: transparent;
   color: #1c87cf;
@@ -1519,45 +1523,47 @@ header #brand img {
 /* line 21, _sections/_home.scss */
 #home-page .home-landing .summary-table-container {
   margin-top: -2rem;
+  z-index: 10000;
+  position: relative;
 }
-/* line 25, _sections/_home.scss */
+/* line 27, _sections/_home.scss */
 #home-page .home-landing .subhead {
   margin-top: -1rem;
   color: #999999;
   font-size: 1.9rem;
 }
-/* line 31, _sections/_home.scss */
+/* line 33, _sections/_home.scss */
 #home-page .home-landing #pcawg-logo {
   margin-left: 1rem;
   margin-bottom: 1rem;
 }
-/* line 38, _sections/_home.scss */
+/* line 40, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home {
   margin: 0 0;
   padding-top: 0;
 }
-/* line 42, _sections/_home.scss */
+/* line 44, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .dividers {
   margin-top: 1.5rem;
 }
-/* line 46, _sections/_home.scss */
+/* line 48, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .icgc-container {
   margin: 0 0;
   position: relative;
   transition: opacity 0.2s ease-in;
   width: 330px;
 }
-/* line 52, _sections/_home.scss */
+/* line 54, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .icgc-container img {
   width: 100%;
   display: block;
   margin-left: -2rem;
 }
-/* line 58, _sections/_home.scss */
+/* line 60, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .icgc-container p {
   margin-top: 0;
 }
-/* line 65, _sections/_home.scss */
+/* line 67, _sections/_home.scss */
 #home-page .home-landing .divider {
   border-top: 1px solid #eee;
   margin-top: 2rem;

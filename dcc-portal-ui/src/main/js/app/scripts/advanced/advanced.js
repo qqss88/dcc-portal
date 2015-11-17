@@ -24,7 +24,7 @@
     $stateProvider.state('advanced', {
       url: '/search?filters',
       data: {
-        tab: 'donor'
+        tab: 'donor', isAdvancedSearch: true
       },
       reloadOnSearch: false,
       templateUrl: '/scripts/advanced/views/advanced.html',
@@ -33,28 +33,28 @@
     $stateProvider.state('advanced.gene', {
       url: '/g',
       reloadOnSearch: false,
-      data: {tab: 'gene'}
+      data: {tab: 'gene', isAdvancedSearch: true}
     });
     $stateProvider.state('advanced.mutation', {
       url: '/m',
       reloadOnSearch: false,
-      data: {tab: 'mutation', subTab: 'mutation'}
+      data: {tab: 'mutation', subTab: 'mutation', isAdvancedSearch: true}
     });
     $stateProvider.state('advanced.mutation.occurrence', {
       url: '/o',
       reloadOnSearch: false,
-      data: {subTab: 'occurrence'}
+      data: {subTab: 'occurrence', isAdvancedSearch: true}
     });
   });
 })();
 
 (function () {
   'use strict';
-
+  var _locationFilterCache = null;
   var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services', 'icgc.sets.services']);
 
   module.controller('AdvancedCtrl',
-    function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
+    function ($scope, $rootScope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
               AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings, RouteInfoService) {
 
       Page.setTitle('Advanced Search');
@@ -63,6 +63,36 @@
       var _ctrl = this;
       var dataRepoRouteInfo = RouteInfoService.get ('dataRepositories');
       var dataRepoUrl = dataRepoRouteInfo.href;
+
+      ///////////////////////////////////////////////////////////////////////////
+      // TODO: Clean these controllers up so this patch isn't necessary
+      ///////////////////////////////////////////////////////////////////////////
+      var _isInAdvancedSearchCtrl = true;
+
+      // Cache the filters so we can use them during the several layers of promises
+      // we perform
+      _locationFilterCache = _.extend({}, LocationService.filters());
+
+
+      $scope.$watch(
+        function() {
+          return JSON.stringify(LocationService.filters());
+        },
+        function(newFiltersStr, oldFiltersStr) {
+          if (! _isInAdvancedSearchCtrl || newFiltersStr === oldFiltersStr) {
+            return;
+          }
+
+          _locationFilterCache = _.extend({}, LocationService.filters());
+        }
+
+      );
+
+      $rootScope.$on('$stateChangeStart', function(e, toState) {
+        _isInAdvancedSearchCtrl = _.get(toState, 'data.isAdvancedSearch', false) ? true : false;
+      });
+
+      ///////////////////////////////////////////////////////////////////////////
 
       _ctrl.Page = Page;
       _ctrl.state = State;
@@ -76,7 +106,7 @@
 
 
       function refresh() {
-        var filters = LocationService.filters(),
+        var filters = _locationFilterCache,
             _controllers = [
               { 'controller': _ctrl.Donor, id: 'donor', startRunTime: null },
               { 'controller': _ctrl.Gene, id: 'gene', startRunTime: null },
@@ -218,7 +248,7 @@
 
       _ctrl.viewExternal = function(type, limit) {
         var params = {};
-        params.filters = LocationService.filters();
+        params.filters = _locationFilterCache;
         params.size = limit;
         params.isTransient = true;
         // Ensure scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
@@ -345,7 +375,7 @@
         Donors
           .one(_.pluck(_this.donors.hits, 'id').join(','))
           .handler
-          .one('mutations', 'counts').get({filters: LocationService.filters()}).then(function (counts) {
+          .one('mutations', 'counts').get({filters: _locationFilterCache}).then(function (counts) {
             _this.mutationCounts = counts;
           });
 
@@ -404,7 +434,7 @@
     };
 
     _this.success = function (donors) {
-      var filters = LocationService.filters();
+      var filters = _locationFilterCache;
       //Page.stopWork();
       _this.loading = false;
       
@@ -443,6 +473,7 @@
       var params = LocationService.getJsonParam('donors');
       params.include = 'facets';
       params.facetsOnly = true;
+      params.filters = _locationFilterCache;
 
       Donors.getList(params).then(function (facetDonorList) {
 
@@ -470,7 +501,7 @@
     var _this = this;
 
     _this.projectGeneQuery = function(projectId, geneId) {
-      var f = LocationService.filters();
+      var f = _locationFilterCache;
       if (f.hasOwnProperty('gene')) {
         delete f.gene.id;
         delete f.gene[Extensions.ENTITY];
@@ -501,7 +532,7 @@
 
         // Get Mutations counts
         Genes.one(geneIds).handler
-          .one('mutations', 'counts').get({filters: LocationService.filters()}).then(function (data) {
+          .one('mutations', 'counts').get({filters: _locationFilterCache}).then(function (data) {
             _this.mutationCounts = data;
           });
 
@@ -510,7 +541,7 @@
         Projects.getList().then(function (projects) {
           _this.genes.hits.forEach(function (gene) {
 
-            var geneFilter = LocationService.filters();
+            var geneFilter = _locationFilterCache;
             if (geneFilter.hasOwnProperty('gene')) {
               delete geneFilter.gene[ Extensions.ENTITY ];
               delete geneFilter.gene.id;
@@ -533,7 +564,7 @@
               gene.uiDonors = [];
               if (data.facets.projectId.terms) {
 
-                var _f = LocationService.filters();
+                var _f = _locationFilterCache;
                 if (_f.hasOwnProperty('donor')) {
                   delete _f.donor.projectId;
                   if (_.isEmpty(_f.donor)) {
@@ -583,7 +614,7 @@
       //console.log('Stop Gene Work!');
       
       genes.hits.forEach(function (gene) {
-        var filters = LocationService.filters();
+        var filters = _locationFilterCache;
         gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
 
         // Remove gene entity set because gene id is the key
@@ -642,7 +673,7 @@
       var projectCachePromise = ProjectCache.getData();
 
       _this.projectMutationQuery = function(projectId, mutationId) {
-        var f = LocationService.filters();
+        var f = _locationFilterCache;
         if (f.hasOwnProperty('mutation')) {
           delete f.mutation.id;
           delete f.mutation[Extensions.ENTITY];
@@ -672,7 +703,7 @@
           Projects.getList().then(function (projects) {
             _this.mutations.hits.forEach(function (mutation) {
 
-              var mutationFilter = LocationService.filters();
+              var mutationFilter = _locationFilterCache;
               if (mutationFilter.hasOwnProperty('mutation')) {
                 delete mutationFilter.mutation[ Extensions.ENTITY ];
                 delete mutationFilter.mutation.id;
@@ -694,7 +725,7 @@
               }).then(function (data) {
                 mutation.uiDonors = [];
                 if (data.facets.projectId.terms) {
-                  var _f = LocationService.filters();
+                  var _f = _locationFilterCache;
                   if (_f.hasOwnProperty('donor')) {
                     delete _f.donor.projectId;
                     if (_.isEmpty(_f.donor)) {
@@ -763,7 +794,7 @@
         //console.log('Stop Mutation Work!');
          
         mutations.hits.forEach(function (mutation) {
-          var filters = LocationService.filters();
+          var filters = _locationFilterCache;
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
 
           // Remove mutation entity set because mutation id is the key
@@ -804,6 +835,7 @@
         var mParams = LocationService.getJsonParam('mutations');
         mParams.include = ['facets', 'consequences'];
         mParams.facetsOnly = true;
+        mParams.filters = _locationFilterCache;
 
         Mutations.getList(mParams).then(function (mutationsFacetsList) {
             deferred.resolve();

@@ -9,7 +9,7 @@ $navbarButtonSeparatorColour: #ccc;
    text-align: right;
    padding: 0rem 0rem 0rem 1rem;
    border-bottom: solid 1px #ddd;
-   transition-property: colour background;
+   transition-property: colour, background;
    transition: 1s ease-in-out;
 
    &.default-login {
@@ -36,6 +36,10 @@ $navbarButtonSeparatorColour: #ccc;
       .tool-item {
          display: inline-block;
          border-left: solid 1px $navbarButtonSeparatorColour;
+
+         &.tool-item-single {
+            border: none;
+         }
 
          padding: 0rem 1rem 0rem 0.5rem;
 
