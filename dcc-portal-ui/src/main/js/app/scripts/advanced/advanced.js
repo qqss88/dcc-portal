@@ -84,12 +84,18 @@
           }
 
           _locationFilterCache = _.extend({}, LocationService.filters());
+          console.log(_locationFilterCache);
         }
 
       );
 
       $rootScope.$on('$stateChangeStart', function(e, toState) {
+        console.log(toState);
         _isInAdvancedSearchCtrl = _.get(toState, 'data.isAdvancedSearch', false) ? true : false;
+
+        if (_isInAdvancedSearchCtrl) {
+          _locationFilterCache = _.extend({}, LocationService.filters());
+        }
       });
 
       ///////////////////////////////////////////////////////////////////////////
