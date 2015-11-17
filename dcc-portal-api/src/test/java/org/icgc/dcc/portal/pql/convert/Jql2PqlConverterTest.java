@@ -33,7 +33,7 @@ import com.google.common.collect.ImmutableList;
 @Slf4j
 public class Jql2PqlConverterTest {
 
-  Jql2PqlConverter converter = new Jql2PqlConverter();
+  private static final Jql2PqlConverter CONVERTER = Jql2PqlConverter.getInstance();
 
   @Test
   public void fieldsTest() {
@@ -86,7 +86,7 @@ public class Jql2PqlConverterTest {
   @Test
   public void includeFacetsTest() {
     val query = Query.builder().includes(singletonList("facets")).build();
-    val result = converter.convert(query, Type.DONOR_CENTRIC);
+    val result = CONVERTER.convert(query, Type.DONOR_CENTRIC);
     log.debug("{}", result);
     assertThat(result).contains("facets(*)");
   }
@@ -110,8 +110,37 @@ public class Jql2PqlConverterTest {
     assertResponse(query, "select(*),sort(-donorId)");
   }
 
+  @Test
+  public void fieldsAndFilterAndFacetTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{is:1}}}").get())
+        .includes(singletonList("facets"))
+        .build();
+    assertResponse(query, "select(id,age),facets(*),eq(donor.id,1)");
+  }
+
+  @Test
+  public void filterAndCountTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{is:1}}}").get())
+        .build();
+    assertCountQueryResponse(query, "count(),eq(donor.id,1)");
+  }
+
+  @Test
+  public void filterAndFacetOnlyTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{is:1}}}").get())
+        .includes(singletonList("facets"))
+        .build();
+    assertCountQueryResponse(query, "count(),facets(*),eq(donor.id,1)");
+  }
+
   private void assertResponse(Query query, String exectedResult) {
-    val result = converter.convert(query, Type.DONOR_CENTRIC);
+    val result = CONVERTER.convert(query, Type.DONOR_CENTRIC);
     log.debug("{}", result);
 
     if (query.hasFields()) {
@@ -119,7 +148,13 @@ public class Jql2PqlConverterTest {
     } else {
       assertThat(result).contains(exectedResult);
     }
+  }
 
+  private void assertCountQueryResponse(Query query, String exectedResult) {
+    val result = CONVERTER.convertCount(query, Type.DONOR_CENTRIC);
+    log.debug("{}", result);
+
+    assertThat(result).isEqualTo(exectedResult);
   }
 
 }

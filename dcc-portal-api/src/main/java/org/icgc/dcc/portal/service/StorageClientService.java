@@ -31,17 +31,21 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 @Service
-public class ClientService {
+public class StorageClientService {
 
   /**
    * Constants.
    */
   private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final Map<String, ?> PARAMS = ImmutableMap.of(
+  private static final Map<String, String> PARAMS = ImmutableMap.of(
       "groupId", "org.icgc.dcc",
-      "artifactId", "dcc-storage-client",
+      "artifactId", "icgc-storage-client",
+      "classifier", "dist",
       "repository", "dcc-release");
 
+  /**
+   * Configuration.
+   */
   private String mavenRepositoryUrl = "http://seqwaremaven.oicr.on.ca/artifactory";
 
   @SneakyThrows
@@ -59,20 +63,29 @@ public class ClientService {
     return getVersionUrl("%5BRELEASE%5D");
   }
 
+  public String getVersionChecksumUrl(String version) {
+    return getVersionUrl(version) + ".md5";
+  }
+
+  public String getVersionSignatureUrl(String version) {
+    return getVersionUrl(version) + ".asc";
+  }
+
   public String getVersionUrl(String version) {
-    return mavenRepositoryUrl + "/simple/dcc-release" + getVersionPath(version);
+    val artifactId = PARAMS.get("artifactId");
+    val classifier = PARAMS.get("classifier");
+    return getGroupUrl() + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "-"
+        + classifier + ".tar.gz";
   }
 
-  public String getVersionChecksum(String version) {
-    return mavenRepositoryUrl + "/simple/dcc-release" + getVersionPath(version) + ".md5";
+  private String getGroupUrl() {
+    val groupId = PARAMS.get("groupId");
+    return getRepositoryUrl() + "/" + groupId.replaceAll("\\.", "/");
   }
 
-  public String getVersionSignature(String version) {
-    return mavenRepositoryUrl + "/simple/dcc-release" + getVersionPath(version) + ".asc";
-  }
-
-  public String getVersionPath(String version) {
-    return "/org/icgc/dcc/dcc-storage-client/" + version + "/dcc-storage-client-" + version + "-dist.tar.gz";
+  private String getRepositoryUrl() {
+    val repository = PARAMS.get("repository");
+    return mavenRepositoryUrl + "/simple/" + repository;
   }
 
   @Data

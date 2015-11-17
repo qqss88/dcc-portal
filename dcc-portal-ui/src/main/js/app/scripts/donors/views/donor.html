@@ -9,10 +9,10 @@
   <section>
     <i class="icon-attention or icon-attention-1"></i>
     No data for this donor has been submitted directly to ICGC DCC yet. However, go to the
-    <a href="{{ DonorCtrl.urlToExternalRepository }}">
-      external repository browser
+    <a href="{{:: DonorCtrl.urlToExternalRepository() }}">
+      {{:: DonorCtrl.dataRepoTitle }} browser
     </a>
-     to see the list of data files hosted in external repositories for this donor.
+     to see the list of data files hosted in {{:: DonorCtrl.dataRepoTitle }} for this donor.
   </section>
 </span>
 
@@ -266,8 +266,8 @@
 
     <div data-ng-if="DonorMutationsCtrl.mutations.hits.length > 0">
         <h3>Most Frequent Mutations
-            <span 
-            data-open-in-list='/m?filters={{DonorMutationsCtrl.mutations.advQuery}}' 
+            <span
+            data-open-in-list='/m?filters={{DonorMutationsCtrl.mutations.advQuery}}'
             context="donor"
             context-url='/m?filters={{DonorMutationsCtrl.mutations.viewerQuery}}'></span>
         </h3>

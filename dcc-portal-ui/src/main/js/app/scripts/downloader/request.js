@@ -8,7 +8,7 @@
    * Requesting dynamic download
    */
   module.controller('DownloadRequestController', function($scope, $location, $modalInstance,
-    $filter, Donors, LocationService, DownloaderService, DataType, filters) {
+    $filter, Donors, LocationService, DownloaderService, DataType, filters, RouteInfoService) {
 
     var emailRegex = /.+@.+\..+/i;
 
@@ -20,6 +20,7 @@
     $scope.params.dataTypes = [];
 
     $scope.totalSize = 0;
+    $scope.dataReleasesRouteInfo = RouteInfoService.get ('dataReleases');
 
     if (! filters) {
       filters = LocationService.filters();

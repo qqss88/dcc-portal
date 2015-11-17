@@ -22,11 +22,11 @@
 
   module.controller('currentCtrl',
     function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page) {
-
+    
     $scope.Page = Page;
     $scope.Facets = Facets;
     $scope.Extensions = Extensions;
-
+   
     var donorSetFiltersInRepositoryFile = [{
       term: 'Uploaded donor set',
       controlTerm: 'Uploaded donor set',
@@ -82,8 +82,8 @@
         $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
       }
 
-      //$scope.isActive = _.keys($scope.filters).length;
-      $scope.isActive = _.keys(currentFilters).length;
+      // If we have filters then show the filter query directive
+      $scope.isActive = ! _.isEmpty(currentFilters);
     }
 
     /**
@@ -150,7 +150,7 @@
     refresh();
     $scope.$on('$locationChangeSuccess', function (evt, next) {
       // FIXME: Only applicable on search page. Should have a cleaner solution
-      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repository/external') ) {
+      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repositories') ) {
         refresh();
       }
     });

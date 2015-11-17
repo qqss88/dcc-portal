@@ -29,6 +29,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -46,10 +51,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -72,6 +73,7 @@ public class MutationRepository implements Repository {
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
     val pql = converter.convert(query, MUTATION_CENTRIC);
     val search = queryEngine.execute(pql, MUTATION_CENTRIC);
@@ -80,6 +82,13 @@ public class MutationRepository implements Repository {
 
     SearchResponse response = search.getRequestBuilder().execute().actionGet();
     return response;
+  }
+
+  @NonNull
+  public SearchResponse findAllCentric(StatementNode pqlAst) {
+    val search = queryEngine.execute(pqlAst, MUTATION_CENTRIC);
+
+    return search.getRequestBuilder().execute().actionGet();
   }
 
   /**

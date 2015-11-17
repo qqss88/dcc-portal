@@ -47,6 +47,12 @@
   background-color: $file;
 }
 
-.manifest-span {
-  min-width:220px;
+.manifest-cell {
+  width: 28%;
+  min-height: 31px;
+  .manifest {
+    display: inline-block;
+    vertical-align: middle;
+
+  }
 }

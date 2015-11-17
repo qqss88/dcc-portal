@@ -5,12 +5,16 @@ $aws-colour:  rgb(228, 121, 17);
 
 /** ICGC Cloud Home Page **/
 .cloud-banner {
-  padding: 0rem 2rem;
+  //padding: 0rem 2rem;
   position: relative;
+  margin: 0 0;
   
   img {
     vertical-align: middle;
-      margin-top: 0.5rem
+    //margin-top: 0.5rem
+    width: 60%;
+    max-width: 480px;
+    min-width: 320px;
   }
   
   .icgc {
@@ -48,13 +52,22 @@ $aws-colour:  rgb(228, 121, 17);
         margin: 1rem auto;
     }
     
-
+    
     section {
       padding: 0rem 2rem 2rem 2rem;
       border-bottom: none;
       
+      // EXPERIMENTAL - TO BE REVIEWED
+      font-size: 1.1rem;
+      line-height: 1.8rem;
+      ///
+      
       h2 {
         margin-top: 0;
+      }
+      
+      p:last-child {
+        margin-bottom: 0rem;
       }
     }
     
@@ -79,11 +92,16 @@ $aws-colour:  rgb(228, 121, 17);
     .card-body {
       height:100%;
       position: relative;
+      display: table;
+      width: 100%;
+      
       
       .card-container {
         position: relative;
-        display: inline-block;
-       // width: 49%;
+        //display: inline-block;
+        display: table-cell;
+        vertical-align: top;
+        width: 50%;
         height: 100%;
       }
     }
@@ -312,9 +330,14 @@ $aws-colour:  rgb(228, 121, 17);
     
     a {
         text-indent: initial;
+        
+        &.link {
+          white-space: nowrap;
+        }
     }
         
     .cloud-repository-content {
+      padding-top: 0rem;
         
         p { 
             text-align:justify; 
@@ -324,6 +347,12 @@ $aws-colour:  rgb(228, 121, 17);
         .bar-chart-container {
             margin: 1rem 2rem 1.5rem 2rem;
         }
+    }
+    
+    .confine-column {
+      text-align: justify; 
+      text-indent: 1rem; 
+      max-width:46rem; 
     }
     
     .repo-controls-container {
@@ -363,6 +392,12 @@ $aws-colour:  rgb(228, 121, 17);
     
     nav ul {
         margin: 0 0; 
+    }
+    
+    .shadow-right {
+      -webkit-box-shadow: inset -16px 0px 8px -16px rgba(0,0,0,0.72);
+      -moz-box-shadow: inset -16px 0px 8px -16px rgba(0,0,0,0.72);
+      box-shadow: inset -16px 0px 8px -16px rgba(0,0,0,0.72);
     }
        
     section {
@@ -411,6 +446,10 @@ $aws-colour:  rgb(228, 121, 17);
     
     a {
       color: #4183C4; 
+      
+      &.link {
+        white-space: nowrap;
+      }
     }
     
     

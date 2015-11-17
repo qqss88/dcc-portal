@@ -20,7 +20,8 @@
 
   var module = angular.module('icgc.common.location', []);
 
-  module.factory('LocationService', function ($location, Notify, Extensions) {
+  module
+    .factory('LocationService', function ($location, $anchorScroll, Notify, Extensions) {
 
     return {
       path: function () {
@@ -117,6 +118,10 @@
         }
         
         return encodeURIComponent(filterStr);
+      },
+      goToInlineAnchor: function (inlineAnchorID) {
+        $location.hash(inlineAnchorID);
+        $anchorScroll(inlineAnchorID);
       },
       getJsonParam: function (param) {
         

@@ -72,14 +72,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
@@ -115,9 +107,17 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
@@ -200,7 +200,7 @@ public class RepositoryFileService {
       Fields.FILE_NAME,
       Fields.FILE_SIZE,
       Fields.FILE_MD5SUM,
-      Fields.INDEX_FILE_UUID,
+      Fields.INDEX_OBJECT_UUID,
       Fields.DONOR_ID,
       Fields.PROJECT_CODE,
       Fields.STUDY);
@@ -312,9 +312,9 @@ public class RepositoryFileService {
     val valueMap = hit.getFields();
     val maps = DATA_TABLE_EXPORT_FIELD_PROCESSORS.entrySet().stream().map(fieldsProcessorPair -> {
       // Takes a collection of fields and its processor and produces a map of field and its value.
-        return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
-            field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
-      });
+      return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
+          field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
+    });
 
     return combineMaps(maps);
   }
@@ -424,8 +424,6 @@ public class RepositoryFileService {
       } else {
         generateTextFile(buffer, downloadUrlGroups);
       }
-
-      break;
     }
   }
 
@@ -530,14 +528,14 @@ public class RepositoryFileService {
 
   private static Map<String, String> getFileCopyMap(FileCopy fileCopy) {
     val indexFile = fileCopy.getIndexFile();
-    val indexFileId = (null == indexFile) ? "" : defaultString(indexFile.getId());
+    val indexObjectId = (null == indexFile) ? "" : defaultString(indexFile.getObjectId());
 
     return ImmutableMap.<String, String> builder()
         .put(Fields.FILE_NAME, defaultString(fileCopy.getFileName()))
         .put(Fields.FILE_FORMAT, defaultString(fileCopy.getFileFormat()))
         .put(Fields.FILE_MD5SUM, defaultString(fileCopy.getFileMd5sum()))
         .put(Fields.FILE_SIZE, String.valueOf(fileCopy.getFileSize()))
-        .put(Fields.INDEX_FILE_UUID, indexFileId)
+        .put(Fields.INDEX_OBJECT_UUID, indexObjectId)
         .put(Fields.REPO_CODE, defaultString(fileCopy.getRepoCode()))
         .put(Fields.REPO_TYPE, defaultString(fileCopy.getRepoType()))
         .put(Fields.REPO_BASE_URL, defaultString(fileCopy.getRepoBaseUrl()))
@@ -565,8 +563,8 @@ public class RepositoryFileService {
   private static void generateTarEntry(TarArchiveOutputStream tar, List<Map<String, String>> allFileInfoOfOneRepo,
       String repoCode, String repoType, Date timestamp) {
     val isGnos = RepoTypes.isGnos(repoType);
-    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo, entry ->
-        isGnos ? buildGnosDownloadUrl(entry) : buildDownloadUrl(entry));
+    val downloadUrlGroups =
+        Multimaps.index(allFileInfoOfOneRepo, entry -> isGnos ? buildGnosDownloadUrl(entry) : buildDownloadUrl(entry));
 
     @Cleanup
     val buffer = new ByteArrayOutputStream(BUFFER_SIZE);
@@ -635,7 +633,8 @@ public class RepositoryFileService {
 
   @SneakyThrows
   @NonNull
-  private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
+  private static void generateAwsTextFile(OutputStream buffer,
+      Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
     val tsv = createTsv(buffer);
     tsv.writeHeader(AWS_TSV_HEADERS);
