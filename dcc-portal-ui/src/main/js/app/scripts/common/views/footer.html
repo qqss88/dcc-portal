@@ -1,0 +1,54 @@
+<div class="clearfix">
+<ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
+    <li class="heading">Main</li>
+    <li><a href="/">Home</a></li>
+    <li><a href="/projects">Cancer Projects</a></li>
+    <li><a href="/search">Advanced Search</a></li>
+    <li><a href="/analysis/sets">Data Analysis</a></li>
+    <li><a href="/repository">Data Repository</a></li>
+    <li><a href="/pcawg">PCAWG</a></li>
+</ul>
+<ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
+    <li class="heading">Tools</li>
+    <li><a href="/browser">Genome Viewer</a></li>
+    <li><a href="/ga4gh/beacon">ICGC GA4GH Beacon</a></li>
+    <li data-ng-if="portalFeature.get('SOFTWARE_PAGE')"><a href="/software">Software</a></li>
+</ul>
+<ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
+    <li class="heading">Documentation</li>
+    <li><a href="https://docs.icgc.org/data-portal" target="_blank">Portal</a></li>
+    <li><a href="/docs/" target="_blank">Portal API</a></li>
+    <li><a href="https://docs.icgc.org/data-submission" target="_blank">Submission</a></li>
+   
+    
+</ul>
+<ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
+    <li class="heading">DCC</li>
+    <li><a href="/team">The Team</a></li>
+    <li><a href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback">Contact Us</a></li>
+    <li><a target="_blank" href="https://twitter.com/icgc_dcc">Twitter</a></li>
+</ul>
+<ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
+    <li class="heading">ICGC</li>
+    <li><a href="https://icgc.org" target="_blank">ICGC Home</a></li>
+    <li><a href="https://www.icgc.org/daco" target="_blank">Data Access</a></li>
+    <li><a href="https://www.icgc.org/icgc/goals-structure-policies-guidelines/e3-publication-policy" target="_blank">Publication Policy</a></li>
+    <li><a href="https://www.icgc.org/privacy-policy" target="_blank">Privacy Policy</a></li>
+    <li><a href="https://www.icgc.org/terms-and-conditions" target="_blank">Terms and Conditions</a></li>
+</ul>
+<ul data-ng-if="stagedFeatures.getCloudLinks()">
+    <li class="heading">Cloud</li>
+    <li data-ng-repeat="cloudLink in stagedFeatures.getCloudLinks()"> 
+      <a data-ng-href="{{cloudLink.link}}" data-ng-bind="cloudLink.title"></a>
+    </li>
+</ul>
+<div class="logo omega"><a href="http://oicr.on.ca/" target="_blank"><img src="/styles/images/OICR2logo.png"></a></div>
+        </div>
+<div>
+    <small style="display: block"> &copy; 2015 <a href="https://icgc.org">International Cancer Genome Consortium.</a> All
+        Rights
+        reserved.</small>
+    <small style="display: block; line-height: .5rem">ICGC Data Portal {{FooterCtrl.portalVersion}} -
+        API {{FooterCtrl.apiVersion}} -
+        {{FooterCtrl.portalCommit}}</small>
+</div>

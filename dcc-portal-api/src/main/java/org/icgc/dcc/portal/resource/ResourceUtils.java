@@ -35,7 +35,7 @@ public class ResourceUtils {
   static final String DEFAULT_SIZE = "10";
   static final String DEFAULT_FROM = "1";
   static final String DEFAULT_ORDER = "desc";
-  static final String DEFAULT_PROJECT_SORT = "totalDonorCount";
+  static final String DEFAULT_PROJECT_SORT = "totalLiveDonorCount";
   static final String DEFAULT_DONOR_SORT = "ssmAffectedGenes";
   public static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
   static final String DEFAULT_OCCURRENCE_SORT = "donorId";
@@ -106,6 +106,8 @@ public class ResourceUtils {
   static final String API_FILE_IDS_VALUE = "Limits the file manifest archive to this list of file IDs";
   static final String API_FILE_REPOS_PARAM = "repositories";
   static final String API_FILE_REPOS_VALUE = "Limits the file manifest archive to this list of file repositories";
+  static final String API_FILE_REPO_CODE_PARAM = "repoCode";
+  static final String API_FILE_REPO_CODE_VALUE = "File Repository Code";
 
   static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
   static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
@@ -113,6 +115,8 @@ public class ResourceUtils {
   static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity Set Definition";
   static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
   static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
+
+  static final String API_ASYNC = "Asyncronous API Request";
 
   private static final Joiner COMMA_JOINER = COMMA.skipNulls();
 

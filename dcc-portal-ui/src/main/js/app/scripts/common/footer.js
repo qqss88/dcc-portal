@@ -21,11 +21,31 @@ angular.module('app.common.footer', ['app.common.footer.controllers']);
 
 angular.module('app.common.footer.controllers', []);
 
-angular.module('app.common.footer.controllers').controller('FooterCtrl', function ($http) {
+angular.module('app.common.footer.controllers').controller('FooterCtrl', function ($scope, $http, PortalFeature) {
   var _ctrl = this;
   $http.get('/api/version').success(function(data) {
     _ctrl.apiVersion = data.api;
     _ctrl.portalVersion = data.portal;
     _ctrl.portalCommit = data.portalCommit;
   });
+  
+ 
+ var cloudLinks = [
+          {'link': '/icgc-in-the-cloud/', 'title': 'About'},
+          {'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'Amazon'},
+          {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory'},
+          {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'User Guide'} 
+        ];
+ 
+  $scope.portalFeature = PortalFeature;
+  
+  $scope.stagedFeatures = {
+    getCloudLinks: function() {
+      if (PortalFeature.get('ICGC_CLOUD')) {
+        return cloudLinks;
+      } 
+    }     
+    };
+    
+   
 });

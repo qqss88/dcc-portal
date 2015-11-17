@@ -12,7 +12,7 @@
 
        if (type === 'consequenceType') {
          return Consequence;
-       } else if (type === 'availableDataTypes') {
+       } else if (type === 'availableDataTypes' || type === 'dataType' ) {
          return DataType;
        } 
        return CodeTable;

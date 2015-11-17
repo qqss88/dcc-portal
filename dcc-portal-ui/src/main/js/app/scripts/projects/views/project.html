@@ -85,17 +85,10 @@
                 </ul>
             </td>
         </tr>
-        <tr data-ng-if="ProjectCtrl.project.state === 'live'">
-            <th>Total number of donors</th>
-            <td>
-                <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]}}}"})'>
-                    {{ProjectCtrl.project.totalDonorCount | number}}
-                </a>
-            </td>
-        </tr>
-
         <tr data-ng-if="ProjectCtrl.project.state === 'live' && ProjectCtrl.studies.length > 0">
-            <th>Number of donors in PCAWG</th>
+            <th>Number of donors in
+              <a href="/pcawg">PCAWG</a>
+            </th>
             <td>
                 <ul>
                     <li data-ng-repeat="study in ProjectCtrl.studies">
@@ -106,6 +99,25 @@
                         -->
                     </li>
                 </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>Number of donors with molecular data in DCC </th>
+            <td>
+                <span data-ng-if="ProjectCtrl.project.totalLiveDonorCount > 0">
+                    <a data-ui-sref=
+                    'advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]},\"state\":{\"is\":[\"live\"]}}}"})'>
+                        {{::ProjectCtrl.project.totalLiveDonorCount | number}}</a>
+                </span>
+                <span data-ng-if="ProjectCtrl.project.totalLiveDonorCount === 0">--</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Total number of donors</th>
+            <td>
+                <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]}}}"})'>
+                    {{::ProjectCtrl.project.totalDonorCount | number}}
+                </a>
             </td>
         </tr>
 

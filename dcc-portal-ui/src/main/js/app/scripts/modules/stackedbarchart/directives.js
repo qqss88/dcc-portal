@@ -24,22 +24,31 @@
       replace: true,
       scope: {
         items: '=',
+        isLoading: '=',
         alternateBrightness: '=',
+        selected: '=',
+        selectedProjectCount: '=',
+        lineHeight: '=',
         title: '@',
         subtitle: '@',
         yLabel: '@'
       },
-      template:'<div><div class="text-center graph_title">{{title}}</div>'+
-        '<div class="stackedsubtitle text-center">{{subtitle}} </div></div>',
+      templateUrl: '/scripts/modules/stackedbarchart/views/stackedbarchart.html',
       link: function ($scope, $element) {
-        var chart, config;
+        $scope.showPlot = false;
+        $scope.defaultGraphWidth = 500;
+        $scope.margin = {
+           top: 5,
+           right: 20,
+           bottom: 50,
+           left: 50
+        };
 
-        config = {
-          margin: {
-             top: 5, right: 20, bottom: 50, left: 50
-          },
+        var chart;
+        var config = {
+          margin: $scope.margin,
           height: 250,
-          width: 500,
+          width: $scope.defaultGraphWidth,
           colours: HighchartsService.primarySiteColours,
           alternateBrightness: $scope.alternateBrightness === true? true : false,
           yaxis: {
@@ -75,7 +84,23 @@
           }
         };
 
-        $scope.$watch('items', function (newValue) {
+        $scope.isLoadingData = false;
+
+        $scope.$watch ('isLoading', function (newValue) {
+          $scope.isLoadingData = newValue;
+        });
+
+        var svgMountPoint = _.first ($element.find ('.canvas'));
+
+        function shouldShowPlot (data) {
+          return ! _.isEmpty (data);
+        }
+
+        $scope.$watch ('items', function (newValue) {
+          var showPlot = shouldShowPlot (newValue);
+          $scope.showPlot = showPlot;
+          if (! showPlot) {return;}
+
           if (newValue && typeof $scope.items[0] !== 'undefined') {
             if (!chart) {
               chart = new dcc.StackedBarChart(config);
@@ -87,7 +112,7 @@
               config.margin.bottom += 25;
             }
 
-            chart.render($element[0], $scope.items);
+            chart.render (svgMountPoint, $scope.items);
           }
         }, true);
 

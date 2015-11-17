@@ -29,10 +29,6 @@ import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.ClusterState;
@@ -44,6 +40,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Lazy
@@ -71,6 +71,11 @@ public class SearchConfig {
   public String indexName() {
     String indexName = properties.getElastic().getIndexName();
     return resolveIndexName(indexName);
+  }
+
+  @Bean
+  public String repoIndexName() {
+    return properties.getElastic().getRepoIndexName();
   }
 
   private String resolveIndexName(String indexName) {

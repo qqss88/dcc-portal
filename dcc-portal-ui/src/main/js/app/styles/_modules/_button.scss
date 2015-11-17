@@ -51,4 +51,18 @@
     background: $greyLightest;
 
   }
+ 
 }
+ 
+.t_button_info {
+  background: lighten($brand-light, 10%);
+  border-color: lighten($brand-light, 10%);
+  
+    &:hover {
+    background: $brand;
+  }
+} 
+
+  
+  
+

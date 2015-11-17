@@ -16,15 +16,172 @@ $nonNodeBoxColor: #ebffe7;
 $compartmentBackground: #fbf7f4;
 $compartmentBorder:#ffc38b;
 
+#pathways {
+  height: 100%;
+  width: 100%;
+  
+  .t_badge_icon {
+    position: relative;
+    // fix offsetted icon in banner
+    .icon-spread {
+      position: relative;
+      left: -2px;
+    }
+  }
+  
+  #pathway {
+    padding-top: 0rem;
+  }
+  
+  .content-body {
+    border-top: solid 1px #ccc;
+    display: table;
+    width:100%;
+  }
+  
+  .search-control {
+    position: relative;
+    padding: 1rem;
+    
+    .search-icon {
+      position: absolute;
+      top: 1.4rem;
+      left: 1.3rem;
+    }
+    
+    
+    input[type="text"].pathway-filter {
+      margin: 0 auto;
+      display: block;
+      width: 100%;
+      padding-left: 1.5rem
+    }
+  }
+  
+  aside {
+    //display: inline-block;
+    display: table-cell;
+    width: 20%;
+    float: none;
+    border-left: solid 1px #ccc;
+    margin: 0 0;
+    min-width: 200px;
+    border-right: solid 1px #ccc;
+  }
+  
+  .pathway-filter-container {
+      max-height: 81rem;
+      overflow-y: scroll;
+      padding-bottom: 1rem;
+      border-top: solid 1px #ccc;
+      
+      
+     .item-body {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 17rem;
+     }
+      
+      .pathway-item-header {
+        position: relative;
+        @include clearfix;
+        
+        .item-title {
+          float: left;
+        }
+        
+        
+        
+        .item-pval {
+          float: right;
+          padding-right: 0.6rem;
+          color: $secondaryNodeBorder;
+          font-size: 1rem; 
+        }
+        
+        
+        
+      }
+      
+      .selected .item-pval {
+            color: #fff; 
+        }
+    }
+    
+  .pathways-content {
+    padding: 0.5rem 0.5rem;
+    height: 100%;
+    border: none;
+    width: 100%;
+    display: inline-block;
+    //display: table-cell;
+    float: none;
+    vertical-align: top;
+    
+    .pathway-summary {
+      padding-bottom: 0rem;
+      border: none;
+    }
+    
+    .table-pathway-info {
+      margin: 0rem 0rem 2rem 0rem;
+    }
+    
+    .pathway-analysis-header {
+      @include clearfix;
+      
+      padding-top:0.2rem;
+      padding-bottom:0.6rem;
+    
+      .summary-header {
+        margin: 0;
+        float: left;
+        padding-top:0;
+        padding-bottom:0;
+      }
+      
+      .summary-back-link {
+        margin: 0rem 0rem 0rem 0rem;
+        float: right;
+        border: none;
+        padding-top:0;
+        padding-bottom:0;
+      }
+    }
+    
+    .action-item {
+      padding: 0rem 0rem 3rem 0rem 0rem;
+    }
+    
+  }
+}
+
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
   fill:$primaryNodeColor;
   stroke:$primaryNodeBorder;
+}
+
+.span__RenderableRect, .span__RenderableProtein, .span__RenderableChemical, .span__RenderableEntity, .span__ProcessNode{
+  background: $primaryNodeColor;
+  padding: 2px;
+  &:hover {
+    background: lighten($primaryNodeColor,10%);
+  }
 }
 
 .RenderableComplex, .RenderableEntitySet{
   fill:$secondaryNodeColor;
   stroke-width:$lineThicknessLight;
   stroke: $secondaryNodeBorder;
+}
+
+.span__RenderableComplex, .span__RenderableEntitySet{
+  background:$secondaryNodeColor;
+  padding:2px;
+    &:hover {
+    background: lighten($secondaryNodeColor,10%);
+  }
 }
 
 .RenderableEntitySet{
@@ -82,6 +239,14 @@ $compartmentBorder:#ffc38b;
 }
 
 /** ESSENTIALS **/
+
+.EntitySetAndMemberLink {
+  stroke-dasharray: 5 7;
+}
+
+.EntitySetAndEntitySetLink {
+  stroke-dasharray: 5 7;
+}
 
 .RenderableNodeText .RenderableNodeTextCell{
   text-align: center;
@@ -144,10 +309,10 @@ $compartmentBorder:#ffc38b;
   padding:5%;
   height: 70%;
   overflow-y: auto;
-}
-
-.pathway-gene-table{
-  margin:0 auto;
+  
+  .pathway-gene-table{
+    margin:2rem auto; 
+  }
 }
 
 .pathway-gene-label, .pathway-gene-header-label{
@@ -168,7 +333,7 @@ $compartmentBorder:#ffc38b;
 .pathway-legend-controller, .pathway-info-controller{
   margin-top: 0.5em;
 }
-
+ 
 .pathway-info h4, .pathway-legend h4{
   margin-left: 1em;
   margin-right: 1em;
@@ -190,6 +355,36 @@ $compartmentBorder:#ffc38b;
   padding-left:15%;
   padding-right:15%;
   max-height: 150px;
+}
+
+.failed-reaction {
+  stroke: red;
+  stroke-width: 2px;
+}
+
+.lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode{
+  background-color:$primaryNodeColor;
+  border: 2px dotted red;
+}
+
+.lof-RenderableComplex, .lof-RenderableEntitySet{
+  background-color:$secondaryNodeColor;
+  border: 2px dotted red;
+}
+
+.lof-cell {
+  padding: 0px;
+}
+
+.node-text-body {
+  -ms-word-break: break-all;
+  -ms-word-wrap: break-all;
+  -webkit-word-break: break-word;
+  -webkit-word-wrap: break-word;
+  word-break: break-word;
+  word-wrap: break-word;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
 }
 
 .pathway-fullscreen-controller {
@@ -215,6 +410,57 @@ $compartmentBorder:#ffc38b;
   position: fixed;
   top: 0;
   background: white;
+   
+  .pathway-info-content{
+    line-height: 1.4rem;
+    padding:5%;
+    height: 70%;
+    overflow-y: auto;
+    
+    .pathway-gene-table{
+      margin:4rem auto; 
+    }
+  }
+  
+  .subpath-link {
+    padding-top:4rem;
+  }  
+}
+
+:-moz-full-screen {
+   
+  .pathway-info-content{
+    line-height: 1.4rem;
+    padding:5%;
+    height: 70%;
+    overflow-y: auto;
+    
+    .pathway-gene-table{
+      margin:4rem auto; 
+    }
+  }
+  
+  .subpath-link {
+    padding-top:4rem;
+  }     
+}
+
+:fullscreen {
+   
+  .pathway-info-content{
+    line-height: 1.4rem;
+    padding:5%;
+    height: 70%;
+    overflow-y: auto;
+    
+    .pathway-gene-table{
+      margin:4rem auto; 
+    }
+  }
+  
+  .subpath-link {
+    padding-top:4rem;
+  }    
 }
 
 /**

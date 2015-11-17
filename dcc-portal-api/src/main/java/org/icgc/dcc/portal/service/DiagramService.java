@@ -23,8 +23,10 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.common.core.model.FieldNames.DIAGRAM_PROTEIN_MAP_DB_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.DIAGRAM_PROTEIN_MAP_UNIPROT_IDS;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CONSEQUENCE_TYPES;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_CONSEQUENCE;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_GENE;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
@@ -34,6 +36,7 @@ import java.util.Map;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.IndexModel;
@@ -45,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -63,6 +67,23 @@ public class DiagramService {
   private final MutationRepository mutationRepository;
 
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
+
+  private static final List<String> CONSEQUENCE_TYPES = ImmutableList.<String> builder().add(
+      "frameshift_variant",
+      "missense_variant",
+      "start_lost",
+      "initiator_codon_variant",
+      "stop_gained",
+      "stop_lost",
+      "exon_loss_variant",
+      "exon_variant",
+      "splice_acceptor_variant",
+      "splice_donor_variant", "splice_region_variant",
+      "5_prime_UTR_premature_start_codon_gain_variant",
+      "disruptive_inframe_deletion",
+      "inframe_deletion",
+      "disruptive_inframe_insertion",
+      "inframe_insertion").build();
 
   public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
     val dbToUniprotMap = getProteinIdMap(pathwayId);
@@ -151,12 +172,16 @@ public class DiagramService {
   private BoolQueryBuilder getQuery(String id, String[] impacts) {
     val uniprotIdsFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_GENE + "." + GENE_UNIPROT_IDS;
     val functionalImpactFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
+    val consequenceTypeFullPath =
+        MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_CONSEQUENCE + "." + MUTATION_CONSEQUENCE_TYPES;
 
     val query = boolQuery().must(termQuery(uniprotIdsFieldName, id));
     if (impacts.length > 0) {
       query.must(termsQuery(functionalImpactFieldName, impacts));
     }
+    query.must(termsQuery(consequenceTypeFullPath, CONSEQUENCE_TYPES));
 
-    return query;
+    val nestedQuery = QueryBuilders.nestedQuery(MUTATION_TRANSCRIPTS, query);
+    return boolQuery().must(nestedQuery);
   }
 }

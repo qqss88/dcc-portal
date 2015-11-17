@@ -64,6 +64,8 @@ public class Release {
   Long liveDonorCount;
   @ApiModelProperty(value = "Projects with molecular data", required = true)
   Long liveProjectCount;
+  @ApiModelProperty(value = "Primary Site Count with molecular data", required = true)
+  Long livePrimarySiteCount;
 
   public Release(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.RELEASE);
@@ -81,6 +83,7 @@ public class Release {
     releaseNumber = (Integer) (fieldMap.get(fields.get("releaseNumber")));
     liveDonorCount = getLong(fieldMap.get(fields.get("liveDonorCount")));
     liveProjectCount = getLong(fieldMap.get(fields.get("liveProjectCount")));
+    livePrimarySiteCount = getLong(fieldMap.get(fields.get("livePrimarySiteCount")));
   }
 
 }

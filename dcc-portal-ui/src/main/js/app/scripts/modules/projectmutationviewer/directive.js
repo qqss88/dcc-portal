@@ -8,33 +8,25 @@
     return {
       restrict: 'E',
       replace: 'true',
-      template: '<div>' +
-        '<div class="text-center graph_title">' +
-        'Number of Somatic Mutations in Donor\'s Exomes Across Cancer Projects' +
-        '<span class="pull-right"><a href="">' +
-        '<small><i class="icon-help" data-tooltip="{{helpText}}" data-tooltip-placement="left"></i>' +
-        '</small></a></span>' +
-        '</div>' +
-        '<div class="canvas"></div>' +
-        '<div class="text-right">' +
-        '<small>Design inspired from Nature: ' +
-        '<a href="http://www.nature.com/nature/journal/v499/n7457/full/nature12213.html" ' +
-        'target="_blank">doi:10.1038/nature12213</a></small>' +
-        '</div>' +
-        '</div>',
+      templateUrl: '/scripts/modules/projectmutationviewer/views/projectmutationviewer.html',
       scope: {
         items: '=',
-        selected: '='
+        selected: '=',
+        selectedProjectCount: '='
       },
       link: function($scope, $element) {
         var chart, config;
+
+        $scope.showPlot = false;
 
         $scope.helpText = 'Each dot represents the number of somatic mutations per megabase in ' +
           'a given donor\'s exome. Donors are grouped by cancer projects. <br>Horizontal red lines ' +
           'provide the median number of somatic and exomic mutations within each cancer project.';
 
+        $scope.defaultGraphHeight = 230;
+
         config = {
-          height: 230,
+          height: $scope.defaultGraphHeight,
           width: 950,
           clickFunc: function(d) {
             $scope.$emit('tooltip::hide');
@@ -121,11 +113,18 @@
           return chartData;
         }
 
-        $scope.$watch('items', function(newData) {
+        $scope.$watch ('items', function (newData) {
+          var showPlot = _.some ($scope.selected, function (projectId) {
+            return _.has (newData, projectId);
+          });
+
+          $scope.showPlot = showPlot;
+          if (! showPlot) {return;}
+
           if (newData && !chart) {
-            chart = new dcc.ProjectMutationChart(transform($scope.items), config);
-            // chart.render( $element[0] );
+            chart = new dcc.ProjectMutationChart (transform ($scope.items), config);
             chart.render( $element.find('.canvas')[0] );
+
             if (angular.isDefined($scope.selected)) {
               chart.highlight($scope.selected);
             }
@@ -142,7 +141,9 @@
         $scope.$on('$destroy', function() {
           $scope.items = null;
           $scope.selected = null;
-          chart.destroy();
+          if (chart) {
+            chart.destroy();
+          }
         });
       }
     };

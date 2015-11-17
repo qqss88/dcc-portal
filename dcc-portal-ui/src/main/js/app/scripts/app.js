@@ -18,6 +18,182 @@
 (function () {
   'use strict';
 
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Define global namespace for the icgc app to be used by third parties as well as in the console.
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if (typeof window.$icgc === 'undefined') {
+    (function(devConfig) {
+      
+      // used to configure dev profile for the API class
+      var _defaultDevConfiguration = devConfig || {},
+          _defaultDevHost = _defaultDevConfiguration.HOST || 'localhost',
+          _defaultDevPort = _defaultDevConfiguration.API_PORT || '8080',
+          _developerLocalMode = _defaultDevConfiguration.DEVELOPER_LOCAL_MODE === true ? true : false;
+
+      // API Base class
+      function API(version, localUIDevRun, host, port, context) {
+        var _version = version || 1,
+            _host = host || (localUIDevRun === true ? _defaultDevHost : null),
+            _port =  port || (localUIDevRun === true ? _defaultDevPort : null),
+            _context = context || '/api',
+            _isDebugEnabled = false;
+
+
+        this.getVersion = function() {
+          return _version;
+        };
+
+        this.getVersion = function() {
+          return _version;
+        };
+
+        this.getBasePathURL = function() {
+          return  (_host ? '//' + _host : '') +
+              (_port ? ':' + _port : '')  +
+              (_context + '/v' + _version);
+        };
+
+        this.getBasePathURL = function() {
+          return  (_host ? '//' + _host : '') +
+                  (_port ? ':' + _port : '')  +
+                  (_context + '/v' + _version);
+        };
+
+        this.setDebugEnabled = function(isDebugEnabled) {
+          _isDebugEnabled = isDebugEnabled;
+          return this;
+        };
+
+        this.setDebugEnabled = function(isDebugEnabled) {
+          _isDebugEnabled = isDebugEnabled;
+          return this;
+        };
+
+        this.isDebugEnabled = function() {
+          return _isDebugEnabled;
+        };
+
+
+        return this;
+      }
+
+
+
+      // ICGC Constructor method which provides an access point for other JS logic to query rather than soley
+      // relying off of angular. This will be useful for setting debug state on the fly as well as offering
+      // an interface layer between the angular/non-angular worlds.
+      function ICGCApp() {
+
+        var _isDebugEnabled = false,
+            _currentAPIVersion = 1,
+            _APIInterface = null,
+            _isLocalUIRun = false,
+            _angularInjector = null;
+
+        ///////////////////////////////////////////////////////
+        // Private methods
+        ///////////////////////////////////////////////////////
+        // Default initializer
+        function __initDefaultAPI() {
+          _APIInterface = new API(_currentAPIVersion, _isLocalUIRun);
+        }
+
+        function __getAngularInjector() {
+          if (_angularInjector) {
+            return _angularInjector;
+          }
+
+          _angularInjector = angular.element(document.body).injector();
+
+          return _angularInjector;
+        }
+
+        function __getAngularProvider(dependencyName) {
+
+          if (__getAngularInjector) {
+            __getAngularInjector();
+          }
+
+         var provider;
+
+          try {
+             provider = _angularInjector.get(dependencyName);
+          }
+          catch (e) {
+            console.error('Cannot find dependeny with name: ' + dependencyName);
+            provider = null;
+          }
+
+          return provider;
+        }
+
+        function __setAPIDebugEnabled(isAPIDebugEnabled) {
+          return _APIInterface.setDebugEnabled(isAPIDebugEnabled);
+        }
+
+
+
+        ///////////////////////////////////////////////////////
+        // Public API
+        ////////////////////////////////////////////////////////
+        this.getAPI = function() {
+
+          if (_APIInterface === null) {
+            __initDefaultAPI();
+          }
+
+          return _APIInterface;
+        };
+
+        this.setAPI = function(version) {
+          _currentAPIVersion = version;
+          // TODO: extend with potential to specify host and port (for now default it)
+          _APIInterface = new API(_currentAPIVersion, _isLocalUIRun);
+          return this;
+        };
+
+        // Turn on all debug across the app
+        this.setDebugEnabled = function(isEnabled) {
+          _isDebugEnabled = isEnabled;
+          __setAPIDebugEnabled(isEnabled); // turn on the API debug as well
+          return this;
+        };
+
+        this.setLocalUIRun = function(isLocalUIRun) {
+          _isLocalUIRun = isLocalUIRun;
+          return this;
+        };
+
+        // This method should be used for checking before performing a console.*
+        // useful if debuging in a different environment that is not development
+        this.isDebugEnabled = function() {
+          return _isDebugEnabled;
+        };
+
+        // turn on the API debug only
+        this.setAPIDebugEnabled = __setAPIDebugEnabled;
+
+        this.getAngularInjector = __getAngularInjector;
+
+        this.getAngularProvider = __getAngularProvider;
+
+
+      return this;
+    }
+
+
+     // Singleton global variable used to control the application settings across non-angular
+     // libraries as well the the JS console
+     window.$icgcApp = new ICGCApp().setLocalUIRun(_developerLocalMode);
+
+    })(window.$ICGC_DEV_CONFIG || null);
+
+  }
+  //////////////////////////////////////////////////////////////////////////
+
+  var toJson = angular.toJson;
+
   var module = angular.module('icgc', [
     'ngSanitize',
     'ngAnimate',
@@ -58,8 +234,10 @@
     'icgc.mutations',
     'icgc.advanced',
     'icgc.releases',
+    'icgc.portalfeature',
     'icgc.keyword',
     'icgc.browser',
+    'icgc.donorlist',
     'icgc.genelist',
     'icgc.genesets',
     'icgc.visualization',
@@ -70,10 +248,13 @@
     'icgc.beacon',
     'icgc.downloader',
     'icgc.pathwayviewer',
+    'icgc.repositories',
     'icgc.repository',
+    'icgc.software',
     'icgc.pancancer',
     'icgc.auth',
     'icgc.tokens',
+    'icgc.pathways',
 
     // old
     'app.ui',
@@ -123,71 +304,11 @@
    * This is the base URL for API requests. We can change this to use API from a different server, this is useful
    * when only testing the user interface, or to debug production UI issues.
    */
+
   module.constant('API', {
-    BASE_URL: '/api/v1'
+    BASE_URL: $icgcApp.getAPI().getBasePathURL()
   });
 
-
-  /**
-   * This serves as a debugging service to toggle features that are merged
-   * but disabled.
-   *
-   * Note: This works automatically for views that are tied to a state, otherwise
-   * it will be up to the callers to check for state change via watch/observe or other means.
-   */
-  module.service('PortalFeature', function($state, LocationService) {
-    var features = {
-      REACTOME_VIEWER: false,
-      AUTH_TOKEN: false
-    };
-    function _enable(feature) {
-      if (features.hasOwnProperty(feature) === false) { return; }
-      features[feature] = true;
-      if ($state.current.name) {
-        $state.go($state.current.name, {}, {reload: true});
-      }
-    }
-
-    function _disable(feature) {
-      if (features.hasOwnProperty(feature) === false) { return; }
-      features[feature] = false;
-      if ($state.current.name) {
-        $state.go($state.current.name, {}, {reload: true});
-      }
-    }
-
-    function init() {
-      var enable = LocationService.getParam('enable');
-      if (_.isEmpty(enable)) {
-        return;
-      }
-      enable.split(',').forEach(function(feature) {
-        _enable(feature.trim());
-      });
-    }
-
-    // Allow features to be turned on via query param on application load
-    init();
-
-
-    this.get = function(s) {
-      if (features.hasOwnProperty(s) === false) { return false; }
-      return features[s];
-    };
-
-    this.enable = function(s) {
-      _enable(s);
-    };
-
-    this.disable = function(s) {
-      _disable(s);
-    };
-
-    this.list = function() {
-      return features;
-    };
-
-  });
 
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
@@ -198,10 +319,27 @@
     $compileProvider.debugInfoEnabled(false);
 
     // Combine calls - needs more testing
-    // $httpProvider.useApplyAsync(true);
+    $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
+
+    // Function that returns a interceptor function
+    function _getInterceptorDebugFunction(requestType){
+
+      return function(data, operation, model) {
+        // perform this check dynamically the computation time is neglible so this shouldn't impede on perfomance
+        if ($icgcApp.getAPI().isDebugEnabled()) {
+          console.log(requestType + ' Method: ', operation.toUpperCase(), '\nModel: ', model, '\nData: ', data);
+        }
+        return data;
+      };
+
+    }
+
+    RestangularProvider.setRequestInterceptor(_getInterceptorDebugFunction('Request'));
+    RestangularProvider.setResponseInterceptor(_getInterceptorDebugFunction('Reponse'));
+
 
 
     RestangularProvider.setDefaultHttpFields({cache: true});
@@ -245,17 +383,18 @@
 
     var ignoreNotFound = [
       '/analysis/',
-      '/list'
+      '/list',
+      '/ui/reactome'
     ];
 
     Restangular.setErrorInterceptor(function (response) {
 
       if (response.status !== 401) {
-        console.error('Response Error: ', response);
+        console.error ('Response Error: ', toJson (response));
       }
 
       if (response.status >= 500) {
-        Notify.setMessage('' + response.data.message);
+        Notify.setMessage ('' + response.data.message || response.statusText);
         Notify.showErrors();
       } else if (response.status === 404) {
 
@@ -270,8 +409,6 @@
         if (ignore === true) {
           return true;
         }
-
-
 
         if (response.data.message) {
           Page.setPage('error');

@@ -197,7 +197,7 @@ ol {
 
 h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
   // Sets a max width. Site will be fluid until it reaches 1200, then stick there.
-  width: 1200px;
+  width: $break-desktop;
 
   @include breakpoint($break-widescreen) {
     width: 1440px;
@@ -288,6 +288,10 @@ h3:hover {
     padding: 0;
     padding-right: 1rem;
   }
+}
+
+.blur {
+   @include filter(blur(2px));
 }
 
 #loading-screen {

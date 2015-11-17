@@ -51,11 +51,12 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services']);
+  var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services', 'icgc.sets.services']);
 
   module.controller('AdvancedCtrl',
-    function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
-              AdvancedMutationService, Settings) {
+    function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
+      AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings) {
+
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -70,11 +71,110 @@
       _ctrl.Mutation = AdvancedMutationService;
       _ctrl.Location = LocationService;
 
+
+
       function refresh() {
-        _ctrl.Donor.refresh();
-        _ctrl.Gene.refresh();
-        _ctrl.Mutation.refresh();
-        _ctrl.hasGeneFilter = LocationService.filters().hasOwnProperty('gene');
+        var filters = LocationService.filters(),
+            _controllers = [
+              { 'controller': _ctrl.Donor, id: 'donor', startRunTime: null },
+              { 'controller': _ctrl.Gene, id: 'gene', startRunTime: null},
+              { 'controller': _ctrl.Mutation, id: 'mutation', startRunTime: null}
+            ],
+            refreshOrder = [];
+        
+        // Based on the tab we are on make sure we exec
+        // our refreshes in the correct order.
+        switch (_ctrl.state.tab) {
+          case 'mutation':
+            refreshOrder = _controllers.reverse();
+            break;
+          case 'gene':
+            refreshOrder = [
+              _controllers[1],
+              _controllers[0],
+              _controllers[2]
+            ];
+            break;  
+          default: // donor
+            refreshOrder = _controllers;
+            break;
+        }
+        
+       
+        // Handy function used to perform our refresh requests
+        // and unblock when certain conditions are met
+        function _execRefresh(controllerObj) {
+          controllerObj.startRunTime = new Date().getTime();
+          
+          var refreshPromise = controllerObj.controller.refresh.apply(_ctrl);
+                  
+          controllerObj.promiseCount = ++_promiseCount;
+          console.log('Promise #' + controllerObj.promiseCount + ' - Controller ID "' + controllerObj.id +
+                        '" started refresh...');
+          
+          refreshPromise.then(
+            function () {
+              
+              var nowTime = new Date().getTime(),
+                  timeDelta = nowTime - _workStartTime;
+                
+              _totalMSElapsed += timeDelta;
+
+              // If we have resolved all our promises in under _MAX_REFRESH_BLOCK_TIME
+              // or we have waitied at least _MAX_REFRESH_BLOCK_TIME before
+              // the first resolve then unblock...
+              if ( ( _pageUnblockedTime === null &&
+                    (_promiseCount === _refreshControllerLength ||
+                    _totalMSElapsed >= _MAX_REFRESH_BLOCK_TIME)
+                  ) ) {
+                
+                _pageUnblockedTime = nowTime;
+                console.log('Advanced Search Page blocking stopped in ' + timeDelta + 'ms...');
+                Page.stopWork();
+              }
+              
+              console.log('Promise #' + controllerObj.promiseCount + ' - Controller ID "' +
+                controllerObj.id + '" refreshed in ' +
+                          (nowTime - controllerObj.startRunTime) + 'ms...');
+             
+            });
+           
+          return refreshPromise;
+        }
+       
+        var _refreshControllerLength = refreshOrder.length,
+            _firstRefreshController = refreshOrder.shift(),
+            _workStartTime = null,
+            _promiseCount = 0,
+            _totalMSElapsed = 0,
+            _pageUnblockedTime = null,
+           
+            _MAX_REFRESH_BLOCK_TIME = 500; // Block for 500ms max
+
+        // Reset our refresh variables before executing the refresh
+        _pageUnblockedTime = null;
+        _totalMSElapsed = 0;
+        _promiseCount = 0;
+        _workStartTime = new Date().getTime();
+
+        Page.startWork();
+        _execRefresh(_firstRefreshController);
+       
+       
+       
+       
+        
+        // Fire the other requests once using
+        // one digest cycle --> $http forceAsync has been turned on
+        // in Angular - see app.js   
+        
+        _.forEach(refreshOrder, function (refreshControllerObj) {
+          _execRefresh(refreshControllerObj);
+        });
+          
+        
+        
+        _ctrl.hasGeneFilter = angular.isObject(filters) ?  filters.hasOwnProperty('gene') : false;
       }
 
       function ajax() {
@@ -114,6 +214,15 @@
         });
       };
 
+      _ctrl.viewExternal = function(type, limit) {
+        var params = {};
+        params.filters = LocationService.filters();
+        params.size = limit;
+        params.isTransient = true;
+        // Ensure scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
+        $scope.$destroy();
+        SetService.createForwardSet(type, params, '/repository/external');
+      };
 
       /**
        * Create new enrichment analysis
@@ -133,6 +242,22 @@
         });
       };
 
+      function ensureString (string) {
+        return _.isString (string) ? string.trim() : '';
+      }
+
+      _ctrl.projectFlagIconClass = function (projectCode) {
+        var defaultValue = '';
+        var last3 = _.takeRight (ensureString (projectCode), 3);
+
+        if (_.size (last3) < 3 || _.first (last3) !== '-') {
+          return defaultValue;
+        }
+
+        var last2 = _.rest (last3).join ('');
+
+        return 'flag flag-' + CodeTable.translateCountryCode (last2.toLowerCase());
+      };
 
       /**
        * View observation/experimental details
@@ -208,7 +333,7 @@
 
 
   module.service('AdvancedDonorService',
-    function(Page, LocationService, HighchartsService, Donors, State, Extensions) {
+    function(Page, LocationService, HighchartsService, Donors, State, Extensions, $q) {
 
     var _this = this;
 
@@ -278,8 +403,10 @@
 
     _this.success = function (donors) {
       var filters = LocationService.filters();
-      Page.stopWork();
+      //Page.stopWork();
       _this.loading = false;
+      
+       //console.log('Stop Donor Work!');
 
       donors.hits.forEach(function (donor) {
         donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
@@ -299,16 +426,23 @@
     };
 
     _this.refresh = function () {
-      Page.startWork();
+      var deferred = $q.defer();
       _this.loading = true;
+      
+      //console.log('Start Donor Work!');
       var params = LocationService.getJsonParam('donors');
       params.include = 'facets';
-      Donors.getList(params).then(_this.success);
+      Donors.getList(params).then(function (donorList) {
+         deferred.resolve();
+        _this.success(donorList);
+      });
+      
+      return deferred.promise;
     };
   });
 
   module.service('AdvancedGeneService',
-    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions, ProjectCache) {
+    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions, ProjectCache, $q) {
 
     var _this = this;
 
@@ -391,7 +525,10 @@
                 }
 
 
-                gene.uiDonorsLink = LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet');
+                gene.uiDonorsLink = LocationService.toURLParam(
+                                      LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet')
+                                    );
+
                 gene.uiDonors = data.facets.projectId.terms;
                 gene.uiDonors.forEach(function (facet) {
                   var p = _.find(projects.hits, function (item) {
@@ -418,9 +555,10 @@
     };
 
     _this.success = function (genes) {
-      Page.stopWork();
       _this.loading = false;
-
+     
+      //console.log('Stop Gene Work!');
+      
       genes.hits.forEach(function (gene) {
         var filters = LocationService.filters();
         gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
@@ -440,16 +578,24 @@
     };
 
     _this.refresh = function () {
-      Page.startWork();
+       var deferred = $q.defer();
+      
       _this.loading = true;
+      //console.log('Start Gene Work!');
       var params = LocationService.getJsonParam('genes');
       params.include = 'facets';
-      Genes.getList(params).then(_this.success);
+      
+      Genes.getList(params).then(function (geneList) {
+        deferred.resolve();
+        _this.success(geneList);
+      });
+      
+      return deferred.promise;
     };
   });
 
   module.service('AdvancedMutationService', function (Page, LocationService, HighchartsService, Mutations,
-    Occurrences, Projects, Donors, State, Extensions, ProjectCache) {
+    Occurrences, Projects, Donors, State, Extensions, ProjectCache, $q) {
 
       var _this = this;
       var projectCachePromise = ProjectCache.getData();
@@ -521,7 +667,9 @@
                     }
                   }
 
-                  mutation.uiDonorsLink = LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet');
+                  mutation.uiDonorsLink = LocationService.toURLParam(
+                                            LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet')
+                                          );
                   mutation.uiDonors = data.facets.projectId.terms;
                   mutation.uiDonors.forEach(function (facet) {
                     var p = _.find(projects.hits, function (item) {
@@ -570,9 +718,9 @@
       };
 
       _this.mSuccess = function (mutations) {
-        Page.stopWork();
         _this.loading = false;
-
+        //console.log('Stop Mutation Work!');
+         
         mutations.hits.forEach(function (mutation) {
           var filters = LocationService.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
@@ -601,12 +749,26 @@
       };
 
       _this.refresh = function () {
-        Page.startWork();
+        //Page.startWork();
+        var deferred = $q.defer();
         _this.loading = true;
+
+        //console.log('Start Mutation Work!');
+
         var mParams = LocationService.getJsonParam('mutations');
         mParams.include = ['facets', 'consequences'];
-        Mutations.getList(mParams).then(_this.mSuccess);
-        Occurrences.getList(LocationService.getJsonParam('occurrences')).then(_this.oSuccess);
+        Mutations.getList(mParams).then(
+          function (mutationsList) {
+            deferred.resolve();
+            _this.mSuccess(mutationsList);
+          }
+          );
+        Occurrences.getList(LocationService.getJsonParam('occurrences'))
+          .then(function(occurrencesList) {
+            _this.oSuccess(occurrencesList);
+          });
+        
+        return deferred.promise;
       };
     });
 })();

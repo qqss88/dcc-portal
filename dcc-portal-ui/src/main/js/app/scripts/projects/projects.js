@@ -63,10 +63,11 @@
 (function () {
   'use strict';
 
+  var toJson = angular.toJson;
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
   module.controller('ProjectsCtrl',
-    function ($q, $scope, $state, ProjectState, Page, Projects,
+    function ($q, $scope, $state, $filter, ProjectState, Page, Projects, CodeTable,
                HighchartsService, Donors, Restangular, LocationService) {
 
     var _ctrl = this;
@@ -88,29 +89,79 @@
         _ctrl.setTab($state.current.data.tab);
       });
 
-    // This is needed to translate projects filters to donor filters
-    $scope.createAdvanceFilters = function(dataType) {
-      var currentFilters = LocationService.filters();
-      var filters = {};
+    $scope.countryCode = CodeTable.countryCode;
 
-      if (dataType || !_.isEmpty(currentFilters)) {
-        filters.donor = {};
-      }
-
-      if (dataType) {
-        filters.donor.availableDataTypes = {};
-        filters.donor.availableDataTypes.is = [dataType];
-      }
-      if (!_.isEmpty(currentFilters)) {
-        filters.donor.projectId = {};
-        filters.donor.projectId.is = _ctrl.projectIds;
-      }
-
-      return JSON.stringify(filters);
+    var pathMapping = {
+      ids: 'donor.projectId.is',
+      datatype: 'donor.availableDataTypes.is',
+      state: 'donor.state.is'
     };
 
+    function ensureObject (o) {
+      return _.isPlainObject (o) ? o : {};
+    }
 
-    // Helper to do the stacked chart
+    var isEmptyObject = _.flow (ensureObject, _.isEmpty);
+
+    function hasQueryFilter() {
+      return (! isEmptyObject (LocationService.filters()));
+    }
+
+    _ctrl.fieldKeys = [
+      'totalLiveDonorCount',
+      'totalDonorCount',
+      'ssmTestedDonorCount',
+      'cnsmTestedDonorCount',
+      'stsmTestedDonorCount',
+      'sgvTestedDonorCount',
+      'methArrayTestedDonorCount',
+      'methSeqTestedDonorCount',
+      'expArrayTestedDonorCount',
+      'expSeqTestedDonorCount',
+      'pexpTestedDonorCount',
+      'mirnaSeqTestedDonorCount',
+      'jcnTestedDonorCount'];
+
+    var fieldMapping = {
+      totalLiveDonorCount: {state: 'live'},
+      totalDonorCount: {},
+      ssmTestedDonorCount: {datatype: 'ssm'},
+      cnsmTestedDonorCount: {datatype: 'cnsm'},
+      stsmTestedDonorCount: {datatype: 'stsm'},
+      sgvTestedDonorCount: {datatype: 'sgv'},
+      methArrayTestedDonorCount: {datatype: 'meth_array'},
+      methSeqTestedDonorCount: {datatype: 'meth_seq'},
+      expArrayTestedDonorCount: {datatype: 'exp_array'},
+      expSeqTestedDonorCount: {datatype: 'exp_seq'},
+      pexpTestedDonorCount: {datatype: 'pexp'},
+      mirnaSeqTestedDonorCount: {datatype: 'mirna_seq'},
+      jcnTestedDonorCount: {datatype: 'jcn'}
+    };
+
+    function buildFilter (fieldKey, projectIds) {
+      var filter = _.mapValues (_.clone (_.get (fieldMapping, fieldKey, {})), function (v) {
+        return [v];
+      });
+
+      if (_.isArray (projectIds) && (! _.isEmpty (projectIds))) {
+        _.assign (filter, {ids: projectIds});
+      }
+
+      return _.transform (filter, function (result, value, key) {
+        if (_.has (pathMapping, key)) {
+          result = _.set (result, pathMapping [key], value);
+        }
+      });
+    }
+
+    $scope.toAdvancedSearch = function (fieldKey, projectIds) {
+      var filter = {
+        filters: toJson (buildFilter (fieldKey, projectIds))
+      };
+      return 'advanced (' + toJson (filter) + ')';
+    };
+
+    // Transforms data for the stacked bar chart
     function transform(data) {
       var list = [];
 
@@ -137,41 +188,83 @@
 	   return list.sort(function(a, b) { return b.total - a.total; });
     }
 
+    _ctrl.donutChartSubTitle = function () {
+      var formatNumber = $filter ('number');
+      var pluralizer = function (n, singular) {
+        return '' + singular + (n > 1 ?  's' : '');
+      };
+      var toHumanReadable = function (n, singular) {
+        return '' + formatNumber (n) + ' ' + pluralizer (n, singular);
+      };
+      var subtitle = toHumanReadable (_ctrl.totalDonors, 'Donor');
+      var projects = _.get (_ctrl, 'projects.hits', undefined);
 
-    function success(data) {
-    	
+      return subtitle + (_.isArray (projects) ?
+        ' across ' + toHumanReadable (projects.length, 'Project') : '');
+    };
+
+    _ctrl.hasDonutData = function () {
+      var donutData = _ctrl.donut;
+      var lengths = _.map (['inner', 'outer'], function (key) {
+        return _.get (donutData, [key, 'length'], 0);
+      });
+      return _.sum (lengths) > 0;
+    };
+
+    _ctrl.numberOfSelectedProjectsInFilter = function () {
+      var queryFilter = LocationService.filters();
+      return _.get (queryFilter, 'project.id.is.length', 0);
+    };
+
+    function noHitsIn (results) {
+      return 0 === _.get (results, 'hits.length', 0);
+    }
+
+    _ctrl.isLoadingData = false;
+
+    function stopIfNoHits (data) {
+      if (noHitsIn (data)) {
+        _ctrl.isLoadingData = false;
+        _ctrl.stacked = [];
+        Page.stopWork();
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    var aggregationAjaxAbort = null;
+
+    function cancelInFlightAggregationAjax () {
+      if (aggregationAjaxAbort) {
+        aggregationAjaxAbort.resolve();
+        aggregationAjaxAbort = null;
+      }
+    }
+
+    function success (data) {
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
-        _ctrl.projects = data;
-        _ctrl.projectIds = _.pluck(data.hits, 'id');
+        _ctrl.projectIds = _.pluck (data.hits, 'id');
 
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
           ssmTotalDonors += p.ssmTestedDonorCount;
         });
-        
-        _ctrl.totals = {};
-        _ctrl.labels = ['totalDonorCount', 
-                        'ssmTestedDonorCount', 
-                        'cnsmTestedDonorCount', 
-                        'stsmTestedDonorCount', 
-                        'sgvTestedDonorCount', 
-                        'methArrayTestedDonorCount', 
-                        'methSeqTestedDonorCount', 
-                        'expArrayTestedDonorCount', 
-                        'expSeqTestedDonorCount', 
-                        'pexpTestedDonorCount',
-                        'mirnaSeqTestedDonorCount', 
-                        'jcnTestedDonorCount'];
-        
-        _ctrl.labels.forEach(function(fieldName) {
-        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
+
+        var totalRowProjectIds = hasQueryFilter() ? _ctrl.projectIds : undefined;
+        _ctrl.totals = _.map (_ctrl.fieldKeys, function (fieldKey) {
+          return {
+            total: _.sum (data.hits, fieldKey),
+            sref: $scope.toAdvancedSearch (fieldKey, totalRowProjectIds)
+          };
         });
 
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
 
+        _ctrl.projects = data;
         _ctrl.donut = HighchartsService.donut({
           data: data.hits,
           type: 'project',
@@ -180,73 +273,67 @@
           countBy: 'totalDonorCount'
         });
 
-        _ctrl.stacked = [];
-
-
         // Get project-donor-mutation distribution of exon impacted ssm
         Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
           _ctrl.distribution = data;
         });
-        
-        
-        if (data.hits.length > 0) {
-          Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes', {
-            include : 'projects',
-            filters : {
-              mutation : {
-                functionalImpact : {
-                  is : [ 'High' ]
-                }
-              }
-            },
-            size : 20
-          }).then(function(genes) {
-            if (!genes.hits || genes.hits.length === 0) {
-              Page.stopWork();
-              return;
-            }
-            var params = {
-              mutation : {
-                functionalImpact : {
-                  is : [ 'High' ]
-                }
-              }
-            };
-            Page.stopWork();
 
-            // FIXME: elasticsearch aggregation support may be more
-            // efficient
-            Restangular.one('ui').one('gene-project-donor-counts', _.pluck(genes.hits, 'id')).get({
-              'filters' : params
-            }).then(function(geneProjectFacets) {
+        cancelInFlightAggregationAjax();
+        if (stopIfNoHits (data)) {return;}
 
-              genes.hits.forEach(function(gene) {
+        var mutationFilter = {
+          mutation: {
+            functionalImpact: {is: ['High']}
+          }
+        };
+
+        Projects.several (_ctrl.projectIds.join()).get ('genes', {
+          include: 'projects',
+          filters: mutationFilter,
+          size: 20
+        }).then (function (genes) {
+          // About to launch a new ajax getting project aggregation data. Cancel any active call.
+          cancelInFlightAggregationAjax();
+
+          if (stopIfNoHits (genes)) {return;}
+
+          Page.stopWork();
+
+          aggregationAjaxAbort = $q.defer();
+          _ctrl.isLoadingData = true;
+
+          Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
+            .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
+            .get ({'filters': mutationFilter})
+            .then (function (geneProjectFacets) {
+
+              genes.hits.forEach (function (gene) {
                 var uiFIProjects = [];
 
-                geneProjectFacets[gene.id].terms.forEach(function(t) {
-                  var proj = _.find(data.hits, function(p) {
+                geneProjectFacets[gene.id].terms.forEach(function (t) {
+                  var proj = _.find(data.hits, function (p) {
                     return p.id === t.term;
                   });
 
                   if (angular.isDefined(proj)) {
                     uiFIProjects.push({
-                      id : t.term,
-                      name : proj.name,
-                      primarySite : proj.primarySite,
-                      count : t.count
+                      id: t.term,
+                      name: proj.name,
+                      primarySite: proj.primarySite,
+                      count: t.count
                     });
                   }
                 });
                 gene.uiFIProjects = uiFIProjects;
               });
-              _ctrl.stacked = transform(genes.hits);
+
+              _ctrl.isLoadingData = false;
+              _ctrl.stacked = transform (genes.hits);
+              aggregationAjaxAbort = null;
             });
-          });
-        } else {
-          Page.stopWork();
-        }
+        });
 
         // Id to primary site
         var id2site = {};
@@ -270,6 +357,13 @@
       Page.startWork();
       Projects.getList({include: 'facets'}).then(success);
     }
+
+    _ctrl.countryIconClass = function (countryName) {
+      var defaultValue = '';
+      var countryCode = CodeTable.countryCode (countryName);
+
+      return _.isEmpty (countryCode) ? defaultValue : 'flag flag-' + countryCode;
+    };
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
 
@@ -624,13 +718,7 @@
         filters: LocationService.filters()
       };
 
-
-      // Sanitize filters, we want to enforce project.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.project) {
-        liveFilters.filters.project = {};
-      }
-      liveFilters.filters.project.state = { is: ['live']};
 
       return this.all().get('', liveFilters).then(function (data) {
 
@@ -687,12 +775,7 @@
         from: 1
       };
 
-      // Sanitize filters, we want to enforce donor.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.donor) {
-        liveFilters.filters.donor = {};
-      }
-      liveFilters.filters.donor.state = { is: ['live']};
 
       return this.handler.one('donors', '').get(liveFilters);
     };

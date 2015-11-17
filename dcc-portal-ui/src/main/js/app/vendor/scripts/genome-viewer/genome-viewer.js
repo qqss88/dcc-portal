@@ -20693,6 +20693,7 @@ OpencgaAdapter.prototype = {
 
         return responseItems;
 
+<<<<<<< HEAD
     },
 
     /**

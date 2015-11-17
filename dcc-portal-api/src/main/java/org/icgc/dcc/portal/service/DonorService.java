@@ -1,8 +1,13 @@
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.range;
+import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
+import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
@@ -21,6 +26,12 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
+import org.dcc.portal.pql.meta.DonorCentricTypeModel.Fields;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -28,24 +39,23 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvMapWriter;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
-import lombok.Cleanup;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
@@ -71,8 +81,73 @@ public class DonorService {
     return donors;
   }
 
+  /**
+   * Matches donors based on the ids provided.
+   * 
+   * @param ids List of ids as strings
+   * @param False - donor-text, True - file-donor-text
+   * @return A Map keyed on search fields from file-donor-text or donor-text with values being a multimap containing the
+   * matched field as the key and the matched donor as the value.
+   */
+  public Map<String, Multimap<String, String>> validateIdentifiers(@NonNull List<String> ids,
+      boolean isForExternalfile) {
+    val result = Maps.<String, Multimap<String, String>> newHashMap();
+    val fields = isForExternalfile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
+
+    for (val search : fields.values()) {
+      val typeResult = ArrayListMultimap.<String, String> create();
+      result.put(search, typeResult);
+    }
+
+    val response = donorRepository.validateIdentifiers(ids, isForExternalfile);
+
+    for (val hit : response.getHits()) {
+      val highlightedFields = hit.getHighlightFields();
+      // The 'id' field in both 'donor-text' and 'file-donor-text' is the donor ID.
+      val matchedDonor = hit.getId();
+
+      for (val searchEntry : fields.entrySet()) {
+        val keys = highlightedFields.get(searchEntry.getKey());
+        if (keys != null) {
+          val field = searchEntry.getValue();
+
+          for (val key : keys.getFragments()) {
+            result.get(field).put(key.toString(), matchedDonor);
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
   public Donors findAllCentric(Query query) {
     return buildDonors(donorRepository.findAllCentric(query), query);
+  }
+
+  @NonNull
+  public Map<String, TermFacet> projectDonorCount(List<String> geneIds, List<Query> queries) {
+    // The queries should be derived from geneIds, which means they are of the same size and order.
+    val geneCount = geneIds.size();
+    checkState(geneCount == queries.size(),
+        "The number of gene IDs ({}) does not match the number of queries.",
+        geneIds);
+
+    val facetName = Fields.PROJECT_ID;
+    val response = donorRepository.projectDonorCount(queries, facetName);
+    val responseItems = response.getResponses();
+    val responseItemCount = responseItems.length;
+
+    checkState(geneCount == responseItemCount,
+        "The number of gene IDs ({}) does not match the number of responses in a multi-search.",
+        geneIds);
+
+    return range(0, geneCount).boxed().collect(toMap(
+        i -> geneIds.get(i),
+        i -> {
+          final SearchResponse item = responseItems[i].getResponse();
+          return aggregationsConverter.convert(item.getAggregations()).get(facetName);
+        }));
   }
 
   public long count(Query query) {
@@ -168,10 +243,7 @@ public class DonorService {
             new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
 
         final String[] headers =
-            { "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id", "icgc_donor_id", "submitted_donor_id", "project_code",
-
-            "specimen_type", "specimen_type_other", "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study"
-            };
+            { "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id", "icgc_donor_id", "submitted_donor_id", "project_code", "specimen_type", "specimen_type_other", "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study" };
 
         // Write TSV
         writer.writeHeader(headers);

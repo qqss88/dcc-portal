@@ -106,6 +106,7 @@ hazelcast:
 # ElasticSearch index and hosts
 elastic:
   indexName: "dcc-release-dcc-etl-cli"
+  repoIndexName: "icgc-repository"
   nodeAddresses:
      - host: "localhost"
        port: 9300
@@ -114,14 +115,6 @@ elastic:
 mail:
   enabled: false
   recipientEmail: ***REMOVED***
-
-# Genomemaps
-browser:
-  dataSources:
-     - uri: gene
-       className: org.icgc.dcc.portal.browser.ds.GeneDataSource
-     - uri: mutation
-       className: org.icgc.dcc.portal.browser.ds.MutationDataSource
 
 # Data download
 download:

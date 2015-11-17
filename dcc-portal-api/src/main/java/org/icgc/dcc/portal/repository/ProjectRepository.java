@@ -4,7 +4,7 @@ import static java.util.Collections.singletonMap;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonorInProject;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -35,6 +35,7 @@ public class ProjectRepository {
 
   private final Client client;
   private final String index;
+  private final String repoIndexName;
 
   private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
   private final QueryEngine queryEngine;
@@ -42,6 +43,7 @@ public class ProjectRepository {
   @Autowired
   ProjectRepository(Client client, IndexModel indexModel, QueryEngine engine) {
     this.index = indexModel.getIndex();
+    this.repoIndexName = indexModel.getRepoIndex();
     this.client = client;
     this.queryEngine = engine;
   }
@@ -59,6 +61,7 @@ public class ProjectRepository {
     return search.getRequestBuilder().execute().actionGet().getHits().getTotalHits();
   }
 
+  @SuppressWarnings("deprecation")
   public Map<String, Object> findOne(String id, Query query) {
     val search = client.prepareGet(index, TYPE_ID, id)
         .setFields(getFields(query, KIND));
@@ -73,7 +76,7 @@ public class ProjectRepository {
       return result;
     }
 
-    if (!isRepositoryDonor(client, "project_code", id)) {
+    if (!isRepositoryDonorInProject(client, id, repoIndexName)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }

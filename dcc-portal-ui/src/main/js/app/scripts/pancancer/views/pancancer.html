@@ -1,8 +1,8 @@
 <h1>
-    <img src="styles/images/PCAWG-icon.png" style="height:3.5rem; margin-left:2rem; vertical-align:bottom"></img> 
+    <img src="styles/images/PCAWG-icon.png" style="height:3.5rem; margin-left:2rem; vertical-align:bottom"></img>
     <span style="display:inline-block">PCAWG - Pancancer Analysis of Whole Genomes</span>
 </h1>
-<section style="padding-top:0"> 
+<section style="padding-top:0">
    <div class="half pull-right" style="margin-bottom:1.5rem; margin-top:1rem; margin-left:2rem; margin-right: 2rem">
 
       <stacked height="250"
@@ -10,7 +10,8 @@
          data-subtitle="{{summary.projectCount}} projects and {{summary.primarySiteCount}} primary sites"
          data-y-label="Donors"
          data-alternate-brightness="true"
-         data-items="primarySites">
+         data-items="primarySites"
+         data-is-loading="false">
       </stacked>
 
       <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
@@ -48,15 +49,15 @@
 
       <span>
           Available data as of <a href="/repository/external?filters={{filters}}">{{indexDate | date}}</a>
-      </span> 
+      </span>
    </div>
 
 
    <p style="text-align:justify; text-indent:1rem">
-       The Pancancer Analysis of Whole Genomes (PCAWG) study is an international collaboration to identify common patterns of mutation in more than 2,600 cancer whole genomes from 
-       the International Cancer Genome Consortium. Building upon previous work which examined cancer coding regions (Cancer Genome Atlas Research Network, The Cancer Genome Atlas 
-       Pan-Cancer analysis project, <span style="dispaly:inline-block; text-indent:0"><a href="http://www.nature.com/ng/journal/v45/n10/full/ng.2764.html" target="_blank"><i class="icon-external-link"></i>Nat. Genet. 2013 45:1113</a></span>), 
-       this project is exploring the nature and consequences of somatic and germline variations in both coding and non-coding regions, with specific emphasis on cis-regulatory sites, 
+       The Pancancer Analysis of Whole Genomes (PCAWG) study is an international collaboration to identify common patterns of mutation in more than 2,600 cancer whole genomes from
+       the International Cancer Genome Consortium. Building upon previous work which examined cancer coding regions (Cancer Genome Atlas Research Network, The Cancer Genome Atlas
+       Pan-Cancer analysis project, <span style="dispaly:inline-block; text-indent:0"><a href="http://www.nature.com/ng/journal/v45/n10/full/ng.2764.html" target="_blank"><i class="icon-external-link"></i>Nat. Genet. 2013 45:1113</a></span>),
+       this project is exploring the nature and consequences of somatic and germline variations in both coding and non-coding regions, with specific emphasis on cis-regulatory sites,
        non-coding RNAs, and large-scale structural alterations.
    </p>
    <p style="text-align:justify; text-indent:1rem">
@@ -84,7 +85,7 @@
 
        All data resulting from this study will be released to the public under the terms of the
        <a href="http://www.icgc.org/" target="_blank"><i class="icon-external-link"></i>ICGC</a> and
-       <a href="http://cancergenome.nih.gov/" target="_blank"><i class="icon-external-link"></i>TCGA</a> 
+       <a href="http://cancergenome.nih.gov/" target="_blank"><i class="icon-external-link"></i>TCGA</a>
        data release policies. Please contact the <a href="mailto:dcc-support@icgc.org"><i class="icon-mail"></i>ICGC helpdesk</a> for more information.
    </p>
 

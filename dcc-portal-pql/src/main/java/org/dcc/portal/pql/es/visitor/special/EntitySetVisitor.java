@@ -25,6 +25,7 @@ import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_INDEX;
 import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_PATH;
@@ -32,9 +33,6 @@ import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_TYPE;
 
 import java.util.List;
 import java.util.Optional;
-
-import lombok.NonNull;
-import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -60,6 +58,9 @@ import org.dcc.portal.pql.query.QueryContext;
 
 import com.google.common.collect.ImmutableList;
 
+import lombok.NonNull;
+import lombok.val;
+
 /**
  * Resolves querying by {@code entitySetId}.<br>
  * <b>NB:</b> Must be run one of the first because it does not modify structure of the AST, just 'enriches' search
@@ -67,7 +68,8 @@ import com.google.common.collect.ImmutableList;
  */
 public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
 
-  private static final List<Type> LOOKUP_TYPES = ImmutableList.of(DONOR_CENTRIC, GENE_CENTRIC, MUTATION_CENTRIC);
+  private static final List<Type> LOOKUP_TYPES =
+      ImmutableList.of(DONOR_CENTRIC, GENE_CENTRIC, MUTATION_CENTRIC, REPOSITORY_FILE);
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, Optional<QueryContext> context) {
@@ -121,7 +123,8 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
   }
 
   @Override
-  public Optional<ExpressionNode> visitShouldBool(@NonNull ShouldBoolNode node, @NonNull Optional<QueryContext> context) {
+  public Optional<ExpressionNode> visitShouldBool(@NonNull ShouldBoolNode node,
+      @NonNull Optional<QueryContext> context) {
     return visitChildren(this, node, context);
   }
 

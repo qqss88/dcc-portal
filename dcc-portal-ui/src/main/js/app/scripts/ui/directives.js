@@ -36,11 +36,9 @@ angular.module('icgc.ui', [
 
 angular.module('app.ui', [
   'app.ui.tpls',
-  'app.ui.param', 'app.ui.nested', 'app.ui.mutation',
+  'app.ui.toggle', 'app.ui.nested', 'app.ui.mutation',
   'app.ui.hidetext', 'app.ui.exists'
 ]);
-
-
 
 /**
  * File chooser detector
@@ -247,7 +245,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
 /**
  * Used in keyword search, should rename - DC
  */
-angular.module('app.ui.param', []).directive('param', function (LocationService) {
+angular.module('app.ui.toggle', []).directive('toggleParam', function (LocationService) {
   return {
     restrict: 'A',
     transclude: true,

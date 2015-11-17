@@ -21,6 +21,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.ok;
 import static org.icgc.dcc.common.core.util.Splitters.COMMA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
@@ -82,7 +83,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -97,7 +97,8 @@ import com.yammer.metrics.annotation.Timed;
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileResource {
 
-  private final static String TYPE_ATTACHMENT = "attachment";
+  private static final String API_PATH_MANIFEST = "/manifest";
+  private static final String TYPE_ATTACHMENT = "attachment";
 
   private final RepositoryFileService repositoryFileService;
 
@@ -106,8 +107,7 @@ public class RepositoryFileResource {
   @Timed
   @ApiOperation(value = "Find by fileId", response = RepositoryFile.class)
   public RepositoryFile find(
-      @ApiParam(value = "File Id", required = true) @PathParam("fileId") String id
-      ) {
+      @ApiParam(value = "File Id", required = true) @PathParam("fileId") String id) {
     return repositoryFileService.findOne(id);
   }
 
@@ -120,10 +120,11 @@ public class RepositoryFileResource {
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
-      @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue("fileName") String sort,
+      @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue("id") String sort,
       @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
 
-    ObjectNode filters = filtersParam.get();
+    val filters = filtersParam.get();
+    log.debug("Received filters: '{}'", filters);
 
     return repositoryFileService.findAll(query().fields(fields).filters(filters)
         .from(from.get())
@@ -159,11 +160,13 @@ public class RepositoryFileResource {
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
-    val stream = repositoryFileService.exportTableData(toQuery(filtersParam));
+    final StreamingOutput outputGenerator =
+        outputStream -> repositoryFileService.exportTableData(outputStream, toQuery(filtersParam));
+
     // Make this similar to client-side export naming format
     val fileName = String.format("repository_%s.tsv", (new SimpleDateFormat("yyyy_MM_dd").format(new Date())));
 
-    return Response.ok(stream).header(CONTENT_DISPOSITION,
+    return ok(outputGenerator).header(CONTENT_DISPOSITION,
         type(TYPE_ATTACHMENT).fileName(fileName).creationDate(new Date()).build()).build();
   }
 
@@ -175,7 +178,47 @@ public class RepositoryFileResource {
   }
 
   @GET
-  @Path("/manifest")
+  @Path("/repo_map")
+  @Timed
+  public Map<String, String> getRepositoryMap() {
+    return repositoryFileService.getRepositoryMap();
+  }
+
+  @GET
+  @Path("/export/{setId}")
+  @Produces(TEXT_TSV)
+  public Response getExportFromSet(@ApiParam(value = "Set Id", required = true) @PathParam("setId") String setId) {
+
+    final StreamingOutput outputGenerator =
+        outputStream -> repositoryFileService.exportTableDataFromSet(outputStream, setId);
+
+    val fileName = String.format("repository_%s.tsv", (new SimpleDateFormat("yyyy_MM_dd").format(new Date())));
+
+    return ok(outputGenerator).header(CONTENT_DISPOSITION,
+        type(TYPE_ATTACHMENT).fileName(fileName).creationDate(new Date()).build()).build();
+  }
+
+  @GET
+  @Path("/manifests/{setId}")
+  @Produces(TEXT_TSV)
+  public Response getManifestFromSet(@ApiParam(value = "Set Id", required = true) @PathParam("setId") String setId) {
+    val timestamp = new Date();
+
+    final StreamingOutput outputGenerator =
+        (outputStream) -> repositoryFileService.generateManifestFileFromSet(outputStream, timestamp, setId);
+    val attachmentType = type(TYPE_ATTACHMENT)
+        .fileName(manifestFileName(setId, timestamp))
+        .creationDate(timestamp)
+        .modificationDate(timestamp)
+        .build();
+
+    return ok(outputGenerator)
+        .header(CONTENT_DISPOSITION, attachmentType)
+        .build();
+  }
+
+  @GET
+  @Path(API_PATH_MANIFEST)
   @Produces(GZIP)
   @Timed
   @ApiOperation(value = "Generate a tar.gz archive containing the manifests of matching repository files.")
@@ -185,25 +228,24 @@ public class RepositoryFileResource {
     log.info("filtersParam is: '{}' AND repoList is: '{}'.", filtersParam, repoList);
 
     val timestamp = new Date();
-    final StreamingOutput outputGenerator = (outputStream) ->
-        repositoryFileService.generateManifestArchive(outputStream,
-            timestamp,
-            toQuery(filtersParam),
-            COMMA.splitToList(repoList));
+    final StreamingOutput outputGenerator = outputStream -> repositoryFileService.generateManifestArchive(
+        outputStream,
+        timestamp,
+        toQuery(filtersParam),
+        COMMA.splitToList(repoList));
     val attechmentType = type(TYPE_ATTACHMENT)
-        .fileName(buildManifestFileName(timestamp))
+        .fileName(manifestArchiveFileName(timestamp))
         .creationDate(timestamp)
         .modificationDate(timestamp)
         .build();
 
-    return Response
-        .ok(outputGenerator)
+    return ok(outputGenerator)
         .header(CONTENT_DISPOSITION, attechmentType)
         .build();
   }
 
   @POST
-  @Path("/manifest")
+  @Path(API_PATH_MANIFEST)
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
   @ApiOperation(value = "Generate a tar.gz archive containing the manifests of selected repository files.")
@@ -224,8 +266,26 @@ public class RepositoryFileResource {
   @Path("/pcawg/stats")
   @Timed
   @ApiOperation(value = "Get pancancer repositories statistics")
-  public Map<String, Map<String, Object>> getPancancerStats() {
-    return repositoryFileService.getPancancerStats();
+  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
+    return repositoryFileService.getStudyStats("PCAWG");
+  }
+
+  @GET
+  @Path("/study/stats/{study}")
+  @Timed
+  @ApiOperation(value = "Get pancancer repositories statistics")
+  public Map<String, Map<String, Map<String, Object>>> getStudyStats(
+      @NonNull @ApiParam(value = "Study Name") @PathParam("study") String study) {
+    return repositoryFileService.getStudyStats(study);
+  }
+
+  @GET
+  @Path("/repo/stats/{repoCode}")
+  @Timed
+  @ApiOperation(value = "Get pancancer repositories statistics")
+  public Map<String, Map<String, Map<String, Object>>> getRepoStats(
+      @NonNull @ApiParam(value = "Repository Code") @PathParam("repoCode") String repoCode) {
+    return repositoryFileService.getRepoStats(repoCode);
   }
 
   @NonNull
@@ -236,8 +296,13 @@ public class RepositoryFileResource {
   }
 
   @NonNull
-  private static String buildManifestFileName(Date timestamp) {
+  private static String manifestArchiveFileName(Date timestamp) {
     return "manifest." + timestamp.getTime() + ".tar.gz";
+  }
+
+  @NonNull
+  private static String manifestFileName(String repoCode, Date timestamp) {
+    return "manifest." + repoCode + "." + timestamp.getTime() + ".txt";
   }
 
   private static String buildFileIdListFilterParam(@NonNull List<String> fileIds) {

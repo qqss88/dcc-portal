@@ -28,7 +28,7 @@
                 Distribution</a></li>
             <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Genes</a></li>
           
-            <li data-spy="pathway" class="t_subnav__items__item" data-ng-if="GeneSetCtrl.geneSet.showPathway && GeneSetCtrl.geneSet.source==='Reactome'">
+            <li data-spy="pathway" class="t_subnav__items__item" data-ng-if="GeneSetCtrl.geneSet.source==='Reactome'">
               <a data-scrollto href="#pathway">Pathway Viewer</a></li>
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
@@ -407,13 +407,14 @@
         </table>
     </div>
 </section>
-<section id="pathway" data-ng-if="GeneSetCtrl.geneSet.showPathway && GeneSetCtrl.geneSet.source === 'Reactome'"
+<section id="pathway" data-ng-if="GeneSetCtrl.geneSet.source === 'Reactome'"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
     <div data-ng-if="GeneSetCtrl.pathway">
         <h3>Pathway Viewer</h3>
-        <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+        <h4 data-ng-if="GeneSetCtrl.pathway.xml!==''">Drag and scroll to explore the pathway. Double click to reset the view.</h4>
         <pathway-viewer data-items="GeneSetCtrl.pathway.xml" data-zooms="GeneSetCtrl.pathway.zooms" data-highlights="GeneSetCtrl.pathway.highlights">
         </pathway-viewer>
+        <small>Data Source: <a href="http://www.reactome.org/">Reactome</a></small>
     </div>
     <h3 data-ng-if="!GeneSetCtrl.pathway">
         No Pathway Diagram Found.

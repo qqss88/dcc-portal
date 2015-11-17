@@ -21,7 +21,6 @@ import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.icgc.dcc.portal.service.SessionService.DISCOVERY_INFO_CACHE_NAME;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,13 +34,13 @@ import org.icgc.dcc.common.client.api.cms.CMSClient;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
+import org.icgc.dcc.common.core.mail.Mailer;
 import org.icgc.dcc.downloader.client.DownloaderClient;
 import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.portal.auth.UserAuthProvider;
+import org.icgc.dcc.portal.auth.UserAuthenticator;
 import org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore;
 import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
-import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
-import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
-import org.icgc.dcc.portal.browser.model.DataSource;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
@@ -65,7 +64,6 @@ import org.openid4java.consumer.InMemoryNonceVerifier;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -135,14 +133,8 @@ public class PortalConfig {
   }
 
   @Bean
-  @Qualifier
-  public List<DataSource> dataSources() {
-    return properties.getBrowser().getDataSources();
-  }
-
-  @Bean
-  public OpenIDAuthProvider openIdProvider(OpenIDAuthenticator authenticator) {
-    return new OpenIDAuthProvider(authenticator, "OpenID");
+  public UserAuthProvider openIdProvider(UserAuthenticator authenticator) {
+    return new UserAuthProvider(authenticator, "OpenID");
   }
 
   @Bean
@@ -176,6 +168,7 @@ public class PortalConfig {
     val release = properties.getRelease();
     val download = properties.getDownload();
     val setAnalysis = properties.getSetOperation();
+    val features = properties.getFeatures();
 
     return Settings.builder()
         .ssoUrl(crowd.getSsoUrl())
@@ -185,6 +178,7 @@ public class PortalConfig {
         .downloadEnabled(download.isEnabled())
         .maxNumberOfHits(setAnalysis.maxNumberOfHits)
         .maxMultiplier(setAnalysis.maxMultiplier)
+        .featureFlags(features)
         .build();
   }
 
@@ -315,6 +309,21 @@ public class PortalConfig {
   public QueryEngine queryEngine(@NonNull Client client, @Value("#{indexName}") String index) {
     return new QueryEngine(client, index);
   }
+
+  @Bean
+  public Mailer mailer(MailProperties mail) {
+    return Mailer.builder()
+        .enabled(mail.isEnabled())
+        .recipient(mail.getRecipientEmail())
+        .from(mail.getSenderEmail())
+        .host(mail.getSmtpServer())
+        .port(Integer.toString(mail.getSmtpPort()))
+        .build();
+  }
+
+  //
+  // Utilities
+  //
 
   private boolean isDistributed() {
     return properties.getHazelcast().isEnabled();

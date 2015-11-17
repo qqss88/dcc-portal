@@ -74,19 +74,18 @@
       filters: {
         file: {
           donorId: {is: [_ctrl.donor.id]},
-          dataFormat: { is: ['XML']}
+          fileFormat: {is: ['XML']}
         }
       }
     });
-    promise.then(function(results) {
-      if (results.hits && results.hits[0]) {
-        var file = results.hits[0];
-        var repo = file.repository;
-        _ctrl.donor.clinicalXML = repo.repoServer[0].repoBaseUrl.replace(/\/$/, '') +
-          repo.repoDataPath + repo.repoEntityId;
+    promise.then (function (results) {
+      var fileCopy = _.get (results, 'hits[0].fileCopies[0]', undefined);
+
+      if (_.isPlainObject (fileCopy)) {
+        _ctrl.donor.clinicalXML = fileCopy.repoBaseUrl.replace (/\/$/, '') +
+          fileCopy.repoDataPath + fileCopy.fileName;
       }
     });
-
 
     _ctrl.downloadDonorData = function() {
       $modal.open({
@@ -150,6 +149,8 @@
         _ctrl.mutations = mutations;
 
         _ctrl.mutations.advQuery = LocationService.mergeIntoFilters({donor: {id: {is: [donor.id]}}});
+        _ctrl.mutations.viewerQuery = LocationService.mergeIntoFilters({donor: {id: {is: [donor.id]},
+        projectId: {is: [donor.projectId]}}});
 
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
@@ -267,13 +268,7 @@
         filters: LocationService.filters()
       };
 
-
-      // Sanitize filters, we want to enforce donor.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.donor) {
-        liveFilters.filters.donor = {};
-      }
-      liveFilters.filters.donor.state = { is: ['live']};
 
       return this.handler.one('', '').get(liveFilters).then(function (data) {
         if (data.hasOwnProperty('facets')) {

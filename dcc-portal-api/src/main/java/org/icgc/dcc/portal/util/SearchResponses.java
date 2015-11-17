@@ -22,6 +22,7 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -29,6 +30,7 @@ import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -42,6 +44,22 @@ public final class SearchResponses {
 
   public static List<String> getHitIds(@NonNull SearchResponse response) {
     val ids = Lists.<String> newArrayList();
+    for (val hit : response.getHits()) {
+      ids.add(hit.getId());
+    }
+
+    return ids;
+  }
+  
+  /**
+   * Get ids from hits as a set. Useful for when queries can span across types and indices resulting in id collision
+   * and enforcing id uniqueness is desirable.
+   * 
+   * @param response SearchResponse from elasticsearch
+   * @return ids in a HashSet
+   */
+  public static Set<String> getHitIdsSet(@NonNull SearchResponse response) {
+    val ids = Sets.<String> newHashSet();
     for (val hit : response.getHits()) {
       ids.add(hit.getId());
     }

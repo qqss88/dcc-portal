@@ -79,8 +79,20 @@ angular.module('icgc.ui.table.counts').directive('tableCounts', function () {
               'of <strong>{{page.total | number}}</strong> {{label}}' +
               '</span>'
   };
+})
+.directive ('linkableNumberCell', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      theNumber: '=',
+      sref: '=',
+      zeroText: '@'
+    },
+    replace: true,
+    template: '<span><a ng-if="theNumber > 0" ui-sref="{{:: sref }}">{{:: theNumber | number }}</a>' +
+      '<span ng-if="theNumber === 0">{{:: zeroText }}</span></span>'
+  };
 });
-
 
 angular.module('icgc.ui.table.pagination', [])
 
@@ -120,17 +132,20 @@ angular.module('icgc.ui.table.pagination', [])
 
         scope.maxSize = angular.isDefined(attrs.maxSize) ? attrs.maxSize : paginationConfig.maxSize;
 
+        var formatNumber = $filter ('number');
+
         // Create page object used in template
-        function makePage(number, text, isActive, isDisabled) {
+        function makePage(number, text, isActive, isDisabled, tooltip) {
           if (angular.isNumber(text)) {
-            text = $filter('number')(text);
+            text = formatNumber (text);
           }
 
           return {
             number: number,
             text: text,
             active: isActive,
-            disabled: isDisabled
+            disabled: isDisabled,
+            tooltip: isDisabled ? '' : tooltip
           };
         }
 
@@ -177,7 +192,9 @@ angular.module('icgc.ui.table.pagination', [])
             firstPage = makePage(1, firstText, false, scope.noPrevious());
             scope.pages.unshift(firstPage);
 
-            lastPage = makePage(scope.data.pagination.pages, lastText, false, scope.noNext());
+            var numberOfPages = scope.data.pagination.pages;
+            var tooltip = 'Go to last page (#' + formatNumber (numberOfPages) + ')';
+            lastPage = makePage (numberOfPages, lastText, false, scope.noNext(), tooltip);
             scope.pages.push(lastPage);
           }
 

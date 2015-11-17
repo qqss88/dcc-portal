@@ -17,6 +17,9 @@
 (function () {
   'use strict';
 
+  var toJson = angular.toJson;
+  var isDefined = angular.isDefined;
+
   var module = angular.module('icgc.facets.helpers', []);
 
   module.factory('Facets', function (LocationService) {
@@ -34,16 +37,11 @@
      * TODO Set Terms
      */
     function setTerms(params) {
-      var filters;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      ['type', 'facet', 'terms'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp) || !angular.isDefined(params[rp])) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       ensurePath(filters, params);
 
@@ -56,16 +54,11 @@
      * Add a Term
      */
     function addTerm(params) {
-      var filters;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      [ 'type', 'facet', 'term'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp)) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       ensurePath(filters, params);
 
@@ -80,20 +73,15 @@
     /*
      * Remove a Term
      */
-    function removeTerm(params) {
-      var filters, index;
+    function removeTerm (params) {
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      [ 'type', 'facet', 'term'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp)) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       // TODO make is possible to use 'is' or 'not'
-      index = filters[params.type][params.facet].is.indexOf(params.term);
+      var index = filters[params.type][params.facet].is.indexOf(params.term);
       filters[params.type][params.facet].is.splice(index, 1);
 
       if (!filters[params.type][params.facet].is.length) {
@@ -101,6 +89,22 @@
       } else {
         LocationService.setFilters(filters);
       }
+    }
+
+    function invalidParams (params) {
+      var properties = ['type', 'facet', 'term'];
+
+      return anyIs (false, propertyValues (params, properties), isDefined);
+    }
+
+    function propertyValues (obj, properties) {
+      return _(obj).pick (properties)
+        .values().value();
+    }
+
+    function anyIs (truthy, collection, predicate) {
+      return _.some (collection,
+        truthy ? predicate : _.negate (predicate));
     }
 
     /*

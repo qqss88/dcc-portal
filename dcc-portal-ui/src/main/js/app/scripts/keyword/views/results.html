@@ -6,7 +6,7 @@
             <form class="t_suggest">
                 <input
                         class="t_suggest__input"
-                        placeholder="eg. BRAF, KRAS G12D, DO35100, MU7870, apoptosis, Cancer Gene Census, GO:0016049"
+                        placeholder="e.g. BRAF, KRAS G12D, DO35100, MU7870, apoptosis, Cancer Gene Census, GO:0016049"
                         autocomplete="off"
                         autofocus="true"
                         data-ng-model="query"
@@ -27,19 +27,19 @@
                 <div data-ng-if="query.length > 1 && results.hits.length == 0">No results found for <span class="match">{{query}}</span>
                 </div>
                 <div class="t_labels">
-                    <span data-param data-default-select="true" data-key='type' data-value="all"
+                    <span data-toggle-param data-default-select="true" data-key='type' data-value="all"
                           class="t_labels__label t_labels__label__all"></span>
-                    <span data-param data-key='type' data-value=gene
+                    <span data-toggle-param data-key='type' data-value=gene
                           class="t_labels__label t_labels__label__genes"></span>
-                    <span data-param data-key='type' data-value=donor
+                    <span data-toggle-param data-key='type' data-value=donor
                           class="t_labels__label t_labels__label__donors"></span>
-                    <span data-param data-key='type' data-value=mutation
+                    <span data-toggle-param data-key='type' data-value=mutation
                           class="t_labels__label t_labels__label__mutations"></span>
-                    <span data-param data-key='type' data-value=project
+                    <span data-toggle-param data-key='type' data-value=project
                           class="t_labels__label t_labels__label__projects"></span>
-                    <span data-param data-key='type' data-value="geneSet"
+                    <span data-toggle-param data-key='type' data-value="geneSet"
                           class="t_labels__label t_labels__label__pathways"></span>
-                    <span data-param data-key='type' data-value="file"
+                    <span data-toggle-param data-key='type' data-value="file"
                           class="t_labels__label t_labels__label__files"></span>
                 </div>
             </form>
@@ -50,18 +50,28 @@
             <tr data-ng-repeat="r in results.hits" data-ng-switch="r.type" class="t_quick__hit">
                 <td class="t_quick__hit__type">
                     <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
-                    <!--<span data-ng-class="'t_badge t_badge__'+r.type"></span>-->
                 </td>
                 <td class="t_quick__hit__text" data-ng-switch-when="file">
-                    <a href="/repository/files/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery"></a>
+                    <a href="/repository/external/files/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery"></a>
+
                     <ul class="t_quick__hit__text__details">
                         <li>
-                            <span class="t_quick__hit__text__details__label">Name</span>
-                            <span class="t_quick__hit__text__details__value" data-ng-bind-html="r.fileName | highlight:activeQuery"></span> 
+                            <span class="t_quick__hit__text__details__label">File Name</span>           
+                            <span class="t_quick__hit__text__details__value" data-ng-bind-html="r.fileName[0] | highlight:activeQuery"></span>
+                            <span data-ng-if="r.fileName.length > 1" style="cursor:pointer;" 
+                              data-tooltip="{{r.fileName | withoutFirst | highlight:activeQuery}}" class="t_quick__hit__text__details__value">...</span>
                         </li>
                         <li>
-                            <span class="t_quick__hit__text__details__label">Donor</span>
-                            <span class="t_quick__hit__text__details__value">{{r.donorId}}</span> 
+                            <span class="t_quick__hit__text__details__label">File Object ID</span>
+                            <span class="t_quick__hit__text__details__value">{{r.fileObjectId}}</span>
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Data Type</span>
+                            <span class="t_quick__hit__text__details__value">{{r.dataType}}</span>
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Project ID</span>
+                            <span class="t_quick__hit__text__details__value">{{ r.projectCode | projectCode }}</span>
                         </li>
                     </ul>
                 </td>
@@ -156,7 +166,7 @@
                     <ul class="t_quick__hit__text__details">
                         <li>
                             <span class="t_quick__hit__text__details__label">Gene Set Type</span>
-                            <span class="t_quick__hit__text__details__value">Reactome Pathway</span> 
+                            <span class="t_quick__hit__text__details__value">Reactome Pathway</span>
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">Gene Set Name</span>
@@ -169,7 +179,7 @@
                     <ul class="t_quick__hit__text__details">
                         <li>
                             <span class="t_quick__hit__text__details__label">Gene Set Type</span>
-                            <span class="t_quick__hit__text__details__value">GO</span> 
+                            <span class="t_quick__hit__text__details__value">GO</span>
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">Gene Set Name</span>
@@ -186,7 +196,7 @@
                     <ul class="t_quick__hit__text__details">
                         <li>
                             <span class="t_quick__hit__text__details__label">Gene Set Type</span>
-                            <span class="t_quick__hit__text__details__value">Curated Gene Set</span> 
+                            <span class="t_quick__hit__text__details__value">Curated Gene Set</span>
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">Gene Set Name</span>

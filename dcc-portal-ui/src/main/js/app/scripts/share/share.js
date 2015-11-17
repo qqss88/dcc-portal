@@ -40,12 +40,39 @@
     };
   });
 
-  module.service('Share', function (Restangular) {
+  module.service('Share', function (Restangular, $location) {
     this.getShortUrl = function (params) {
-      var defaults = {
-        url: window.location.href
-      };
-
+      var port = window.location.port ? ':' +  window.location.port : '',
+          defaults = {
+            url: window.location.protocol + '//' + window.location.hostname + 
+            port + window.location.pathname
+          };
+      
+      
+      var requestParams = $location.search(),
+          queryStr = '';
+        
+      for (var requestKey in requestParams) {
+        
+        if (! requestParams.hasOwnProperty(requestKey)) {
+          continue;
+        }
+          
+        if (queryStr !== '') {
+          queryStr += '&';
+        }
+        // FIXME: The url shortner decodes the GET request params for some reason - 
+        // I will file a bug with them but in the meantime
+        // this double encoding will do...fail...
+        queryStr += requestKey +  '=' + encodeURIComponent(encodeURIComponent(requestParams[requestKey]));
+      }
+      
+      
+      if (queryStr.length > 0) {
+          defaults.url += '?' + queryStr;
+      }
+      
+     
       return Restangular.one('short', '').get(angular.extend(defaults, params));
     };
   });

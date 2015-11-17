@@ -13,11 +13,13 @@
     strokeColor: 'black',
     highlightColor: 'red',
     subPathwayColor: 'blue',
-    initScaleFactor: 0.95
+    initScaleFactor: 0.90
   };
 
   var ReactomePathway = function (config) {
     this.config = config || defaultConfig;
+    this.rendererUtils = new dcc.RendererUtils();
+    this.model = null;
   };
 
   /*
@@ -113,9 +115,8 @@
       highlightColor: config.highlightColor,
       subPathwayColor: config.subPathwayColor
     });
-    this.rendererUtils = new dcc.RendererUtils();
     
-    this.renderer.renderCompartments(_.where(model.getNodes(),{type:'RenderableCompartment'}));
+    this.renderer.renderCompartments(_.where(model.getNodes(),{type:'RenderableCompartment', hasClass:true}));
     this.renderer.renderEdges(this.rendererUtils.generateLines(model));
     this.renderer.renderNodes(_.filter(model.getNodes(),
                                        function(n){return n.type!=='RenderableCompartment';}));
@@ -189,15 +190,14 @@
     var nodes = rendererUtils.getLegendNodes(20,0,legendSvg);
     
     legendRenderer.renderNodes(nodes);
-    legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.34,legendSvg));
-    legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.64,legendSvg),true);
-    legendRenderer.highlightEntity(
-      [{id:'Mutated',value:99}],
-      {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
-    });
-    legendSvg.selectAll('.reaction-sub-example')
-          .attr('stroke',config.subPathwayColor)
-          .classed('pathway-sub-reaction-line',true);
+    legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.38,legendSvg));
+    legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(35,h*0.63,legendSvg),true);
+    var model = new dcc.PathwayModel();
+    model.nodes = [nodes[nodes.length-1]];
+    legendRenderer.highlightEntity([{id:'mutated',value:99}],model);
+    
+    legendSvg.selectAll('.reaction-failed-example')
+          .classed('failed-reaction',true);
   };
 
   /**

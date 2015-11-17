@@ -2,13 +2,16 @@
     <i class="icon-spinner icon-spin"></i>
 </h3>
 <ul data-ng-show="AdvancedCtrl.Donor.donors" class="t_facets">
-    <li data-tags-facet data-label="Donor" data-facet-name="id" data-placeholder="eg. DO1" data-type="donor"></li>
+    <li data-tags-facet data-label="Donor" data-facet-name="id" data-placeholder="e.g. DO45299, SA501608" data-type="donor"></li>
 
     <terms data-type="donor" data-facet-name="primarySite" data-label="Primary Site"
            data-facet="AdvancedCtrl.Donor.donors.facets.primarySite"></terms>
 
-    <terms data-type="donor" data-facet-name="projectId" data-defined="true" data-label="Project"
-           data-facet="AdvancedCtrl.Donor.donors.facets.projectId"></terms>
+    <terms data-type="donor"
+      data-facet-name="projectId"
+      data-defined="true"
+      data-label="Project"
+      data-facet="AdvancedCtrl.Donor.donors.facets.projectId" />
     <terms data-type="donor" data-facet-name="studies" data-label="Study"
            data-missing-text="None"
            data-facet="AdvancedCtrl.Donor.donors.facets.studies"></terms>
@@ -36,4 +39,7 @@
 
     <terms data-type="donor" data-facet-name="analysisTypes" data-defined="true" data-label="Donor Analysis Type"
            data-facet="AdvancedCtrl.Donor.donors.facets.analysisTypes" data-collapsed="true"></terms>
+
+    <terms data-type="donor" data-facet-name="state" data-capitalize="true" data-collapsed="true" data-label="Donor Molecular Data"
+           data-facet="AdvancedCtrl.Donor.donors.facets.state"></terms>
 </ul>

@@ -2,7 +2,7 @@
 http:
   # The root path for the Jersey servlet.
   rootPath: "/api/*"
-  
+
   # HTTP request log settings.
   requestLog:
 
@@ -17,7 +17,7 @@ http:
 
       # If true, log requests to a file.
       enabled: false
-      
+
 # Database
 database:
   # The name of the JDBC driver
@@ -28,13 +28,13 @@ database:
 
   # The password
   password:
-  
+
   # The JDBC URL
   url: jdbc:h2:mem:genelist;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=runscript from 'src/test/sql/schema.sql'
 
   # The maximum number of connections to keep open
   maxSize: 10
- 
+
 # Controls generation of "Last-Modified" and "ETag" HTTP headers
 cache:
   # Enable Last-Modified HTTP header generation
@@ -49,22 +49,22 @@ cache:
   # List of resources for which ETag HTTP header should not be generated. Format: regex accepted by java.lang.String
   excludeETag: []
 
-# Authorization 
+# Authorization
 crowd:
   ssoUrl: "https://***REMOVED***/user?continue="
   ssoUrlGoogle: "https://***REMOVED***/gooapi/redirect?continue="
-  
+
 oauth:
   serviceUrl: "http://localhost:8443"
   clientId: "mgmt"
   clientSecret: "pass"
   enableStrictSSL: false
   enableHttpLogging: true
-    
+
 
 hazelcast:
   enabled: false
-  
+
   # NB: Below hazelcast settings do not have default values. The portal won't start if they're unset
 
   # Credentials to enter a group. E.g. dev, uat, prod groups
@@ -84,8 +84,9 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  # indexName: icgc18-0-2
+  #indexName: icgc18-0-2
   indexName: etl-test-release17-0-0
+  repoIndexName: test-icgc-repository
   nodeAddresses:
     - host: "localhost"
       port: 9300
@@ -94,14 +95,6 @@ elastic:
 mail:
   enabled: false
   recipientEmail: ***REMOVED***
-
-# Genomemaps
-browser:
-  dataSources:
-     - uri: gene
-       className: org.icgc.dcc.portal.browser.ds.GeneDataSource
-     - uri: mutation
-       className: org.icgc.dcc.portal.browser.ds.MutationDataSource
 
 # Data download
 download:
@@ -125,10 +118,10 @@ logging:
 
   # Logger-specific levels
   loggers:
-  
+
     # Jersey request logging
     "com.sun.jersey.api.container.filter.LoggingFilter": INFO
-    
+
     # ElasticSearch query logging
     "org.icgc.dcc.portal.service.BaseQueryService": INFO
     "org.icgc.dcc.portal.browser.ds.GeneParser": INFO
@@ -157,7 +150,7 @@ icgc:
 
   # CMS API endpoint
   cmsUrl: "https://***REMOVED***/cms_oauth_coop/1"
-  
+
   # CUD credentials. Obtained from webdev@oicr.on.ca
   cudAppId: "change_me"
   cudUser: "change_me"
@@ -192,3 +185,9 @@ release:
   releaseDate: "Month Day, Year"
   dataVersion: 2
 
+
+#Feature Flags
+features:
+  AUTH_TOKEN: true
+  ICGC_CLOUD: true
+  SOFTWARE_PAGE: true

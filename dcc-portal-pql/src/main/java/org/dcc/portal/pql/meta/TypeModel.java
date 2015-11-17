@@ -66,6 +66,7 @@ public abstract class TypeModel {
   public static final String DONOR_ENTITY_SET_ID = format("%s.%s", "donor", ENTITY_SET_ID);
   public static final String GENE_ENTITY_SET_ID = format("%s.%s", "gene", ENTITY_SET_ID);
   public static final String MUTATION_ENTITY_SET_ID = format("%s.%s", "mutation", ENTITY_SET_ID);
+  public static final String REPO_FILE_ENTITY_SET_ID = format("%s.%s", "file", ENTITY_SET_ID);
 
   public static final String SCORE = "_score";
 
@@ -90,7 +91,8 @@ public abstract class TypeModel {
       MUTATION_LOCATION,
       DONOR_ENTITY_SET_ID,
       GENE_ENTITY_SET_ID,
-      MUTATION_ENTITY_SET_ID);
+      MUTATION_ENTITY_SET_ID,
+      REPO_FILE_ENTITY_SET_ID);
 
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
@@ -205,6 +207,11 @@ public abstract class TypeModel {
     return nestedPath.startsWith(path);
   }
 
+  public final boolean isAliasDefined(String alias) {
+    return (null == alias) ? false :
+        fieldsByAlias.containsKey(alias);
+  }
+
   /**
    * Returns fully qualified name of the field that has {@code alias} defined.
    * @throws NoSuchElementException if there is a field with such an alias.
@@ -220,6 +227,16 @@ public abstract class TypeModel {
     }
 
     return alias;
+  }
+
+  public final FieldModel getFieldModelByAlias(@NonNull String alias) {
+    val result = fieldsByFullPath.get(getField(alias));
+
+    if (null == result) {
+      throw new SemanticException("Field %s does not have a matching field model.", alias);
+    }
+
+    return result;
   }
 
   /**
@@ -249,9 +266,10 @@ public abstract class TypeModel {
   }
 
   private List<String> split(String fullyQualifiedName) {
-    val result = new ImmutableList.Builder<String>();
+    val result = ImmutableList.<String> builder();
     val list = FIELD_SEPARATOR_SPLITTER.splitToList(fullyQualifiedName);
     String prefix = "";
+
     for (int i = 0; i < list.size(); i++) {
       result.add(prefix + list.get(i));
       prefix = prefix + list.get(i) + FIELD_SEPARATOR;
@@ -320,8 +338,7 @@ public abstract class TypeModel {
   private String getFullName(String path) {
     val uiAlias = fieldsByAlias.get(path);
 
-    return uiAlias == null ? path : uiAlias;
-
+    return (uiAlias == null) ? path : uiAlias;
   }
 
   /**

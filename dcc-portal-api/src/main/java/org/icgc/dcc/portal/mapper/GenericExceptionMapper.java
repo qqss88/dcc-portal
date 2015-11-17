@@ -16,12 +16,10 @@
  */
 package org.icgc.dcc.portal.mapper;
 
-import static com.google.common.base.Throwables.getStackTraceAsString;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.icgc.dcc.portal.util.HttpServletRequests.getHttpRequestCallerInfo;
-import static org.icgc.dcc.portal.util.HttpServletRequests.getLocalNetworkInfo;
 
 import java.util.Date;
 import java.util.Random;
@@ -35,28 +33,29 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.icgc.dcc.common.core.mail.Mailer;
+import org.icgc.dcc.common.core.report.BufferedReport;
+import org.icgc.dcc.common.core.report.ReportEmail;
+import org.icgc.dcc.portal.model.Error;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.Error;
-import org.icgc.dcc.portal.service.MailService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Slf4j
 @Component
 @Provider
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
-  private static final boolean SEND_EMAIL_ASYNC = true;
   private static final Random RANDOM = new Random();
 
   @NonNull
-  private final MailService mailService;
+  private final Mailer mailer;
 
   @Context
   private HttpHeaders headers;
@@ -128,11 +127,14 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
   protected void sendEmail(long id, Throwable t) {
     try {
-      val subject = "DCC Portal - Exception " + getLocalNetworkInfo() + " @ " + new Date();
-      val message = getHttpRequestCallerInfo(request) + " " + request + "\n\n" + formatLogMessage(id, t) + "\n\n"
-          + getStackTraceAsString(t);
+      val report = new BufferedReport();
+      report.addException((Exception) t);
+      report.addInfo("Info", getHttpRequestCallerInfo(request));
+      report.addInfo("Request = %s", request);
+      report.addInfo("Date = %s", new Date());
 
-      mailService.sendEmail(subject, message, SEND_EMAIL_ASYNC);
+      val email = new ReportEmail("DCC Portal", report);
+      mailer.sendMail(email);
     } catch (Exception e) {
       log.error("Exception mailing:", e);
     }

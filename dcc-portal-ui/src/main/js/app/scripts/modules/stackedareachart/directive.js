@@ -43,9 +43,10 @@
       replace: true,
       scope: {
         items: '=',
-        selected: '='
+        selected: '=',
+        selectedProjectCount: '='
       },
-      template:'<div class="text-center"></div>',
+      templateUrl: '/scripts/modules/stackedareachart/views/stackedareachart.html',
       link: function ($scope, $element) {
         var chart;
         var filterProjects = function(data, includedProjects){
@@ -62,9 +63,14 @@
 
           return result;
         };
+
+        $scope.showPlot = false;
+        $scope.defaultGraphHeight = 600;
+        $scope.defaultGraphTitle = 'Cumulative Count of Project Donors with Molecular Data in DCC by Release';
+
         var config = {
           margin:{top: 10, right: 40, bottom: 60, left: 40},
-          height: 600,
+          height: $scope.defaultGraphHeight,
           width: 1000,
           colours: HighchartsService.primarySiteColours,
           yaxis:{label:'# of Donors',ticks:8},
@@ -93,26 +99,49 @@
           tooltipHideFunc: function() {
             $scope.$emit('tooltip::hide');
           },
-          graphTitles: ['Cumulative Project Donor Count by Release','Individual Project Donor Count by Release'],
+          graphTitles: [
+            $scope.defaultGraphTitle,
+            'Individual Count of Project Donors with Molecular Data in DCC by Release'],
           offset: 'zero'
         };
+
+        function renderChart (chart) {
+          var svgMountPoint = $element.find ('.canvas')[0];
+          chart.render (svgMountPoint);
+        }
+
+        function shouldShowPlot (history) {
+          var projectsWithHistory = _.pluck (history, 'group');
+          var selectedProjects = $scope.selected;
+          var selectedProjectsWithHistory = _.intersection (projectsWithHistory, selectedProjects);
+          return ! _.isEmpty (selectedProjectsWithHistory);
+        }
 
         $scope.$watch('selected', function (newValue){
             if(newValue && $scope.items){
               if(chart){
                 chart.destroy();
               }
+
               $scope.selected = newValue;
-              chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
-              chart.render($element[0]);
+              var showPlot = shouldShowPlot ($scope.items);
+              $scope.showPlot = showPlot;
+              if (! showPlot) {return;}
+
+              chart = new dcc.StackedAreaChart (filterProjects ($scope.items, $scope.selected), config);
+              renderChart (chart);
             }
           },true);
 
         $scope.$watch('items', function (newValue) {
-          if(!chart && newValue){
+          var showPlot = shouldShowPlot (newValue);
+          $scope.showPlot = showPlot;
+          if (! showPlot) {return;}
+
+          if (!chart && newValue) {
             chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
-            chart.render($element[0]);
-          }else if(newValue){
+            renderChart (chart);
+          } else if (newValue) {
             $scope.items = newValue;
           }
         }, true);

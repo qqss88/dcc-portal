@@ -19,6 +19,8 @@
   'use strict';
 
   var module = angular.module('icgc.genesets', ['icgc.genesets.controllers', 'ui.router']);
+  
+  
 
   module.config(function ($stateProvider) {
     $stateProvider.state('geneset', {
@@ -28,11 +30,12 @@
       resolve: {
         geneSet: ['$stateParams', 'GeneSets', function ($stateParams, GeneSets) {
           return GeneSets.one($stateParams.id).get().then(function (geneSet) {
-            return geneSet;
-          });
-        }]
-      }
-    });
+
+                return geneSet;
+            });            
+          }]     
+        }
+      });
   });
 })();
 
@@ -42,21 +45,26 @@
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.services']);
 
   module.controller('GeneSetCtrl',
-    function ($scope, $timeout, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet, PortalFeature) {
+    function ($scope, $timeout, $state, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
+      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet) {
 
-      var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
+
+      var _ctrl = this, 
+          geneSetFilter = {}; // Build adv query based on type
+          
+          
+                 
       Page.setTitle(geneSet.id);
       Page.setPage('entity');
 
       _ctrl.geneSet = geneSet;
       _ctrl.geneSet.queryType = FiltersUtil.getGeneSetQueryType(_ctrl.geneSet.type);
+      geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
 
       _ctrl.ExternalLinks = ExternalLinks;
 
-      // Build adv query based on type
-      geneSetFilter = {};
-      geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
+      
+      
 
       /**
        * Our function for keeping the page on the current section. 
@@ -166,13 +174,10 @@
           });
 
         });
-
+  
         // 4) if it's a reactome pathway, get diagram
-        _ctrl.geneSet.showPathway = PortalFeature.get('REACTOME_VIEWER');
-
-        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && _ctrl.geneSet.showPathway) {
+        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0]) {
           _ctrl.pathway = {};
-          _ctrl.geneSet.showPathway = true;
 
           var pathwayId = _ctrl.uiParentPathways[0].diagramId;
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
@@ -180,6 +185,8 @@
           // Get pathway XML
           GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
             _ctrl.pathway.xml = xml;
+          }).catch(function() {
+            _ctrl.pathway.xml = '';
           });
 
 
@@ -228,8 +235,7 @@
                 var ensemblId = uniprotObj[0].id;
                 n.advQuery =  LocationService.mergeIntoFilters({
                   gene: {
-                    id:  {is: [ensemblId]},
-                    pathwayId: {is: [parentPathwayId]}
+                    id:  {is: [ensemblId]}
                   }
                 });
                 n.geneSymbol = uniprotObj[0].symbol;
@@ -238,6 +244,8 @@
             });
 
             _ctrl.pathway.highlights = pathwayHighlights;
+          }).catch(function () {
+            _ctrl.pathway.highlights = [];
           });
 
 

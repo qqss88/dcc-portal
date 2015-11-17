@@ -177,11 +177,12 @@
 
       node.goTerms = [];
       inferredTree.forEach(function(goTerm) {
-        // FIXME: Temporary fix to get around the issue where root level can be 0 and self is also 0
+
+        // Next level
         if ( (goTerm.level !== current || goTerm.relation === 'self') && !_.isEmpty(node.goTerms)) {
           current = goTerm.level;
           node.child = {};
-          node.child .goTerms = [];
+          node.child.goTerms = [];
           node = node.child;
         }
         node.goTerms.push({

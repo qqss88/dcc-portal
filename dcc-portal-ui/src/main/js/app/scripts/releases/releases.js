@@ -18,12 +18,22 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.releases', ['icgc.releases.controllers', 'ui.router']);
+  var module = angular.module('icgc.releases', ['icgc.portalfeature','icgc.releases.controllers', 'ui.router']);
 
-  module.config(function ($stateProvider) {
+  module.config(function ($stateProvider, PortalFeatureProvider) {
     $stateProvider.state('home', {
       url: '/',
-      templateUrl: 'views/home.html',
+      templateUrl: function() {
+       
+        var _templateURL = '/scripts/releases/views/home.html',
+            isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
+       
+        if (isICGCCloudFunctionlityEnabled) {
+          _templateURL = '/scripts/releases/views/home-beta.html';
+        }
+
+        return _templateURL;
+      },
       controller: 'ReleaseCtrl as ReleaseCtrl',
       resolve: {
         release: ['Releases', function (Releases) {
@@ -43,6 +53,29 @@
     var _ctrl = this;
     Page.setTitle('Welcome');
     Page.setPage('home');
+
+    _ctrl.routeToProjectPageWithLiveDonorStateFilter = function () {
+      var liveDonorStateFilter = {
+        project: {
+          state: {
+            is: ['live']
+          }
+        }
+      };
+
+      return '/projects?filters=' + angular.toJson (liveDonorStateFilter);
+    };
+    _ctrl.routeToAdvancedSearchPageWithLiveDonorStateFilter = function () {
+      var liveDonorStateFilter = {
+        donor: {
+          state: {
+            is: ['live']
+          }
+        }
+      };
+
+      return '/search?filters=' + angular.toJson (liveDonorStateFilter);
+    };
 
     function successP(projects) {
       _ctrl.donut = HighchartsService.donut({

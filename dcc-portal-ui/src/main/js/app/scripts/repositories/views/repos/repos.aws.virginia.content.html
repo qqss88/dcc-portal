@@ -1,0 +1,32 @@
+<p>
+    ICGC and Amazon have partnered to offer low-cost and scalable computing solutions for analysing ICGC data
+    on <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>AWS EC2</a>. 
+    The ICGC alignment and variant data on AWS S3 is managed by the ICGC Data Coordination Center 
+    (DCC) which is also developing software tools to search and access the repository content from AWS EC2 
+    instances. Raw data and associated metadata produced by the 
+    <a href="/pcawg">ICGC PCAWG study</a> as 
+    well as the one submitted 
+    by ICGC's members to the 
+    <a href="https://www.ebi.ac.uk/ega/" target="_blank"><i class="icon-external-link"></i>European Genome Archive (EGA)</a> is periodically gathered, curated and incrementally 
+    uploaded to this repository for the benefit of the cancer research community. An up-to-date summary of the 
+    repository's data content is provided on the right.  Our <a href="/icgc-in-the-cloud/repositories/aws-virginia/guide">user guide</a> provides step-by-step instructions on 
+    how to access and analyse ICGC data on AWS. 
+</p>
+
+<div class="repo-controls-container">
+        <a class="t_button btn" data-ng-show="repositoryCtrl.hasSummaryData()" data-ng-href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}"><i class="icon-search"></i> Search Respository</a>
+        <a class="t_button btn" data-ng-href="/icgc-in-the-cloud/repositories/{{repoContextID}}/guide"><i class="icon-book-open"></i>User Guide</a>
+</div>
+
+<h3>PCAWG Workflows</h3>
+<p>
+The PCAWG project has created standardized, whole genome workflows for alignment using BWA-Mem and variant calling using best practice processes from the 
+<a href="https://www.sanger.ac.uk/" target="_blank"><i class="icon-external-link"></i>Sanger Institute</a>, the <a href="https://www.broadinstitute.org/" target="_blank"><i class="icon-external-link"></i>Broad Institute</a>, 
+and <a href="https://www.dkfz.de/" target="_blank"><i class="icon-external-link"></i>DKFZ</a> / <a href="http://www.embl.de/" target="_blank"><i class="icon-external-link"></i>EMBL</a>. These are made available to the research community via a &quot;launcher&quot; AMI that allows users to analyze 
+their data using the same workflows. Currently supporting the BWA alignment workflow, this system makes it easy for users to load their data into AWS S3, 
+launch many VMs simultaneously to analyze data in parallel, and write the resulting alignments back to S3.  Over time, the full range of PanCancer workflows 
+will be made available.
+</p>
+<div class="repo-controls-container">
+   <a class="t_button btn" data-ng-href="https://github.com/ICGC-TCGA-PanCancer/cli/blob/develop/QuickStart.md#aws-pancancer-workflow-launcher--cli" target="_blank"><i class="icon-book-open"></i>Workflow Launcher Quick Start</a>
+</div>

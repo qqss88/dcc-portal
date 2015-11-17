@@ -256,6 +256,10 @@ IcgcMutationAdapter.prototype._callWebService = function (segmentString, callbac
     success: function (data) {
       var region = new Region(segmentString);
       callback(data, region);
+    },
+    error: function(e) {
+      var region = new Region(segmentString);
+      callback({}, region);
     }
   });
 };

@@ -28,35 +28,35 @@
         highlights: '=',
         zooms: '='
       },
-      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+ 
-        '<i class="fa fa-expand pathway-fullscreen-controller"></i>' +
-        '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
-        '<h4>LEGEND</h4></div>'+
-        '<div class="pathway-info">'+
-        '<i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div>{{entityType}}</div><div class="pathway-info-svg"></div>'+
-          '<div class="pathway-info-content">'+
-          '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
-            '<tr>'+
-                '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
-                '<th class="pathway-gene-header-label pathway-gene-header"># ICGC Mutations</th>' +
-            '</tr>'+
-            '<tr data-ng-repeat="gene in geneList">' +
-              '<th class="pathway-gene-label"><a href="/genes/{{gene.id}}">{{gene.symbol}}</a></th>' +
-              '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
-            '</tr></table>' +
-        '</div></div>'+
-        '</div>',
+      templateUrl: 'scripts/modules/pathwayviewer/views/viewer.html',
       link: function ($scope, element) {
-        var showingLegend = false,  rendered = false;
-        var zoomedOn, xml, highlights;
-        
-        var scrollTimer;
+        var showingLegend = false,  
+            rendered = false,
+            zoomedOn = $scope.zooms || [''],
+            xml = $scope.items,
+            highlights = $scope.highlights,
+            scrollTimer,
+            consequenceFilter = {"is":
+          ["frameshift_variant",
+          "missense_variant",
+          "start_lost",
+          "initiator_codon_variant",
+          "stop_gained","stop_lost",
+          "exon_loss_variant",
+          "exon_variant",
+          "splice_acceptor_variant",
+          "splice_donor_variant",
+          "splice_region_variant",
+          "5_prime_UTR_premature_start_codon_gain_variant",
+          "disruptive_inframe_deletion",
+          "inframe_deletion",
+          "disruptive_inframe_insertion",
+          "inframe_insertion"]};
         
         element.bind("mouseenter", function() {
           scrollTimer = setTimeout(function() {
             $('.pathwaysvg').attr('class', 'pathwaysvg');
-          }, 800);
+          }, 500);
         });
         
         element.bind("mouseleave", function() {
@@ -101,20 +101,24 @@
         var renderinfo = function(node,mutationCount,isMutated){
           $('.pathway-info-svg').html('');
           
-          var padding = 7;
+          var padding = 2;
+          // Need extra node padding on the top for firefox. Otherwise mutation count gets cut off
+          var nodeTopPadding = 10;
           var infoSvg = d3.select('.pathway-info-svg').append('svg')
-              .attr('viewBox', '0 0 ' +150+ ' ' +50)
+              .attr('viewBox', '0 0 ' +150+ ' ' +70)
               .attr('preserveAspectRatio', 'xMidYMid')
+              .attr('style', 'padding-top:20px')
               .append('g');
           var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
-          node.size={width:100-padding*2,height:50-padding*2};
-          node.position={x:padding+25,y:padding};
+          node.size={width:120-padding*2,height:60-padding*2};
+          node.position={x:padding+15,y:padding+nodeTopPadding};
           infoRenderer.renderNodes([node]);
           
           if(isMutated){
-            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}],
-                                         {getNodesByReactomeId:function (){return [node];}});
+            var model = new dcc.PathwayModel();
+            model.nodes = [node];
+            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}], model);
           }
         };
 
@@ -130,6 +134,7 @@
             // Reset data
             $scope.geneList = [];
             $scope.entityType = typeMap[d.type];
+            $scope.subPathwayId = d.reactomeId;
             
             hideLegend();
             showInfo();
@@ -143,6 +148,8 @@
                   if(!highlight.advQuery){
                     return;
                   }
+                  
+                  _.set(highlight.advQuery, 'mutation.consequenceType', consequenceFilter);
                   
                   geneList.push({
                     symbol:highlight.geneSymbol,
@@ -165,7 +172,7 @@
           urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          initScaleFactor: 0.95,
+          initScaleFactor: 0.90,
           subPathwayColor: 'navy'
         });
         
@@ -173,15 +180,7 @@
         setTimeout(function() {
           var rect = $('.pathway-legend')[0].getBoundingClientRect();
           controller.renderLegend(rect.width,rect.height);
-        }, 500);
-        
-        $('.pathway-legend-controller').on('click', function(){
-          if(showingLegend){
-            hideLegend();
-          }else{
-            showLegend();
-          }
-        });
+        }, 700);
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
@@ -231,10 +230,35 @@
             document.addEventListener('fullscreenchange', fullScreenHandler);
         }
         
+        var fixUrl = function(e,attr) {
+          if (e.hasAttribute(attr) && e.getAttribute(attr)!== false) {
+            var idMatcher = /(#.*)\'\)/;
+            var matches = e.getAttribute(attr).match(idMatcher);
+            if (matches !== null) {
+              var svgId = matches[1];
+              var newPath = window.location.pathname + window.location.search;
+              var newUrl = "url('" + newPath + svgId + "')";
+        
+              e.setAttribute(attr, newUrl);
+            }
+          }
+        };
+        
+        var fixFilters = function () {
+          fixUrl(this, 'filter');
+        };
+        
+        var fixMarkers = function () {
+          fixUrl(this, 'marker-end');
+          fixUrl(this, 'marker-start');
+        };
+        
         var handleRender = function(){
           if(!xml || !zoomedOn){
+            $('.pathwaysvg').remove();
             return;
           }else if(!rendered){
+            $('.pathwaysvg').remove();
             controller.render(xml,zoomedOn);
             rendered = true;
           }else{
@@ -247,24 +271,47 @@
           }
         };
         
-        $scope.$watch('items', function (newValue) {
+        $scope.legendClick = function() {
+            if(showingLegend){
+              hideLegend();
+            }else{
+              showLegend();
+            }
+        };
+        
+        $scope.$watch('items', function (newValue, oldValue) {         
+          rendered = false;
           xml = newValue;
           handleRender();
         });
         
-        $scope.$watch('zooms', function (newValue) {
+        $scope.$watch('zooms', function (newValue, oldValue) {
+           if (newValue === oldValue) {
+            return;
+          }
+            
           zoomedOn = newValue;
           handleRender();
         });
 
-        $scope.$watch('highlights', function (newValue) {
+        $scope.$watch('highlights', function (newValue, oldValue) {
+           if (newValue === oldValue) {
+            return;
+          }
+          
           highlights = newValue;
           handleRender();
         });
         
+        // Needed to fix url paths for SVGs on url change due to <base> tag required by angular
+        $scope.$on('$locationChangeSuccess', function() {
+          jQuery('rect', '#pathway-viewer-mini').map(fixFilters);
+          jQuery('polygon', '#pathway-viewer-mini').map(fixFilters);
+          jQuery('line', '#pathway-viewer-mini').map(fixMarkers);
+        });
+        
         $scope.$on('$destroy', function () {
           element.unbind();
-          
           document.removeEventListener('webkitfullscreenchange', fullScreenHandler);
           document.removeEventListener('mozfullscreenchange', fullScreenHandler);
           document.removeEventListener('fullscreenchange', fullScreenHandler);

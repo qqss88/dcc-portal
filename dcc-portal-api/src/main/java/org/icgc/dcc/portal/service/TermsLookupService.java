@@ -29,6 +29,14 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.TermsLookupFilterBuilder;
+import org.icgc.dcc.portal.model.EntitySet.SubType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.google.common.collect.ImmutableMap;
+
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -36,17 +44,12 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.TermsLookupFilterBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 /**
  * Term lookup services
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class TermsLookupService {
 
   /**
@@ -111,6 +114,18 @@ public class TermsLookupService {
     createTermsLookup(type, id, additionalAttributes);
   }
 
+  public void createTermsLookup(@NonNull final TermLookupType type, @NonNull final UUID id,
+      @NonNull final Iterable<String> values, final boolean trans) {
+    val attributes = ImmutableMap.<String, Object> of(TERMS_LOOKUP_PATH, values, SubType.TRANSIENT.getName(), trans);
+    createTermsLookup(type, id, attributes);
+  }
+
+  public void createTermsLookup(@NonNull final TermLookupType type, @NonNull final UUID id,
+      @NonNull final Iterable<String> values, @NonNull final String repoName) {
+    val attributes = ImmutableMap.<String, Object> of(TERMS_LOOKUP_PATH, values, "repo", repoName);
+    createTermsLookup(type, id, attributes);
+  }
+
   public static TermsLookupFilterBuilder createTermsLookupFilter(@NonNull String fieldName,
       @NonNull TermLookupType type, @NonNull UUID id) {
     val key = id.toString();
@@ -140,11 +155,11 @@ public class TermsLookupService {
 
     GENE_IDS("gene-ids"),
     MUTATION_IDS("mutation-ids"),
-    DONOR_IDS("donor-ids");
+    DONOR_IDS("donor-ids"),
+    FILE_IDS("file-ids");
 
     @NonNull
     private final String name;
 
   }
-
 }

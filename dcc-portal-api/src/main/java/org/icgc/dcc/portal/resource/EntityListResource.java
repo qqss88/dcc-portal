@@ -22,6 +22,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_ASYNC;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_VALUE;
@@ -36,21 +37,17 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.elasticsearch.common.collect.Sets;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.model.EntitySetDefinition;
@@ -61,8 +58,15 @@ import org.icgc.dcc.portal.service.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * DropWizard end-points that provide various functionalities for entity sets.
@@ -71,7 +75,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Slf4j
 @Component
 @Path("/v1/entityset")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class EntityListResource {
 
   private final static String TYPE_ATTACHMENT = "attachment";
@@ -97,8 +101,7 @@ public class EntityListResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Retrieves a list of entity sets by their IDs.", response = EntitySet.class, responseContainer = "List")
   public List<EntitySet> getEntityLists(
-      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UuidListParam entityListIds
-      ) {
+      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UuidListParam entityListIds) {
     Set<UUID> listIds = null;
     try {
       listIds = entityListIds.get();
@@ -118,28 +121,75 @@ public class EntityListResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Retrieves an entity set by its ID.", response = EntitySet.class)
   public EntitySet getEntityList(
-      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId
-      ) {
+      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
     val result = getEntityListsByIds(Sets.newHashSet(entityListId));
     if (result.isEmpty()) {
-      log.error("Error: getEntityListsByIds returns empty. The entityListId '{}' is most likely invalid.", entityListId);
+      log.error("Error: getEntityListsByIds returns empty. The entityListId '{}' is most likely invalid.",
+          entityListId);
       throw new NotFoundException(entityListId.toString(), API_ENTITY_LIST_ID_VALUE);
     } else {
       return result.get(0);
     }
   }
 
+  /**
+   * This hits the root path of /v1/entityset
+   * 
+   * @param listDefinition EntitySet definition from client.
+   * @param async Defaults to true. Set to false if a synchronous request is needed.
+   * @return JSON representation of new entity set.
+   */
   @POST
-  // this hits the root path of /v1/entityset
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntitySet.class)
   public Response createList(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition
-      ) {
-    val newList = service.createEntityList(listDefinition);
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition,
+      @ApiParam(value = API_ASYNC) @QueryParam("async") @DefaultValue("true") final boolean async) {
+    val newList = service.createEntityList(listDefinition, async);
 
     return newListResponse(newList);
+  }
+
+  /**
+   * Endpoint used for creating an entity set from the external repository.
+   * 
+   * @param listDefinition EntitySet definition from client.
+   * @return JSON representation of new entity set.
+   */
+  @POST
+  @Path("/external")
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntitySet.class)
+  public Response createExternalList(
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition) {
+    val newList = service.createExternalEntityList(listDefinition);
+
+    return newListResponse(newList);
+  }
+
+  /**
+   * Endpoint for creating an entity set from files from a single repository
+   * 
+   * @param listDefinition EntitySet definition from client.
+   * @return JSON representation of new entity set.
+   */
+  @POST
+  @Path("/file")
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Creates an entity set from an Repository Query.", response = EntitySet.class)
+  public Response createFileSet(
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition) {
+    val filters = listDefinition.getFilters();
+    val repoList = (ArrayNode) filters.path("file").path("repoName").path("is");
+    if (!repoList.isMissingNode() && repoList.size() == 1) {
+      val newList = service.createFileEntitySet(listDefinition);
+      return newListResponse(newList);
+    } else {
+      throw new BadRequestException("Need to filter by exactly one Repository.");
+    }
   }
 
   @POST
@@ -148,9 +198,9 @@ public class EntityListResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an entity set by combining two or more existing sets.", response = EntitySet.class)
   public Response deriveList(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition
-      ) {
-    val newList = service.deriveEntityList(listDefinition);
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition,
+      @ApiParam(value = API_ASYNC) @QueryParam("async") @DefaultValue("true") final boolean async) {
+    val newList = service.computeEntityList(listDefinition, async);
 
     return newListResponse(newList);
   }
@@ -170,8 +220,7 @@ public class EntityListResource {
   @Produces(TEXT_TSV)
   @ApiOperation(value = "Exports the data of a set as a download in TSV (tab-delimited) format.", response = EntitySet.class)
   public Response exportListItems(
-      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId
-      ) {
+      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
     val list = getEntityList(entityListId);
 
     if (EntitySet.State.FINISHED != list.getState()) {
