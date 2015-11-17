@@ -220,7 +220,7 @@ $aws-colour:  rgb(228, 121, 17);
       }
       .card-content {
         padding: 1rem 1rem;
-        background: #fff;
+        background: transparent;
         //transform: translateX(-5.5rem);
         transition-property: transform border-color;
         transition: 0.25s ease-in;
