@@ -446,20 +446,6 @@ public class RepositoryFileService {
     generateRepoManifestFile(output, awsRepoCode, searchResult, timestamp);
   }
 
-  public String getCollabMetaUrl(@NonNull String fileId) {
-    log.info("Get Collabratory MetaData URL for: '{}'.", fileId);
-    val file = parse(repositoryFileRepository.findOneByObjectId(fileId).getSourceAsString());
-    val copies = file.getFileCopies();
-
-    for (val copy : copies) {
-      if (copy.getRepoCode().equalsIgnoreCase("collaboratory")) {
-        return createCollabMetaUrl(copy);
-      }
-    }
-
-    return null;
-  }
-
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {
     val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
     log.debug("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
@@ -823,20 +809,6 @@ public class RepositoryFileService {
 
   public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
     return repositoryFileRepository.getRepoStats(repoName);
-  }
-
-  private String createCollabMetaUrl(FileCopy file) {
-    val baseUrl = file.getRepoBaseUrl();
-    val metaPath = file.getRepoMetadataPath();
-
-    // We expect the base to end with a "/" and the meta data to start with a "/". Otherwise notify with exception.
-    if (baseUrl.endsWith("/") && metaPath.startsWith("/")) {
-      return baseUrl.substring(0, baseUrl.length() - 1) + metaPath;
-    } else {
-      throw new IllegalStateException(
-          String.format("File Copy %s had an unexpected format in URL.",
-              file.getFileName()));
-    }
   }
 
 }
