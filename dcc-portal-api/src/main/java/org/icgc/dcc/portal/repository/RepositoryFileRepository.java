@@ -26,13 +26,11 @@ import static java.lang.String.format;
 import static java.math.RoundingMode.CEILING;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.limit;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
 import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.AVAILABLE_FACETS;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.FILE_OBJECT_ID;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 import static org.dcc.portal.pql.query.PqlParser.parse;
@@ -77,9 +75,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
@@ -100,7 +95,6 @@ import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.NestedFilterBuilder;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -637,20 +631,6 @@ public class RepositoryFileRepository {
     checkResponseState(id, response, KIND);
 
     return response;
-  }
-
-  public SearchHit findOneByObjectId(@NonNull String id) {
-    val pql = String.format("select(*),in(file.%s,'%s'),sort(-id),limit(1)", FILE_OBJECT_ID, id);
-    val request = queryEngine.execute(pql, REPOSITORY_FILE).getRequestBuilder();
-    val response = request.execute().actionGet();
-
-    val hits = response.getHits().getHits();
-    if (hits.length != 1) {
-      val message = String.format("File not found for objectId of %s", id);
-      throw new WebApplicationException(Response.status(NOT_FOUND).entity(message).build());
-    }
-
-    return hits[0];
   }
 
   public SearchResponse findAll(@NonNull Query query) {
