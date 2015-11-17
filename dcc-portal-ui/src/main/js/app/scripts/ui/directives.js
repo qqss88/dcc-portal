@@ -422,7 +422,8 @@ angular.module('icgc.ui.copyPaste', [])
                 onError: '&',
                 copyData: '=',
                 onCopyFocusOn: '@',
-                onCopySuccessMessage: '@'
+                onCopySuccessMessage: '@',
+                onHoverMessage: '@'
             },
             link: function (scope, element, attrs) {
 
@@ -462,9 +463,18 @@ angular.module('icgc.ui.copyPaste', [])
 
              }
 
-              function _showTipMessage(isSuccess, overrideMessage) {
+              function _hideTipMessage() {
+                if (!_showCopyTips || _showingCopiedStatusMessage) {
+                  return;
+                }
 
-                if (!_showCopyTips) {
+                _messageBubble.fadeOut('fast');
+              }
+
+              function _showTipMessage(isSuccess, overrideMessage, timeoutInMS) {
+
+                // Status copy messages take priority over other messages
+                if (!_showCopyTips || _showingCopiedStatusMessage) {
                   return;
                 }
                 
@@ -475,10 +485,10 @@ angular.module('icgc.ui.copyPaste', [])
                     
                 
                 
-                if (typeof overrideMessage === 'string') {
+                if (typeof overrideMessage === 'string') { // We are using this as a tooltip/status notifier
                   msg = overrideMessage;
                 }
-                else {
+                else { // Or else we handle success/failure of copy
                   switch (_browserOSPlatform) {
                     case 'mac':
                       copyPasteCommandKey = '&#x2318;';
@@ -487,15 +497,18 @@ angular.module('icgc.ui.copyPaste', [])
                       break;
                   }
 
+                  _showingCopiedStatusMessage = true;
+
                   if (isSuccess) {
                     msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage : '';
+
 
                     if (! msg) {
                       msg += 'Press ' + copyPasteCommandKey +
                              '-' + pasteCommandAlphaKey + ' to paste.';
                     }
                   }
-                  else {
+                  else if (isSuccess) {
                     msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +
                     ' to copy and ' + copyPasteCommandKey + '-' +
                     pasteCommandAlphaKey + ' to paste.';
@@ -518,7 +531,8 @@ angular.module('icgc.ui.copyPaste', [])
                 _previousMessageTimeout = setTimeout(function () {
                   _messageBubble.fadeOut('fast');
                   _previousMessageTimeout = null;
-                }, 2500);
+                  _showingCopiedStatusMessage = false;
+                }, timeoutInMS || 2500);
               }
               
               //
@@ -688,6 +702,17 @@ angular.module('icgc.ui.copyPaste', [])
                 ////////////////////////////////////////////////////////////////
 
                 element.addClass('copy-to-clip');
+
+                if (scope.onHoverMessage) {
+                  element.hover(
+                    function() {
+                      _showTipMessage(null, scope.onHoverMessage, 1500);
+                    },
+                    function() {
+                      _hideTipMessage();
+                    }
+                  );
+                }
                 
                 if (_zeroClipboardSupported) {
                   _initCopyZeroClipboard();
@@ -730,6 +755,7 @@ angular.module('icgc.ui.copyPaste', [])
                 _messageBubble = element.find('.copy-to-clip-message-container'),
                 _focusOnCopySelector = scope.onCopyFocusOn ? element.find(scope.onCopyFocusOn) : false,
                 _previousMessageTimeout = null,
+                _showingCopiedStatusMessage = false,
                 _browserOSPlatform = window.navigator.platform ?
                   (navigator.platform.toLowerCase().indexOf('mac') >= 0 ? 'mac' : 'win') : 'win';
               

@@ -36,15 +36,14 @@
       <tr>
         <th>File Object ID</th>
         <td>
-          <div tooltip="Click here to copy the Object ID to your clipboard." data-tooltip-placement="top">
-            <div data-copy-to-clip data-copy-data="info.objectId" data-show-copy-tips="true"
-                 data-on-copy-success-message="File Object ID copied!"
-                 data-on-copy-focus-on="#fileObjectID"
-                 data-prompt-on-copy="false">
-                <span class="icon-clippy"></span>
-                <span id="fileObjectID" data-ng-bind="fileCtrlr.stringOrDefault (info.objectId)">
-                </span>
-            </div>
+          <div data-copy-to-clip data-copy-data="info.objectId" data-show-copy-tips="true"
+               data-on-copy-success-message="File Object ID copied!"
+               data-on-copy-focus-on="#fileObjectID"
+               data-on-hover-message="Click here to copy the Object ID to your clipboard."
+               data-prompt-on-copy="false">
+              <span class="icon-clippy"></span>
+              <span id="fileObjectID" data-ng-bind="fileCtrlr.stringOrDefault (info.objectId)">
+              </span>
           </div>
         </td>
       </tr>
