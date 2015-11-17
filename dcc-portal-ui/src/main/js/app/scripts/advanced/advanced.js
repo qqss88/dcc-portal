@@ -90,7 +90,7 @@
       );
 
       $rootScope.$on('$stateChangeStart', function(e, toState) {
-        console.log(toState);
+
         _isInAdvancedSearchCtrl = _.get(toState, 'data.isAdvancedSearch', false) ? true : false;
 
         if (_isInAdvancedSearchCtrl) {
