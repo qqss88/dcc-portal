@@ -5017,8 +5017,8 @@ td {
 /* line 221, _modules/_repositories.scss */
 .cloud-home .card .card-content {
   padding: 1rem 1rem;
-  background: #fff;
-  transition-property: transform border-color;
+  background: transparent;
+  transition-property: transform, border-color;
   transition: 0.25s ease-in;
 }
 /* line 228, _modules/_repositories.scss */

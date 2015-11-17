@@ -89,7 +89,12 @@
       );
 
       $rootScope.$on('$stateChangeStart', function(e, toState) {
+
         _isInAdvancedSearchCtrl = _.get(toState, 'data.isAdvancedSearch', false) ? true : false;
+
+        if (_isInAdvancedSearchCtrl) {
+          _locationFilterCache = _.extend({}, LocationService.filters());
+        }
       });
 
       ///////////////////////////////////////////////////////////////////////////
