@@ -18,8 +18,8 @@ var Bam = Class.extend({
     this.iobio.samtools = "ws://127.0.0.1:8000/samtools/";
     this.iobio.bamReadDepther = "ws://" + currentHost + ":" + currentPort + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "ws://" + currentHost + ":" + currentPort + "/bamstatsalive/";
-    this.path="/home/iobio/iobio/tools/icgc-storage-client/data_aws/";
-//    this.path="/home/iobio/iobio/tools/icgc-storage-client/data_collab/"
+    this.path="/home/iobio/iobio/tools/icgc-storage-client/data/aws/";
+//    this.path="/home/iobio/iobio/tools/icgc-storage-client/data/collab/"
     
     return this;
   },
