@@ -17,6 +17,8 @@ var Bam = Class.extend({
     this.iobio.samtools = "ws://127.0.0.1:8000/samtools/";
     this.iobio.bamReadDepther = "ws://" + currentHost + ":" + currentPort + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "ws://" + currentHost + ":" + currentPort + "/bamstatsalive/";
+    this.path="/home/iobio/iobio/tools/icgc-storage-client/data_aws/";
+//    this.path="/home/iobio/iobio/tools/icgc-storage-client/data_collab/"
     //      this.iobio.bamtools = "ws://localhost:8061";
     // this.iobio.samtools = "ws://localhost:8060";
     // this.iobio.bamReadDepther = "ws://localhost:8021";
@@ -71,7 +73,7 @@ var Bam = Class.extend({
     regions.forEach(function (region) {
       regionStr += " " + region.name + ":" + region.start + "-" + region.end
     });
-    var url = this.iobio.samtools + "?cmd= view -b /home/iobio/iobio/tools/icgc-storage-client/data/" + this.bamUri + regionStr + "&encoding=binary";
+    var url = this.iobio.samtools + "?cmd= view -b " + this.path + this.bamUri + regionStr + "&encoding=binary";
     return encodeURI(url);
   },
 
@@ -271,9 +273,9 @@ var Bam = Class.extend({
     if (Object.keys(me.readDepth).length > 0)
       callback(me.readDepth)
 
-    else if (me.sourceType == 'dcc') {
+    else {
       var client = BinaryClient(me.iobio.bamReadDepther);
-      var url = encodeURI(me.iobio.bamReadDepther + '?cmd=-i /home/iobio/iobio/tools/icgc-storage-client/data/' + me.bamUri + ".bai")
+      var url = encodeURI(me.iobio.bamReadDepther + '?cmd=-i ' + me.path + me.bamUri + ".bai")
         //this._lastUpdateTimer = new Date().getTime();
       client.on('open', function (stream) {
         var stream = client.createStream({
@@ -314,9 +316,9 @@ var Bam = Class.extend({
     var me = this;
     if (me.header)
       callback(me.header);
-    else if (me.sourceType == 'dcc') {
+    else {
       var client = BinaryClient(me.iobio.samHeader);
-      var url = encodeURI(me.iobio.samHeader + '?cmd= /home/iobio/iobio/tools/icgc-storage-client/data/' + this.bamUri);
+      var url = encodeURI(me.iobio.samHeader + '?cmd= ' + this.path + this.bamUri);
       client.on('open', function (stream) {
         var stream = client.createStream({
           event: 'run',
