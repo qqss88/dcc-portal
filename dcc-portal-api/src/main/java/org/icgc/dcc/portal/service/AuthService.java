@@ -17,7 +17,15 @@
 
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.common.client.api.daco.DACOClient.UserType.CUD;
+import static org.icgc.dcc.common.client.api.daco.DACOClient.UserType.OPENID;
+
 import java.util.Optional;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.common.client.api.ICGCEntityNotFoundException;
 import org.icgc.dcc.common.client.api.ICGCException;
@@ -29,11 +37,6 @@ import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Provides authentication services against the Central User Directory (CUD) and utilities to check if the user is a
  * DACO approved user.
@@ -42,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class AuthService {
 
   @NonNull
@@ -52,21 +55,12 @@ public class AuthService {
   @NonNull
   private ICGCProperties icgcConfig;
 
-  public Optional<org.icgc.dcc.common.client.api.daco.User> getDacoUser(UserType userType, String userId) {
-    try {
-      val dacoUsers = dacoClient.getUsersByType(userType, userId);
-      if (dacoUsers.size() > 1) {
-        log.warn("Received more that 1 DACO approved user for userID '{}'. Can't decide which one to use. Declining "
-            + "DACO access. Users: {}", userId, dacoUsers);
-
-        return Optional.empty();
-      }
-
-      return Optional.of(dacoUsers.get(0));
-    } catch (ICGCEntityNotFoundException e) {
-      log.debug("User '{}' does not have DACO access", userId);
-
-      return Optional.empty();
+  public Optional<org.icgc.dcc.common.client.api.daco.User> getDacoUser(@NonNull UserType userType,
+      @NonNull String userId) {
+    if (userType.equals(OPENID)) {
+      return getDacoUserByOpenId(userId);
+    } else {
+      return getDacoUserByCUD(userId);
     }
   }
 
@@ -131,6 +125,47 @@ public class AuthService {
    */
   public String getAuthToken() {
     return loginUser(icgcConfig.getCudUser(), icgcConfig.getCudPassword());
+  }
+
+  private Optional<org.icgc.dcc.common.client.api.daco.User> getDacoUserByCUD(String userId) {
+    try {
+      // Resolve openId for this user.
+      val openIdUsers = dacoClient.getUsersByType(CUD, userId);
+      if (openIdUsers.isEmpty()) {
+        return Optional.empty();
+      }
+
+      if (openIdUsers.size() > 1) {
+        log.warn("CUD user '{}' has multiple openIDs. Using the first one. OpenIDs: {}", userId, openIdUsers);
+      }
+
+      val user = openIdUsers.get(0);
+
+      return getDacoUserByOpenId(user.getOpenid());
+    } catch (ICGCEntityNotFoundException e) {
+      log.debug("User '{}' does not have DACO access", userId);
+
+      return Optional.empty();
+    }
+  }
+
+  private Optional<org.icgc.dcc.common.client.api.daco.User> getDacoUserByOpenId(String userId) {
+    try {
+      val dacoUsers = dacoClient.getUser(userId);
+      if (dacoUsers.isEmpty()) {
+        return Optional.empty();
+      }
+
+      if (dacoUsers.size() > 1) {
+        log.warn("OpenID '{}' is shared between multiple users. Returning the first one. Users: {}", userId, dacoUsers);
+      }
+
+      return Optional.of(dacoUsers.get(0));
+    } catch (ICGCEntityNotFoundException e) {
+      log.debug("User '{}' does not have DACO access", userId);
+
+      return Optional.empty();
+    }
   }
 
 }
