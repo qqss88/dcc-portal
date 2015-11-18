@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
@@ -125,6 +126,7 @@ public final class Visitors {
           .put(OBSERVATION_CENTRIC, DEFAULT_SCORE_QUERY_VISITOR)
           .put(PROJECT, DEFAULT_SCORE_QUERY_VISITOR)
           .put(REPOSITORY_FILE, DEFAULT_SCORE_QUERY_VISITOR)
+          .put(DRUG, DEFAULT_SCORE_QUERY_VISITOR)
           .build();
 
   public static final VerifyNestedFilterVisitor createVerifyNestedFilterVisitor() {

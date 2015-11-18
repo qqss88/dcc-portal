@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Maps.uniqueIndex;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -48,9 +49,9 @@ public class SearchFieldMapper {
   /**
    * These suffixes are defined and used in our elasticsearch index models.
    */
-  private static final String EXACT_MATCH_SUFFIX = ".raw";
-  private static final String PARTIAL_MATCH_SUFFIX = ".analyzed";
-  private static final String LOWERCASE_MATCH_SUFFIX = ".search";
+  public static final String EXACT_MATCH_SUFFIX = ".raw";
+  public static final String PARTIAL_MATCH_SUFFIX = ".analyzed";
+  public static final String LOWERCASE_MATCH_SUFFIX = ".search";
 
   Set<String> exactMatchFields;
   Set<String> partialMatchFields;
@@ -70,6 +71,11 @@ public class SearchFieldMapper {
   public Iterable<String> map() {
     val fields = concat(ensureSet(exactMatchFields), ensureSet(partialMatchFields), ensureSet(lowercaseMatchFields));
     return map(fields);
+  }
+
+  @NonNull
+  public static String boost(String suffix, int boost) {
+    return format("%s^%d", suffix, boost);
   }
 
   public Map<String, String> toMap() {
