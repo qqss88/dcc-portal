@@ -141,7 +141,7 @@
 
         scope.chromosomes = [];
 
-        function goBam(region) {
+        function goBam() {
           // get read depth
           window.bam
             .estimateBaiReadDepth(function (id) {
