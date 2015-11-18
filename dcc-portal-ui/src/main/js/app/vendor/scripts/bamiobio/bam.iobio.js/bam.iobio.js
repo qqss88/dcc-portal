@@ -1,4 +1,5 @@
 // extending Thomas Down's original BAM js work 
+'use strict';
 
 var Bam = Class.extend({
 
@@ -7,34 +8,29 @@ var Bam = Class.extend({
     this.options = options; // *** add options mapper ***
     // test if file or url
 
-    this.sourceType = "dcc";
+    this.sourceType = 'dcc';
 
     // set iobio servers
-    this.iobio = {}
-    var currentHost = "10.5.74.221";
+    this.iobio = {};
+    var currentHost = '10.5.74.194';
     var currentPort = 80;
-    this.iobio.samHeader = "ws://" + currentHost + ":" + currentPort + "/samheader/"
-    this.iobio.samtools = "ws://127.0.0.1:8000/samtools/";
-    this.iobio.bamReadDepther = "ws://" + currentHost + ":" + currentPort + "/bamreaddepther/";
-    this.iobio.bamstatsAlive = "ws://" + currentHost + ":" + currentPort + "/bamstatsalive/";
-    //      this.iobio.bamtools = "ws://localhost:8061";
-    // this.iobio.samtools = "ws://localhost:8060";
-    // this.iobio.bamReadDepther = "ws://localhost:8021";
-    //      this.iobio.bamMerger = "ws://localhost:8030";      
-    // this.iobio.bamstatsAlive = "ws://localhost:7100"
-    // this.iobio.bamstatsAlive = "ws://localhost:7101"
+    this.iobio.samHeader = 'ws://' + currentHost + ':' + currentPort + '/samheader/';
+    this.iobio.samtools = 'ws://127.0.0.1:8000/samtools/';
+    this.iobio.bamReadDepther = 'ws://' + currentHost + ':' + currentPort + '/bamreaddepther/';
+    this.iobio.bamstatsAlive = 'ws://' + currentHost + ':' + currentPort + '/bamstatsalive/';
     return this;
   },
 
   fetch: function (name, start, end, callback, options) {
     var me = this;
     // handle bam has been created yet
-    if (this.bam == undefined) // **** TEST FOR BAD BAM ***
+    if (this.bam === undefined) {// **** TEST FOR BAD BAM ***
       this.promise(function () {
-      me.fetch(name, start, end, callback, options);
-    });
-    else
+        me.fetch(name, start, end, callback, options);
+      });
+    } else {
       this.bam.fetch(name, start, end, callback, options);
+    }
   },
 
   promise: function (callback) {
@@ -43,17 +39,19 @@ var Bam = Class.extend({
 
   provide: function (bam) {
     this.bam = bam;
-    while (this.promises.length != 0)
+    while (this.promises.length !== 0) {
       this.promises.shift()();
+    }
   },
 
   _makeid: function () {
     // make unique string id;
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-    for (var i = 0; i < 5; i++)
+    for (var i = 0; i < 5; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
 
     return text;
   },
@@ -67,37 +65,44 @@ var Bam = Class.extend({
   },
 
   _getBamRegionsUrl: function (regions) {
-    var regionStr = "";
+    var regionStr = '';
     regions.forEach(function (region) {
-      regionStr += " " + region.name + ":" + region.start + "-" + region.end
+      regionStr += ' ' + region.name + ':' + region.start + '-' + region.end;
     });
-    var url = this.iobio.samtools + "?cmd= view -b /home/iobio/iobio/tools/icgc-storage-client/data/" + this.bamUri + regionStr + "&encoding=binary";
+    // TODO: This is bad, move this to serverside
+    var url = this.iobio.samtools + '?cmd= view -b /home/iobio/iobio/tools/icgc-storage-client/data/' + this.bamUri +
+     regionStr + '&encoding=binary';
     return encodeURI(url);
   },
 
   _generateExomeBed: function (id) {
-    var bed = "";
+    var bed = '';
     var readDepth = this.readDepth[id];
     var start, end;
-    var sum = 0;
+    // var sum = 0;
     // for (var i=0; i < readDepth.length; i++){
     //    sum += readDepth[i].depth;
     // }
     // console.log("avg = " + parseInt(sum / readDepth.length));
     // merge contiguous blocks into a single block and convert to bed format
+    
     for (var i = 0; i < readDepth.length; i++) {
       if (readDepth[i].depth < 20) {
-        if (start != undefined)
-          bed += id + "\t" + start + "\t" + end + "\t.\t.\t.\t.\t.\t.\t.\t.\t.\n"
+        if (start !== undefined) {
+          bed += id + '\t' + start + '\t' + end + '\t.\t.\t.\t.\t.\t.\t.\t.\t.\n';
+        }
         start = undefined;
       } else {
-        if (start == undefined) start = readDepth[i].pos;
+        if (start === undefined) {
+          start = readDepth[i].pos;
+        }
         end = readDepth[i].pos + 16384;
       }
     }
     // add final record if data stopped on non-zero
-    if (start != undefined)
-      bed += id + "\t" + start + "\t" + end + "\t.\t.\t.\t.\t.\t.\t.\t.\t.\n"
+    if (start !== undefined) {
+      bed += id + '\t' + start + '\t' + end + '\t.\t.\t.\t.\t.\t.\t.\t.\t.\n';
+    }
     return bed;
   },
 
@@ -106,7 +111,7 @@ var Bam = Class.extend({
     var bedRegions = [];
     var a = this._bedToCoordinateArray(ref, bed);
     regions.forEach(function (reg) {
-      var start = reg.start
+      var start = reg.start;
       var length = reg.end - reg.start;
       var ci = me._getClosestValueIndex(a, reg.start); // update lo start value
       var maxci = a.length;
@@ -114,12 +119,16 @@ var Bam = Class.extend({
         var newStart, newEnd;
 
         // determine start position
-        if (a[ci].start <= start) newStart = start;
-        else newStart = a[ci].start;
+        if (a[ci].start <= start) {
+          newStart = start;
+        } else {
+          newStart = a[ci].start;
+        }
 
         // determine end position
-        if (a[ci].end >= newStart + length) newEnd = newStart + length
-        else {
+        if (a[ci].end >= newStart + length) {
+          newEnd = newStart + length;
+        } else {
           newEnd = a[ci].end;
           ci += 1;
         }
@@ -133,7 +142,7 @@ var Bam = Class.extend({
           'end': newEnd
         });
       }
-    })
+    });
     return bedRegions;
   },
 
@@ -141,33 +150,37 @@ var Bam = Class.extend({
     var a = this._bedToCoordinateArray(ref, bed);
     var a_i = 0;
     var bedRegions = [];
-    if (a.length == 0) {
-      alert("Bed file doesn't have coordinates for reference: " + regions[0].name + ". Sampling normally");
+    if (a.length === 0) {
+      console.log('Bed file doesn\'t have coordinates for reference: ' + regions[0].name + '. Sampling normally');
       return null;
     }
     regions.forEach(function (reg) {
       for (a_i; a_i < a.length; a_i++) {
-        if (a[a_i].end > reg.end)
+        if (a[a_i].end > reg.end) {
           break;
+        }
 
-        if (a[a_i].start >= reg.start)
+        if (a[a_i].start >= reg.start) {
           bedRegions.push({
             name: reg.name,
             start: a[a_i].start,
             end: a[a_i].end
-          })
+          });
+        }
       }
-    })
-    return bedRegions
+    });
+    return bedRegions;
   },
 
   _bedToCoordinateArray: function (ref, bed) {
     var me = this;
     var a = [];
-    bed.split("\n").forEach(function (line) {
-      if (line[0] == '#' || line == "") return;
+    bed.split('\n').forEach(function (line) {
+      if (line[0] === '#' || line === '') {
+        return;
+      }
 
-      var fields = line.split("\t");
+      var fields = line.split('\t');
       if (me._referenceMatchesBed(ref, fields[0])) {
         a.push({
           chr: ref,
@@ -180,14 +193,14 @@ var Bam = Class.extend({
   },
 
   _referenceMatchesBed: function (ref, bedRef) {
-    if (ref == bedRef) {
+    if (ref === bedRef) {
       return true;
     }
     // Try stripping chr from reference names and then comparing
-    ref1 = ref.replace(/^chr?/, '');
-    bedRef1 = bedRef.replace(/^chr?/, '');
+    var ref1 = ref.replace(/^chr?/, '');
+    var bedRef1 = bedRef.replace(/^chr?/, '');
 
-    return (ref1 == bedRef1);
+    return (ref1 === bedRef1);
   },
 
   _getClosestValueIndex: function (a, x) {
@@ -201,34 +214,39 @@ var Bam = Class.extend({
         hi = mid;
       }
     }
-    if (lo == -1) return 0;
-    if (a[lo].end > x)
+    if (lo === -1) {
+      return 0;
+    }
+    if (a[lo].end > x) {
       return lo;
-    else
+    } else {
       return hi;
+    }
   },
 
   // *** bamtools functionality ***
 
   convert: function (format, name, start, end, callback, options) {
     // Converts between BAM and a number of other formats
-    if (!format || !name || !start || !end)
-      return "Error: must supply format, sequenceid, start nucleotide and end nucleotide"
+    if (!format || !name || !start || !end) {
+      return 'Error: must supply format, sequenceid, start nucleotide and end nucleotide';
+    }
 
-    if (format.toLowerCase() != "sam")
-      return "Error: format + " + options.format + " is not supported"
+    if (format.toLowerCase() !== 'sam') {
+      return 'Error: format + " + options.format + " is not supported';
+    }
     var me = this;
     this.fetch(name, start, end, function (data, e) {
-      if (options && options.noHeader)
+      if (options && options.noHeader) {
         callback(data, e);
-      else {
+      } else {
         me.getHeader(function (h) {
           callback(h.toStr + data, e);
-        })
+        });
       }
     }, {
       'format': format
-    })
+    });
   },
 
   count: function () {
@@ -247,54 +265,57 @@ var Bam = Class.extend({
 
   estimateBaiReadDepth: function (callback) {
     var me = this,
-      readDepth = {};
+    readDepth = {};
     me.readDepth = {};
 
     function cb() {
       if (me.header) {
         for (var id in readDepth) {
-          if (readDepth.hasOwnProperty(id))
+          if (readDepth.hasOwnProperty(id)) {
             var name = me.header.sq[parseInt(id)].name;
-          if (me.readDepth[name] == undefined) {
-            me.readDepth[name] = readDepth[id];
-            callback(name, readDepth[id]);
+            if (me.readDepth[name] == undefined) {
+              me.readDepth[name] = readDepth[id];
+              callback(name, readDepth[id]);
+            }
           }
         }
       }
     }
 
-    me.getHeader(function (header) {
-      if (Object.keys(me.readDepth).length > 0)
+    me.getHeader(function () {
+      if (Object.keys(me.readDepth).length > 0) {
         cb();
+      }
     });
 
-    if (Object.keys(me.readDepth).length > 0)
-      callback(me.readDepth)
+    if (Object.keys(me.readDepth).length > 0) {
+      callback(me.readDepth);
+    }
 
-    else if (me.sourceType == 'dcc') {
-      var client = BinaryClient(me.iobio.bamReadDepther);
+    else if (me.sourceType === 'dcc') {
+      var client = new BinaryClient(me.iobio.bamReadDepther);
       var url = encodeURI(me.iobio.bamReadDepther + '?cmd=-i /home/iobio/iobio/tools/icgc-storage-client/data/' + me.bamUri + ".bai")
         //this._lastUpdateTimer = new Date().getTime();
       client.on('open', function (stream) {
-        var stream = client.createStream({
+        stream = client.createStream({
           event: 'run',
           params: {
             'url': url
           }
         });
         var currentSequence;
-        stream.on('data', function (data, options) {
-          data = data.split("\n");
+        stream.on('data', function (data) {
+          data = data.split('\n');
           for (var i = 0; i < data.length; i++) {
-            if (data[i][0] == '#') {
+            if (data[i][0] === '#') {
               if (Object.keys(readDepth).length > 0) {
-                cb()
-              };
+                cb();
+              }
               currentSequence = data[i].substr(1);
               readDepth[currentSequence] = [];
             } else {
-              if (data[i] != "") {
-                var d = data[i].split("\t");
+              if (data[i] !== '') {
+                var d = data[i].split('\t');
                 readDepth[currentSequence].push({
                   pos: parseInt(d[0]),
                   depth: parseInt(d[1])
@@ -312,19 +333,19 @@ var Bam = Class.extend({
 
   getHeader: function (callback) {
     var me = this;
-    if (me.header)
+    if (me.header) {
       callback(me.header);
-    else if (me.sourceType == 'dcc') {
+    } else if (me.sourceType == 'dcc') {
       var client = BinaryClient(me.iobio.samHeader);
       var url = encodeURI(me.iobio.samHeader + '?cmd= /home/iobio/iobio/tools/icgc-storage-client/data/' + this.bamUri);
       client.on('open', function (stream) {
-        var stream = client.createStream({
+        stream = client.createStream({
           event: 'run',
           params: {
             'url': url
           }
         });
-        var rawHeader = ""
+        var rawHeader = '';
         stream.on('data', function (data, options) {
           rawHeader += data;
         });
@@ -344,18 +365,18 @@ var Bam = Class.extend({
       sq: [],
       toStr: headerStr
     };
-    var lines = headerStr.split("\n");
+    var lines = headerStr.split('\n');
     for (var i = 0; i < lines.length > 0; i++) {
       var fields = lines[i].split("\t");
-      if (fields[0] == "@SQ") {
+      if (fields[0] === '@SQ') {
         var fHash = {};
         fields.forEach(function (field) {
           var values = field.split(':');
-          fHash[values[0]] = values[1]
-        })
+          fHash[values[0]] = values[1];
+        });
         header.sq.push({
-          name: fHash["SN"],
-          end: 1 + parseInt(fHash["LN"])
+          name: fHash.SN,
+          end: 1 + parseInt(fHash.LN)
         });
       }
     }
@@ -392,27 +413,30 @@ var Bam = Class.extend({
 
   stats: function (name, start, end, callback) {
     // Prints some basic statistics from input BAM file(s)
-    var client = BinaryClient(this.iobio.bamstatsAlive);
-    var url = encodeURI(this.iobio.bamstatsAlive + '?cmd=-u 1000 -s ' + start + " -l " + parseInt(end - start) + " " + encodeURIComponent(this._getBamUrl(name, start, end)));
+    var client = new BinaryClient(this.iobio.bamstatsAlive);
+    var url = encodeURI(this.iobio.bamstatsAlive + '?cmd=-u 1000 -s ' + start + ' -l ' + parseInt(end - start) + ' ' + encodeURIComponent(this._getBamUrl(name, start, end)));
     client.on('open', function (stream) {
-      var stream = client.createStream({
+      stream = client.createStream({
         event: 'run',
         params: {
           'url': url
         }
       });
-      var buffer = "";
-      stream.on('data', function (data, options) {
-        if (data == undefined) return;
+      var buffer = '';
+      stream.on('data', function (data) {
+        if (data === undefined) {
+          return;
+        }
         var success = true;
+        var obj;
         try {
-          var obj = JSON.parse(buffer + data)
+          obj = JSON.parse(buffer + data);
         } catch (e) {
           success = false;
           buffer += data;
         }
         if (success) {
-          buffer = "";
+          buffer = '';
           callback(obj);
         }
       });
@@ -436,7 +460,7 @@ var Bam = Class.extend({
         var length = SQs[j].end - sqStart;
         if (length < options.binSize * options.binNumber) {
           SQs[j].start = sqStart;
-          regions.push(SQs[j])
+          regions.push(SQs[j]);
         } else {
           // create random reference coordinates
           var regions = [];
@@ -456,16 +480,18 @@ var Bam = Class.extend({
           });
 
           // intelligently determine exome bed coordinates
-          if (options.exomeSampling)
+          if (options.exomeSampling) {
             options.bed = me._generateExomeBed(options.sequenceNames[0]);
+          }
 
           // map random region coordinates to bed coordinates
-          if (options.bed != undefined)
-            bedRegions = me._mapToBedCoordinates(SQs[0].name, regions, options.bed)
+          if (options.bed !== undefined) {
+            bedRegions = me._mapToBedCoordinates(SQs[0].name, regions, options.bed);
+          }
         }
       }
 
-      var client = BinaryClient(me.iobio.bamstatsAlive);
+      var client = new BinaryClient(me.iobio.bamstatsAlive);
       var regStr = JSON.stringify((bedRegions || regions).map(function (d) {
         return {
           start: d.start,
@@ -473,52 +499,56 @@ var Bam = Class.extend({
           chr: d.name
         };
       }));
-      // var samtoolsCmd = JSON.stringify((bedRegions || regions).map(function(d) { return {d.start,end:d.end,chr:d.name};}));
-      // var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 30000 -f 2000 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
+// var samtoolsCmd = JSON.stringify((bedRegions || regions).map(function(d) { return {d.start,end:d.end,chr:d.name};}));
+// var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 30000 -f 2000 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
       var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 500 -k 1 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
-      var buffer = "";
+      var buffer = '';
          client.on('open', function(stream){
-            var stream = client.createStream({event:'run', params : {'url':url}});
+            stream = client.createStream({event:'run', params : {'url':url}});
             stream.on('error', function(err) {
               console.log(err);
-            })
-        stream.on('data', function (datas, options) {
+            });
+        stream.on('data', function (datas) {
           datas.split(';').forEach(function (data) {
-            if (data == undefined || data == "\n") return;
+            if (data === undefined || data === '\n') {
+              return;
+            }
             var success = true;
+            var obj;
             try {
-
-              var obj = JSON.parse(buffer + data)
+              obj = JSON.parse(buffer + data);
             } catch (e) {
               success = false;
               buffer += data;
             }
             if (success) {
-              buffer = "";
+              buffer = '';
               callback(obj);
             }
           });
         });
 
         stream.on('end', function () {
-          if (options.onEnd != undefined)
+          if (options.onEnd !== undefined) {
             options.onEnd();
+          }
         });
       });
     }
 
-    if (options.sequenceNames != undefined && options.sequenceNames.length == 1 && options.end != undefined) {
+    if (options.sequenceNames !== undefined && options.sequenceNames.length === 1 && options.end !== undefined) {
       goSampling([{
         name: options.sequenceNames[0],
         end: options.end
       }]);
-    } else if (options.sequenceNames != undefined && options.sequenceNames.length == 1) {
+    } else if (options.sequenceNames !== undefined && options.sequenceNames.length === 1) {
       this.getHeader(function (header) {
         var sq;
         $(header.sq).each(function (i, d) {
-          if (d.name == options.sequenceNames[0])
+          if (d.name === options.sequenceNames[0]) {
             sq = d;
-        })
+          }
+        });
         goSampling([sq]);
       });
     } else {
