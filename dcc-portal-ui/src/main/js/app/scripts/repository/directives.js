@@ -239,9 +239,11 @@
           // no need to trigger event? since setSelected sq will do it
           // brush.event(g);
         }
-
-        function updateTotalReads(totalReads) {
+        
+        function updateTotalReads(totalReads, rand) {
           // update total reads
+          console.log(rand + '::::: ' + getSelectedSeqId());
+          
           var reads = shortenNumber(totalReads);
           $('#total-reads>#value').html(reads[0]);
           $('#total-reads>#base>#number').html(reads[1] || '');
@@ -280,7 +282,7 @@
               NProgress.done();
             }
           }, options);
-
+          var rand = Math.random().toString(36).substr(2, 9);
           // turn on sampling message and off svg
           $('section#middle svg').css('display', 'none');
           $('.samplingLoader').css('display', 'block');
@@ -289,7 +291,10 @@
           // update selected stats
           window.bam
             .sampleStats(
-              function (data) {
+              function (data, seq) {
+                if (getSelectedSeqId() !== seq) {
+                  return;
+                }
                 // turn off sampling message
                 $('.samplingLoader').css('display', 'none');
                 $('section#middle svg').css('display', 'block');
@@ -319,7 +324,7 @@
                 }
                 // update charts
                 updatePercentCharts(data, window.sampleDonutChart);
-                updateTotalReads(data.total_reads);
+                updateTotalReads(data.total_reads, rand);
                 updateHistogramCharts(data, undefined, 'sampleBar');
               }, options);
         }

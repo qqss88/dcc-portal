@@ -523,7 +523,7 @@ var Bam = Class.extend({
             }
             if (success) {
               buffer = '';
-              callback(obj);
+              callback(obj, options.sequenceNames[0]);
             }
           });
         });
