@@ -90,6 +90,14 @@ elastic:
   nodeAddresses:
     - host: "localhost"
       port: 9300
+      
+  # List of TransportClient settings. 
+  # E.g. 
+  # - key: "client.transport.sniff"
+  #   value: true 
+  client:
+    - key: "client.transport.sniff"
+      value: true
 
 # Mail
 mail:

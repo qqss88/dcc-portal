@@ -22,10 +22,12 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.icgc.dcc.portal.config.PortalProperties.ElasticSearchProperties.TransportClientSetting.SNIFF_MODE_KEY;
 import static org.icgc.dcc.portal.util.VersionUtils.getApiVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getApplicationVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +36,9 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.icgc.dcc.portal.config.PortalProperties.ElasticSearchProperties.TransportClientSetting;
 import org.icgc.dcc.portal.model.Versions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +61,7 @@ public class SearchConfig {
   public Client client() {
     // TransportClient is thread-safe so @Singleton is appropriate
     val configuration = properties.getElastic();
-    val client = new TransportClient();
+    val client = createTransportClient(configuration.getClient());
     for (val nodeAddress : configuration.getNodeAddresses()) {
       client.addTransportAddress(new InetSocketTransportAddress(
           nodeAddress.getHost(),
@@ -141,6 +145,23 @@ public class SearchConfig {
         getCommitId(),
         firstNonNull(releaseIndexMetadata().get("git.commit.id.abbrev"), "unknown"),
         indexName());
+  }
+
+  private static TransportClient createTransportClient(List<TransportClientSetting> clientSettings) {
+    val settingsBuilder = ImmutableSettings.settingsBuilder();
+    if (!isSniffModeSet(clientSettings)) {
+      settingsBuilder.put(SNIFF_MODE_KEY, true);
+    }
+
+    clientSettings.stream()
+        .forEach(s -> settingsBuilder.put(s.getKey(), s.getValue()));
+
+    return new TransportClient(settingsBuilder.build());
+  }
+
+  private static boolean isSniffModeSet(List<TransportClientSetting> clientSettings) {
+    return clientSettings.stream()
+        .anyMatch(setting -> setting.getKey().equals(SNIFF_MODE_KEY));
   }
 
 }
