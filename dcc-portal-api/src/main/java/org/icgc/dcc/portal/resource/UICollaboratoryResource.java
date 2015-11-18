@@ -46,7 +46,7 @@ public class UICollaboratoryResource {
    * Resources - Collaboratory.
    */
 
-  @Path("/oicr.icgc.meta/metadata/{objectId}")
+  @Path("/metadata/{objectId}")
   @GET
   @SneakyThrows
   public Response collabMeta(@PathParam("objectId") String objectId) {

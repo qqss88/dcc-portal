@@ -267,7 +267,7 @@
           
           var match = hash.match(/^!([\w\-]+)$/i),
             to = 0,
-            HEADER_HEIGHT = 79; 
+            HEADER_HEIGHT = 49 + 10; // Height of header + some nice looking offset.
           
           
           if (match && match.length > 1) {

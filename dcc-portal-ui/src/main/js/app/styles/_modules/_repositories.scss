@@ -101,7 +101,7 @@ $aws-colour:  rgb(228, 121, 17);
         //display: inline-block;
         display: table-cell;
         vertical-align: top;
-       // width: 49%;
+        width: 50%;
         height: 100%;
       }
     }
@@ -220,9 +220,9 @@ $aws-colour:  rgb(228, 121, 17);
       }
       .card-content {
         padding: 1rem 1rem;
-        background: #fff;
+        background: transparent;
         //transform: translateX(-5.5rem);
-        transition-property: transform border-color;
+        transition-property: transform, border-color;
         transition: 0.25s ease-in;
         
         &.slide {

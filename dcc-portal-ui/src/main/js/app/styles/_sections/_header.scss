@@ -79,6 +79,7 @@ header {
   display: inline;
   text-align: left;
   margin-right: 0.7rem;
+  margin-bottom: 0.5rem;
 
   @include breakpoint($break-tablet) {
     display: inline-block;
@@ -308,7 +309,7 @@ header {
       margin: 0;
       @include breakpoint($break-tablet) {
         // margin: 0 2rem;
-        margin: 0 1.25rem;
+        margin: 0rem 1.25rem 0.7rem 0rem;
       }
       a {
         padding-right: 1rem;

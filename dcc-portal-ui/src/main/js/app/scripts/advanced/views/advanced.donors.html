@@ -1,7 +1,7 @@
-<div data-ng-if="!AdvancedCtrl.Donor.donors" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
+<div data-ng-if="!AdvancedCtrl.Donor.donors || ! AdvancedCtrl.Donor.donors.hitsLoaded" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
     Loading Donors...
 </h3></div>
-<div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0" class="empty loading-text"><h3>No Donors Found.</h3></div>
+<div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0 && AdvancedCtrl.Donor.donors.hitsLoaded" class="empty loading-text"><h3>No Donors Found.</h3></div>
 <div data-ng-show="AdvancedCtrl.Donor.donors.hits.length">
     <section style="position: relative">
         <div data-ng-class="{'graphs-collapsed': !donorExpand}" class="graphs">

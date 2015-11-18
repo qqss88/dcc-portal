@@ -1,7 +1,13 @@
-$popoverBorderRadius: 5px;
+$popoverBorderRadius: 3px;//5px;
 $popoverOutsetBorder: 0.4rem;
 $popoverBubbleMaxWidth: 28rem;
 $popoverBubbleMaxHeight: 30rem;
+
+
+$borderColor: $tooltipBorder;
+$tooltipFill: $tooltipFill;
+$shadowColor: $tooltipShadowColor;
+
 
 .popover {
   transition: all ease-in-out 0.25s;
@@ -12,19 +18,21 @@ $popoverBubbleMaxHeight: 30rem;
   display: inline-block;
   margin-right: 1rem;
   padding-left: 0.5rem;
-
+ /*
   &:hover  .popover-outer-container {
-    opacity: 1;
+    opacity: 0;
     z-index: 100;
-  }
+  } */
 
   .popover-outer-container {
     position: absolute; 
     background: transparent;
-    z-index: -1;
-    top: -10px;
-    left: -$popoverBubbleMaxWidth + 0.5rem;
-    opacity: 0;
+    //z-index: -1;
+    top: -11px;
+    left: -$popoverBubbleMaxWidth + 0.2rem;
+    //opacity: 0;
+    display: none;
+    z-index: 1000000;
     transition: opacity ease-in-out 0.25s;
    
     
@@ -32,38 +40,59 @@ $popoverBubbleMaxHeight: 30rem;
     
     .popover-inner-container-border {
       position: absolute;
-      background: #000;
-      opacity: 0.7;
+      //background: #000;
+      background: $fill;
+      //opacity: 0.7;
+      display: none;
       height: 100%;
       width: 100%;
       z-index: 0;
       top: -$popoverOutsetBorder; 
-      left: -$popoverOutsetBorder; 
+      left: -$popoverOutsetBorder;
+      border: 1px solid $borderColor;
       border-radius: $popoverBorderRadius;
       box-sizing: content-box;
       padding: $popoverOutsetBorder $popoverOutsetBorder;
-      -webkit-box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
+      /*-webkit-box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
       -moz-box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
-      box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);
+      box-shadow: -2px 4px 14px -1px rgba(0,0,0,0.75);*/
+      -webkit-filter: drop-shadow(0 1px 3px $shadowColor);
+      -moz-box-shadow: 0 1px 3px $shadowColor;
+      filter: drop-shadow(0 1px 3px $shadowColor);
       
       .arrow {
         position: absolute;
         opacity: 1;
-        right: -8px;
+        right: -10px;
         top: 17px;
         width: 0; 
         height: 0; 
         border-top: 10px solid transparent;
         border-bottom: 10px solid transparent;
         
-        border-left: 10px solid #000;
+        border-left: 10px solid $borderColor;
+      }
+
+      .arrow:after {
+        content: ' ';
+        position: absolute;
+        opacity: 1;
+        right: 1px;
+        top: -10px;
+
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+
+        border-left: 10px solid $tooltipFill;
       }
       
     }
     
     .popover-inner-container {
       position:relative;
-      background: #fff;
+      display: none;
+      //background: #fff;
+      background: $fill;
       padding: 0.5rem 0.5rem;
       border-radius: $popoverBorderRadius;
       z-index: 100;
@@ -90,7 +119,13 @@ $popoverBubbleMaxHeight: 30rem;
       .popover-body {
         width: 100%;
         height: 100%;
-        font-size: 1.2rem;
+        //font-size: 1.2rem;
+        font-size: 0.9rem;
+        line-height: 1.6rem;
+
+        & [class^="icon-"]:before {
+          width: auto;
+        }
       }
       
     }
@@ -117,7 +152,7 @@ $popoverBubbleMaxHeight: 30rem;
   
   .popover-label {
     display: inline-block;
-    border-bottom: 1px dashed;
+    //border-bottom: 1px dashed;
     line-height: 1.1rem;
   }
   

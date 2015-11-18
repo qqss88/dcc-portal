@@ -1,7 +1,7 @@
-<div data-ng-if="!AdvancedCtrl.Mutation.mutations" class="loading loading-text"><h3><i
+<div data-ng-if="! AdvancedCtrl.Mutation.mutations || ! AdvancedCtrl.Mutation.mutations.hitsLoaded" class="loading loading-text"><h3><i
         class="icon-spinner icon-spin"></i> Loading
     Mutations...</h3></div>
-<div data-ng-if="AdvancedCtrl.Mutation.mutations.hits.length == 0" class="empty loading-text"><h3>No Mutations
+<div data-ng-if="AdvancedCtrl.Mutation.mutations.hits.length == 0 && AdvancedCtrl.Mutation.mutations.hitsLoaded" class="empty loading-text"><h3>No Mutations
     Found.</h3></div>
 <div data-ng-show="AdvancedCtrl.Mutation.mutations.hits.length">
     <section>

@@ -1,7 +1,7 @@
-<div data-ng-if="!AdvancedCtrl.Gene.genes" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
+<div data-ng-if="! AdvancedCtrl.Gene.genes || ! AdvancedCtrl.Gene.genes.hitsLoaded" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
     Loading Genes...
 </h3></div>
-<div data-ng-if="AdvancedCtrl.Gene.genes.hits.length == 0" class="empty loading-text"><h3>No Genes Found.</h3></div>
+<div data-ng-if="AdvancedCtrl.Gene.genes.hits.length == 0 && AdvancedCtrl.Gene.genes.hitsLoaded" class="empty loading-text"><h3>No Genes Found.</h3></div>
 <section data-ng-show="AdvancedCtrl.Gene.genes.hits.length">
 
     <h3>Genes
