@@ -6,6 +6,7 @@
 //
 // bam.js: indexed binary alignments
 //
+'use strict';
 
 var BAM_MAGIC = 21840194;
 var BAI_MAGIC = 21578050;
@@ -33,7 +34,7 @@ function makeBam(data, bai, callback) {
 
     bam.data.slice(0, 65536).fetch(function(r) {
         if (!r) {
-            return dlog("Couldn't access BAM");
+            return console.log('Couldn\'t access BAM');
         }
 
         var unc = unbgzf(r);
