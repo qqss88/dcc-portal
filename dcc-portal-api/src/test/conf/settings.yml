@@ -184,3 +184,10 @@ setOperation:
 release:
   releaseDate: "Month Day, Year"
   dataVersion: 2
+  
+
+#Feature Flags
+features:
+  AUTH_TOKEN: true
+  ICGC_CLOUD: true
+  SOFTWARE_PAGE: true

@@ -3,6 +3,8 @@ package org.icgc.dcc.portal.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.jetty.http.HttpStatus.NOT_FOUND_404;
 import static org.icgc.dcc.portal.resource.ResourceUtils.AFFECTED_BY_THE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FACETS_ONLY_DESCRIPTION;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FACETS_ONLY_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
@@ -54,6 +56,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.TOTAL;
 import static org.icgc.dcc.portal.resource.ResourceUtils.generateQueries;
 import static org.icgc.dcc.portal.resource.ResourceUtils.mergeFilters;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
+import static org.icgc.dcc.portal.resource.ResourceUtils.regularFindAllJqlQuery;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -127,15 +130,16 @@ public class MutationResource {
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order,
+      @ApiParam(value = API_FACETS_ONLY_DESCRIPTION) @QueryParam(API_FACETS_ONLY_PARAM) @DefaultValue("false") boolean facetsOnly
       ) {
-    ObjectNode filters = filtersParam.get();
+    val filters = filtersParam.get();
 
     log.info(FIND_ALL_TEMPLATE, new Object[] { size, MUTATION, from, sort, order, filters });
 
-    return mutationService
-        .findAllCentric(query().fields(fields).filters(filters)
-            .includes(include).from(from.get()).size(size.get()).sort(sort).order(order).build());
+    val query = regularFindAllJqlQuery(fields, include, filters, from, size, sort, order);
+
+    return mutationService.findAllCentric(query, facetsOnly);
   }
 
   @Path("/count")

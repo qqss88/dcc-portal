@@ -1,9 +1,9 @@
-<div class="login-nav-bar" data-ng-class="{'default-login': ! params.user.token}">
+<div class="login-nav-bar">
    <span data-ng-show="params.user.verifying">
      <i class="icon-spinner icon-spin"></i> Verifying...
    </span>
    <span data-ng-show="params.user.token && !params.user.verifying">
-      <i data-ng-show="params.user.daco" 
+      <i data-ng-show="params.user.daco"
       class="icon-shield data-available"
          data-tooltip-placement="bottom"
          data-tooltip="DACO Access Authorized"></i>
@@ -24,8 +24,8 @@
       <ul class="toolbar">
         <li class="tool-item" data-ng-show="params.user.daco && params.showCollaboratoryToken" >
           <a href="" 
-            data-ng-click="openTokenManagerPopup()" 
-            data-tooltip="Token Manager Settings"
+            data-ng-click="openTokenManagerPopup()"
+            data-tooltip="Manage your ICGC access tokens"
             class="tool-bttn" 
             data-tooltip-placement="bottom">
               <i class="icon-key"></i>Token Manager 
@@ -38,8 +38,11 @@
         </li>
       </ul>
    </span>
-   
-   <a data-ng-hide="params.user.token || params.user.verifying" data-ng-click="openLoginPopup()" href="">
-      <i class="icon-login"></i>Login
-   </a>
+    <ul class="toolbar" data-ng-hide="params.user.token || params.user.verifying">
+        <li class="tool-item tool-item-single">
+            <a data-ng-click="openLoginPopup()" href="">
+              <i class="icon-login"></i>Login
+           </a>
+        </li>
+    </ul>
 </div>

@@ -34,17 +34,37 @@
         <td ng-bind="fileId" />
       </tr>
       <tr>
-        <th>File Object ID</th>
+        <th>Object ID</th>
         <td>
-          <div tooltip="Click here to copy the Object ID to your clipboard." data-tooltip-placement="top">
-            <div data-copy-to-clip data-copy-data="info.objectId" data-show-copy-tips="true"
+          <div ng-init="objectId = fileCtrlr.stringOrDefault (info.objectId);">
+            <div ng-if="objectId !== fileCtrlr.defaultString"
+                 data-copy-to-clip data-copy-data="objectId" data-show-copy-tips="true"
                  data-on-copy-success-message="File Object ID copied!"
                  data-on-copy-focus-on="#fileObjectID"
+                 data-on-hover-message="Click here to copy the Object ID to your clipboard."
                  data-prompt-on-copy="false">
                 <span class="icon-clippy"></span>
-                <span id="fileObjectID" data-ng-bind="fileCtrlr.stringOrDefault (info.objectId)">
+                <span id="fileObjectID" data-ng-bind="objectId">
                 </span>
             </div>
+            <span ng-if="objectId === fileCtrlr.defaultString" data-ng-bind="objectId" />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>Bundle ID</th>
+        <td>
+          <div ng-init="dataBundleId = fileCtrlr.stringOrDefault (info.dataBundle.dataBundleId);">
+            <div ng-if="dataBundleId !== fileCtrlr.defaultString"
+                 data-copy-to-clip data-copy-data="dataBundleId" data-show-copy-tips="true"
+                 data-on-copy-success-message="Bundle ID copied!"
+                 data-on-copy-focus-on="#dataBundleID"
+                 data-on-hover-message="Click here to copy the Bundle ID to your clipboard."
+                 data-prompt-on-copy="false">
+                <span class="icon-clippy" />
+                <span id="dataBundleID" data-ng-bind="dataBundleId" />
+            </div>
+            <span ng-if="dataBundleId === fileCtrlr.defaultString" data-ng-bind="dataBundleId" />
           </div>
         </td>
       </tr>
@@ -134,7 +154,15 @@
           <th rowspan="2">Size</th>
           <th rowspan="2">Last Update</th>
           <th colspan="3" class="text-center">Repository</th>
-          <th rowspan="2">Actions</th>
+          <th rowspan="2"> <popover class="light"
+                                    popover-anchor-label="Actions"
+                                    popover-assist-icon-class="icon-help"
+                                    popover-assist-icon-position-before="false">
+
+            Click on <strong><i class="icon-download"></i>Manifest</strong> and use the manifest to download the data file.
+            Please see the <a style="white-space: nowrap;" href="https://docs.icgc.org/data-portal-usage#ExternalRepoList" target="_blank"><i class="icon-external-link"></i>documentation</a> to learn more.
+            </a>
+          </popover></th>
         </tr>
 
         <tr>
@@ -174,7 +202,7 @@
               ng-init="metaDataUrl = fileCtrlr.buildMetaDataUrl (fileCopy, info); isS3 = fileCtrlr.isS3 (fileCopy.repoType);">
               <br>
               <a ng-if="isS3"
-                href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}">
+                href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}" target="_blank">
                 <i class="icon-download" />Metadata
               </a>
               <a ng-if="! isS3"

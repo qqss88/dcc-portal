@@ -15,43 +15,44 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.model;
+package org.icgc.dcc.portal.resource;
 
-import java.util.Map;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import lombok.Builder;
-import lombok.Value;
+import java.net.URL;
 
-@Value
-@Builder
-public class Settings {
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
-  /**
-   * Release settings.
-   */
-  String releaseDate;
-  int dataVersion;
+import org.springframework.stereotype.Component;
 
-  /**
-   * Download settings.
-   */
-  boolean downloadEnabled;
+import lombok.SneakyThrows;
+import lombok.val;
 
-  /**
-   * Crowd settings.
-   */
-  String ssoUrl;
-  String ssoUrlGoogle;
+@Component
+@Path("/v1/ui/collaboratory")
+@Produces(APPLICATION_JSON)
+public class UICollaboratoryResource {
 
   /**
-   * Set analysis settings.
+   * Constants.
    */
-  int maxNumberOfHits;
-  int maxMultiplier;
+  private static final String COLLAB_META_URL = "https://www.cancercollaboratory.org:9080/oicr.icgc.meta/metadata/";
 
   /**
-   * Feature Flags for enabling/disabling features.
+   * Resources - Collaboratory.
    */
-  Map<String, Boolean> featureFlags;
+
+  @Path("/metadata/{objectId}")
+  @GET
+  @SneakyThrows
+  public Response collabMeta(@PathParam("objectId") String objectId) {
+    val input = new URL(COLLAB_META_URL + objectId).openStream();
+
+    return Response.ok(input).type("text/xml").build();
+  }
 
 }

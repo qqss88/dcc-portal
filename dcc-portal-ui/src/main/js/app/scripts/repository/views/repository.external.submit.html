@@ -19,12 +19,12 @@
            <th class="text-right">Total file size</th>
            <th class="text-right">
              <popover class="light"
-                      popover-title="Creating a Manifest ID" 
-                      popover-anchor-label="Create Manifest ID" 
-                      popover-assist-icon-class="icon-help-circled"
+                      popover-anchor-label="Manifest ID"
+                      popover-assist-icon-class="icon-help"
                       popover-assist-icon-position-before="false">
-                 A manifest ID is used to reference the desired respository you wish to 
-                 obtain the manifest file for in the Data Portal. Please see the <a href="/icgc-in-the-cloud/guide#!storage-manifest-section" target="_blank">User Guide</a> to learn more.
+
+                 In addition to the manifest file, the ICGC Storage Client accepts manifest ID to download files selected in your query.
+                 Please see the <a href="/icgc-in-the-cloud/guide#!storage-manifest-data-portal-section" target="_blank"><i class="icon-external-link"></i>User Guide</a> to learn more.
                  </a> 
              </popover>
              </th>
@@ -39,10 +39,13 @@
              <td class="text-right">{{ repoData.fileCount | number }}</td>
              <td class="text-right">{{ repoData.fileSize | bytes }}</td>
              <td class="text-right manifest-cell">
+                 <span data-tooltip="Manifest ID creation is not applicable to {{repoName}}." data-tooltip-placement="left" data-ng-if="repoName !== 'AWS - Virginia' && repoName !== 'Collaboratory'" style="color: #888; font-size: 0.8rem;">
+                     Not Applicable
+                 </span>
                <div class="manifest" data-ng-if="repoName === 'AWS - Virginia' || repoName === 'Collaboratory'">
                  <button data-ng-if="! repoData.isGeneratingManifestID  && ! repoData.manifestID" class="t_button no-animate"
                    data-ng-click="createManifestId(repoName, repoData)">
-                  Create Manifest ID
+                   Manifest ID
                  </button>
                  <div data-ng-if="repoData.isGeneratingManifestID">
                    <i class="icon-spinner icon-spin"></i>

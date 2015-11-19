@@ -82,7 +82,7 @@ public class MutationResourceTest extends ResourceTest {
 
   @Test
   public final void test_findAll() throws IOException {
-    when(mutationService.findAllCentric(any(Query.class))).thenReturn(MUTATIONS);
+    when(mutationService.findAllCentric(any(Query.class), any(Boolean.class))).thenReturn(MUTATIONS);
 
     val response = resource("");
 

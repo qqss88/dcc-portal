@@ -257,13 +257,98 @@ angular.module('icgc.ui.popover', [])
         'isOpen': '=popoverIsOpen'
       },
       templateUrl: '/scripts/ui/views/popover.html',
-      link: function (scope) {
+      link: function (scope, element) {
+
+        function Popover(id) {
+          var _popoverEl = element.find(id),
+              _outerBorder = _popoverEl.find('.popover-inner-container-border'),
+              _popoverContent = _popoverEl.find('.popover-inner-container'),
+              _self = this,
+              _containerHoverCount = 0,
+              _timeout_in_ms = 700;
+
+          function _init() {
+
+            _popoverEl.hover(function() {
+              _self.show();
+            },
+            function() {
+              _self.hide();
+            });
+
+          }
+
+          function _popoverStatusCheck() {
+            setTimeout(_popoverShow, _timeout_in_ms);
+          }
+
+          function _popoverShow(shouldShow) {
+
+            if (shouldShow === true) {
+              _popoverEl.show();
+              _outerBorder.fadeIn('fast');
+              _popoverContent.fadeIn('fast');
+            }
+            else if (_containerHoverCount === 0) {
+              _popoverContent.fadeOut('fast');
+              _outerBorder.fadeOut('fast', function() {
+                _popoverEl.hide();
+              });
+
+            }
+          }
+
+
+          _init();
+
+
+          // Popover Public API
+          this.show = function() {
+            _containerHoverCount++;
+
+            _popoverShow(true);
+            _popoverStatusCheck();
+          };
+
+          this.hide = function() {
+            _containerHoverCount  = Math.max(0, _containerHoverCount - 1 );
+            _popoverStatusCheck();
+          };
+
+          this.popoverTimeout = function(timeoutInMS) {
+
+            if (arguments.length > 0) {
+              _timeout_in_ms = timeoutInMS;
+            }
+
+            return _timeout_in_ms;
+          };
+
+
+        }
       
         function _init() {
+          var popover = new Popover('.popover-outer-container');
           scope.title = $sce.trustAsHtml(scope.popoverTitle);
           scope.anchorText = $sce.trustAsHtml(scope.popoverAnchorText); 
-          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false; 
+          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false;
+
+
+          element.hover(
+            function() {
+              popover.show();
+            },
+            function() {
+              setTimeout(function() {
+                popover.hide();
+              }, popover.popoverTimeout());
+            }
+          );
+
         }
+
+
+
 
         _init();
       }
@@ -337,7 +422,8 @@ angular.module('icgc.ui.copyPaste', [])
                 onError: '&',
                 copyData: '=',
                 onCopyFocusOn: '@',
-                onCopySuccessMessage: '@'
+                onCopySuccessMessage: '@',
+                onHoverMessage: '@'
             },
             link: function (scope, element, attrs) {
 
@@ -377,9 +463,18 @@ angular.module('icgc.ui.copyPaste', [])
 
              }
 
-              function _showTipMessage(isSuccess, overrideMessage) {
+              function _hideTipMessage() {
+                if (!_showCopyTips || _showingCopiedStatusMessage) {
+                  return;
+                }
 
-                if (!_showCopyTips) {
+                _messageBubble.fadeOut('fast');
+              }
+
+              function _showTipMessage(isSuccess, overrideMessage, timeoutInMS) {
+
+                // Status copy messages take priority over other messages
+                if (!_showCopyTips || _showingCopiedStatusMessage) {
                   return;
                 }
                 
@@ -390,10 +485,10 @@ angular.module('icgc.ui.copyPaste', [])
                     
                 
                 
-                if (typeof overrideMessage === 'string') {
+                if (typeof overrideMessage === 'string') { // We are using this as a tooltip/status notifier
                   msg = overrideMessage;
                 }
-                else {
+                else { // Or else we handle success/failure of copy
                   switch (_browserOSPlatform) {
                     case 'mac':
                       copyPasteCommandKey = '&#x2318;';
@@ -402,15 +497,18 @@ angular.module('icgc.ui.copyPaste', [])
                       break;
                   }
 
+                  _showingCopiedStatusMessage = true;
+
                   if (isSuccess) {
                     msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage : '';
+
 
                     if (! msg) {
                       msg += 'Press ' + copyPasteCommandKey +
                              '-' + pasteCommandAlphaKey + ' to paste.';
                     }
                   }
-                  else {
+                  else if (isSuccess) {
                     msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +
                     ' to copy and ' + copyPasteCommandKey + '-' +
                     pasteCommandAlphaKey + ' to paste.';
@@ -433,7 +531,8 @@ angular.module('icgc.ui.copyPaste', [])
                 _previousMessageTimeout = setTimeout(function () {
                   _messageBubble.fadeOut('fast');
                   _previousMessageTimeout = null;
-                }, 2500);
+                  _showingCopiedStatusMessage = false;
+                }, timeoutInMS || 2500);
               }
               
               //
@@ -603,6 +702,17 @@ angular.module('icgc.ui.copyPaste', [])
                 ////////////////////////////////////////////////////////////////
 
                 element.addClass('copy-to-clip');
+
+                if (scope.onHoverMessage) {
+                  element.hover(
+                    function() {
+                      _showTipMessage(null, scope.onHoverMessage, 1500);
+                    },
+                    function() {
+                      _hideTipMessage();
+                    }
+                  );
+                }
                 
                 if (_zeroClipboardSupported) {
                   _initCopyZeroClipboard();
@@ -645,6 +755,7 @@ angular.module('icgc.ui.copyPaste', [])
                 _messageBubble = element.find('.copy-to-clip-message-container'),
                 _focusOnCopySelector = scope.onCopyFocusOn ? element.find(scope.onCopyFocusOn) : false,
                 _previousMessageTimeout = null,
+                _showingCopiedStatusMessage = false,
                 _browserOSPlatform = window.navigator.platform ?
                   (navigator.platform.toLowerCase().indexOf('mac') >= 0 ? 'mac' : 'win') : 'win';
               

@@ -11,14 +11,15 @@
 }
 
 .t_suggest__input {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   border: .2rem solid $greyLight;
   border-radius: 0;
-  margin: 1rem 0;
+  margin: 1rem 0rem 0.3rem 0rem;
+  line-height: 2rem;
   outline: $cyan;
   padding: {
     top: 1rem;
-    right: 2.5rem;
+    right: 2rem;
     bottom: 1rem;
     left: 0;
   }
