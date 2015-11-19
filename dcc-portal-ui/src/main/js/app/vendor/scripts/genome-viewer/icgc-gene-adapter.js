@@ -23,7 +23,7 @@ function IcgcGeneAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = '/api/browser';
+  this.host = window.$icgcApp.getQualifiedHost() + '/api/browser';
   this.gzip = true;
 
   this.params = {};

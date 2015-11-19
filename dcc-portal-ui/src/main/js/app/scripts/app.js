@@ -108,7 +108,7 @@
              provider = _angularInjector.get(dependencyName);
           }
           catch (e) {
-            console.error('Cannot find dependeny with name: ' + dependencyName);
+            console.error('Cannot find dependency with name: ' + dependencyName);
             provider = null;
           }
 
@@ -119,7 +119,15 @@
           return _APIInterface.setDebugEnabled(isAPIDebugEnabled);
         }
 
+        function __getQualifiedHost() {
+          var url = '';
 
+          if ( _isLocalUIRun === true ) {
+            url = window.location.protocol + '//' + _defaultDevHost + ':' + _defaultDevPort;
+          }
+
+          return url;
+        }
 
         ///////////////////////////////////////////////////////
         // Public API
@@ -164,6 +172,8 @@
         this.getAngularInjector = __getAngularInjector;
 
         this.getAngularProvider = __getAngularProvider;
+
+        this.getQualifiedHost = __getQualifiedHost;
 
 
       return this;
