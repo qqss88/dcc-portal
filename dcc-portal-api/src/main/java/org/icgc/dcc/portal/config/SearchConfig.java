@@ -146,6 +146,7 @@ public class SearchConfig {
   }
 
   private static TransportClient createTransportClient(Map<String, String> clientSettings) {
+    logClientSettings(clientSettings);
     val settingsBuilder = ImmutableSettings.settingsBuilder();
     if (!isSniffModeSet(clientSettings)) {
       settingsBuilder.put(SNIFF_MODE_KEY, true);
@@ -160,6 +161,14 @@ public class SearchConfig {
   private static boolean isSniffModeSet(Map<String, String> clientSettings) {
     return clientSettings.entrySet().stream()
         .anyMatch(e -> e.getKey().equals(SNIFF_MODE_KEY));
+  }
+
+  private static void logClientSettings(Map<String, String> clientSettings) {
+    val settings = newHashMap(clientSettings);
+    if (!isSniffModeSet(clientSettings)) {
+      settings.put(SNIFF_MODE_KEY, String.valueOf(true));
+    }
+    log.info("Initializing Elasticsearch Transport Client with settings: {}", settings);
   }
 
 }
