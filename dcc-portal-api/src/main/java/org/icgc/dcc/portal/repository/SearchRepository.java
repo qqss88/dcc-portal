@@ -30,6 +30,10 @@ import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.EXACT_MATCH_SUFFIX;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.LOWERCASE_MATCH_SUFFIX;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.PARTIAL_MATCH_SUFFIX;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.boost;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 
 import java.util.Collection;
@@ -37,6 +41,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -54,11 +63,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -124,6 +128,11 @@ public class SearchRepository {
       Types.GENE_SET)
       .map(t -> TYPE_ID_MAPPINGS.get(t))
       .collect(toImmutableSet());
+
+  private static final List<String> SEARCH_SUFFIXES = ImmutableList.of(
+      boost(LOWERCASE_MATCH_SUFFIX, 2), PARTIAL_MATCH_SUFFIX);
+  private static final List<String> BOOSTED_SEARCH_SUFFIXES = ImmutableList.of(
+      boost(LOWERCASE_MATCH_SUFFIX, 2), boost(PARTIAL_MATCH_SUFFIX, 2));
 
   // Instance variables
   private final Client client;
@@ -212,7 +221,7 @@ public class SearchRepository {
 
   private static QueryBuilder getQuery(Query query, String type) {
     val queryString = query.getQuery();
-    val prefixQuery = prefixQuery(FieldNames.FILE_NAME + ".raw", queryString);
+    val prefixQuery = prefixQuery(FieldNames.FILE_NAME + EXACT_MATCH_SUFFIX, queryString);
     val keys = buildMultiMatchFieldList(FIELD_KEYS, queryString, type);
     val multiMatchQuery = multiMatchQuery(queryString, toStringArray(keys)).tieBreaker(TIE_BREAKER);
 
@@ -226,15 +235,12 @@ public class SearchRepository {
     return fieldsToSkip.stream().noneMatch(fieldToAvoid -> sourceField.equals(fieldToAvoid));
   }
 
-  private static final List<String> SEARCH_SUFFIXES = ImmutableList.of(".search^2", ".analyzed");
-  private static final List<String> BOOSTED_SEARCH_SUFFIXES = ImmutableList.of(".search^2", ".analyzed^2");
-
-  private static List<String> appendSearchSuffixes(String field) {
-    return transform(SEARCH_SUFFIXES, suffix -> field + suffix);
+  private static List<String> appendSuffixes(String field, List<String> suffixes) {
+    return transform(suffixes, suffix -> field + suffix);
   }
 
-  private static List<String> appendBoostedSearchSuffixes(String field) {
-    return transform(BOOSTED_SEARCH_SUFFIXES, suffix -> field + suffix);
+  private static List<String> appendSearchSuffixes(String field) {
+    return appendSuffixes(field, SEARCH_SUFFIXES);
   }
 
   @NonNull
@@ -258,11 +264,8 @@ public class SearchRepository {
     }
 
     // Don't boost without space or genes won't show when partially matched
-    if (queryString.contains(" ")) {
-      keys.addAll(appendBoostedSearchSuffixes(FieldNames.GENE_MUTATIONS));
-    } else {
-      keys.addAll(appendSearchSuffixes(FieldNames.GENE_MUTATIONS));
-    }
+    val geneMutationSearchSuffixes = queryString.contains(" ") ? BOOSTED_SEARCH_SUFFIXES : SEARCH_SUFFIXES;
+    keys.addAll(appendSuffixes(FieldNames.GENE_MUTATIONS, geneMutationSearchSuffixes));
 
     // Exact-match search on "id".
     keys.add(FieldNames.ID);

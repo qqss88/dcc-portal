@@ -15,30 +15,69 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.meta;
+package org.icgc.dcc.portal.service;
 
-import static lombok.AccessLevel.PRIVATE;
-import lombok.Getter;
+import static org.dcc.portal.pql.meta.Type.DRUG;
+import static org.icgc.dcc.portal.model.Drug.parse;
+
+import java.util.List;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-@Getter
-@RequiredArgsConstructor(access = PRIVATE)
-public enum Type {
+import org.dcc.portal.pql.ast.StatementNode;
+import org.dcc.portal.pql.query.PqlParser;
+import org.elasticsearch.search.SearchHit;
+import org.icgc.dcc.portal.model.Drug;
+import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
+import org.icgc.dcc.portal.repository.DrugRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-  DONOR_CENTRIC("donor-centric", "donor"),
-  GENE_CENTRIC("gene-centric", "gene"),
-  MUTATION_CENTRIC("mutation-centric", "mutation"),
-  OBSERVATION_CENTRIC("observation-centric", "observation"),
-  PROJECT("project", "project"),
-  REPOSITORY_FILE("file-centric", "file"),
-  GENE_SET("gene-set", "gene-set"),
-  DRUG("drug", "drug");
+import com.google.common.collect.FluentIterable;
+
+/**
+ * Service to facilitate drug query operations
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+public class DrugService {
+
+  private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
+
+  private final DrugRepository repository;
 
   @NonNull
-  private final String id;
+  public List<Drug> findAll(Query query) {
+    val pql = toAst(query);
+    val response = repository.findAll(pql);
+
+    log.debug("Response of findAll is: {}", response);
+
+    return FluentIterable.from(response.getHits())
+        .transform(DrugService::toDrug)
+        .toList();
+  }
 
   @NonNull
-  private final String prefix;
+  public Drug findOne(String id) {
+    val response = repository.findOne(id);
+    return parse(response.getSourceAsString());
+  }
+
+  private static StatementNode toAst(Query query) {
+    val pql = QUERY_CONVERTER.convert(query, DRUG);
+
+    log.info("pql for drug is: {}", pql);
+    return PqlParser.parse(pql);
+  }
+
+  private static Drug toDrug(SearchHit hit) {
+    return parse(hit.getSourceAsString());
+  }
 
 }

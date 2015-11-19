@@ -31,12 +31,14 @@ import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilter
 import static org.dcc.portal.pql.es.utils.Visitors.createResolveNestedFieldVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
 import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getDrugTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getRepositoryFileTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
@@ -75,6 +77,7 @@ public class EsAstTransformer {
           .put(OBSERVATION_CENTRIC, createFacetContext(getObservationCentricTypeModel()))
           .put(PROJECT, createFacetContext(getProjectTypeModel()))
           .put(REPOSITORY_FILE, createFacetContext(getRepositoryFileTypeModel()))
+          .put(DRUG, createFacetContext(getDrugTypeModel()))
           .build();
 
   public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
