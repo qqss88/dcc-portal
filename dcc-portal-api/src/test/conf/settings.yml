@@ -93,11 +93,9 @@ elastic:
       
   # List of TransportClient settings. 
   # E.g. 
-  # - key: "client.transport.sniff"
-  #   value: true 
+  # "client.transport.sniff": true 
   client:
-    - key: "client.transport.sniff"
-      value: true
+    "client.transport.sniff": true
 
 # Mail
 mail:
