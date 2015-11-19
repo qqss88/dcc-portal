@@ -20,7 +20,13 @@
 	
 	var module = angular.module('icgc.pathways', ['icgc.enrichment.directives']);
 	
-	module.config(function($stateProvider) {
+	module
+    .constant('PathwaysConstants', {
+      EVENTS: {
+        MODEL_READY_EVENT:'icgc.pathways.ready.event'
+      }
+    })
+    .config(function($stateProvider) {
 		$stateProvider.state('pathways', {
 			url: '/pathways/:entityID',
 			templateUrl: '/scripts/modules/pathwayviewer/views/pathways.html',
@@ -50,7 +56,7 @@
 
 	module.controller('PathwaysController', function($scope, $q, Page, EnrichmentData, Restangular,
 		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService,
-    EnrichmentService) {
+    EnrichmentService, PathwaysConstants) {
 				
 		
 		var _ctrl = this,
@@ -290,6 +296,11 @@
          $scope.geneSet = _geneSet;
          $scope.pathway = {xml: _xml, zooms: _zooms, highlights: _pathwayHighlights, overlaps: _geneOverlapExistsHash};
          $scope.uiParentPathways = _uiParentPathways;
+
+         setTimeout(function() {
+           $scope.$broadcast(PathwaysConstants.EVENTS.MODEL_READY_EVENT, {});
+         }, 100);
+
          //console.log($scope.pathway);
        });
  

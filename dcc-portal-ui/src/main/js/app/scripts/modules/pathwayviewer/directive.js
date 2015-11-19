@@ -21,9 +21,9 @@
 (function($) {
   'use strict';
 
-  var module = angular.module('icgc.pathwayviewer', ['icgc.pathwayviewer.directives.controller']);
+  var module = angular.module('icgc.pathwayviewer', ['icgc.pathways', 'icgc.pathwayviewer.directives.controller']);
 
-  module.directive('pathwayViewer', function ($location) {
+  module.directive('pathwayViewer', function ($location, PathwaysConstants) {
     return {
       restrict: 'E',
       replace: true,
@@ -202,10 +202,10 @@
         });
 
         // Render legend last to ensure all dependancies are initialized. Timeout of 0 does not work in firefox.
-        setTimeout(function() {
+        $scope.$on(PathwaysConstants.EVENTS.MODEL_READY_EVENT, function() {
           var rect = $('.pathway-legend')[0].getBoundingClientRect();
           controller.renderLegend(rect.width,rect.height);
-        }, 700);
+        });
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
