@@ -129,16 +129,16 @@
           }
         };
 
-        var controller = new pathwayViewerCtrl.ReactomePathway({
+        var controllerSettings = {
           width: 500,
-          height: 300,
+          height: 350,
           container: '#pathway-viewer-mini',
           onClick: function (d) {
             var mutationCount = '*',
-                node = $.extend({}, d),
-                overlappingGenesMap = {},
-                overlappingGenesList = [],
-                geneList = [];
+              node = $.extend({}, d),
+              overlappingGenesMap = {},
+              overlappingGenesList = [],
+              geneList = [];
 
             // Reset data
             $scope.geneList = [];
@@ -149,7 +149,7 @@
             showInfo();
 
             if (overlaps && node.isPartOfPathway) {
-              console.log('Overlapping!!' , d.reactomeId, overlaps);
+              //console.log('Overlapping!!' , d.reactomeId, overlaps);
               _.keys(overlaps).forEach(function(dbId) {
                 if (dbId === d.reactomeId) {
                   var overlappingGene = overlaps[dbId];
@@ -158,7 +158,7 @@
                 }
               });
 
-              console.log('OVERLAPPPING!!!', overlappingGenesList);
+              //console.log('OVERLAPPPING!!!', overlappingGenesList);
               $scope.overlappingGenesList = overlappingGenesList;
               $scope.overlappingGenesMap = overlappingGenesMap;
             }
@@ -199,13 +199,10 @@
           overlapColor: '#ff9900',
           initScaleFactor: 0.90,
           subPathwayColor: 'navy'
-        });
+        };
 
-        // Render legend last to ensure all dependancies are initialized. Timeout of 0 does not work in firefox.
-        $scope.$on(PathwaysConstants.EVENTS.MODEL_READY_EVENT, function() {
-          var rect = $('.pathway-legend')[0].getBoundingClientRect();
-          controller.renderLegend(rect.width,rect.height);
-        });
+        var controller = new pathwayViewerCtrl.ReactomePathway(controllerSettings);
+
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
@@ -335,6 +332,14 @@
 
           overlaps = newValue;
           handleRender();
+        });
+
+        // Render legend last to ensure all dependancies are initialized. Timeout of 0 does not work in firefox.
+        $scope.$on(PathwaysConstants.EVENTS.MODEL_READY_EVENT, function() {
+
+            //var rect = $('.pathway-legend')[0].getBoundingClientRect();
+            controller.renderLegend(240, 671);
+
         });
 
         // Needed to fix url paths for SVGs on url change due to <base> tag required by angular

@@ -76,7 +76,7 @@
                         </td>
                         <td class="text-right">
                             <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></span>
-                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters" class="gene-overlap-result">
                                 <a href="/search/g?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></a>
                             </span>
                         </td>

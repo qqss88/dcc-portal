@@ -178,7 +178,7 @@ angular.module('icgc.pathwayviewer.directives.controller', ['icgc.pathwayviewer.
         var config =  this.config;
         var rendererUtils = this.rendererUtils;
 
-        var legendSvg = d3.select('.pathway-legend').append('svg')
+        var legendSvg = d3.select('.pathway-legend-content').append('svg')
           .attr('class','pathway-legend-svg')
           .attr('viewBox', '0 0 ' +w+ ' ' + h)
           .attr('preserveAspectRatio', 'xMidYMid')
@@ -188,17 +188,18 @@ angular.module('icgc.pathwayviewer.directives.controller', ['icgc.pathwayviewer.
           onClick: function(){},
           urlPath: config.urlPath,
           strokeColor: config.strokeColor,
-          highlightColor: config.highlightColor
+          highlightColor: config.highlightColor,
+          overlapColor: config.overlapColor
         });
 
         var nodes = rendererUtils.getLegendNodes(20,0,legendSvg);
 
         legendRenderer.renderNodes(nodes);
-        legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.38,legendSvg));
-        legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(35,h*0.63,legendSvg),true);
+        legendRenderer.renderEdges(rendererUtils.getLegendLines(40,Math.ceil(h*0.44),legendSvg));
+        legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(35,Math.ceil(h*0.67),legendSvg),true);
         var model = new PathwayModel();
-        model.nodes = [nodes[nodes.length-1]];
-        legendRenderer.highlightEntity([{id:'mutated',value:99}], [] ,model);
+        model.nodes = [nodes[nodes.length-2], nodes[nodes.length-1]];
+        legendRenderer.highlightEntity([{id:'mutated',value:99}], {'overlapping': 0} ,model);
 
         legendSvg.selectAll('.reaction-failed-example')
           .classed('failed-reaction',true);
@@ -214,6 +215,7 @@ angular.module('icgc.pathwayviewer.directives.controller', ['icgc.pathwayviewer.
       ReactomePathway.prototype.highlight = function (rawHighlights, overlaps) {
         var highlights = [];
         var nodesInPathway = this.nodesInPathway;
+        console.log(nodesInPathway);
         rawHighlights.forEach(function (rh) {
           rh.dbIds.forEach(function (dbId) {
 

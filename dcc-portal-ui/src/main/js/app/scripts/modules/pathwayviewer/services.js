@@ -949,49 +949,99 @@ angular.module('icgc.pathwayviewer.directives.services', [])
       RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop, svg){
         var nodes = [];
         var mutatedNodeText = 'Mutated Gene(s)';
+        var overlappedNodeText = 'Overlapping Gene(s)';
         var failedText = 'Failed Output';
         var lofText = "LossOfFunction";
         var x = marginLeft, y= marginTop;
-        var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText,lofText,mutatedNodeText];
+        var types = [
+          'Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',
+          failedText,lofText, mutatedNodeText, overlappedNodeText
+        ];
+
+
+        function _getIDForType(type) {
+          var _id = 'fake';
+
+          switch(type) {
+            case mutatedNodeText:
+              _id = 'mutated';
+              break;
+            case overlappedNodeText:
+              _id = 'overlapping';
+              break;
+            default:
+              break;
+          }
+
+          return _id;
+        }
+
+
         for(var i=0;i<types.length;i++){
           x = i%2===0?marginLeft:marginLeft+100+10;
           y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
           var type = types[i];
 
-          nodes.push({
+          if (type === overlappedNodeText) {
+            x = marginLeft;
+            y = Math.floor((i+ 1)/2)*40 + marginTop + 5*Math.floor((i+1)/2);
+          }
+
+
+          var node = {
             position:{x:x,y:y},
             size:{width:90,height:30},
             type:(function(type) {
               if (type==='ProcessNode') {
                 return type;
-              } else if (type===failedText) {
+              }
+              else if (type === failedText) {
                 return 'RenderableFailed';
-              } else if (type===lofText) {
+              }
+              else if (type === lofText) {
                 return 'RenderableEntitySet';
-              } else {
+              }
+              else if (type === overlappedNodeText) {
+                return 'RenderableOverlappedEntitySet';
+              }
+              else {
                 return 'Renderable'+type;
               }
             })(type),
-            id:type===mutatedNodeText?'mutated':'fake',
+            id: _getIDForType(type),
             crossed:type===failedText?true:false,
             lof:type===lofText?true:false,
             grayed: false,
-            reactomeId:type===mutatedNodeText?'mutated':'fake',
+            reactomeId: _getIDForType(type),
             text:{content:type,position:{x:x,y:y}}
-          });
+          };
+          console.log(node);
+          if (type === overlappedNodeText) {
+            node.size.height += 10;
+          }
+
+          nodes.push(node);
+
+          if (type === mutatedNodeText) {
+            // Add extra comment for mutated gene node to show what the value in the corner means
+            svg.append('foreignObject').attr({
+              x: marginLeft+90,
+              y: y - 15,
+              width:100,
+              height:35,
+              'fill':'none'
+            }).append('xhtml:body')
+              .attr('class','RenderableNodeText')
+              .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+                    '&larr; # ICGC Mutations'+'</td></tr></table>');
+
+
+          }
+
+
         }
 
-        // Add extra comment for mutated gene node to show what the value in the corner means
-        svg.append('foreignObject').attr({
-          x: marginLeft+90,
-          y: y - 15,
-          width:100,
-          height:35,
-          'fill':'none'
-        }).append('xhtml:body')
-          .attr('class','RenderableNodeText')
-          .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
-                '&larr; # ICGC Mutations'+'</td></tr></table>');
+
 
         return nodes;
       };
