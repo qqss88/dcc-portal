@@ -33,7 +33,7 @@ public enum Type {
   PROJECT("project", "project"),
   REPOSITORY_FILE("file-centric", "file"),
   GENE_SET("gene-set", "gene-set"),
-  DRUG("drug", "drug");
+  DRUG("drug-centric", "drug");
 
   @NonNull
   private final String id;
