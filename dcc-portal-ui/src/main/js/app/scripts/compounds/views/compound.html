@@ -1,0 +1,149 @@
+<div data-ng-init="compound = CompoundCtrl.getCompound()">
+    <div class="h1-wrap">
+        <h1 data-ui-scrollfix=79>
+            <span class="t_badge t_badge__compound"></span>
+            <span data-ng-bind=":: compound.name"></span>
+        </h1>
+    </div>
+    <div data-scroll-spy="">
+        <aside data-ui-scrollfix=79 class="t_sidenav">
+            <section>
+                <ul class="t_subnav__items">
+                    <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a></li>
+                    <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Targeted Genes</a></li>
+                    <li data-spy="trials" class="t_subnav__items__item"><a data-scrollto href="#trials">Clinical Trials</a></li>
+                </ul>
+            </section>
+        </aside>
+        <article>
+            <section id="summary">
+                <div class="wide">
+
+                    <h3>Summary</h3>
+                    <table class="table table-info">
+                        <tbody>
+                            <tr>
+                                <th>Name</th>
+                                <td data-ng-bind=":: compound.name"></td>
+                            </tr>
+                            <tr>
+                                <th>Inchikey</th>
+                                <td data-ng-bind=":: compound.inchiKey"></td>
+                            </tr>
+                            <tr>
+                                <th>Compound Class</th>
+                                <td data-ng-bind=":: compound.drugClass"></td>
+                            </tr>
+                            <tr>
+                                <th>Clinical Trials</th>
+                                <td>
+                                    <a data-scrollto href="#trials" data-ng-bind=":: compound.cancerTrialCount"></a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                    <div class="narrow omega">
+                        <h3>External References</h3>
+                        <table class="table table-info">
+                            <tbody>
+                                <tr>
+                                    <th>Zinc ID</th>
+                                    <td>
+                                        <a href="http://zinc15.docking.org/substances/{{compound.id}}" target="_blank">
+                                            <span class="icon-external-link"></span><span data-ng-bind="compound.id"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <tr data-ng-repeat="(refName, refIds) in :: compound.externalReferences" data-ng-if="refIds.length">
+                                <th data-ng-bind="CompoundCtrl.getPrettyExternalRefName(refName)"></th>
+                                <td>
+                                    <ul>
+                                        <li data-ng-repeat="refId in :: refIds">
+                                            <a  data-ng-if="refName === 'chembl'" href="https://www.ebi.ac.uk/chembl/compound/inspect/{{refId}}"
+                                                target="_blank">
+                                                <span class="icon-external-link"></span><span data-ng-bind="refId"></span>
+                                            </a>
+
+                                            <a  data-ng-if="refName === 'drugbank'" href="http://www.drugbank.ca/drugs/{{refId}}"
+                                                target="_blank">
+                                                <span class="icon-external-link"></span><span data-ng-bind="refId"></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="wide">
+                        <h3>ATC Codes</h3>
+                        <div data-ng-if="compound.atcCodes.length == 0">No ATC Codes Found.</div>
+                        <table class="table table-info" data-ng-if="compound.atcCodes.length">
+                            <tbody>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Description</th>
+                                    <th>ATC Level 5 Code</th>
+                                </tr>
+                                <tr data-ng-repeat="atcCodes in :: compound.atcCodes">
+                                    <td data-ng-bind="atcCodes.code"></td>
+                                    <td data-ng-bind="atcCodes.description"></td>
+                                    <td data-ng-bind="atcCodes.atcLevel5Codes"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                <div class="narrow omega" data-ng-if="compound.imageURL">
+                    <h3>Molecule</h3>
+                    <div style="border: solid 1px #ccc; text-align: center; ">
+                       <a href="{{compound.imageURL}}" target="_blank">
+                           <img src="{{compound.imageURL}}" data-ng-if="compound.imageURL" style="max-width: 100%" />
+                       </a>
+                    </div>
+                </div>
+
+                </section>
+            <section id="genes">
+                <div class="full">
+                    <h3>Most Frequently Mutated Genes Targeted by this Drug</h3>
+                </div>
+            </section>
+            <section id="trials">
+                <div class="full">
+                    <h3>Clinical Trials</h3>
+                    <table class="table table-info" data-ng-if="compound.trials.length > 0">
+                        <tbody>
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Conditions</th>
+                                <th>Start Date</th>
+                                <th>Phase</th>
+                                <th>Status</th>
+                            </tr>
+                            <tr data-ng-repeat="trial in :: compound.trials track by $index">
+                                <td>
+                                    <a style="white-space: nowrap" target="_blank" href="https://www.clinicaltrials.gov/ct2/show/{{trial.code}}">
+                                        <i class="icon-external-link"></i><span data-ng-bind="trial.code"></span>
+                                    </a>
+                                </td>
+                                <td data-ng-bind="trial.description"></td>
+                                <td>
+                                    <ul>
+                                        <li data-ng-repeat="condition in trial.conditions" data-ng-bind="condition.name"></li>
+                                    </ul>
+                                </td>
+                                <td data-ng-bind="trial.startDate"></td>
+                                <td data-ng-bind="trial.phaseName"></td>
+                                <td data-ng-bind="trial.statusName">Status</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </article>
+    </div>
+</div>

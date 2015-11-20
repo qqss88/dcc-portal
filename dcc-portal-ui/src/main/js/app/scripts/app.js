@@ -228,6 +228,7 @@
     'icgc.projects',
     'icgc.donors',
     'icgc.genes',
+    'icgc.compounds',
     'icgc.mutations',
     'icgc.advanced',
     'icgc.releases',
