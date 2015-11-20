@@ -36,12 +36,13 @@ angular.module('template/lists', []).run(function ($templateCache) {
     '<i class="icon-external-link"></i>{{item.name}}</a>');
 
 
+  $templateCache.put('template/compoundList.html', '<span data-ng-bind="item.name"></span>');
   // Display a list of gene set annotations
   // { name: xyz, id: xyz, qualifiers:[ xyz, xyz] }
   $templateCache.put('template/geneGeneSetList.html',
     '<ul data-ng-if="item.qualifiers">' +
     '<li data-ng-repeat="qualifier in item.qualifiers">' +
-    '<span>{{qualifier | trans }} <a href="genesets/{{item.id}}"><span>{{item.name}}</span></a></span>' +
+    '<span>{{qualifier | trans }} <a href="genesets/{{item.id}}"><span>{{item.shortName}}</span></a></span>' +
     '</li>' +
     '</ul>' +
     '<span data-ng-if="!item.qualifiers">' +
