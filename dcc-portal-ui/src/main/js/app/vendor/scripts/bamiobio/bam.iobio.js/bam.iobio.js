@@ -12,14 +12,13 @@ var Bam = Class.extend({
 
     // set iobio servers
     this.iobio = {};
-    var currentHost = '10.5.74.221';
+    var currentHost = '10.5.74.194';
     var currentPort = 80;
-    this.iobio.samHeader = "ws://" + currentHost + ":" + currentPort + "/samheader/"
+    this.iobio.samHeader = "ws://" + currentHost + ":" + currentPort + "/samheader/";
     this.iobio.samtools = "ws://127.0.0.1:8000/samtools/";
     this.iobio.bamReadDepther = "ws://" + currentHost + ":" + currentPort + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "ws://" + currentHost + ":" + currentPort + "/bamstatsalive/";
     this.path="/home/iobio/iobio/tools/icgc-storage-client/data/aws/";
-//    this.path="/home/iobio/iobio/tools/icgc-storage-client/data/collab/"
     
     return this;
   },
@@ -340,7 +339,7 @@ var Bam = Class.extend({
       callback(me.header);
     } else {
       var client = BinaryClient(me.iobio.samHeader);
-      var url = encodeURI(me.iobio.samHeader + '?cmd= ' + this.path + this.bamUri);
+      var url = encodeURI(me.iobio.samHeader + '?cmd= ' + this.bamUri);
       client.on('open', function (stream) {
         stream = client.createStream({
           event: 'run',
@@ -415,35 +414,7 @@ var Bam = Class.extend({
   },
 
   stats: function (name, start, end, callback) {
-    // Prints some basic statistics from input BAM file(s)
-    var client = new BinaryClient(this.iobio.bamstatsAlive);
-    var url = encodeURI(this.iobio.bamstatsAlive + '?cmd=-u 1000 -s ' + start + ' -l ' + parseInt(end - start) + ' ' + encodeURIComponent(this._getBamUrl(name, start, end)));
-    client.on('open', function (stream) {
-      stream = client.createStream({
-        event: 'run',
-        params: {
-          'url': url
-        }
-      });
-      var buffer = '';
-      stream.on('data', function (data) {
-        if (data === undefined) {
-          return;
-        }
-        var success = true;
-        var obj;
-        try {
-          obj = JSON.parse(buffer + data);
-        } catch (e) {
-          success = false;
-          buffer += data;
-        }
-        if (success) {
-          buffer = '';
-          callback(obj);
-        }
-      });
-    });
+    // Removed
   },
 
   sampleStats: function (callback, options) {
@@ -504,7 +475,7 @@ var Bam = Class.extend({
       }));
 // var samtoolsCmd = JSON.stringify((bedRegions || regions).map(function(d) { return {d.start,end:d.end,chr:d.name};}));
 // var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 30000 -f 2000 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
-      var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 500 -k 1 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
+      var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=\'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
       var buffer = '';
          client.on('open', function(stream){
             stream = client.createStream({event:'run', params : {'url':url}});
