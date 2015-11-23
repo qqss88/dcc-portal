@@ -218,7 +218,7 @@ public class AuthResource extends BaseResource {
   @POST
   @Path("/login")
   public Response login(Map<String, String> creds) {
-    checkRequest((creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
+    checkRequest((creds == null || creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
     val username = creds.get(USERNAME_KEY);
     log.info("Logging into CUD as {}", username);
 
