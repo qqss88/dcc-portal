@@ -12,11 +12,10 @@ var Bam = Class.extend({
 
     // set iobio servers
     this.iobio = {};
-    var currentHost = '10.5.74.194';
-    var currentPort = 80;
-    this.iobio.samHeader = "ws://" + currentHost + ":" + currentPort + "/samheader/";
-    this.iobio.bamReadDepther = "ws://" + currentHost + ":" + currentPort + "/bamreaddepther/";
-    this.iobio.bamstatsAlive = "ws://" + currentHost + ":" + currentPort + "/bamstatsalive/";
+    var currentHost = 'bam.icgc.org';
+    this.iobio.samHeader = "wss://" + currentHost + "/samheader/";
+    this.iobio.bamReadDepther = "wss://" + currentHost + "/bamreaddepther/";
+    this.iobio.bamstatsAlive = "wss://" + currentHost + "/bamstatsalive/";
     
     return this;
   },
@@ -56,35 +55,10 @@ var Bam = Class.extend({
     return text;
   },
 
-  _getBamUrl: function (name, start, end) {
-    return this._getBamRegionsUrl([{
-      'name': name,
-      'start': start,
-      'end': end
-    }]);
-  },
-
-  _getBamRegionsUrl: function (regions) {
-    var regionStr = '';
-    regions.forEach(function (region) {
-      regionStr += ' ' + region.name + ':' + region.start + '-' + region.end;
-    });
-    // TODO: This is bad, move this to serverside
-    var url = this.iobio.samtools + '?cmd= view -b ' + this.path + this.bamUri +
-     regionStr + '&encoding=binary';
-    return encodeURI(url);
-  },
-
   _generateExomeBed: function (id) {
     var bed = '';
     var readDepth = this.readDepth[id];
     var start, end;
-    // var sum = 0;
-    // for (var i=0; i < readDepth.length; i++){
-    //    sum += readDepth[i].depth;
-    // }
-    // console.log("avg = " + parseInt(sum / readDepth.length));
-    // merge contiguous blocks into a single block and convert to bed format
     
     for (var i = 0; i < readDepth.length; i++) {
       if (readDepth[i].depth < 20) {

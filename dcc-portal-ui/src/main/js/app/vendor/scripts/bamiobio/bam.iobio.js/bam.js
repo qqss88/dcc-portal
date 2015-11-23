@@ -132,7 +132,6 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
     for (var b = 0; b < nbin; ++b) {
         var bin = readInt(index, p);
         var nchnk = readInt(index, p+4);
-//        dlog('bin=' + bin + '; nchnk=' + nchnk);
         p += 8;
         if (intBins[bin]) {
             for (var c = 0; c < nchnk; ++c) {
@@ -145,8 +144,6 @@ BamFile.prototype.blocksForRange = function(refId, min, max) {
             p +=  (nchnk * 16);
         }
     }
-//    dlog('leafChunks = ' + miniJSONify(leafChunks));
-//    dlog('otherChunks = ' + miniJSONify(otherChunks));
 
     var nintv = readInt(index, p);
     var lowest = null;
@@ -414,11 +411,6 @@ BamFile.prototype.readBamRecords = function(ba, offset, sink, min, max, chrId) {
         offset = blockEnd;
     }
 
-    // if (options && options.format)
-    //   sink.forEach(function(elem) { data += elem.convertTo(options.format) })
-    // else
-      
-    // Exits via top of loop.
 }
 
 function readInt(ba, offset) {
@@ -432,11 +424,7 @@ function readShort(ba, offset) {
 function readVob(ba, offset) {
     var block = ((ba[offset+6] & 0xff) * 0x100000000) + ((ba[offset+5] & 0xff) * 0x1000000) + ((ba[offset+4] & 0xff) * 0x10000) + ((ba[offset+3] & 0xff) * 0x100) + ((ba[offset+2] & 0xff));
     var bint = (ba[offset+1] << 8) | (ba[offset]);
-    // if (block == 0 && bint == 0) {
-    //     return null;  // Should only happen in the linear index?
-    // } else {
-        return new Vob(block, bint);
-    //}
+    return new Vob(block, bint);
 }
 
 function unbgzf(data, lim) {
@@ -448,7 +436,6 @@ function unbgzf(data, lim) {
     while (ptr[0] < lim) {
         var ba = new Uint8Array(data, ptr[0], 100); // FIXME is this enough for all credible BGZF block headers?
         var xlen = (ba[11] << 8) | (ba[10]);
-        // dlog('xlen[' + (ptr[0]) +']=' + xlen);
         var unc = jszlib_inflate_buffer(data, 12 + xlen + ptr[0], Math.min(65536, data.byteLength - 12 - xlen - ptr[0]), ptr);
         ptr[0] += 8;
         totalSize += unc.byteLength;
