@@ -27,6 +27,13 @@
                                 <td data-ng-bind=":: compound.name"></td>
                             </tr>
                             <tr>
+                                <th>Synonyms</th>
+                                <td>
+                                    <hide-text data-text="{{compound.synonyms.join(', ')}}">
+                                    </hide-text>
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Inchikey</th>
                                 <td data-ng-bind=":: compound.inchiKey"></td>
                             </tr>
@@ -53,7 +60,7 @@
                                     <th>Zinc ID</th>
                                     <td>
                                         <a href="http://zinc15.docking.org/substances/{{compound.id}}" target="_blank">
-                                            <span class="icon-external-link"></span><span data-ng-bind="compound.id"></span>
+                                            <span class="icon-external-link"></span> <span data-ng-bind="compound.id"></span>
                                         </a>
                                     </td>
                                 </tr>
@@ -64,12 +71,12 @@
                                         <li data-ng-repeat="refId in :: refIds">
                                             <a  data-ng-if="refName === 'chembl'" href="https://www.ebi.ac.uk/chembl/compound/inspect/{{refId}}"
                                                 target="_blank">
-                                                <span class="icon-external-link"></span><span data-ng-bind="refId"></span>
+                                                <span class="icon-external-link"></span> <span data-ng-bind="refId"></span>
                                             </a>
 
                                             <a  data-ng-if="refName === 'drugbank'" href="http://www.drugbank.ca/drugs/{{refId}}"
                                                 target="_blank">
-                                                <span class="icon-external-link"></span><span data-ng-bind="refId"></span>
+                                                <span class="icon-external-link"></span> <span data-ng-bind="refId"></span>
                                             </a>
                                         </li>
                                     </ul>
@@ -109,11 +116,40 @@
             <section id="genes">
                 <div class="full">
                     <h3>Most Frequently Mutated Genes Targeted by this Drug</h3>
+                    <span class="t_table_top">
+                        Showing <strong data-ng-bind="CompoundCtrl.getTargetedCompoundGenesResultPerPage()"></strong> of <strong data-ng-bind="CompoundCtrl.getTargetedCompoundGenes().length"></strong> genes
+                        <span class="t_tools" data-toolbar="" data-dls="ENSG00000198626_mutations">
+                        <span class="t_tools__tool" data-tooltip-placement="left" data-tooltip="Export Table as TSV" data-ng-clicks="downloadHTMLTable(dl, 'tsv')"><i class="icon-file"></i></span>
+                        </span>
+                    </span>
+                    <table class="table table-info" data-ng-if="compound.trials.length > 0">
+                        <tbody>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th># Donors affected</th>
+                                <th># Mutations</th>
+                            </tr>
+                        <tr data-ng-repeat="gene in CompoundCtrl.getTargetedCompoundGenes() | limitTo: CompoundCtrl.getTargetedCompoundGenesResultPerPage()">
+                            <td><a href="/genes/{{gene.id}}" data-ng-bind="gene.symbol"></a></td>
+                            <td data-ng-bind="gene.name"></td>
+                            <td data-ng-bind-template="chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}"></td>
+                            <td data-ng-bind="gene.type | trans"></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
             <section id="trials">
                 <div class="full">
                     <h3>Clinical Trials</h3>
+                    <span class="t_table_top">
+                        Showing <strong data-ng-bind="compound.trials.length"></strong> Clinical Trials
+                    </span>
                     <table class="table table-info" data-ng-if="compound.trials.length > 0">
                         <tbody>
                             <tr>
@@ -127,13 +163,19 @@
                             <tr data-ng-repeat="trial in :: compound.trials track by $index">
                                 <td>
                                     <a style="white-space: nowrap" target="_blank" href="https://www.clinicaltrials.gov/ct2/show/{{trial.code}}">
-                                        <i class="icon-external-link"></i><span data-ng-bind="trial.code"></span>
+                                        <i class="icon-external-link"></i> <span data-ng-bind="trial.code"></span>
                                     </a>
                                 </td>
-                                <td data-ng-bind="trial.description"></td>
+                                <td>
+                                    <hide-text text="{{ trial.description }}"></hide-text>
+                                </td>
                                 <td>
                                     <ul>
-                                        <li data-ng-repeat="condition in trial.conditions" data-ng-bind="condition.name"></li>
+                                        <hide-list data-items="trial.conditions"
+                                                   data-display-limit="2"
+                                                   data-template-name="template/compoundList.html"
+                                        >
+                                        </hide-list>
                                     </ul>
                                 </td>
                                 <td data-ng-bind="trial.startDate"></td>

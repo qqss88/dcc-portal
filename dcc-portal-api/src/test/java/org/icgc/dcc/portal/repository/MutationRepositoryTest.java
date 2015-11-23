@@ -32,6 +32,7 @@ import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.icgc.dcc.portal.model.Query;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,10 +61,12 @@ public class MutationRepositoryTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {
+    this.testIndex = TestIndex.RELEASE;
     es.execute(
         createIndexMappings(Type.MUTATION_CENTRIC)
             .withData(bulkFile(getClass())));
-    mutationRepository = new MutationRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME));
+    mutationRepository =
+        new MutationRepository(es.client(), testIndex.getModel(), new QueryEngine(es.client(), testIndex.getName()));
   }
 
   @Test
@@ -121,8 +124,8 @@ public class MutationRepositoryTest extends BaseElasticSearchTest {
   @Test
   public void testFindAllWithNestedDonorFilters() throws Exception {
     FiltersParam filterIs = new FiltersParam(joinFilters(MUTATION_FILTER, DONOR_FILTER));
-    Query queryIs = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterIs.get
-        ()).build();
+    Query queryIs =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterIs.get()).build();
     SearchResponse responseIs = mutationRepository.findAllCentric(queryIs);
     SearchHits hitsIs = responseIs.getHits();
 
@@ -143,8 +146,8 @@ public class MutationRepositoryTest extends BaseElasticSearchTest {
   @Test
   public void testFindAllWithNestedGeneFilters() throws Exception {
     FiltersParam filterIs = new FiltersParam(joinFilters(MUTATION_FILTER, GENES_FILTER));
-    Query queryIs = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterIs.get
-        ()).build();
+    Query queryIs =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterIs.get()).build();
     SearchResponse responseIs = mutationRepository.findAllCentric(queryIs);
     SearchHits hitsIs = responseIs.getHits();
 

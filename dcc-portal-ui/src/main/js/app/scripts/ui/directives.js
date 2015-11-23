@@ -130,7 +130,7 @@ angular.module('app.ui.hidetext', []).directive('hideText', function () {
     link: function (scope, element, attrs) {
       var previous, next;
 
-      scope.limit = 250;
+      scope.limit = attrs.textLimit || 250;
 
       previous = attrs.text;
       next = attrs.text.length > scope.limit ? attrs.text.slice(0, scope.limit) + '...' : attrs.text;

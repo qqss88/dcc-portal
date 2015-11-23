@@ -39,7 +39,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 @NoArgsConstructor(access = PRIVATE)
-public final class FilterUtils {
+public final class Tests {
 
   /**
    * Creates a stub of {@link ContainerRequest} that is used for testing.

@@ -32,6 +32,7 @@ import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.icgc.dcc.portal.model.Query;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,8 +62,10 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {
+    this.testIndex = TestIndex.RELEASE;
     es.execute(createIndexMappings(Type.GENE, Type.GENE_CENTRIC).withData(bulkFile(getClass())));
-    geneRepository = new GeneRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME));
+    geneRepository =
+        new GeneRepository(es.client(), testIndex.getModel(), new QueryEngine(es.client(), testIndex.getName()));
   }
 
   @Test
@@ -184,7 +187,7 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
   public void testCountIntersectionWithFilters() throws Exception {
     assertThat(
         geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_FILTER)).get()).build()))
-        .isEqualTo(1);
+            .isEqualTo(1);
     assertThat(
         geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_NOT_FILTER)).get())
             .build())).isEqualTo(2);

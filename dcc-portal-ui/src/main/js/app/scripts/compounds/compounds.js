@@ -39,15 +39,31 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
 
     var _ctrl = this,
         _compound = null,
-      _targettedCompoundGenes = null;
+        _targetedCompoundGenes = null,
+        _targetedCompoundGenesResultPerPage = 10;
 
 
+    function _initTargetedGeneResults() {
+      _targetedCompoundGenes = CompoundsService.getTargetedCompoundGenes(_compound);
+
+      if (! _targetedCompoundGenes.length) {
+        return;
+      }
+
+      for (var i = 0; i < _targetedCompoundGenesResultPerPage; i++) {
+        _targetedCompoundGenes[i].get();
+      }
+
+    }
 
     function _init() {
-      Page.stopWork();
       Page.setTitle('Compounds');
+      Page.setPage('entity');
+      Page.stopWork();
+
       _compound = compound;
-      _targettedCompoundGenes = CompoundsService.getTargettedCompoundGenes(_compound);
+
+      _initTargetedGeneResults();
     }
 
     _init();
@@ -56,6 +72,10 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
     //////////////////////////////////////////////////////////////////////
     // Controller API
     //////////////////////////////////////////////////////////////////////
+
+    _ctrl.getTargetedCompoundGenesResultPerPage = function() {
+      return _targetedCompoundGenesResultPerPage;
+    };
 
     _ctrl.getPrettyExternalRefName = function(refName) {
       var referenceName = refName.toLowerCase();
@@ -74,8 +94,8 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
       return referenceName;
     };
 
-    _ctrl.getTargettedCompoundGenes = function() {
-      return _targettedCompoundGenes;
+    _ctrl.getTargetedCompoundGenes = function() {
+      return _targetedCompoundGenes;
     };
 
     _ctrl.getCompound = function() {
@@ -90,7 +110,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       return angular.isArray(arr) ?  arr : [];
     }
 
-    function CompoundFactory(compound) {
+    function compoundFactory(compound) {
       var _id = compound.zincId,
           _inchikey = compound.inchikey,
           _name = compound.name,
@@ -127,16 +147,25 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
       function _init(geneData) {
         _geneData = geneData;
+        _self.type = geneData.type;
+        _self.symbol = geneData.symbol;
+        _self.name = geneData.name;
+        _self.chromosome = geneData.chromosome;
+        _self.start = geneData.start;
+        _self.end = geneData.end;
       }
 
 
+      //////////////////////////////////////////////////////
+      // Public API
+      //////////////////////////////////////////////////////
       _self.get = function() {
 
         if (_genePromise === null) {
           _genePromise = $q.defer();
 
-          Genes.one()
-              .get(geneId)
+          Restangular.one('genes', geneId)
+              .get()
               .then(function(geneData) {
                 _init(geneData);
                 _genePromise.resolve(_self);
@@ -148,18 +177,22 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         return _self;
       };
 
+      _self.id = geneId;
+
     }
 
-    this.getCompound = function(id) {
+    var _srv = this;
+
+    _srv.getCompound = function(id) {
       return Restangular
         .one('drugs', id)
         .get()
         .then(function(compound) {
-          return CompoundFactory(compound.plain());
+          return compoundFactory(compound.plain());
         });
     };
 
-    this.getTargettedCompoundGenes = function(compound) {
+    _srv.getTargetedCompoundGenes = function(compound) {
       var geneCount = compound.genes.length,
           genes = [];
 
@@ -170,8 +203,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
           genes.push( new GeneEntity(geneId) );
         }
       }
-      // FIXME: FOR NOW CAP THE LIMIT FOR TESTING
-      genes = _.slice(genes, 0, 10);
+
       return genes;
     };
 

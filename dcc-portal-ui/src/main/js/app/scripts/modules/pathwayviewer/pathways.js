@@ -20,7 +20,13 @@
 	
 	var module = angular.module('icgc.pathways', ['icgc.enrichment.directives']);
 	
-	module.config(function($stateProvider) {
+	module
+    .constant('PathwaysConstants', {
+      EVENTS: {
+        MODEL_READY_EVENT:'icgc.pathways.ready.event'
+      }
+    })
+    .config(function($stateProvider) {
 		$stateProvider.state('pathways', {
 			url: '/pathways/:entityID',
 			templateUrl: '/scripts/modules/pathwayviewer/views/pathways.html',
@@ -50,7 +56,7 @@
 
 	module.controller('PathwaysController', function($scope, $q, Page, EnrichmentData, Restangular,
 		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService,
-    EnrichmentService) {
+    EnrichmentService, PathwaysConstants) {
 				
 		
 		var _ctrl = this,
@@ -62,7 +68,7 @@
 			Page.setPage('entity');
 			Page.setTitle('Enrichment Analysis Pathway Viewer');
       
-      $scope.TooltipText = TooltipText
+      $scope.TooltipText = TooltipText;
 			
 			$scope.pathways = EnrichmentData.results;
 			$scope.analysis = {
@@ -120,7 +126,8 @@
         _uniprotIds = null,
         _xml = null,
         _zooms = [''],
-        _pathwayHighlights = [];
+        _pathwayHighlights = [],
+        _geneOverlapExistsHash = {};
         
         
         
@@ -171,26 +178,84 @@
             
               // Normalize into array
                   _.forEach(map,function(value,id) {
+
                     if(value && value.dbIds) {
+                      var dbIds = value.dbIds.split(',');
+
                       _pathwayHighlights.push({
                         uniprotId:id,
-                        dbIds:value.dbIds.split(','),
+                        dbIds: dbIds,
                         value:value.value
                       });
                     }
                   });
-      
+
+              //console.log(_geneOverlapExistsHash);
               // Get ensembl ids for all the genes so we can link to advSearch page
               _uniprotIds = _.pluck(_pathwayHighlights, 'uniprotId');
               deferred.resolve();
           });
            return deferred.promise;
        })
+       .then(function(){
+         var deferred = $q.defer();
+
+         Restangular.one('genes').get({filters: pathway.geneSetOverlapFilters})
+           .then(function(geneListData) {
+
+             // Check if there are hits (i.e. any gene overlap) - otherwise resolve the promise
+             if (! _.get(geneListData,'hits[0]')) {
+               deferred.resolve();
+               return;
+             }
+
+             var pathwayGeneID = 'externalDbIds.uniprotkb_swissprot',
+               geneList = [];
+
+             _.forEach(geneListData.hits, function(gene) {
+               var overlapGeneExternalIDs = _.get(gene, pathwayGeneID, false); /*, overlapGene = {},*/
+
+               // We can't join by this ID (with the pathway viewer) so throw away
+               if( ! overlapGeneExternalIDs) {
+                 return;
+               }
+
+               // Create auxiliary gene object that we can later reference
+               /*var  overlapGene = {
+                geneId: gene.id,
+                name: gene.name,
+                geneSymbol: gene['symbol']
+                };
+
+               _.forEach(overlapGeneExternalIDs, function(dbID) {
+                 _geneOverlapExistsHash[dbID] = overlapGene;
+               });*/
+                //console.log(overlapGene);
+               geneList.push.apply(geneList, overlapGeneExternalIDs);
+
+             });
+
+             _.forEach(geneList, function(g) {
+               _geneOverlapExistsHash[g] = true;
+             });
+
+
+
+             //console.log('Overlap genes returned: ' + _.keys(_geneOverlapExistsHash).length, '\nProtein Map Intersect Overlap Length = ' +
+             //                                                                             (_.intersection(_.values(_uniprotIds), _.keys(_geneOverlapExistsHash)).length) );
+             deferred.resolve();
+
+           });
+         return deferred.promise;
+       })
        .then(function() {
           var deferred = $q.defer();
           
           GeneSetVerificationService.verify(_uniprotIds.join(',') )
           .then(function(data) {
+
+            var geneCount = 0;
+
             _.forEach(_pathwayHighlights,function(n){
                 var geneKey = 'external_db_ids.uniprotkb_swissprot';
                 if (! data.validGenes[geneKey]) {
@@ -209,17 +274,33 @@
                 });
                 n.geneSymbol = uniprotObj[0].symbol;
                 n.geneId = ensemblId;
+
+              if (angular.isDefined(_geneOverlapExistsHash[n.uniprotId])) {
+                geneCount++;
+
+                _.forEach(n.dbIds, function(dbID) {
+                  // Swap in Reactome keys but maintain the id we use this to determine overlaps in O(1)
+                  // later... The dbID is used as a reference to the reactome SVG nodes...
+                  _geneOverlapExistsHash[dbID] = {id: n.uniprotId, geneId: n.geneId, geneSymbol: n.geneSymbol};
+                });
+                delete _geneOverlapExistsHash[n.uniprotId];
+              }
             });
-            
+           console.log(geneCount + ' Overlapped genes validated! ');
             deferred.resolve();
           });
           
           return deferred.promise;
-       }).
-       then(function(){
+       })
+       .then(function(){
          $scope.geneSet = _geneSet;
-         $scope.pathway = {xml: _xml, zooms: _zooms, highlights: _pathwayHighlights };
+         $scope.pathway = {xml: _xml, zooms: _zooms, highlights: _pathwayHighlights, overlaps: _geneOverlapExistsHash};
          $scope.uiParentPathways = _uiParentPathways;
+
+         setTimeout(function() {
+           $scope.$broadcast(PathwaysConstants.EVENTS.MODEL_READY_EVENT, {});
+         }, 100);
+
          //console.log($scope.pathway);
        });
  

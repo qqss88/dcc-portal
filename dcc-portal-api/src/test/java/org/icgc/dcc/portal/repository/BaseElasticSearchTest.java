@@ -24,16 +24,13 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.icgc.dcc.portal.util.JsonUtils.parseFilters;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.After;
 import org.junit.Before;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,36 +40,29 @@ import com.github.tlrx.elasticsearch.test.EsSetup;
 import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 import com.github.tlrx.elasticsearch.test.request.CreateIndex;
 import com.google.common.io.Files;
-import com.google.common.io.Resources;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
+@RequiredArgsConstructor
 public abstract class BaseElasticSearchTest {
 
   /**
    * Test configuration.
    */
-  protected static final String INDEX_NAME = "test_index";
-  protected static final String REPO_INDEX_NAME = "test-repo-index";
-  protected static final String SETTINGS_FILE_NAME = "index.settings.json";
-  protected static final String JSON_DIR = "mappings";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
-  protected static final URL SETTINGS_FILE = getMappingFileUrl(SETTINGS_FILE_NAME);
-
-  @SneakyThrows
-  private static URL getMappingFileUrl(String fileName) {
-    return Resources.getResource(JSON_DIR + "/" + fileName);
-  }
-
-  protected static final IndexModel INDEX = new IndexModel(INDEX_NAME, REPO_INDEX_NAME);
 
   /**
    * Test data.
    */
   protected static final String MISSING_ID = "@@@@@@@@@@@";
+
+  /**
+   * The index to test.
+   */
+  protected TestIndex testIndex;
 
   /**
    * ES facade.
@@ -114,19 +104,19 @@ public abstract class BaseElasticSearchTest {
   /**
    * Creates the index, settings and {@code TypeName} mapping
    * 
-   * @param typeName - the index type to create
+   * @param type - the index type to create
    * @return
    */
-  protected static CreateIndex createIndexMapping(Type typeName) {
-    return createIndexMappings(typeName);
+  protected CreateIndex createIndexMapping(Type type) {
+    return createIndexMappings(type);
   }
 
-  protected static CreateIndex createIndexMappings(Type... typeNames) {
-    CreateIndex request = createIndex(INDEX_NAME)
-        .withSettings(settingsSource(SETTINGS_FILE));
+  protected CreateIndex createIndexMappings(Type... types) {
+    CreateIndex request = createIndex(testIndex.getName())
+        .withSettings(testIndex.getSettings());
 
-    for (Type typeName : typeNames) {
-      request = request.withMapping(typeName.getId(), mappingSource(typeName));
+    for (Type type : types) {
+      request = request.withMapping(type.getId(), testIndex.getMapping(type));
     }
 
     return request;
@@ -150,43 +140,6 @@ public abstract class BaseElasticSearchTest {
 
   protected static ObjectNode filters(String jsonish) {
     return (ObjectNode) parseFilters(jsonish);
-  }
-
-  @SneakyThrows
-  protected static String settingsSource() {
-    return settingsSource(SETTINGS_FILE);
-  }
-
-  @SneakyThrows
-  private static String settingsSource(URL settingsFile) {
-    // Override production values that would introduce test timing delays / issues
-    return objectNode(settingsFile)
-        .put("index.number_of_shards", 1)
-        .put("index.number_of_replicas", 0)
-        .toString();
-  }
-
-  private static String mappingSource(Type typeName) {
-    return mappingSource(mappingFile(typeName));
-  }
-
-  @SneakyThrows
-  private static String mappingSource(URL mappingFile) {
-    return json(mappingFile);
-  }
-
-  private static URL mappingFile(Type typeName) {
-    String mappingFileName = typeName.getId() + ".mapping.json";
-    return getMappingFileUrl(mappingFileName);
-  }
-
-  private static String json(URL url) throws IOException, JsonProcessingException {
-    return objectNode(url).toString();
-  }
-
-  private static ObjectNode objectNode(URL url) throws IOException, JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    return (ObjectNode) mapper.readTree(url);
   }
 
   /**
