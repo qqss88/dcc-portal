@@ -189,6 +189,8 @@ public class PortalProperties extends Configuration {
   @Data
   public static class ElasticSearchProperties {
 
+    public static final String SNIFF_MODE_KEY = "client.transport.sniff";
+
     @JsonProperty
     String indexName = "dcc-release-release5";
 
@@ -197,6 +199,9 @@ public class PortalProperties extends Configuration {
 
     @JsonProperty
     List<ElasticSearchNodeAddress> nodeAddresses = newArrayList();
+
+    @JsonProperty
+    Map<String, String> client = newHashMap();
 
     @Getter
     @ToString

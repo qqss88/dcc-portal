@@ -23,6 +23,7 @@ import org.icgc.dcc.portal.model.AlleleMutation;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.repository.BaseElasticSearchTest;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,10 +33,11 @@ public class BeaconServiceTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {
+    this.testIndex = TestIndex.RELEASE;
     es.execute(
         createIndexMappings(Type.MUTATION_CENTRIC)
             .withData(bulkFile("BeaconServiceTest.json")));
-    service = new BeaconService(es.client(), INDEX_NAME);
+    service = new BeaconService(es.client(), testIndex.getName());
   }
 
   @Test
