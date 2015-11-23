@@ -15,10 +15,8 @@ var Bam = Class.extend({
     var currentHost = '10.5.74.194';
     var currentPort = 80;
     this.iobio.samHeader = "ws://" + currentHost + ":" + currentPort + "/samheader/";
-    this.iobio.samtools = "ws://127.0.0.1:8000/samtools/";
     this.iobio.bamReadDepther = "ws://" + currentHost + ":" + currentPort + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "ws://" + currentHost + ":" + currentPort + "/bamstatsalive/";
-    this.path="/home/iobio/iobio/tools/icgc-storage-client/data/aws/";
     
     return this;
   },
@@ -296,8 +294,7 @@ var Bam = Class.extend({
 
     else if (me.sourceType === 'dcc') {
       var client = new BinaryClient(me.iobio.bamReadDepther);
-      var url = encodeURI(me.iobio.bamReadDepther + '?cmd=-i ' + me.path + me.bamUri + ".bai")
-        //this._lastUpdateTimer = new Date().getTime();
+      var url = encodeURI(me.iobio.bamReadDepther + '?cmd=' + me.bamUri + ".bai")
       client.on('open', function (stream) {
         stream = client.createStream({
           event: 'run',
@@ -475,7 +472,7 @@ var Bam = Class.extend({
       }));
 // var samtoolsCmd = JSON.stringify((bedRegions || regions).map(function(d) { return {d.start,end:d.end,chr:d.name};}));
 // var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 30000 -f 2000 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
-      var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=\'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
+      var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=\'' + regStr + '\' ' + me.bamUri);
       var buffer = '';
          client.on('open', function(stream){
             stream = client.createStream({event:'run', params : {'url':url}});
@@ -529,9 +526,6 @@ var Bam = Class.extend({
       this.getHeader(function (header) {
         goSampling(header.sq);
       });
-      // this.getReferencesWithReads(function(refs) {            
-      //    goSampling(refs);
-      // })
     }
   }
 
