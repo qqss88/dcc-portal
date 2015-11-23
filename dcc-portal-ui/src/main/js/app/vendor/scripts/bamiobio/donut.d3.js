@@ -65,7 +65,7 @@ function donutD3() {
     if (!arguments.length) return radius;
     radius = value;
     arc = d3.svg.arc()
-      .outerRadius(radius - 10)
+      .outerRadius(radius)
       .innerRadius(radius - 17);
     return my;
   };
