@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.collect.Lists.transform;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
@@ -42,6 +43,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.DONOR;
 import static org.icgc.dcc.portal.resource.ResourceUtils.FIND_ALL_TEMPLATE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.regularFindAllJqlQuery;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 
 import javax.ws.rs.DefaultValue;
@@ -58,6 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.Drug;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.service.DrugService;
+import org.icgc.dcc.portal.service.MutationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,6 +82,7 @@ import com.yammer.metrics.annotation.Timed;
 public class DrugResource {
 
   private final DrugService drugService;
+  private final MutationService mutationService;
 
   @Path("/{drugId}")
   @GET
@@ -87,6 +91,21 @@ public class DrugResource {
   public Drug findOneDrug(
       @ApiParam(value = "Drug ID", required = true) @PathParam("drugId") String drugId) {
     return drugService.findOne(drugId);
+  }
+
+  @Path("/{drugId}/genes/mutations/counts")
+  @GET
+  @Timed
+  @ApiOperation(value = "Find most frequently mutated genes targeted by a drug", response = List.class)
+  public List<SimpleImmutableEntry<String, Long>> topMutatedGenes(
+      @ApiParam(value = "Drug ID", required = true) @PathParam("drugId") String drugId,
+      @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
+      ) {
+    val drug = drugService.findOne(drugId);
+    val genes = transform(drug.getGenes(), gene -> gene.getEnsemblGeneId());
+
+    return mutationService.counts(genes, size.get(), order.equals("desc"));
   }
 
   @GET

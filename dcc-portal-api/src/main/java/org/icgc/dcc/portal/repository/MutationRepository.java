@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
@@ -133,6 +134,21 @@ public class MutationRepository implements Repository {
 
     for (val query : queries.values()) {
       val pql = converter.convertCount(query, MUTATION_CENTRIC);
+      search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
+    }
+
+    log.debug("{}", search);
+    return search.execute().actionGet();
+  }
+
+  @NonNull
+  public MultiSearchResponse counts(List<String> geneIds) {
+    val pqlTemplate = "count(), nested (transcript, in (gene.id, '%s'))";
+    val search = client.prepareMultiSearch();
+
+    for (val id : geneIds) {
+      val pql = format(pqlTemplate, id);
+
       search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
     }
 
