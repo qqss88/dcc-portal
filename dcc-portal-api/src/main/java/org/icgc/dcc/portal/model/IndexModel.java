@@ -1,6 +1,7 @@
 package org.icgc.dcc.portal.model;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.IndexModel.getRepositoryFileTypeModel;
 import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
@@ -106,6 +107,7 @@ public class IndexModel {
     DIAGRAM("diagram"),
     REPOSITORY_FILE_TEXT("file-text"),
     REPOSITORY_FILE_DONOR_TEXT("donor-text"),
+    DRUG_TEXT("drug-text"),
     PROJECT_TEXT("project-text");
 
     @NonNull
@@ -404,6 +406,12 @@ public class IndexModel {
           .put("highlights", "highlights")
           .build();
 
+  private static Map<String, String> DRUG_KEYWORD_FIELDS = ImmutableList.of(
+      "inchikey", "drug_class", "atc_codes_code", "atc_codes_description", "atc_level5_codes",
+      "trials_description", "trials_conditions_name", "external_references_drugbank", "external_references_chembl")
+      .stream().collect(
+          toMap(field -> Type.DRUG_TEXT.id + "." + field, identity()));
+
   private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING = ImmutableMap.<String, String> builder()
       // Common
       .put("id", "id")
@@ -454,6 +462,9 @@ public class IndexModel {
       .put("object_id", "object_id")
       .put("data_type", "data_type")
       .put("project_code", "project_code")
+
+      // Drug-text
+      .putAll(DRUG_KEYWORD_FIELDS)
 
       .build();
 
