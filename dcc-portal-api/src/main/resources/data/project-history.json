@@ -82,12 +82,12 @@
   {
     "group": "ALL-US",
     "index": 20,
-    "value": "220"
+    "value": 220
   },
   {
     "group": "AML-US",
     "index": 20,
-    "value": "161"
+    "value": 161
   },
   {
     "group": "BLCA-CN",
@@ -172,7 +172,7 @@
   {
     "group": "BLCA-CN",
     "index": 20,
-    "value": "103"
+    "value": 103
   },
   {
     "group": "BLCA-US",
@@ -257,7 +257,7 @@
   {
     "group": "BLCA-US",
     "index": 20,
-    "value": "299"
+    "value": 299
   },
   {
     "group": "BOCA-FR",
@@ -342,7 +342,7 @@
   {
     "group": "BOCA-FR",
     "index": 20,
-    "value": "98"
+    "value": 98
   },
   {
     "group": "BOCA-UK",
@@ -427,12 +427,12 @@
   {
     "group": "BOCA-UK",
     "index": 20,
-    "value": "69"
+    "value": 69
   },
   {
     "group": "BRCA-EU",
     "index": 20,
-    "value": "0"
+    "value": 0
   },
   {
     "group": "BRCA-UK",
@@ -517,7 +517,7 @@
   {
     "group": "BRCA-UK",
     "index": 20,
-    "value": "141"
+    "value": 141
   },
   {
     "group": "BRCA-US",
@@ -602,22 +602,22 @@
   {
     "group": "BRCA-US",
     "index": 20,
-    "value": "1045"
+    "value": 1045
   },
   {
     "group": "BTCA-JP",
     "index": 20,
-    "value": "239"
+    "value": 239
   },
   {
     "group": "BTCA-SG",
     "index": 20,
-    "value": "0"
+    "value": 0
   },
   {
     "group": "CCSK-US",
     "index": 20,
-    "value": "13"
+    "value": 13
   },
   {
     "group": "CESC-US",
@@ -702,7 +702,7 @@
   {
     "group": "CESC-US",
     "index": 20,
-    "value": "261"
+    "value": 261
   },
   {
     "group": "CLLE-ES",
@@ -787,7 +787,7 @@
   {
     "group": "CLLE-ES",
     "index": 20,
-    "value": "549"
+    "value": 549
   },
   {
     "group": "CMDI-UK",
@@ -872,7 +872,7 @@
   {
     "group": "CMDI-UK",
     "index": 20,
-    "value": "129"
+    "value": 129
   },
   {
     "group": "COAD-US",
@@ -957,7 +957,7 @@
   {
     "group": "COAD-US",
     "index": 20,
-    "value": "451"
+    "value": 451
   },
   {
     "group": "COCA-CN",
@@ -1042,12 +1042,12 @@
   {
     "group": "COCA-CN",
     "index": 20,
-    "value": "147"
+    "value": 147
   },
   {
     "group": "DLBC-US",
     "index": 20,
-    "value": "0"
+    "value": 0
   },
   {
     "group": "EOPC-DE",
@@ -1132,7 +1132,7 @@
   {
     "group": "EOPC-DE",
     "index": 20,
-    "value": "11"
+    "value": 11
   },
   {
     "group": "ESAD-UK",
@@ -1217,7 +1217,7 @@
   {
     "group": "ESAD-UK",
     "index": 20,
-    "value": "119"
+    "value": 119
   },
   {
     "group": "ESCA-CN",
@@ -1302,7 +1302,7 @@
   {
     "group": "ESCA-CN",
     "index": 20,
-    "value": "228"
+    "value": 228
   },
   {
     "group": "GACA-CN",
@@ -1387,7 +1387,7 @@
   {
     "group": "GACA-CN",
     "index": 20,
-    "value": "9"
+    "value": 9
   },
   {
     "group": "GBM-US",
@@ -1472,7 +1472,7 @@
   {
     "group": "GBM-US",
     "index": 20,
-    "value": "589"
+    "value": 589
   },
   {
     "group": "HNSC-US",
@@ -1557,12 +1557,12 @@
   {
     "group": "HNSC-US",
     "index": 20,
-    "value": "494"
+    "value": 494
   },
   {
     "group": "KICH-US",
     "index": 20,
-    "value": "0"
+    "value": 0
   },
   {
     "group": "KIRC-US",
@@ -1647,7 +1647,7 @@
   {
     "group": "KIRC-US",
     "index": 20,
-    "value": "525"
+    "value": 525
   },
   {
     "group": "KIRP-US",
@@ -1732,7 +1732,7 @@
   {
     "group": "KIRP-US",
     "index": 20,
-    "value": "223"
+    "value": 223
   },
   {
     "group": "LAML-KR",
@@ -1817,7 +1817,7 @@
   {
     "group": "LAML-KR",
     "index": 20,
-    "value": "147"
+    "value": 147
   },
   {
     "group": "LAML-US",
@@ -1902,7 +1902,7 @@
   {
     "group": "LAML-US",
     "index": 20,
-    "value": "200"
+    "value": 200
   },
   {
     "group": "LGG-US",
@@ -1987,7 +1987,7 @@
   {
     "group": "LGG-US",
     "index": 20,
-    "value": "441"
+    "value": 441
   },
   {
     "group": "LIAD-FR",
@@ -2072,7 +2072,7 @@
   {
     "group": "LIAD-FR",
     "index": 20,
-    "value": "30"
+    "value": 30
   },
   {
     "group": "LICA-FR",
@@ -2157,7 +2157,7 @@
   {
     "group": "LICA-FR",
     "index": 20,
-    "value": "277"
+    "value": 277
   },
   {
     "group": "LIHC-US",
@@ -2242,7 +2242,7 @@
   {
     "group": "LIHC-US",
     "index": 20,
-    "value": "317"
+    "value": 317
   },
   {
     "group": "LIHM-FR",
@@ -2327,7 +2327,7 @@
   {
     "group": "LIHM-FR",
     "index": 20,
-    "value": "4"
+    "value": 4
   },
   {
     "group": "LINC-JP",
@@ -2412,7 +2412,7 @@
   {
     "group": "LINC-JP",
     "index": 20,
-    "value": "244"
+    "value": 244
   },
   {
     "group": "LIRI-JP",
@@ -2497,7 +2497,7 @@
   {
     "group": "LIRI-JP",
     "index": 20,
-    "value": "260"
+    "value": 260
   },
   {
     "group": "LUAD-US",
@@ -2582,7 +2582,7 @@
   {
     "group": "LUAD-US",
     "index": 20,
-    "value": "485"
+    "value": 485
   },
   {
     "group": "LUSC-CN",
@@ -2667,7 +2667,7 @@
   {
     "group": "LUSC-CN",
     "index": 20,
-    "value": "10"
+    "value": 10
   },
   {
     "group": "LUSC-KR",
@@ -2752,7 +2752,7 @@
   {
     "group": "LUSC-KR",
     "index": 20,
-    "value": "36"
+    "value": 36
   },
   {
     "group": "LUSC-US",
@@ -2837,7 +2837,7 @@
   {
     "group": "LUSC-US",
     "index": 20,
-    "value": "431"
+    "value": 431
   },
   {
     "group": "MALY-DE",
@@ -2922,12 +2922,12 @@
   {
     "group": "MALY-DE",
     "index": 20,
-    "value": "102"
+    "value": 102
   },
   {
     "group": "MELA-AU",
     "index": 20,
-    "value": "183"
+    "value": 183
   },
   {
     "group": "NBL-US",
@@ -3012,7 +3012,7 @@
   {
     "group": "NBL-US",
     "index": 20,
-    "value": "448"
+    "value": 448
   },
   {
     "group": "ORCA-IN",
@@ -3097,7 +3097,7 @@
   {
     "group": "ORCA-IN",
     "index": 20,
-    "value": "106"
+    "value": 106
   },
   {
     "group": "OV-AU",
@@ -3182,7 +3182,7 @@
   {
     "group": "OV-AU",
     "index": 20,
-    "value": "93"
+    "value": 93
   },
   {
     "group": "OV-US",
@@ -3267,7 +3267,7 @@
   {
     "group": "OV-US",
     "index": 20,
-    "value": "582"
+    "value": 582
   },
   {
     "group": "PAAD-US",
@@ -3352,7 +3352,7 @@
   {
     "group": "PAAD-US",
     "index": 20,
-    "value": "148"
+    "value": 148
   },
   {
     "group": "PACA-AU",
@@ -3437,7 +3437,7 @@
   {
     "group": "PACA-AU",
     "index": 20,
-    "value": "431"
+    "value": 431
   },
   {
     "group": "PACA-CA",
@@ -3522,7 +3522,7 @@
   {
     "group": "PACA-CA",
     "index": 20,
-    "value": "252"
+    "value": 252
   },
   {
     "group": "PACA-IT",
@@ -3607,7 +3607,7 @@
   {
     "group": "PACA-IT",
     "index": 20,
-    "value": "37"
+    "value": 37
   },
   {
     "group": "PAEN-AU",
@@ -3692,7 +3692,7 @@
   {
     "group": "PAEN-AU",
     "index": 20,
-    "value": "66"
+    "value": 66
   },
   {
     "group": "PBCA-DE",
@@ -3777,7 +3777,7 @@
   {
     "group": "PBCA-DE",
     "index": 20,
-    "value": "299"
+    "value": 299
   },
   {
     "group": "PEME-CA",
@@ -3942,7 +3942,7 @@
   {
     "group": "PRAD-CA",
     "index": 20,
-    "value": "124"
+    "value": 124
   },
   {
     "group": "PRAD-UK",
@@ -4027,7 +4027,7 @@
   {
     "group": "PRAD-UK",
     "index": 20,
-    "value": "108"
+    "value": 108
   },
   {
     "group": "PRAD-US",
@@ -4112,7 +4112,7 @@
   {
     "group": "PRAD-US",
     "index": 20,
-    "value": "384"
+    "value": 384
   },
   {
     "group": "READ-US",
@@ -4197,7 +4197,7 @@
   {
     "group": "READ-US",
     "index": 20,
-    "value": "169"
+    "value": 169
   },
   {
     "group": "RECA-CN",
@@ -4282,7 +4282,7 @@
   {
     "group": "RECA-CN",
     "index": 20,
-    "value": "10"
+    "value": 10
   },
   {
     "group": "RECA-EU",
@@ -4367,12 +4367,12 @@
   {
     "group": "RECA-EU",
     "index": 20,
-    "value": "122"
+    "value": 122
   },
   {
     "group": "SARC-US",
     "index": 20,
-    "value": "0"
+    "value": 0
   },
   {
     "group": "SKCA-BR",
@@ -4457,7 +4457,7 @@
   {
     "group": "SKCA-BR",
     "index": 20,
-    "value": "66"
+    "value": 66
   },
   {
     "group": "SKCM-US",
@@ -4542,7 +4542,7 @@
   {
     "group": "SKCM-US",
     "index": 20,
-    "value": "433"
+    "value": 433
   },
   {
     "group": "STAD-US",
@@ -4627,7 +4627,7 @@
   {
     "group": "STAD-US",
     "index": 20,
-    "value": "443"
+    "value": 443
   },
   {
     "group": "THCA-SA",
@@ -4712,7 +4712,7 @@
   {
     "group": "THCA-SA",
     "index": 20,
-    "value": "15"
+    "value": 15
   },
   {
     "group": "THCA-US",
@@ -4797,7 +4797,7 @@
   {
     "group": "THCA-US",
     "index": 20,
-    "value": "502"
+    "value": 502
   },
   {
     "group": "UCEC-US",
@@ -4882,11 +4882,91 @@
   {
     "group": "UCEC-US",
     "index": 20,
-    "value": "513"
+    "value": 513
   },
   {
     "group": "WT-US",
+    "index": 4,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 5,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 6,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 7,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 8,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 9,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 10,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 11,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 12,
+    "value": 0
+  },                    
+  {
+    "group": "WT-US",
+    "index": 13,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 14,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 15,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 16,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
+    "index": 17,
+    "value": 0
+  },            
+  {
+    "group": "WT-US",
+    "index": 18,
+    "value": 0
+  },    
+  {
+    "group": "WT-US",
+    "index": 19,
+    "value": 0
+  },  
+  {
+    "group": "WT-US",
     "index": 20,
-    "value": "126"
+    "value": 126
   }
 ]
