@@ -298,7 +298,7 @@
                 // turn off sampling message
                 $('.samplingLoader').css('display', 'none');
                 $('section#middle svg').css('display', 'block');
-                $('div#percents svg').css('padding-left', '9%');
+                $('section#middle svg').css('margin', 'auto');
                 window.sampleStats = data;
                 // update progress bar
                 var length, percentDone;
