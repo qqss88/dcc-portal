@@ -205,7 +205,8 @@ function ICGCGruntConfigProvider() {
     yeoman: yeomanConfig,
     watch: {
       compass: {
-        files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+        files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}',
+                '<%= yeoman.app %>/vendor/styles/{,*/}*.{scss,sass}'],
         tasks: ['compass:server']
       },
       injector: {

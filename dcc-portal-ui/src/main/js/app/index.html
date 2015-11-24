@@ -25,14 +25,14 @@
 <html data-ng-app="icgc" data-ng-controller="AppCtrl as AppCtrl" data-ng-click="AppCtrl.handleApplicationClick()"
       class="no-js">
 <!--<![endif]-->
-<head>
+<head> 
     <meta charset="utf-8"/>
     <!--[if lte IE 10]>
     <script>
         document.write('<base href="' + document.location.protocol + '//' + document.location.host + '/">');
     </script>
     <![endif]-->
-    <base href="/"/>
+    <base href="/"/> 
 
     <meta name="fragment" content="!"/>
 
@@ -176,9 +176,28 @@
 <script src="bower_components/showdown/src/showdown.js"></script>
 <script src="bower_components/showdown/src/extensions/table.js"></script>
 <script src="bower_components/x2js/xml2json.js"></script>
-<script src="scripts/ui/table2CSV.js"></script>
+<script src="scripts/ui/table2CSV.js"></script> 
 <!-- endbuild -->
+ 
 
+<!--  BAM iobio -->
+<!-- build:js scripts/bamiobio.min.js -->
+<script src="vendor/scripts/bamiobio/class.js"></script>
+<script src="vendor/scripts/bamiobio/rdp.js"></script>
+<script src="vendor/scripts/bamiobio/queue.min.js"></script>
+<script src="vendor/scripts/bamiobio/donut.d3.js"></script>
+<script src="vendor/scripts/bamiobio/histogram.d3.js"></script>
+<script src="vendor/scripts/bamiobio/histogramViewFinder.d3.js"></script>
+<script src="vendor/scripts/bamiobio/movingLine.d3.js"></script>
+<script src="vendor/scripts/bamiobio/nprogress.js"></script>
+<script src="vendor/scripts/bamiobio/bam.d3.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/bam.iobio.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/bam.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/bin.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/inflate.js"></script>
+<script src="vendor/scripts/bamiobio/binary.js"></script>
+<script src="vendor/scripts/bamiobio/flatui-checkbox.js"></script>
+<!-- endbuild -->
 
 <!-- Genome Viewer -->
 <!-- build:js scripts/genome-viewer-deps.1.min.js -->
@@ -263,7 +282,7 @@
 <script src="scripts/keyword/keyword.js"></script>
 <script src="scripts/releases/releases.js"></script>
 <script src="scripts/projects/projects.js"></script>
-<script src="scripts/donors/donors.js"></script>
+<script src="scripts/donors/donors.js"></script> 
 <script src="scripts/genes/genes.js"></script>
 <script src="scripts/compounds/compounds.js"></script>
 <script src="scripts/mutations/mutations.js"></script>
@@ -271,7 +290,7 @@
 <script src="scripts/genesets/genesets.js"></script>
 <script src="scripts/advanced/advanced.js"></script>
 <script src="scripts/modules/genomemaps/gmservice.js"></script>
-<script src="scripts/modules/genomemaps/viewer.js"></script>
+<script src="scripts/modules/genomemaps/viewer.js"></script> 
 <script src="scripts/modules/genomemaps/header.js"></script>
 <script src="scripts/downloader/routes.js"></script>
 <script src="scripts/downloader/services.js"></script>
@@ -283,6 +302,7 @@
 <script src="scripts/repository/repository.js"></script>
 <script src="scripts/repository/routes.js"></script>
 <script src="scripts/repository/services.js"></script>
+<script src="scripts/repository/directives.js"></script>
 <script src="scripts/facets/facets.js"></script>
 <script src="scripts/facets/terms.js"></script>
 <script src="scripts/facets/current.js"></script>

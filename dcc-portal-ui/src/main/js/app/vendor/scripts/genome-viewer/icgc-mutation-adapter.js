@@ -23,7 +23,7 @@ function IcgcMutationAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = '/api/browser';
+  this.host = 'http://localhost:8080/api/browser';
   this.gzip = true;
 
   this.params = {};
