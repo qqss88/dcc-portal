@@ -53,14 +53,6 @@
             });
           });
 
-        //        $(document).on('click', '.length-chart', function (event) {
-        //          toggleChart(event.toElement, 'lengthChart');
-        //        });
-        //
-        //        $(document).on('click', '.quality-chart', function (event) {
-        //          toggleChart(event.toElement, 'qualityChart');
-        //        });
-
         // initialize charts
         // get height width of histogram charts and set viewboxes
         var width = $('#read-coverage-distribution-chart').width();
@@ -210,7 +202,7 @@
         }
 
         scope.checkboxCheck = function (event) {
-          var checkbox = $(event.toElement);
+          var checkbox = $(event.target);
           if (checkbox.hasClass('checked')) {
             checkbox.removeClass('icon-ok');
             checkbox.addClass('icon-check-empty');
@@ -444,7 +436,7 @@
         }
 
         scope.toggleChart = function (event, chartId) {
-          var elem = event.toElement;
+          var elem = event.target;
           if ($(elem).hasClass('selected')){
             return;
           }
@@ -478,18 +470,6 @@
             return [Math.round(num / 1000000), 'million'];
           }
         }
-
-        // function hist2array(hist) {
-        // var a = [];
-        // for ( var i in hist) {
-        // a.push([ i,hist[i] ]);
-        // // var position = i;
-        // // var instances = hist[i];
-        // // for ( var j=0; j < instances; j++)
-        // // a.push( parseInt(position) );
-        // }
-        // return a;
-        // }
 
       }
     };
