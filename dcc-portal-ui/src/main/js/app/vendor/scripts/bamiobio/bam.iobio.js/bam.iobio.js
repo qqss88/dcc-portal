@@ -12,7 +12,7 @@ var Bam = Class.extend({
 
     // set iobio servers
     this.iobio = {};
-    var currentHost = 'bam.icgc.org';
+    var currentHost = 'iobio.icgc.org';
     this.iobio.samHeader = "wss://" + currentHost + "/samheader/";
     this.iobio.bamReadDepther = "wss://" + currentHost + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "wss://" + currentHost + "/bamstatsalive/";
