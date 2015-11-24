@@ -118,7 +118,7 @@
       }
 
       return false;
-    }
+    };
 
     this.processRightOnly = function (newElements) {
       var right = _.last (newElements);
@@ -159,7 +159,7 @@
 
     this.currentProcessor = this.processLeftAndRight;
     this.resultArray = [];
-  };
+  }
 
   var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models']);
 
