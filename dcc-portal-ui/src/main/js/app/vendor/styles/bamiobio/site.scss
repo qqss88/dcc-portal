@@ -110,7 +110,7 @@
     -webkit-order: 2;
     order: 2;
     margin-right: 20px;
-//    width: 150px;
+    //    width: 150px;
   }
   #percents {
     margin-right: 20px;
@@ -148,31 +148,42 @@
     height: 13px;
     line-height: 13px;
     font-size: 13px;
-    font-weight:lighter;
+    font-weight: lighter;
   }
   .hint {
     font-size: 13px;
     color: rgb(170, 170, 170);
   }
   #percents .percent {
-    -webkit-flex: 1 1 30%;
-    font-size: 1.3rem;
+    -webkit-flex: 0 1 30%;
+    font-size: 1.2rem;
     font-weight: lighter;
     flex: 1 1 30%;
     position: relative;
+    min-width: 148px;
+    min-height:160px;
   }
   #percents .percent text {
     font-size: 2rem;
   }
   #percents .percent svg {
     width: 100%;
-    height: 180px
+    height: 15rem;
+  }
+  @media screen and (max-width:1534px) and (min-width:721px) {
+    #percents .percent svg {
+      width: 70%;
+      margin-left: 11%;
+      height:17rem;
+    }
   }
   #distributions .distribution {
     -webkit-flex: 1 1 100%;
     flex: 1 1 100%;
     height: 20rem;
     position: relative;
+    display:inline-block;
+    width:45rem;
     /*padding: 0px 15px 0px 15px*/
   }
   .bar rect {
@@ -368,8 +379,8 @@
       order: 0;
     }
     #total-reads {
-      min-height: 130px;
-      max-height: 130px;
+      min-height: 160px;
+      max-height: 160px;
     }
     #depth-distribution.panel .title {
       padding-top: 10px;
