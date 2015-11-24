@@ -69,7 +69,7 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
     //////////////////////////////////////////////////////////////////////
 
     _ctrl.getTargetedCompoundGenesResultPerPage = function() {
-      return _targetedCompoundGenesResultPerPage;
+      return Math.min(_targetedCompoundIds.length, _targetedCompoundGenesResultPerPage);
     };
 
     _ctrl.getPrettyExternalRefName = function(refName) {
