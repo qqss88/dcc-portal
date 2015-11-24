@@ -14,7 +14,8 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+//filters=%7B%22gene%22:%7B%22id%22:%7B%22is%22:%5B%22ENSG00000080224%22,%22ENSG00000058091%22,%22ENSG00000171094%22,%22ENSG00000140538%22,%22ENSG00000184304%22,%22ENSG00000101349%22,%22ENSG00000154928%22,%22ENSG00000044524%22,%22ENSG00000183049%22,%22ENSG00000071909%22%5D%7D%7D%7D&from=1&size=10
+//filters=%7B%22gene%22:%7B%22id%22:%7B%22is%22:%5B%22ENSG00000080224%22,%22ENSG00000058091%22,%22ENSG00000171094%22,%22ENSG00000140538%22,%22ENSG00000184304%22,%22ENSG00000101349%22,%22ENSG00000154928%22,%22ENSG00000044524%22,%22ENSG00000183049%22%5D%7D%7D%7D&from=1&size=10
 'use strict';
 
 ////////////////////////////////////////////////////////////////////////
@@ -27,43 +28,37 @@ angular.module('icgc.compounds', ['icgc.compounds.controllers', 'icgc.compounds.
       templateUrl: 'scripts/compounds/views/compound.html',
       controller: 'CompoundCtrl as CompoundCtrl',
       resolve: {
-        compound: ['$stateParams', 'CompoundsService', function ($stateParams, CompoundsService) {
-          return CompoundsService.getCompound($stateParams.compoundId);
+        compoundManager: ['Page', '$stateParams', 'CompoundsService', function (Page, $stateParams, CompoundsService) {
+          Page.setTitle('Compounds');
+          Page.setPage('entity');
+          return CompoundsService.getCompoundManagerFactory($stateParams.compoundId);
         }]
       }
     });
   });
 
 angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
-  .controller('CompoundCtrl', function (compound, CompoundsService, Page) {
+  .controller('CompoundCtrl', function (compoundManager, CompoundsService, Page) {
 
     var _ctrl = this,
-        _compound = null,
+        _compound = compoundManager.getCompound(),
         _targetedCompoundGenes = null,
-        _targetedCompoundGenesResultPerPage = 10;
+        _targetedCompoundGenesResultPerPage = 10,
+        _targetCompoundResultPage = 0,
+        _targetedCompoundIds = [];
 
 
-    function _initTargetedGeneResults() {
-      _targetedCompoundGenes = CompoundsService.getTargetedCompoundGenes(_compound);
-
-      if (! _targetedCompoundGenes.length) {
-        return;
-      }
-
-      for (var i = 0; i < _targetedCompoundGenesResultPerPage; i++) {
-        _targetedCompoundGenes[i].get();
-      }
-
-    }
 
     function _init() {
-      Page.setTitle('Compounds');
-      Page.setPage('entity');
+
+
       Page.stopWork();
 
-      _compound = compound;
-
-      _initTargetedGeneResults();
+      compoundManager.getTargetedCompoundGenes(_targetCompoundResultPage, _targetCompoundResultPage)
+        .then(function(targetGenes) {
+          _targetedCompoundGenes = targetGenes;
+          _targetedCompoundIds = compoundManager.getTargetedCompoundGeneIds();
+        });
     }
 
     _init();
@@ -98,6 +93,31 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
       return _targetedCompoundGenes;
     };
 
+    _ctrl.getTargetedGeneCount = function() {
+      return _compound.genes.length;
+    };
+
+    _ctrl.getFilter = function(filterType) {
+      var filter = {},
+          endIndex = Math.min(_targetedCompoundGenesResultPerPage, _targetedCompoundIds.length);
+
+      switch (filterType.toLowerCase()) {
+        default:
+          filter.gene = {
+            id: {
+              is: _.slice(_targetedCompoundIds, _targetCompoundResultPage, endIndex)
+            }
+          };
+          break;
+      }
+
+      return filter;
+    };
+
+    _ctrl.getAffectedDonorCountTotal = function() {
+      return compoundManager.getAffectedDonorCountTotal();
+    };
+
     _ctrl.getCompound = function() {
       return _compound;
     };
@@ -110,7 +130,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       return angular.isArray(arr) ?  arr : [];
     }
 
-    function compoundFactory(compound) {
+    function _compoundEntityFactory(compound) {
       var _id = compound.zincId,
           _inchikey = compound.inchikey,
           _name = compound.name,
@@ -139,72 +159,186 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       };
     }
 
-    function GeneEntity(geneId) {
-      var _self = this,
-          _genePromise = null,
-          _geneData = null;
+    function _geneEntityFactory(geneData) {
+
+      var _id = geneData.id,
+          _type = geneData.type,
+          _symbol = geneData.symbol,
+          _name = geneData.name,
+          _chromosome = geneData.chromosome,
+          _start = geneData.start,
+          _end = geneData.end,
+          _affectedDonorCountFiltered = geneData.affectedDonorCountFiltered,
+          _affectedDonorCountTotal = geneData.affectedDonorCountTotal;
 
 
-      function _init(geneData) {
-        _geneData = geneData;
-        _self.type = geneData.type;
-        _self.symbol = geneData.symbol;
-        _self.name = geneData.name;
-        _self.chromosome = geneData.chromosome;
-        _self.start = geneData.start;
-        _self.end = geneData.end;
-      }
-
-
-      //////////////////////////////////////////////////////
-      // Public API
-      //////////////////////////////////////////////////////
-      _self.get = function() {
-
-        if (_genePromise === null) {
-          _genePromise = $q.defer();
-
-          Restangular.one('genes', geneId)
-              .get()
-              .then(function(geneData) {
-                _init(geneData);
-                _genePromise.resolve(_self);
-              });
-
-          return _genePromise.promise;
-        }
-
-        return _self;
+      return {
+        id: _id,
+        type: _type,
+        symbol: _symbol,
+        name: _name,
+        chromosome: _chromosome,
+        start: _start,
+        end: _end,
+        affectedDonorCountFiltered: _affectedDonorCountFiltered,
+        affectedDonorCountTotal: _affectedDonorCountTotal
       };
-
-      _self.id = geneId;
 
     }
 
     var _srv = this;
 
-    _srv.getCompound = function(id) {
-      return Restangular
-        .one('drugs', id)
-        .get()
-        .then(function(compound) {
-          return compoundFactory(compound.plain());
-        });
-    };
 
-    _srv.getTargetedCompoundGenes = function(compound) {
-      var geneCount = compound.genes.length,
-          genes = [];
 
-      for (var i = 0; i < geneCount; i++) {
-        var geneId = _.get(compound, 'genes[' + i + '].ensemblGeneId', false);
 
-        if (geneId) {
-          genes.push( new GeneEntity(geneId) );
-        }
+
+
+    function CompoundManager(compoundId) {
+      var _self = this,
+          _compoundEntity = null,
+          _compoundTargetedGenes = [],
+          _compoundTargetedGeneIds = [],
+          _affectedDonorCountTotal = 0;
+
+      function _getCompoundGenesFilter(geneStartIndex, geneLimit) {
+        var geneStartSliceIndex = geneStartIndex || 0,
+            geneEndIndex = geneStartIndex + (geneLimit || 10),
+            geneIDRequestSliceLength =  Math.min(_compoundEntity.genes.length, geneEndIndex);
+
+       return  {
+         from: 1,
+         size: (geneLimit || 10),
+         filters: {
+           gene: {
+             id: {
+               is: _.slice(_compoundTargetedGeneIds, geneStartSliceIndex, geneIDRequestSliceLength)
+             }
+           }
+         }
+       };
       }
 
-      return genes;
+      _self.getCompoundDonors = function(geneStartIndex, geneLimit) {
+        var params = _getCompoundGenesFilter(geneStartIndex, geneLimit);
+
+        return Restangular
+          .one('donors')
+          .get(params)
+          .then(function(restangularDonorsList) {
+            _affectedDonorCountTotal = _.get(restangularDonorsList, 'pagination.total', 0);
+          });
+      };
+
+      _self.getCompoundMutations = function(geneStartIndex, geneLimit) {
+        var params = _getCompoundGenesFilter(geneStartIndex, geneLimit);
+        delete params.from;
+        delete params.filters;
+
+
+        return Restangular
+            .one('drugs')
+            .one(compoundId)
+            .one('genes')
+            .one('mutations')
+            .one('counts')
+            .get(params);
+      };
+
+      _self.getTargetedCompoundGeneIds = function() {
+        return _compoundTargetedGeneIds;
+      };
+
+      _self.getTargetedCompoundGenes = function(geneStartIndex, geneLimit) {
+
+        var deferred = $q.defer();
+
+        _self.getCompoundMutations()
+          .then(function(restangularMutationCountData) {
+            var mutationCountData = restangularMutationCountData.plain(),
+                geneCount = mutationCountData.length,
+                mutationGeneValueMap = {};
+
+            if (geneCount === 0) {
+              return _compoundTargetedGenes;
+            }
+
+            for (var i = 0; i < geneCount; i++) {
+              var mutationData  = mutationCountData[i],
+                  geneId = _.get(mutationData, 'key', false);
+
+              if (geneId) {
+                _compoundTargetedGeneIds.push( geneId );
+                mutationGeneValueMap[geneId] = +mutationData.value;
+              }
+            }
+
+            var params = _getCompoundGenesFilter(geneStartIndex, geneLimit);
+
+            Restangular
+              .one('genes')
+              .get(params)
+              .then(function(geneList) {
+                var geneListResults = _.get(geneList, 'hits', false);
+
+                if (! geneListResults) {
+                  deferred.resolve(_compoundTargetedGenes);
+                }
+
+                var geneListResultsLength = geneListResults.length;
+
+                for (var i = 0; i < geneListResultsLength; i++) {
+                  var gene = _geneEntityFactory( geneListResults[i] );
+                  gene.mutationCountTotal = mutationGeneValueMap[gene.id];
+
+                  _compoundTargetedGenes.push( gene );
+                }
+
+                _compoundTargetedGenes = _.sortByOrder(_compoundTargetedGenes, 'affectedDonorCountFiltered', false);
+
+                deferred.resolve(_compoundTargetedGenes);
+
+                _self.getCompoundDonors(geneStartIndex, geneLimit);
+
+              });
+
+
+          });
+
+        return deferred.promise;
+      };
+
+      _self.init = function() {
+          var defer = $q.defer(),
+              deferPromise = defer.promise;
+
+          Restangular
+            .one('drugs', compoundId)
+            .get()
+            .then(function(compound) {
+              _compoundEntity = _compoundEntityFactory(compound.plain());
+              defer.resolve(_self);
+            });
+
+        return deferPromise;
+      };
+
+      _self.getTargetedGenes = function() {
+        return _compoundTargetedGenes;
+      };
+
+      _self.getCompound = function() {
+        return _compoundEntity;
+      };
+
+      _self.getAffectedDonorCountTotal = function() {
+        return _affectedDonorCountTotal;
+      };
+
+    }
+
+    _srv.getCompoundManagerFactory = function(id) {
+      var _compoundManager = new CompoundManager(id);
+      return _compoundManager.init();
     };
 
   });
