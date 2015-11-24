@@ -2,8 +2,6 @@ function bamD3(container, heightPct, color) {
    var margin = {top: 5, right: 30, bottom: 20, left: 30},
           width = $(container).width()*0.98 - margin.left - margin.right,
           height = $(container).height()*heightPct - margin.top - margin.bottom;
-   // var width = $(container).width() * 0.98;
-   // var height = $(container).height() * 0.85;
    var formatCount = d3.format(",.0f");
    
    var duration = 1000;
@@ -47,10 +45,6 @@ function bamD3(container, heightPct, color) {
       var lineFunction = d3.svg.line()
          .x(function(d) { return x(d.x) + x(x.domain()[0] + data[0].dx)/2; })
          .y(function(d) { return y(d.y) })
-         // .y(function(d) { 
-         //    var length = d3.sum(d, function(elem){ return elem.length });
-         //    return y(d.y * length / d.x); 
-         // })
          .interpolate("linear");
                   
                    
