@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Value;
+import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 
@@ -36,6 +37,8 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "Keyword")
 public class Keyword {
+
+  private static final ImmutableMap<String, String> FIELDS = FIELDS_MAPPING.get(Kind.KEYWORD);
 
   @ApiModelProperty(value = "ID", required = true)
   String id;
@@ -117,52 +120,93 @@ public class Keyword {
   @ApiModelProperty(required = false)
   List<String> tcgaAliquotBarcode;
 
+  // Drug-text fields
+  @ApiModelProperty(required = false)
+  String inchikey;
+  @ApiModelProperty(required = false)
+  String drugClass;
+  @ApiModelProperty(required = false)
+  List<String> atcCodes;
+  @ApiModelProperty(required = false)
+  List<String> atcCodeDescriptions;
+  @ApiModelProperty(required = false)
+  List<String> atcLevel5Codes;
+  @ApiModelProperty(required = false)
+  List<String> trialDescriptions;
+  @ApiModelProperty(required = false)
+  List<String> trialConditionNames;
+  @ApiModelProperty(required = false)
+  List<String> externalReferencesDrugbank;
+  @ApiModelProperty(required = false)
+  List<String> externalReferencesChembl;
+
   @SuppressWarnings("unchecked")
   public Keyword(Map<String, Object> fieldMap) {
-    ImmutableMap<String, String> fields = FIELDS_MAPPING.get(Kind.KEYWORD);
-    type = getString(fieldMap.get(fields.get("type")));
-    name = getString(fieldMap.get(fields.get("name")));
+    type = getString(fieldMap.get(FIELDS.get("type")));
+    name = getString(fieldMap.get(FIELDS.get("name")));
 
-    symbol = getString(fieldMap.get(fields.get("symbol")));
-    ensemblTranscriptId = getString(fieldMap.get(fields.get("ensemblTranscriptId")));
-    ensemblTranslationId = getString(fieldMap.get(fields.get("ensemblTranslationId")));
-    synonyms = (List<String>) fieldMap.get(fields.get("synonyms"));
-    uniprotkbSwissprot = (List<String>) fieldMap.get(fields.get("uniprotkbSwissprot"));
-    omimGene = (List<String>) fieldMap.get(fields.get("omimGene"));
-    entrezGene = (List<String>) fieldMap.get(fields.get("entrezGene"));
-    hgnc = (List<String>) fieldMap.get(fields.get("hgnc"));
-    altIds = (List<String>) fieldMap.get(fields.get("altIds"));
+    symbol = getString(fieldMap.get(FIELDS.get("symbol")));
+    ensemblTranscriptId = getString(fieldMap.get(FIELDS.get("ensemblTranscriptId")));
+    ensemblTranslationId = getString(fieldMap.get(FIELDS.get("ensemblTranslationId")));
+    synonyms = (List<String>) fieldMap.get(FIELDS.get("synonyms"));
+    uniprotkbSwissprot = (List<String>) fieldMap.get(FIELDS.get("uniprotkbSwissprot"));
+    omimGene = (List<String>) fieldMap.get(FIELDS.get("omimGene"));
+    entrezGene = (List<String>) fieldMap.get(FIELDS.get("entrezGene"));
+    hgnc = (List<String>) fieldMap.get(FIELDS.get("hgnc"));
+    altIds = (List<String>) fieldMap.get(FIELDS.get("altIds"));
 
-    projectId = getString(fieldMap.get(fields.get("projectId")));
-    submittedId = getString(fieldMap.get(fields.get("submittedId")));
-    specimenIds = (List<String>) fieldMap.get(fields.get("specimenIds"));
-    submittedSpecimenIds = (List<String>) fieldMap.get(fields.get("submittedSpecimenIds"));
-    sampleIds = (List<String>) fieldMap.get(fields.get("sampleIds"));
-    submittedSampleIds = (List<String>) fieldMap.get(fields.get("submittedSampleIds"));
+    projectId = getString(fieldMap.get(FIELDS.get("projectId")));
+    submittedId = getString(fieldMap.get(FIELDS.get("submittedId")));
+    specimenIds = (List<String>) fieldMap.get(FIELDS.get("specimenIds"));
+    submittedSpecimenIds = (List<String>) fieldMap.get(FIELDS.get("submittedSpecimenIds"));
+    sampleIds = (List<String>) fieldMap.get(FIELDS.get("sampleIds"));
+    submittedSampleIds = (List<String>) fieldMap.get(FIELDS.get("submittedSampleIds"));
 
-    primarySite = getString(fieldMap.get(fields.get("primarySite")));
-    tumourType = getString(fieldMap.get(fields.get("tumourType")));
-    tumourSubtype = getString(fieldMap.get(fields.get("tumourSubtype")));
+    primarySite = getString(fieldMap.get(FIELDS.get("primarySite")));
+    tumourType = getString(fieldMap.get(FIELDS.get("tumourType")));
+    tumourSubtype = getString(fieldMap.get(FIELDS.get("tumourSubtype")));
 
-    mutation = getString(fieldMap.get(fields.get("mutation")));
-    geneMutations = (List<String>) fieldMap.get(fields.get("geneMutations"));
+    mutation = getString(fieldMap.get(FIELDS.get("mutation")));
+    geneMutations = (List<String>) fieldMap.get(FIELDS.get("geneMutations"));
 
-    url = getString(fieldMap.get(fields.get("url")));
-    source = getString(fieldMap.get(fields.get("source")));
+    url = getString(fieldMap.get(FIELDS.get("url")));
+    source = getString(fieldMap.get(FIELDS.get("source")));
 
     // File
-    fileObjectId = getString(fieldMap.get(fields.get("object_id")));
-    dataType = getString(fieldMap.get(fields.get("data_type")));
+    fileObjectId = getString(fieldMap.get(FIELDS.get("object_id")));
+    dataType = getString(fieldMap.get(FIELDS.get("data_type")));
 
-    fileName = (List<String>) fieldMap.get(fields.get("file_name"));
-    donorId = (List<String>) fieldMap.get(fields.get("donor_id"));
-    projectCode = (List<String>) fieldMap.get(fields.get("project_code"));
+    fileName = (List<String>) fieldMap.get(FIELDS.get("file_name"));
+    donorId = (List<String>) fieldMap.get(FIELDS.get("donor_id"));
+    projectCode = (List<String>) fieldMap.get(FIELDS.get("project_code"));
 
-    tcgaParticipantBarcode = (List<String>) fieldMap.get(fields.get("TCGAParticipantBarcode"));
-    tcgaAliquotBarcode = (List<String>) fieldMap.get(fields.get("TCGAAliquotBarcode"));
-    tcgaSampleBarcode = (List<String>) fieldMap.get(fields.get("TCGASampleBarcode"));
+    tcgaParticipantBarcode = (List<String>) fieldMap.get(FIELDS.get("TCGAParticipantBarcode"));
+    tcgaAliquotBarcode = (List<String>) fieldMap.get(FIELDS.get("TCGAAliquotBarcode"));
+    tcgaSampleBarcode = (List<String>) fieldMap.get(FIELDS.get("TCGASampleBarcode"));
+
+    // Drug-text
+    val drugTextPrefix = "drug-text.";
+    inchikey = string(fieldMap, drugTextPrefix + "inchikey");
+    drugClass = string(fieldMap, drugTextPrefix + "drug_class");
+    atcCodes = strings(fieldMap, drugTextPrefix + "atc_codes_code");
+    atcCodeDescriptions = strings(fieldMap, drugTextPrefix + "atc_codes_description");
+    atcLevel5Codes = strings(fieldMap, drugTextPrefix + "atc_level5_codes");
+    trialDescriptions = strings(fieldMap, drugTextPrefix + "trials_description");
+    trialConditionNames = strings(fieldMap, drugTextPrefix + "trials_conditions_name");
+    externalReferencesDrugbank = strings(fieldMap, drugTextPrefix + "external_references_drugbank");
+    externalReferencesChembl = strings(fieldMap, drugTextPrefix + "external_references_chembl");
 
     // Generic id
-    id = getString(fieldMap.get(fields.get("id")));
+    id = string(fieldMap, "id");
   }
+
+  private static String string(Map<String, Object> fieldMap, String fieldName) {
+    return getString(fieldMap.get(FIELDS.get(fieldName)));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<String> strings(Map<String, Object> fieldMap, String fieldName) {
+    return (List<String>) fieldMap.get(FIELDS.get(fieldName));
+  }
+
 }

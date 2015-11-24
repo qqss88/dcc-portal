@@ -33,6 +33,134 @@
 (function () {
   'use strict';
 
+  _.mixin ({
+    pairUp: function (arrays) {
+      var resolved = _.map (arrays, function (o) {
+        return o.value();
+      });
+      return _.zip.apply (_, resolved);
+    }
+  });
+
+  function ensureArray (array) {
+    return _.isArray (array) ? array : [];
+  }
+  function ensureString (string) {
+    return _.isString (string) ? string.trim() : '';
+  }
+
+  // TODO: move this out.
+  function Abridger (maxLength) {
+    this.maxLength = maxLength;
+
+    var ellipsis = '...';
+    var _this = this;
+
+    this.find = function (sentence, keyword) {
+      var words = _.words (sentence);
+      var index = _.findIndex (words, function (word) {
+        return _.contains (word, keyword);
+      });
+
+      return {
+        target: words [index],
+        left: _(words).take (index).reverse(),
+        right: _(words).slice (index).rest()
+      };
+    };
+    var withinLimit = this.withinLimit = function (newElements) {
+      var combined = _(_this.resultArray).concat (newElements);
+
+      var numberOfCharacters = combined.map ('length').sum();
+      var numberOfSpaces = combined.size() - 1;
+
+      return (numberOfCharacters + numberOfSpaces) <= _this.maxLength;
+    };
+
+    this.processLeftAndRight = function (newElements) {
+      var left = _.first (newElements);
+      var right = _.last (newElements);
+
+      if (withinLimit (newElements)) {
+        _this.resultArray = [left].concat (_this.resultArray, right);
+        return true;
+      } else {
+
+        if (_.size (left) >= _.size (right)) {
+          if (withinLimit (left)) {
+            _this.currentProcessor = _this.processLeftOnly;
+            return _this.currentProcessor (newElements);
+          } else if (withinLimit (right)) {
+            _this.currentProcessor = _this.processRightOnly;
+            return _this.currentProcessor (newElements);
+          }
+        } else {
+          if (withinLimit (right)) {
+            _this.currentProcessor = _this.processRightOnly;
+            return _this.currentProcessor (newElements);
+          } else if (withinLimit (left)) {
+            _this.currentProcessor = _this.processLeftOnly;
+            return _this.currentProcessor (newElements);
+          }
+        }
+
+      }
+
+      return false;
+    };
+
+    this.processLeftOnly = function (newElements) {
+      var left = _.first (newElements);
+
+      if (withinLimit (left)) {
+        _this.resultArray = [left].concat (_this.resultArray);
+        return true;
+      }
+
+      return false;
+    }
+
+    this.processRightOnly = function (newElements) {
+      var right = _.last (newElements);
+
+      if (withinLimit (right)) {
+        _this.resultArray = _this.resultArray.concat (right);
+        return true;
+      }
+
+      return false;
+    };
+    this.hasRoom = function (newElements) {
+      return _this.currentProcessor (newElements);
+    };
+
+    this.format = function (fragments, sentence) {
+      var joined = fragments.join (' ').trim();
+      var dots = function (f) {
+        return f (sentence, joined) ? '' : ellipsis;
+      };
+
+      return dots (_.startsWith) + joined + dots (_.endsWith);
+    };
+
+    this.abridge = function (sentence, keyword) {
+      var finding = _this.find (sentence, keyword);
+
+      _this.resultArray = [finding.target];
+      _this.currentProcessor = _this.processLeftAndRight;
+
+      _([finding.left, finding.right])
+        .pairUp()
+        .takeWhile (_this.hasRoom)
+        .value();
+
+      return this.format (_this.resultArray, sentence);
+    };
+
+    this.currentProcessor = this.processLeftAndRight;
+    this.resultArray = [];
+  };
+
   var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models']);
 
   module.controller('KeywordController',
@@ -64,6 +192,43 @@
 
         $scope.from += pageSize;
         getResults({scroll: true});
+      };
+
+
+      $scope.badgeStyleClass = function (type) {
+        // FIXME: temp. mapping
+        type = ('drug' === type) ? 'compound' : type;
+
+        var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
+        return 't_badge t_badge__' + definedType;
+      };
+
+      $scope.matchElements = function (array, target) {
+        var matches = _.filter (ensureArray (array), function (element) {
+          return _.contains (ensureString (element), target);
+        });
+
+        return matches.join (', ');
+      };
+
+      $scope.concatIfContains = function (array, target) {
+        array = ensureArray (array);
+        var contains = _.any (array, function (element) {
+          return _.contains (ensureString (element), target);
+        });
+
+        return contains ? array.join (', ') : '';
+      };
+
+      var maxAbrigementLength = 60;
+      var abridger = new Abridger (maxAbrigementLength);
+
+      $scope.abridge = function (array, target) {
+        var match = _.find (ensureArray (array), function (sentence) {
+          return _.contains (ensureString (sentence), target);
+        });
+
+        return match ? abridger.abridge (match, target) : '';
       };
 
       $scope.quickFn = function () {

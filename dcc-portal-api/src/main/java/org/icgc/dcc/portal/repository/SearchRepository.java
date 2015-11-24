@@ -82,6 +82,7 @@ public class SearchRepository {
     public final String GENE_SET = "geneSet";
     public final String FILE = "file";
     public final String FILE_DONOR = "file-donor";
+    public final String DRUG = "drug";
 
   }
 
@@ -111,10 +112,12 @@ public class SearchRepository {
       .put(Types.CURATED_SET, Type.GENESET_TEXT)
       .put(Types.FILE, Type.REPOSITORY_FILE_TEXT)
       .put(Types.FILE_DONOR, Type.REPOSITORY_FILE_DONOR_TEXT)
+      .put(Types.DRUG, Type.DRUG_TEXT)
       .build();
   private static final Map<String, String> TYPE_ID_MAPPINGS = transformValues(TYPE_MAPPINGS, type -> type.getId());
   private static final String MUTATION_PREFIX = TYPE_ID_MAPPINGS.get(Types.MUTATION);
 
+  // private static final String[] MULTIPLE_SEARCH_TYPES = Stream.of(
   private static final Set<String> MULTIPLE_SEARCH_TYPES = Stream.of(
       Types.GENE,
       /*
@@ -125,8 +128,12 @@ public class SearchRepository {
       Types.DONOR,
       Types.PROJECT,
       Types.MUTATION,
-      Types.GENE_SET)
+      Types.GENE_SET,
+      Types.DRUG)
       .map(t -> TYPE_ID_MAPPINGS.get(t))
+      // TODO
+      // .distinct()
+      // .toArray(String[]::new);
       .collect(toImmutableSet());
 
   private static final List<String> SEARCH_SUFFIXES = ImmutableList.of(
@@ -196,6 +203,7 @@ public class SearchRepository {
     val result = TYPE_ID_MAPPINGS.containsKey(type) ? newHashSet(TYPE_ID_MAPPINGS.get(type)) : MULTIPLE_SEARCH_TYPES;
 
     return toStringArray(result);
+    // return TYPE_ID_MAPPINGS.containsKey(type) ? new String[] { TYPE_ID_MAPPINGS.get(type) } : MULTIPLE_SEARCH_TYPES;
   }
 
   private static FilterBuilder getPostFilter(String type) {
@@ -213,6 +221,7 @@ public class SearchRepository {
     val others = boolFilter()
         .mustNot(termsFilter(field, Types.DONOR, Types.PROJECT));
 
+    // FIXME
     return result
         .should(donor)
         .should(project)
