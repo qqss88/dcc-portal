@@ -220,7 +220,7 @@
         return contains ? array.join (', ') : '';
       };
 
-      var maxAbrigementLength = 60;
+      var maxAbrigementLength = 120;
       var abridger = new Abridger (maxAbrigementLength);
 
       $scope.abridge = function (array, target) {

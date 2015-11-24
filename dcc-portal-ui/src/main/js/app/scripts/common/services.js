@@ -135,13 +135,13 @@
       }
     };
   });
-  
-  
+
+
   // Prevent the settings service from being requested several times
   var _settingsPromise = null;
 
   module.service('Settings', function (RestangularNoCache) {
-    
+
     this.get = function () {
 
       if (_settingsPromise) {
@@ -149,7 +149,7 @@
       }
 
       _settingsPromise = RestangularNoCache.one('settings').get();
-      
+
       _settingsPromise.then(function () { _settingsPromise = null; });
 
       return _settingsPromise;
@@ -210,6 +210,10 @@
       dataRepositoryFile: {
         href: href ('dataRepositoryFile'),
         title: 'File'
+      },
+      drugCompound: {
+        href: href ('compound'),
+        title: 'Compound'
       }
     };
 

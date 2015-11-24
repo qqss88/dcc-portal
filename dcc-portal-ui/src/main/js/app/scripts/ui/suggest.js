@@ -74,11 +74,20 @@ angular.module('icgc.ui.suggest').controller('suggestController', function ($sco
     }
   };
 
+  $scope.badgeStyleClass = function (type) {
+    // FIXME: temp. mapping
+    type = ('drug' === type) ? 'compound' : type;
+
+    var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
+    return 't_badge t_badge__' + definedType;
+  };
+
   $scope.onChange = debounce($scope.onChangeFn, 200, false);
 });
 
 angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $document, $location, RouteInfoService) {
   var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+  var compoundUrl = RouteInfoService.get ('drugCompound').href;
 
   return {
     restrict: 'A',
@@ -123,6 +132,8 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
             resourceType = 'geneset';
           } else if ('file' === resourceType) {
             return dataRepoFileUrl + item.id;
+          } else if ('drug' === resourceType) {
+            return compoundUrl + item.id;
           }
 
           return '/' + resourceType + 's/' + item.id;
@@ -176,6 +187,7 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
 
 angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location, RouteInfoService) {
   var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+  var compoundUrl = RouteInfoService.get ('drugCompound').href;
 
   return {
     restrict: 'E',
@@ -197,6 +209,9 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location,
             resourceType = 'geneset';
           } else if (item.type === 'file') {
             $location.path (dataRepoFileUrl + item.id).search ({});
+            return;
+          } else if (item.type === 'drug') {
+            $location.path (compoundUrl + item.id).search ({});
             return;
           }
 
