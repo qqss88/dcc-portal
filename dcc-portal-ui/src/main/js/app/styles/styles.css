@@ -5776,7 +5776,7 @@ td {
 }
 /* line 157, ../vendor/styles/bamiobio/site.scss */
 #bam-statistics #percents .percent {
-  -webkit-flex: 0 1 30%;
+  -webkit-flex: 1 1 39%;
   font-size: 1.2rem;
   font-weight: lighter;
   flex: 1 1 30%;
