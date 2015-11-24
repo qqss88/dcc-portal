@@ -80,7 +80,6 @@ function movingLineD3(container) {
 
    
       svg.select(".read-depth-path").remove();
-      // if ( svg.select(".read-depth-path").empty() ) { 
          var path = svg.append("path")
            .attr('class', "read-depth-path")
            .attr("d", line(data))
@@ -96,12 +95,6 @@ function movingLineD3(container) {
              .duration(2000)
              .ease("linear")
              .attr("stroke-dashoffset", 0);
-      // } else {
-      //    // .transition()
-      //    //             .duration(2000)
-      //    //             .attr("d", line(data));
-      // }
-
          
       // update x axis
       if (svg.select(".x.axis").empty()) {
