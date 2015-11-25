@@ -249,6 +249,24 @@
 
       refresh();
     });
+
+  module.controller ('GeneCompoundsCtrl', function ($stateParams, CompoundsService, RouteInfoService) {
+    var geneId = $stateParams.id;
+    var _this = this;
+    this.compoundUrl = RouteInfoService.get ('drugCompound').href;
+
+    CompoundsService.getCompoundsByGeneId (geneId).then (function (data) {
+      var compounds = data.plain();
+
+      _this.compounds = compounds;
+
+      console.log ('compounds are: ', compounds);
+
+    }, function (error) {
+      console.log (error);
+    });
+  });
+
 })();
 
 (function () {
