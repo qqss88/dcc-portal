@@ -13,6 +13,8 @@
             <li data-spy="genomic" class="t_subnav__items__item"><a data-scrollto href="#genomic">Genomic Context</a>
             </li>
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
+            <li data-spy="compounds" class="t_subnav__items__item"><a data-scrollto href="#compounds">Compounds</a></li>
+
             <li><br></li>
             <li class="t_subnav__items__item" data-ng-if="GeneCtrl.mutationFacets.functionalImpact.total > 0">
                 <span>Page Filters</span>
@@ -73,10 +75,10 @@
 
         <h3>Annotation</h3>
         <table class="table table-info">
-            <tr> 
+            <tr>
                 <th>Reactome Pathways</th>
                 <td>
-                    <hide-list data-items="GeneCtrl.uiGeneSets.pathwayList" 
+                    <hide-list data-items="GeneCtrl.uiGeneSets.pathwayList"
                         data-display-limit="5"
                         data-template-name="template/geneGeneSetList.html">
                     </hide-list>
@@ -85,7 +87,7 @@
             <tr>
                 <th>GO Terms</th>
                 <td>
-                    <hide-list data-items="GeneCtrl.uiGeneSets.goList" 
+                    <hide-list data-items="GeneCtrl.uiGeneSets.goList"
                         data-display-limit="5"
                         data-template-name="template/geneGeneSetList.html">
                     </hide-list>
@@ -94,7 +96,7 @@
             <tr>
                 <th>Curated Gene Set</th>
                 <td>
-                    <hide-list data-items="GeneCtrl.uiGeneSets.curatedList" 
+                    <hide-list data-items="GeneCtrl.uiGeneSets.curatedList"
                         data-display-limit="5"
                         data-template-name="template/geneGeneSetList.html">
                     </hide-list>
@@ -225,7 +227,7 @@
                 <td>{{ project.tumourType }}</td>
                 <td>{{ project.tumourSubtype }}</td>
                 <td class="text-right" style="position: relative; display: block">
-                    
+
                         <span data-ng-style="{width:project.uiAffectedDonorPercentage*100+'%'}"
                           class="t_facets__facet__terms__active__term__bar"></span>
                         <span style="position: relative">
@@ -423,5 +425,47 @@
         </table>
     </div>
 </section>
+
+<section id="compounds"
+  ng-controller="GeneCompoundsCtrl as GeneCompoundsCtrl"
+  ng-class="{ 'loading': GeneCompoundsCtrl.compounds === undefined, 'empty': GeneCompoundsCtrl.compoundslength === 0 }">
+
+  <h3 ng-if="GeneCompoundsCtrl.compounds === undefined">
+    <i class="icon-spinner icon-spin" />Fetching compounds...
+  </h3>
+
+  <h3 ng-if="GeneCompoundsCtrl.compounds.length === 0">
+    No Compounds Found.
+  </h3>
+
+  <div ng-if="GeneCompoundsCtrl.compounds.length > 0">
+    <h3>Target Compounds</h3>
+
+    <span class="t_table_top">
+      Showing <strong>{{ GeneCompoundsCtrl.compounds.length }}</strong> compounds
+    </span>
+    <table class="table table-bordered table-striped table-condensed">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Drug Class</th>
+            <th>ATC Codes</th>
+            <th># Clinical Trials</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="compound in GeneCompoundsCtrl.compounds">
+            <td><a href="{{ GeneCompoundsCtrl.compoundUrl }}{{ compound.zincId }}">{{ compound.name }}</a></td>
+            <td>{{ compound.drugClass }}</td>
+            <td>{{ compound.atcCodes }}</td>
+            <td>{{ compound.cancerTrialCount | number }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+  </div>
+
+</section>
+
 </article>
 </div>

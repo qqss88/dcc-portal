@@ -432,4 +432,8 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       return _compoundManager.init();
     };
 
+    _srv.getCompoundsByGeneId = function (geneId) {
+      return Restangular.one ('drugs').one ('genes').one (geneId).get();
+    };
+
   });
