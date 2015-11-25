@@ -106,7 +106,7 @@
           'PCAWG - Tokyo',
           'CGHub - Santa Cruz',
           'TCGA DCC - Bethesda'
-      ]
+      ];
       
       return Restangular.one (REPO_API_PATH).get (angular.extend (defaults, params)).then(function (data) {
         if (data.termFacets.hasOwnProperty('repoName') && data.termFacets.repoName.hasOwnProperty('terms')) {
@@ -115,7 +115,7 @@
           });
         }
         
-        return data
+        return data;
       });
     };
 
