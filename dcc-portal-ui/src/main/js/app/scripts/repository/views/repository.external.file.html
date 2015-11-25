@@ -206,7 +206,9 @@
               <br>
               <a ng-if="isS3"
                 href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}" target="_blank">
-                <i class="icon-download" />Metadata
+                <i class="icon-download" data-ng-if="fileCopy.repoName != 'Collaboratory'"  /><!--
+                --><i class="icon-external-link" data-ng-if="fileCopy.repoName === 'Collaboratory'"  /><!--
+                -->Metadata
               </a>
               <a ng-if="! isS3"
                 target="_blank" href="{{ metaDataUrl }}" tooltip="Show Metadata" title="{{ metaDataUrl }}">
