@@ -170,7 +170,10 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
           _drugClass = compound.drugClass || '--',
           _cancerTrialCount = compound.cancerTrialCount || '--',
           _atcCodes = _arrayOrEmptyArray(compound.atcCodes),
-          _genes = _.pluck(_arrayOrEmptyArray(compound.genes), 'ensemblGeneId'),
+          _genes = _.filter(_.pluck(_arrayOrEmptyArray(compound.genes), 'ensemblGeneId'),
+            function(id) {
+              return id !== null && id.length > 0;
+            }),
           _trials = _arrayOrEmptyArray(compound.trials);
 
 
