@@ -175,6 +175,7 @@
       $scope.isBusy = false;
       $scope.isFinished = false;
       $scope.dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+      $scope.compoundEntityUrl = RouteInfoService.get ('drugCompound').href;
 
       Page.setTitle('Results for ' + $scope.query);
       Page.setPage('q');

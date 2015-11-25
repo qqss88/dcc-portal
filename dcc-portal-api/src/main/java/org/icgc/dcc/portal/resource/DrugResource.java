@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.resource;
 
 import static com.google.common.collect.Lists.transform;
+import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
@@ -105,7 +106,7 @@ public class DrugResource {
     val drug = drugService.findOne(drugId);
     val genes = transform(drug.getGenes(), gene -> gene.getEnsemblGeneId());
 
-    return mutationService.counts(genes, size.get(), order.equals("desc"));
+    return genes.isEmpty() ? emptyList() : mutationService.counts(genes, size.get(), order.equals("desc"));
   }
 
   @GET
