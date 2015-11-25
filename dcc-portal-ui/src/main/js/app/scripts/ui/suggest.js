@@ -75,9 +75,6 @@ angular.module('icgc.ui.suggest').controller('suggestController', function ($sco
   };
 
   $scope.badgeStyleClass = function (type) {
-    // FIXME: temp. mapping
-    type = ('drug' === type) ? 'compound' : type;
-
     var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
     return 't_badge t_badge__' + definedType;
   };
@@ -132,7 +129,7 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
             resourceType = 'geneset';
           } else if ('file' === resourceType) {
             return dataRepoFileUrl + item.id;
-          } else if ('drug' === resourceType) {
+          } else if ('compound' === resourceType) {
             return compoundUrl + item.id;
           }
 
@@ -210,7 +207,7 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location,
           } else if (item.type === 'file') {
             $location.path (dataRepoFileUrl + item.id).search ({});
             return;
-          } else if (item.type === 'drug') {
+          } else if (item.type === 'compound') {
             $location.path (compoundUrl + item.id).search ({});
             return;
           }

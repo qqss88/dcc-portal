@@ -197,23 +197,27 @@
 
 
       $scope.badgeStyleClass = function (type) {
-        // FIXME: temp. mapping
-        type = ('drug' === type) ? 'compound' : type;
-
         var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
         return 't_badge t_badge__' + definedType;
       };
 
-      $scope.matchElements = function (array, target) {
-        var matches = _.filter (ensureArray (array), function (element) {
-          return _.contains (ensureString (element), target);
-        });
+      var maxConcat = 3;
+
+      $scope.concatMatches = function (array) {
+        var target = $scope.query;
+        var matches = _(ensureArray (array))
+          .filter (function (element) {
+            return _.contains (ensureString (element), target);
+          })
+          .take (maxConcat);
 
         return matches.join (', ');
       };
 
-      $scope.concatIfContains = function (array, target) {
+      $scope.concatIfContains = function (array) {
         array = ensureArray (array);
+
+        var target = $scope.query;
         var contains = _.any (array, function (element) {
           return _.contains (ensureString (element), target);
         });
@@ -224,7 +228,8 @@
       var maxAbrigementLength = 120;
       var abridger = new Abridger (maxAbrigementLength);
 
-      $scope.abridge = function (array, target) {
+      $scope.abridge = function (array) {
+        var target = $scope.query;
         var match = _.find (ensureArray (array), function (sentence) {
           return _.contains (ensureString (sentence), target);
         });

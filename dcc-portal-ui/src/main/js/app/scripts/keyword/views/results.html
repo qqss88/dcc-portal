@@ -41,7 +41,7 @@
                           class="t_labels__label t_labels__label__pathways"></span>
                     <span data-toggle-param data-key='type' data-value="file"
                           class="t_labels__label t_labels__label__files"></span>
-                    <span data-toggle-param data-key='type' data-value="drug"
+                    <span data-toggle-param data-key='type' data-value="compound"
                           class="t_labels__label t_labels__label__compounds" />
                 </div>
             </form>
@@ -54,7 +54,7 @@
                     <span class="{{ badgeStyleClass (r.type) }}" />
                 </td>
 
-                <td class="t_quick__hit__text" data-ng-switch-when="drug">
+                <td class="t_quick__hit__text" data-ng-switch-when="compound">
                     <a href="{{ compoundEntityUrl }}{{ r.id }}" data-ng-bind-html="r.name | highlight: activeQuery"></a>
 
                     <ul class="t_quick__hit__text__details">
@@ -66,44 +66,44 @@
                             <span class="t_quick__hit__text__details__label">Compound Class</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="r.drugClass  | highlight: activeQuery" />
                         </li>
-                        <li ng-init="compooundSynonyms = matchElements (r.synonyms, query)"
-                            ng-if="matchElements (r.synonyms, query).length > 0">
+                        <li ng-init="compooundSynonyms = concatMatches (r.synonyms)"
+                            ng-if="concatMatches (r.synonyms).length > 0">
                             <span class="t_quick__hit__text__details__label">Synonyms</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="compooundSynonyms | highlight: activeQuery" />
                         </li>
-                        <li ng-init="atcCodes = matchElements (r.atcCodes, query)"
-                            ng-if="matchElements (r.atcCodes, query).length > 0">
+                        <li ng-init="atcCodes = concatMatches (r.atcCodes)"
+                            ng-if="concatMatches (r.atcCodes).length > 0">
                             <span class="t_quick__hit__text__details__label">ATC Codes</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="atcCodes | highlight: activeQuery" />
                         </li>
-                        <li ng-init="atcLevel5Codes = matchElements (r.atcLevel5Codes, query)"
-                            ng-if="matchElements (r.atcLevel5Codes, query).length > 0">
+                        <li ng-init="atcLevel5Codes = concatMatches (r.atcLevel5Codes)"
+                            ng-if="concatMatches (r.atcLevel5Codes).length > 0">
                             <span class="t_quick__hit__text__details__label">ATC Level5 Codes</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="atcLevel5Codes | highlight: activeQuery" />
                         </li>
-                        <li ng-init="trialConditionNames = matchElements (r.trialConditionNames, query)"
-                            ng-if="matchElements (r.trialConditionNames, query).length > 0">
+                        <li ng-init="trialConditionNames = concatMatches (r.trialConditionNames)"
+                            ng-if="concatMatches (r.trialConditionNames).length > 0">
                             <span class="t_quick__hit__text__details__label">Trial Condition Names</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="trialConditionNames | highlight: activeQuery" />
                         </li>
-                        <li ng-init="externalReferencesDrugbank = matchElements (r.externalReferencesDrugbank, query)"
-                            ng-if="matchElements (r.externalReferencesDrugbank, query).length > 0">
+                        <li ng-init="externalReferencesDrugbank = concatMatches (r.externalReferencesDrugbank)"
+                            ng-if="concatMatches (r.externalReferencesDrugbank).length > 0">
                             <span class="t_quick__hit__text__details__label">Ext. References Drugbank</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="externalReferencesDrugbank | highlight: activeQuery" />
                         </li>
-                        <li ng-init="externalReferencesChembl = matchElements (r.externalReferencesChembl, query)"
-                            ng-if="matchElements (r.externalReferencesChembl, query).length > 0">
+                        <li ng-init="externalReferencesChembl = concatMatches (r.externalReferencesChembl)"
+                            ng-if="concatMatches (r.externalReferencesChembl).length > 0">
                             <span class="t_quick__hit__text__details__label">Ext. References Chembl</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="externalReferencesChembl | highlight: activeQuery" />
                         </li>
 
-                        <li ng-init="atcCodeDescriptions = abridge (r.atcCodeDescriptions, query)"
-                            ng-if="abridge (r.atcCodeDescriptions, query).length > 0">
+                        <li ng-init="atcCodeDescriptions = abridge (r.atcCodeDescriptions)"
+                            ng-if="abridge (r.atcCodeDescriptions).length > 0">
                             <span class="t_quick__hit__text__details__label">ATC Code Descriptions</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="atcCodeDescriptions | highlight: activeQuery" />
                         </li>
-                        <li ng-init="trialDescriptions = abridge (r.trialDescriptions, query)"
-                            ng-if="abridge (r.trialDescriptions, query).length > 0">
+                        <li ng-init="trialDescriptions = abridge (r.trialDescriptions)"
+                            ng-if="abridge (r.trialDescriptions).length > 0">
                             <span class="t_quick__hit__text__details__label">Trial Descriptions</span>
                             <span class="t_quick__hit__text__details__value" ng-bind-html="trialDescriptions | highlight: activeQuery" />
                         </li>

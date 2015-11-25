@@ -26,6 +26,8 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FROM_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FROM_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_GENE_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_GENE_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_INCLUDE_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_INCLUDE_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_ALLOW;
@@ -42,6 +44,11 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DONOR;
 import static org.icgc.dcc.portal.resource.ResourceUtils.FIND_ALL_TEMPLATE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.FOR_THE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.GENE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.MULTIPLE_IDS;
+import static org.icgc.dcc.portal.resource.ResourceUtils.RETURNS_LIST;
+import static org.icgc.dcc.portal.resource.ResourceUtils.S;
 import static org.icgc.dcc.portal.resource.ResourceUtils.regularFindAllJqlQuery;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -60,6 +67,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.Drug;
 import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.service.DrugService;
 import org.icgc.dcc.portal.service.MutationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,9 +117,19 @@ public class DrugResource {
     return genes.isEmpty() ? emptyList() : mutationService.counts(genes, size.get(), order.equals("desc"));
   }
 
+  @Path("/genes/{" + API_GENE_PARAM + "}")
   @GET
   @Timed
-  @ApiOperation(value = "Find drugs via query filters", response = Drug.class)
+  @ApiOperation(value = RETURNS_LIST + "compound" + S + FOR_THE + GENE + S, response = List.class)
+  public List<Drug> findDrugsByGeneIds(
+      @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds
+      ) {
+    return drugService.findDrugsByGeneIds(geneIds.get());
+  }
+
+  @GET
+  @Timed
+  @ApiOperation(value = "Find drugs via query filters", response = List.class)
   public List<Drug> findDrugs(
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,

@@ -17,9 +17,13 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.icgc.dcc.portal.model.Drug.parse;
 
+import java.util.Collection;
 import java.util.List;
 
 import lombok.NonNull;
@@ -48,25 +52,49 @@ import com.google.common.collect.FluentIterable;
 public class DrugService {
 
   private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
+  // TODO: use DrugTypeModel.Fields
+  private static final String PQL_FIND_DRUGS_BY_GENES = "in (drug.ensemblGeneId, %s), sort (+name)";
+  private static final String SINGLE_QUOTE = "'";
+  private static final String COMMA = ",";
 
   private final DrugRepository repository;
 
   @NonNull
   public List<Drug> findAll(Query query) {
-    val pql = toAst(query);
-    val response = repository.findAll(pql);
+    return findAll(toAst(query));
+  }
+
+  @NonNull
+  public List<Drug> findDrugsByGeneIds(Collection<String> geneIds) {
+    if (geneIds.isEmpty()) {
+      return emptyList();
+    }
+
+    val genes = geneIds.stream()
+        .map(id -> SINGLE_QUOTE + id + SINGLE_QUOTE)
+        .collect(joining(COMMA));
+    val pql = format(PQL_FIND_DRUGS_BY_GENES, genes);
+
+    return findAll(PqlParser.parse(pql));
+  }
+
+  @NonNull
+  public Drug findOne(String id) {
+    val response = repository.findOne(id);
+
+    log.info("GetResponse is: {}", response.getSourceAsString());
+
+    return parse(response.getSourceAsString());
+  }
+
+  private List<Drug> findAll(StatementNode pqlAst) {
+    val response = repository.findAll(pqlAst);
 
     log.debug("Response of findAll is: {}", response);
 
     return FluentIterable.from(response.getHits())
         .transform(DrugService::toDrug)
         .toList();
-  }
-
-  @NonNull
-  public Drug findOne(String id) {
-    val response = repository.findOne(id);
-    return parse(response.getSourceAsString());
   }
 
   private static StatementNode toAst(Query query) {
