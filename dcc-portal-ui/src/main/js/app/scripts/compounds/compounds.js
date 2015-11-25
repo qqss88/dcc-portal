@@ -14,8 +14,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-//filters=%7B%22gene%22:%7B%22id%22:%7B%22is%22:%5B%22ENSG00000080224%22,%22ENSG00000058091%22,%22ENSG00000171094%22,%22ENSG00000140538%22,%22ENSG00000184304%22,%22ENSG00000101349%22,%22ENSG00000154928%22,%22ENSG00000044524%22,%22ENSG00000183049%22,%22ENSG00000071909%22%5D%7D%7D%7D&from=1&size=10
-//filters=%7B%22gene%22:%7B%22id%22:%7B%22is%22:%5B%22ENSG00000080224%22,%22ENSG00000058091%22,%22ENSG00000171094%22,%22ENSG00000140538%22,%22ENSG00000184304%22,%22ENSG00000101349%22,%22ENSG00000154928%22,%22ENSG00000044524%22,%22ENSG00000183049%22%5D%7D%7D%7D&from=1&size=10
+
 'use strict';
 
 ////////////////////////////////////////////////////////////////////////
@@ -29,6 +28,7 @@ angular.module('icgc.compounds', ['icgc.compounds.controllers', 'icgc.compounds.
       controller: 'CompoundCtrl as CompoundCtrl',
       resolve: {
         compoundManager: ['Page', '$stateParams', 'CompoundsService', function (Page, $stateParams, CompoundsService) {
+          Page.startWork();
           Page.setTitle('Compounds');
           Page.setPage('entity');
           return CompoundsService.getCompoundManagerFactory($stateParams.compoundId);
@@ -98,14 +98,13 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
     };
 
     _ctrl.getFilter = function(filterType) {
-      var filter = {},
-          endIndex = Math.min(_targetedCompoundGenesResultPerPage, _targetedCompoundIds.length);
+      var filter = {};
 
       switch (filterType.toLowerCase()) {
         default:
           filter.gene = {
             id: {
-              is: _.slice(_targetedCompoundIds, _targetCompoundResultPage, endIndex)
+              is: _compound.genes
             }
           };
           break;
@@ -121,10 +120,40 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
     _ctrl.getCompound = function() {
       return _compound;
     };
+
+    _ctrl.goToModule = function(type, limit) {
+      var params = {},
+          setType = 'gene',
+          url = null;
+
+      params.filters = _ctrl.getFilter(type);
+      params.size = limit || _ctrl.getTargetedGeneCount();
+      params.isTransient = true;
+
+
+      switch(type.toLowerCase()) {
+        case 'genomeviewer':
+          url = '/browser/g';
+          break;
+        case 'advancedsearch':
+          url = '/search/g';
+          break;
+        default:
+        break;
+      }
+
+      if (! url) {
+        return;
+      }
+
+      CompoundsService.goToModule(setType, params, url);
+
+    };
+
   });
 
 angular.module('icgc.compounds.services', ['icgc.genes.models'])
-  .service('CompoundsService', function($q, Gene, Restangular) {
+  .service('CompoundsService', function($q, Gene, Page, $location, Restangular) {
 
     function _arrayOrEmptyArray(arr) {
       return angular.isArray(arr) ?  arr : [];
@@ -140,7 +169,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
           _drugClass = compound.drugClass || '--',
           _cancerTrialCount = compound.cancerTrialCount || '--',
           _atcCodes = _arrayOrEmptyArray(compound.atcCodes),
-          _genes = _arrayOrEmptyArray(compound.genes),
+          _genes = _.pluck(_arrayOrEmptyArray(compound.genes), 'ensemblGeneId'),
           _trials = _arrayOrEmptyArray(compound.trials);
 
 
@@ -335,6 +364,63 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       };
 
     }
+
+    // For application/json format
+    function _params2JSON(type, params) {
+      var data = {};
+      data.filters = encodeURI(JSON.stringify(params.filters));
+      data.type = type.toUpperCase();
+      data.name = params.name;
+      data.description = params.description || '';
+      data.size = params.size || 0;
+
+      if (params.isTransient) {
+        data.isTransient = params.isTransient;
+      }
+
+      // Set default sort values if necessary
+      if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
+        if (type === 'donor') {
+          data.sortBy = 'ssmAffectedGenes';
+        } else if (type === 'gene') {
+          data.sortBy = 'affectedDonorCountFiltered';
+        } else {
+          data.sortBy = 'affectedDonorCountFiltered';
+        }
+        data.sortOrder = 'DESCENDING';
+      } else {
+        data.sortBy = params.sortBy;
+        data.sortOrder = params.sortOrder;
+      }
+      data.union = params.union;
+      return data;
+    }
+
+    _srv.goToModule = function(type, params, forwardUrl) {
+        Page.startWork();
+        params.name = 'Input gene set';
+        params.description = '';
+        params.sortBy = 'affectedDonorCountFiltered';
+        params.sortOrder = 'DESCENDING';
+
+        var data = _params2JSON(type, params),
+            promise = Restangular.one('entityset')
+                        .customPOST(data, undefined, {async:'false'}, {'Content-Type': 'application/json'});
+
+        promise.then(function(data) {
+          Page.stopWork();
+          if (! data.id) {
+            console.warn('there is no id!!!!');
+            return;
+          }
+          else {
+            var newFilter = JSON.stringify({'gene': {entitySetId: {is: [data.id]}}});
+            $location.path(forwardUrl).search('filters', newFilter);
+          }
+        });
+
+        return promise;
+    };
 
     _srv.getCompoundManagerFactory = function(id) {
       var _compoundManager = new CompoundManager(id);
