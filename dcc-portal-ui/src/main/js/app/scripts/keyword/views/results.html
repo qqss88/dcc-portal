@@ -64,7 +64,11 @@
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">Compound Class</span>
-                            <span class="t_quick__hit__text__details__value" ng-bind-html="r.drugClass  | highlight: activeQuery" />
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="r.drugClass | highlight: activeQuery" />
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">InChIKey</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="r.inchikey | highlight: activeQuery" />
                         </li>
                         <li ng-init="compooundSynonyms = concatMatches (r.synonyms)"
                             ng-if="concatMatches (r.synonyms).length > 0">

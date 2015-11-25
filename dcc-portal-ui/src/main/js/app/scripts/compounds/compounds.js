@@ -58,6 +58,7 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
         .then(function(targetGenes) {
           _targetedCompoundGenes = targetGenes;
           _targetedCompoundIds = compoundManager.getTargetedCompoundGeneIds();
+          console.log(targetGenes);
         });
     }
 
@@ -288,7 +289,8 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
                 mutationGeneValueMap = {};
 
             if (geneCount === 0) {
-              return _compoundTargetedGenes;
+              deferred.resolve(_compoundTargetedGenes);
+              return deferred.promise;
             }
 
             for (var i = 0; i < geneCount; i++) {

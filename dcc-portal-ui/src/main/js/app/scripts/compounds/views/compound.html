@@ -124,7 +124,7 @@
                     <h3>
                         Most Frequently Mutated Genes Targeted by this Compound
 
-                        <span class="open-in pull-right">
+                        <span class="open-in pull-right" data-ng-if="CompoundCtrl.getTargetedCompoundGenes() && CompoundCtrl.getTargetedCompoundGenes().length > 0">
                             Open in
 
                               <a href="" data-ng-click="CompoundCtrl.goToModule('AdvancedSearch')">
@@ -141,12 +141,19 @@
 
 
                     <div class="t_table_top">
-                        Showing <strong data-ng-bind="CompoundCtrl.getTargetedCompoundGenesResultPerPage()"></strong> of <strong data-ng-bind="CompoundCtrl.getTargetedGeneCount()"></strong> genes
-                        <span class="t_tools" data-toolbar="" data-dl="compound_mutated_genes">
-                        <span class="t_tools__tool" data-tooltip-placement="left" data-tooltip="Export Table as TSV" data-ng-clicks="downloadHTMLTable(dl, 'tsv')"><i class="icon-file"></i></span>
+
+                        <span data-ng-if="CompoundCtrl.getTargetedCompoundGenes() && CompoundCtrl.getTargetedCompoundGenes().length > 0">
+                            Showing <strong data-ng-bind="CompoundCtrl.getTargetedCompoundGenesResultPerPage()"></strong> of <strong data-ng-bind="CompoundCtrl.getTargetedGeneCount()"></strong> genes
+                            <span class="t_tools" data-toolbar="" data-dl="compound_mutated_genes">
+                            <span class="t_tools__tool" data-tooltip-placement="left" data-tooltip="Export Table as TSV" data-ng-clicks="downloadHTMLTable(dl, 'tsv')"><i class="icon-file"></i></span>
+                            </span>
+                        </span>
+                        <span data-ng-if="CompoundCtrl.getTargetedCompoundGenes() &&  CompoundCtrl.getTargetedCompoundGenes().length === 0">
+                            No targeted genes found.
                         </span>
                     </div>
-                    <table class="table table-info" data-ng-if="compound.trials.length > 0" data-ng-init="genes = CompoundCtrl.getTargetedCompoundGenes()">
+
+                    <table class="table table-info" data-ng-if="CompoundCtrl.getTargetedCompoundGenes().length > 0">
                         <tbody>
                             <tr>
                                 <th>Symbol</th>
@@ -205,7 +212,7 @@
                     <h3>
                         Clinical Trials
 
-                        <span class="pull-right open-in">
+                        <span class="pull-right open-in" data-ng-if="compound.trials.length > 0">
                             Open in
                               <a href="http://zinc15.docking.org/substances/{{compound.id}}/trials/subsets/cancer/" target="_blank">
                                   <i class="icon-external-link"></i>
@@ -215,9 +222,14 @@
                         </span>
                     </h3>
                     <div class="t_table_top">
-                        Showing <strong data-ng-bind="compound.trials.length"></strong> Clinical Trials
-                        <span class="t_tools" data-toolbar="" data-dl="compound_trials">
-                        <span class="t_tools__tool" data-tooltip-placement="left" data-tooltip="Export Table as TSV" data-ng-clicks="downloadHTMLTable(dl, 'tsv')"><i class="icon-file"></i></span>
+                        <span data-ng-if="compound.trials.length > 0">
+                            Showing <strong data-ng-bind="compound.trials.length"></strong> Clinical Trials
+                            <span class="t_tools" data-toolbar="" data-dl="compound_trials">
+                            <span class="t_tools__tool" data-tooltip-placement="left" data-tooltip="Export Table as TSV" data-ng-clicks="downloadHTMLTable(dl, 'tsv')"><i class="icon-file"></i></span>
+                            </span>
+                        </span>
+                        <span data-ng-if="compound.trials.length === 0">
+                            No trials found.
                         </span>
                     </div>
                     <table class="table table-info" data-ng-if="compound.trials.length > 0">
