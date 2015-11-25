@@ -98,18 +98,14 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
       return _compound.genes.length;
     };
 
-    _ctrl.getFilter = function(filterType) {
-      var filter = {};
-
-      switch (filterType.toLowerCase()) {
-        default:
-          filter.gene = {
-            id: {
-              is: _compound.genes
-            }
-          };
-          break;
-      }
+    _ctrl.getFilter = function() {
+      var filter = {
+        gene: {
+          entitySetId: {
+            is: [compoundManager.getGeneEntityID()]
+          }
+        }
+      };
 
       return filter;
     };
@@ -120,35 +116,6 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
 
     _ctrl.getCompound = function() {
       return _compound;
-    };
-
-    _ctrl.goToModule = function(type, limit) {
-      var params = {},
-          setType = 'gene',
-          url = null;
-
-      params.filters = _ctrl.getFilter(type);
-      params.size = limit || _ctrl.getTargetedGeneCount();
-      params.isTransient = true;
-
-
-      switch(type.toLowerCase()) {
-        case 'genomeviewer':
-          url = '/browser/g';
-          break;
-        case 'advancedsearch':
-          url = '/search/g';
-          break;
-        default:
-        break;
-      }
-
-      if (! url) {
-        return;
-      }
-
-      CompoundsService.goToModule(setType, params, url);
-
     };
 
   });
@@ -231,28 +198,104 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
           _compoundEntity = null,
           _compoundTargetedGenes = [],
           _compoundTargetedGeneIds = [],
-          _affectedDonorCountTotal = 0;
+          _affectedDonorCountTotal = 0,
+          _geneEntityId = null;
 
-      function _getCompoundGenesFilter(geneStartIndex, geneLimit) {
-        var geneStartSliceIndex = geneStartIndex || 0,
-            geneEndIndex = geneStartIndex + (geneLimit || 10),
-            geneIDRequestSliceLength =  Math.min(_compoundEntity.genes.length, geneEndIndex);
+      // For application/json format
+      function _params2JSON(type, params) {
+        var data = {};
+        data.filters = encodeURI(JSON.stringify(params.filters));
+        data.type = type.toUpperCase();
+        data.name = params.name;
+        data.description = params.description || '';
+        data.size = params.size || 0;
+
+        if (params.isTransient) {
+          data.isTransient = params.isTransient;
+        }
+
+        // Set default sort values if necessary
+        if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
+          if (type === 'donor') {
+            data.sortBy = 'ssmAffectedGenes';
+          } else if (type === 'gene') {
+            data.sortBy = 'affectedDonorCountFiltered';
+          } else {
+            data.sortBy = 'affectedDonorCountFiltered';
+          }
+          data.sortOrder = 'DESCENDING';
+        } else {
+          data.sortBy = params.sortBy;
+          data.sortOrder = params.sortOrder;
+        }
+        data.union = params.union;
+        return data;
+      }
+
+      function _createGeneEntitySet(params) {
+        var deferred = $q.defer(),
+            urlParams = _.extend({}, params),
+            compoundGenes = _compoundEntity.genes;
+
+        if (compoundGenes.length === 0 || _geneEntityId !== null) {
+          deferred.resolve();
+          return deferred.promise;
+        }
+
+
+        urlParams.filters = {
+          gene: {
+            id: {
+              is: compoundGenes
+            }
+          }
+        };
+
+        urlParams.size = compoundGenes.length;
+        urlParams.isTransient = true;
+        urlParams.name = 'Input gene set';
+        urlParams.description = '';
+        urlParams.sortBy = 'affectedDonorCountFiltered';
+        urlParams.sortOrder = 'DESCENDING';
+
+        var data = _params2JSON('gene', urlParams);
+
+          Restangular.one('entityset')
+            .customPOST(data, undefined, {async:'false'}, {'Content-Type': 'application/json'})
+            .then(function(data) {
+
+              if (data.id) {
+                _geneEntityId = data.id;
+              }
+              else {
+                console.warn('Could not create gene entity set');
+              }
+
+              deferred.resolve();
+            });
+
+        return deferred.promise;
+      }
+
+      function _getResultsCompoundGenesFilter(geneLimit) {
 
        return  {
          from: 1,
          size: (geneLimit || 10),
          filters: {
-           gene: {
-             id: {
-               is: _.slice(_compoundTargetedGeneIds, geneStartSliceIndex, geneIDRequestSliceLength)
-             }
-           }
+            gene: {
+              entitySetId: {
+                is: [_geneEntityId]
+              }
+            }
          }
        };
       }
 
-      _self.getCompoundDonors = function(geneStartIndex, geneLimit) {
-        var params = _getCompoundGenesFilter(geneStartIndex, geneLimit);
+      _self.getResultsCompoundGenesFilter = _getResultsCompoundGenesFilter;
+
+      _self.getCompoundDonors = function(geneLimit) {
+        var params = _getResultsCompoundGenesFilter(geneLimit);
 
         return Restangular
           .one('donors')
@@ -263,7 +306,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       };
 
       _self.getCompoundMutations = function(geneStartIndex, geneLimit) {
-        var params = _getCompoundGenesFilter(geneStartIndex, geneLimit);
+        var params = _getResultsCompoundGenesFilter(geneLimit);
         delete params.from;
         delete params.filters;
 
@@ -281,62 +324,73 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         return _compoundTargetedGeneIds;
       };
 
-      _self.getTargetedCompoundGenes = function(geneStartIndex, geneLimit) {
+      _self.getTargetedCompoundGenes = function(geneLimit) {
 
         var deferred = $q.defer();
 
-        _self.getCompoundMutations()
-          .then(function(restangularMutationCountData) {
-            var mutationCountData = restangularMutationCountData.plain(),
+        _createGeneEntitySet().then(function() {
+          _self.getCompoundMutations()
+            .then(function (restangularMutationCountData) {
+              var mutationCountData = restangularMutationCountData.plain(),
                 geneCount = mutationCountData.length,
                 mutationGeneValueMap = {};
 
-            if (geneCount === 0) {
-              deferred.resolve(_compoundTargetedGenes);
-              return deferred.promise;
-            }
+              if (geneCount === 0) {
+                deferred.resolve(_compoundTargetedGenes);
+                return deferred.promise;
+              }
 
-            for (var i = 0; i < geneCount; i++) {
-              var mutationData  = mutationCountData[i],
+              for (var i = 0; i < geneCount; i++) {
+                var mutationData = mutationCountData[i],
                   geneId = _.get(mutationData, 'key', false);
 
-              if (geneId) {
-                _compoundTargetedGeneIds.push( geneId );
-                mutationGeneValueMap[geneId] = +mutationData.value;
+                if (geneId) {
+                  _compoundTargetedGeneIds.push(geneId);
+                  mutationGeneValueMap[geneId] = +mutationData.value;
+                }
               }
-            }
 
-            var params = _getCompoundGenesFilter(geneStartIndex, geneLimit);
+              var params = {
+                from: 1,
+                size: (geneLimit || 10),
+                filters: {
+                  gene: {
+                    id: {
+                      is: _compoundTargetedGeneIds
+                    }
+                  }
+                }
+              };
 
-            Restangular
-              .one('genes')
-              .get(params)
-              .then(function(geneList) {
-                var geneListResults = _.get(geneList, 'hits', false);
+              Restangular
+                .one('genes')
+                .get(params)
+                .then(function (geneList) {
+                  var geneListResults = _.get(geneList, 'hits', false);
 
-                if (! geneListResults) {
+                  if (!geneListResults) {
+                    deferred.resolve(_compoundTargetedGenes);
+                  }
+
+                  var geneListResultsLength = geneListResults.length;
+
+                  for (var i = 0; i < geneListResultsLength; i++) {
+                    var gene = _geneEntityFactory(geneListResults[i]);
+                    gene.mutationCountTotal = mutationGeneValueMap[gene.id];
+                    _compoundTargetedGenes.push(gene);
+                  }
+
+                  _compoundTargetedGenes = _.sortByOrder(_compoundTargetedGenes, 'affectedDonorCountFiltered', false);
+
                   deferred.resolve(_compoundTargetedGenes);
-                }
 
-                var geneListResultsLength = geneListResults.length;
+                  _self.getCompoundDonors(geneLimit);
 
-                for (var i = 0; i < geneListResultsLength; i++) {
-                  var gene = _geneEntityFactory( geneListResults[i] );
-                  gene.mutationCountTotal = mutationGeneValueMap[gene.id];
-
-                  _compoundTargetedGenes.push( gene );
-                }
-
-                _compoundTargetedGenes = _.sortByOrder(_compoundTargetedGenes, 'affectedDonorCountFiltered', false);
-
-                deferred.resolve(_compoundTargetedGenes);
-
-                _self.getCompoundDonors(geneStartIndex, geneLimit);
-
-              });
+                });
 
 
-          });
+            });
+        });
 
         return deferred.promise;
       };
@@ -364,68 +418,16 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         return _compoundEntity;
       };
 
+      _self.getGeneEntityID = function() {
+        return _geneEntityId;
+      };
+
       _self.getAffectedDonorCountTotal = function() {
         return _affectedDonorCountTotal;
       };
 
     }
 
-    // For application/json format
-    function _params2JSON(type, params) {
-      var data = {};
-      data.filters = encodeURI(JSON.stringify(params.filters));
-      data.type = type.toUpperCase();
-      data.name = params.name;
-      data.description = params.description || '';
-      data.size = params.size || 0;
-
-      if (params.isTransient) {
-        data.isTransient = params.isTransient;
-      }
-
-      // Set default sort values if necessary
-      if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
-        if (type === 'donor') {
-          data.sortBy = 'ssmAffectedGenes';
-        } else if (type === 'gene') {
-          data.sortBy = 'affectedDonorCountFiltered';
-        } else {
-          data.sortBy = 'affectedDonorCountFiltered';
-        }
-        data.sortOrder = 'DESCENDING';
-      } else {
-        data.sortBy = params.sortBy;
-        data.sortOrder = params.sortOrder;
-      }
-      data.union = params.union;
-      return data;
-    }
-
-    _srv.goToModule = function(type, params, forwardUrl) {
-        Page.startWork();
-        params.name = 'Input gene set';
-        params.description = '';
-        params.sortBy = 'affectedDonorCountFiltered';
-        params.sortOrder = 'DESCENDING';
-
-        var data = _params2JSON(type, params),
-            promise = Restangular.one('entityset')
-                        .customPOST(data, undefined, {async:'false'}, {'Content-Type': 'application/json'});
-
-        promise.then(function(data) {
-          Page.stopWork();
-          if (! data.id) {
-            console.warn('there is no id!!!!');
-            return;
-          }
-          else {
-            var newFilter = JSON.stringify({'gene': {entitySetId: {is: [data.id]}}});
-            $location.path(forwardUrl).search('filters', newFilter);
-          }
-        });
-
-        return promise;
-    };
 
     _srv.getCompoundManagerFactory = function(id) {
       var _compoundManager = new CompoundManager(id);

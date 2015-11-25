@@ -127,11 +127,11 @@
                         <span class="open-in pull-right" data-ng-if="CompoundCtrl.getTargetedCompoundGenes() && CompoundCtrl.getTargetedCompoundGenes().length > 0">
                             Open in
 
-                              <a href="" data-ng-click="CompoundCtrl.goToModule('AdvancedSearch')">
+                              <a href="/search?filters={{CompoundCtrl.getFilter()}}">
                                   Advanced Search
                               </a>
                                 |
-                              <a href="" data-ng-click="CompoundCtrl.goToModule('GenomeViewer')">
+                              <a href="/browser/g?filters={{CompoundCtrl.getFilter()}}">
                                   Genome Viewer
                               </a>
 
@@ -152,7 +152,9 @@
                             No targeted genes found.
                         </span>
                     </div>
-
+                    <h3 data-ng-if="! CompoundCtrl.getTargetedCompoundGenes()">
+                        <i class="icon-spinner icon-spin"></i> Fetching targeted genes...
+                    </h3>
                     <table class="table table-info" data-ng-if="CompoundCtrl.getTargetedCompoundGenes().length > 0">
                         <tbody>
                             <tr>
@@ -187,7 +189,7 @@
                                         {{ gene.affectedDonorCountFiltered | number }}
                                     </a>
                                     /
-                                    <a data-ng-href="/search?filters={{CompoundCtrl.getFilter('advancedSearch')}}">
+                                    <a href="/search?filters={{CompoundCtrl.getFilter()}}">
                                         {{ CompoundCtrl.getAffectedDonorCountTotal() | number }}
                                     </a>
                                     <em data-ng-bind-template="({{gene.affectedDonorCountFiltered/CompoundCtrl.getAffectedDonorCountTotal() * 100 | number:2}}%)"></em>
