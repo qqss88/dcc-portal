@@ -49,6 +49,10 @@
     return _.isString (string) ? string.trim() : '';
   }
 
+  function caseInsensitivelyContains (word, partial) {
+    return _.contains (word.toUpperCase(), partial.toUpperCase());
+  }
+
   // TODO: move this out.
   function Abridger (maxLength) {
     this.maxLength = maxLength;
@@ -59,7 +63,7 @@
     this.find = function (sentence, keyword) {
       var words = _.words (sentence);
       var index = _.findIndex (words, function (word) {
-        return _.contains (word, keyword);
+        return caseInsensitivelyContains (word, keyword);
       });
 
       return {
@@ -231,7 +235,7 @@
       $scope.abridge = function (array) {
         var target = $scope.query;
         var match = _.find (ensureArray (array), function (sentence) {
-          return _.contains (ensureString (sentence), target);
+          return caseInsensitivelyContains (ensureString (sentence), target);
         });
 
         return match ? abridger.abridge (match, target) : '';
