@@ -82,7 +82,7 @@ public class SearchRepository {
     public final String GENE_SET = "geneSet";
     public final String FILE = "file";
     public final String FILE_DONOR = "file-donor";
-    public final String DRUG = "drug";
+    public final String DRUG = "compound";
 
   }
 
