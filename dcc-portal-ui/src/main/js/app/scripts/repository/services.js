@@ -92,7 +92,31 @@
         size: 10,
         from:1
       };
-      return Restangular.one (REPO_API_PATH).get (angular.extend (defaults, params));
+      
+      var precedence = [
+          'AWS - Virginia',
+          'Collaboratory',
+          'PCAWG - Barcelona',
+          'PCAWG - Chicago (ICGC)',
+          'PCAWG - Chicago (TCGA)',
+          'PCAWG - Heidelberg',
+          'PCAWG - London',
+          'PCAWG - Santa Cruz',
+          'PCAWG - Seoul',
+          'PCAWG - Tokyo',
+          'CGHub - Santa Cruz',
+          'TCGA DCC - Bethesda'
+      ];
+      
+      return Restangular.one (REPO_API_PATH).get (angular.extend (defaults, params)).then(function (data) {
+        if (data.termFacets.hasOwnProperty('repoName') && data.termFacets.repoName.hasOwnProperty('terms')) {
+          data.termFacets.repoName.terms = data.termFacets.repoName.terms.sort(function (a, b) {
+            return precedence.indexOf(a.term) - precedence.indexOf(b.term);
+          });
+        }
+        
+        return data;
+      });
     };
 
     _srv.getRepoNameFromCode = function (repoCode) {
