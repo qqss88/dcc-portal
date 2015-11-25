@@ -98,8 +98,8 @@
         window.qualityChart.xAxis().tickFormat(tickFormatter);
         window.qualityChart.yAxis().tickFormat(tickFormatter);
 
-        // setup main panel read chart
-        window.readRegionChart = bamD3('#read-depth', 0.85, '#33A7E4');
+//        // setup main panel read chart
+//        window.readRegionChart = bamD3('#read-depth', 0.85, '#33A7E4');
 
         // setup donut chart
         window.sampleDonutChart = donutD3().radius(100).klass(
@@ -178,9 +178,6 @@
         var bamId = scope.bamId;
         // check if url to bam file is supplied in url and sample it
         if (bamId !== undefined) {
-          // remove https if present
-          // if (bamUrl.slice(0,5) == 'https')
-          // bamUrl = 'http' + bamUrl.slice(5,bamUrl.length);
           window.bam = new Bam(bamId);
           var r = getUrlParameter('region');
           var region;
@@ -228,8 +225,6 @@
           var g = d3.selectAll('#depth-distribution .brush');
           brush.clear();
           brush(g);
-          // no need to trigger event? since setSelected sq will do it
-          // brush.event(g);
         }
         
         function updateTotalReads(totalReads, rand) {
@@ -346,16 +341,10 @@
 
         function updatePercentCharts(stats, donutChart) {
           var pie = d3.layout.pie().sort(null);
-//          var value;
-
           // update percent charts
           var keys = ['mapped_reads', 'proper_pairs',
                       'forward_strands', 'singletons', 'both_mates_mapped',
                       'duplicates'];
-            // var colors = ["rgb(45,143,193)", 'rgb(231, 76, 60)',
-            // "rgb(243, 156, 18)",
-            // "rgb(155, 89, 182)", "rgb(46, 204, 113)", "rgb(241, 196,
-            // 15)"];
           keys.forEach(function (key) {
             var stat = stats[key];
             var data = [stat, stats.total_reads - stat];
@@ -363,7 +352,6 @@
               .data(pie(data));
             donutChart(arc);
           });
-
         }
 
         function updateHistogramCharts(histograms) {
@@ -446,9 +434,6 @@
 
           // redraw chart
           var dataId = elem.getAttribute('data-id');
-            // var outlier = elem.getAttribute('data-outlier') === 'true'
-            // ||
-            // elem.getAttribute('data-outlier') == null;
           var h = window.sampleStats[dataId];
           var d = Object.keys(h).map(function (k) {
             return [+k, +h[k]];
@@ -470,7 +455,6 @@
             return [Math.round(num / 1000000), 'million'];
           }
         }
-
       }
     };
   });
