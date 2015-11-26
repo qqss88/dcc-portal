@@ -122,10 +122,9 @@ public class MutationService {
 
     return range(0, responseItems.length).boxed()
         .map(i -> {
-          final String geneId = genes.get(i);
           final long count = getTotalHitCount(responseItems[i].getResponse());
 
-          return new SimpleImmutableEntry<String, Long>(geneId, count);
+          return new SimpleImmutableEntry<String, Long>(genes.get(i), count);
         })
         .sorted(sortDescendingly ? comparator.reversed() : comparator)
         .limit(maxSize)
