@@ -113,7 +113,7 @@ angular.module('icgc.ui.suggest').controller('suggestController',
       .take (maxConcat);
 
     return matches.join (', ');
-  };
+  }
 
   function reducedToMatchString (result, value) {
     if (_.isEmpty (result)) {

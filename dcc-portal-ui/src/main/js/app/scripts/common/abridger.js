@@ -27,13 +27,6 @@
     }
   });
 
-  function ensureArray (array) {
-    return _.isArray (array) ? array : [];
-  }
-  function ensureString (string) {
-    return _.isString (string) ? string.trim() : '';
-  }
-
   function caseInsensitivelyContains (word, partial) {
     return _.contains (word.toUpperCase(), partial.toUpperCase());
   }
