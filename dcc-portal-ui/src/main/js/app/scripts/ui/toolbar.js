@@ -59,7 +59,7 @@ angular.module('icgc.ui.toolbar', []).directive('toolbar', function ($filter, $t
 
 
         if (window.Blob && window.File) {
-          saveAs(new Blob([tableData], {type: 'text/plain;charset=utf-8'}), filename);
+          saveAs(new Blob([tableData], {type: 'text/plain;charset=ascii'}), filename);
         } else {
           // Fallback (IE and other browsers that lack support), create a form and
           // submit a post request to bounce the download content against the server
