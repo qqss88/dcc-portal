@@ -253,17 +253,20 @@
   module.controller ('GeneCompoundsCtrl', function ($stateParams, CompoundsService, RouteInfoService) {
     var geneId = $stateParams.id;
     var _this = this;
+
     this.compoundUrl = RouteInfoService.get ('drugCompound').href;
+    this.concatAtcCodes = function (compound) {
+      var codes = _.map (_.get (compound, 'atcCodes', []), 'code');
+      return _.isEmpty (codes) ? '--' : codes.join (', ');
+    };
 
     CompoundsService.getCompoundsByGeneId (geneId).then (function (data) {
       var compounds = data.plain();
 
       _this.compounds = compounds;
 
-      console.log ('compounds are: ', compounds);
-
     }, function (error) {
-      console.log (error);
+      console.log ("Error getting compounds related to the geneId", error);
     });
   });
 

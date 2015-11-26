@@ -435,7 +435,7 @@
   </h3>
 
   <h3 ng-if="GeneCompoundsCtrl.compounds.length === 0">
-    No Compounds Found.
+    No Target Compounds Found.
   </h3>
 
   <div ng-if="GeneCompoundsCtrl.compounds.length > 0">
@@ -457,7 +457,7 @@
         <tr ng-repeat="compound in GeneCompoundsCtrl.compounds">
             <td><a href="{{ GeneCompoundsCtrl.compoundUrl }}{{ compound.zincId }}">{{ compound.name }}</a></td>
             <td>{{ compound.drugClass }}</td>
-            <td>{{ compound.atcCodes }}</td>
+            <td>{{ GeneCompoundsCtrl.concatAtcCodes (compound) }}</td>
             <td>{{ compound.cancerTrialCount | number }}</td>
         </tr>
         </tbody>
