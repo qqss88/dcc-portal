@@ -448,7 +448,7 @@
         <thead>
         <tr>
             <th>Name</th>
-            <th>Drug Class</th>
+            <th>Compound Class</th>
             <th>ATC Codes</th>
             <th># Clinical Trials</th>
         </tr>
@@ -458,7 +458,7 @@
             <td><a href="{{ GeneCompoundsCtrl.compoundUrl }}{{ compound.zincId }}">{{ compound.name }}</a></td>
             <td>{{ compound.drugClass }}</td>
             <td>{{ GeneCompoundsCtrl.concatAtcCodes (compound) }}</td>
-            <td>{{ compound.cancerTrialCount | number }}</td>
+            <td class="text-right">{{ compound.cancerTrialCount | number }}</td>
         </tr>
         </tbody>
     </table>

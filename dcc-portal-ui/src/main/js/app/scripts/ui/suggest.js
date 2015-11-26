@@ -17,9 +17,10 @@
 
 'use strict';
 
-angular.module('icgc.ui.suggest', ['ngSanitize']);
+angular.module('icgc.ui.suggest', ['ngSanitize', 'icgc.common.text.utils']);
 
-angular.module('icgc.ui.suggest').controller('suggestController', function ($scope, debounce, Keyword) {
+angular.module('icgc.ui.suggest').controller('suggestController',
+  function ($scope, debounce, Keyword, Abridger) {
   var pageSize = 5, inactive = -1;
 
   $scope.active = inactive;
@@ -77,6 +78,90 @@ angular.module('icgc.ui.suggest').controller('suggestController', function ($sco
   $scope.badgeStyleClass = function (type) {
     var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
     return 't_badge t_badge__' + definedType;
+  };
+
+  function ensureArray (array) {
+    return _.isArray (array) ? array : [];
+  }
+  function ensureString (string) {
+    return _.isString (string) ? string.trim() : '';
+  }
+
+  function caseInsensitivelyContains (word, partial) {
+    return _.contains (word.toUpperCase(), partial.toUpperCase());
+  }
+
+  var maxAbrigementLength = 80;
+  var abridger = new Abridger.Abridger (maxAbrigementLength);
+
+  function abridge (array) {
+    var target = $scope.query;
+    var match = _.find (ensureArray (array), function (sentence) {
+      return caseInsensitivelyContains (ensureString (sentence), target);
+    });
+
+    return match ? abridger.abridge (match, target) : '';
+  }
+
+  var maxConcat = 3;
+
+  function concatMatches (array, target) {
+    var matches = _(ensureArray (array))
+      .filter (function (element) {
+        return caseInsensitivelyContains (ensureString (element), target);
+      })
+      .take (maxConcat);
+
+    return matches.join (', ');
+  };
+
+  function reducedToMatchString (result, value) {
+    if (_.isEmpty (result)) {
+      result = concatMatches (value, $scope.query);
+    }
+    return result;
+  }
+
+  $scope.findFirstMatch = function (compound) {
+    var singleValueFields = ['id', 'drugClass', 'inchikey'];
+    var match = _(singleValueFields)
+      .map (function (field) {
+        return [_.get (compound, field, '')];
+      })
+      .reduce (reducedToMatchString, '')
+      .trim();
+
+    if (! _.isEmpty (match)) {
+      return match;
+    }
+
+    var shortStringArrayFields = ['synonyms', 'atcCodes', 'atcLevel5Codes', 'trialConditionNames',
+      'externalReferencesDrugbank', 'externalReferencesChembl'];
+    match = _(shortStringArrayFields)
+      .map (function (field) {
+        return _.get (compound, field, []);
+      })
+      .reduce (reducedToMatchString, '')
+      .trim();
+
+    if (! _.isEmpty (match)) {
+      return match;
+    }
+
+    var longStringArrayFields = ['atcCodeDescriptions', 'trialDescriptions'];
+    match = _(longStringArrayFields)
+      .map (function (field) {
+        return _.get (compound, field, []);
+      })
+      .reduce (function (result, value) {
+        if (_.isEmpty (result)) {
+          result = abridge (value);
+        }
+        return result;
+      }, '')
+      .trim();
+
+    return match;
   };
 
   $scope.onChange = debounce($scope.onChangeFn, 200, false);

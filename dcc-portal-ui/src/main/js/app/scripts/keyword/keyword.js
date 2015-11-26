@@ -33,15 +33,6 @@
 (function () {
   'use strict';
 
-  _.mixin ({
-    pairUp: function (arrays) {
-      var resolved = _.map (arrays, function (o) {
-        return o.value();
-      });
-      return _.zip.apply (_, resolved);
-    }
-  });
-
   function ensureArray (array) {
     return _.isArray (array) ? array : [];
   }
@@ -53,122 +44,11 @@
     return _.contains (word.toUpperCase(), partial.toUpperCase());
   }
 
-  // TODO: move this out.
-  function Abridger (maxLength) {
-    this.maxLength = maxLength;
 
-    var ellipsis = '...';
-    var _this = this;
-
-    this.find = function (sentence, keyword) {
-      var words = _.words (sentence);
-      var index = _.findIndex (words, function (word) {
-        return caseInsensitivelyContains (word, keyword);
-      });
-
-      return {
-        target: words [index],
-        left: _(words).take (index).reverse(),
-        right: _(words).slice (index).rest()
-      };
-    };
-    var withinLimit = this.withinLimit = function (newElements) {
-      var combined = _(_this.resultArray).concat (newElements);
-
-      var numberOfCharacters = combined.map ('length').sum();
-      var numberOfSpaces = combined.size() - 1;
-
-      return (numberOfCharacters + numberOfSpaces) <= _this.maxLength;
-    };
-
-    this.processLeftAndRight = function (newElements) {
-      var left = _.first (newElements);
-      var right = _.last (newElements);
-
-      if (withinLimit (newElements)) {
-        _this.resultArray = [left].concat (_this.resultArray, right);
-        return true;
-      } else {
-
-        if (_.size (left) >= _.size (right)) {
-          if (withinLimit (left)) {
-            _this.currentProcessor = _this.processLeftOnly;
-            return _this.currentProcessor (newElements);
-          } else if (withinLimit (right)) {
-            _this.currentProcessor = _this.processRightOnly;
-            return _this.currentProcessor (newElements);
-          }
-        } else {
-          if (withinLimit (right)) {
-            _this.currentProcessor = _this.processRightOnly;
-            return _this.currentProcessor (newElements);
-          } else if (withinLimit (left)) {
-            _this.currentProcessor = _this.processLeftOnly;
-            return _this.currentProcessor (newElements);
-          }
-        }
-
-      }
-
-      return false;
-    };
-
-    this.processLeftOnly = function (newElements) {
-      var left = _.first (newElements);
-
-      if (withinLimit (left)) {
-        _this.resultArray = [left].concat (_this.resultArray);
-        return true;
-      }
-
-      return false;
-    };
-
-    this.processRightOnly = function (newElements) {
-      var right = _.last (newElements);
-
-      if (withinLimit (right)) {
-        _this.resultArray = _this.resultArray.concat (right);
-        return true;
-      }
-
-      return false;
-    };
-    this.hasRoom = function (newElements) {
-      return _this.currentProcessor (newElements);
-    };
-
-    this.format = function (fragments, sentence) {
-      var joined = fragments.join (' ').trim();
-      var dots = function (f) {
-        return f (sentence, joined) ? '' : ellipsis;
-      };
-
-      return dots (_.startsWith) + joined + dots (_.endsWith);
-    };
-
-    this.abridge = function (sentence, keyword) {
-      var finding = _this.find (sentence, keyword);
-
-      _this.resultArray = [finding.target];
-      _this.currentProcessor = _this.processLeftAndRight;
-
-      _([finding.left, finding.right])
-        .pairUp()
-        .takeWhile (_this.hasRoom)
-        .value();
-
-      return this.format (_this.resultArray, sentence);
-    };
-
-    this.currentProcessor = this.processLeftAndRight;
-    this.resultArray = [];
-  }
-
-  var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models']);
+  var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models', 'icgc.common.text.utils']);
 
   module.controller('KeywordController',
-    function ($scope, Page, LocationService, debounce, Keyword, RouteInfoService) {
+    function ($scope, Page, LocationService, debounce, Keyword, RouteInfoService, Abridger) {
       var pageSize;
 
       $scope.from = 1;
@@ -211,7 +91,7 @@
         var target = $scope.query;
         var matches = _(ensureArray (array))
           .filter (function (element) {
-            return _.contains (ensureString (element), target);
+            return caseInsensitivelyContains (ensureString (element), target);
           })
           .take (maxConcat);
 
@@ -223,14 +103,14 @@
 
         var target = $scope.query;
         var contains = _.any (array, function (element) {
-          return _.contains (ensureString (element), target);
+          return caseInsensitivelyContains (ensureString (element), target);
         });
 
         return contains ? array.join (', ') : '';
       };
 
       var maxAbrigementLength = 120;
-      var abridger = new Abridger (maxAbrigementLength);
+      var abridger = new Abridger.Abridger (maxAbrigementLength);
 
       $scope.abridge = function (array) {
         var target = $scope.query;

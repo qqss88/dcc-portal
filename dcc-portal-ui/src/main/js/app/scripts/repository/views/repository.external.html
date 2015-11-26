@@ -230,7 +230,9 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
 
                     <td>{{ ExternalRepoController.fileFormats (row.fileCopies) }}</td>
 
-                    <td style="min-width: 6rem;">{{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}</td>
+                    <td class="text-right" style="min-width: 6rem;">
+                      {{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}
+                    </td>
 
                   </tr>
                 </tbody>

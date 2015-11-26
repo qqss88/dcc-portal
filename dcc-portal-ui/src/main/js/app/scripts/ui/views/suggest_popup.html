@@ -35,6 +35,9 @@
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="file">
                     <li data-ng-bind-html="r.fileName| highlight:activeQuery:true"></li>
                 </ul>
+                <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="compound">
+                    <li ng-bind-html="findFirstMatch (r) | highlight:activeQuery:true" />
+                </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="gene">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
                     <li data-ng-bind-html="r.synonyms | highlight:activeQuery:true"></li>
