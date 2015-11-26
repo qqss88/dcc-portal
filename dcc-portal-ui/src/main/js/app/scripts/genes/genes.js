@@ -266,7 +266,7 @@
       _this.compounds = compounds;
 
     }, function (error) {
-      console.log ("Error getting compounds related to the geneId", error);
+      console.log ('Error getting compounds related to the geneId', error);
     });
   });
 
