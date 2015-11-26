@@ -463,7 +463,7 @@
               <i ng-if="sortField === 'drugClass'"
                 class="{{ sortDescendingly ? 'icon-sort-down' : 'icon-sort-up'}}" />
             </th>
-            <th>ATC Codes</th>
+            <th>ATC Description</th>
 
             <th style="cursor: pointer"
               ng-click="sortField = 'cancerTrialCount'; sortDescendingly = ! sortDescendingly">
@@ -478,8 +478,8 @@
         <tbody>
         <tr ng-repeat="compound in GeneCompoundsCtrl.compounds | orderBy:sortField:sortDescendingly">
             <td><a href="{{ GeneCompoundsCtrl.compoundUrl }}{{ compound.zincId }}">{{ compound.name }}</a></td>
-            <td>{{ compound.drugClass }}</td>
-            <td>{{ GeneCompoundsCtrl.concatAtcCodes (compound) }}</td>
+            <td>{{ compound.drugClass | formatCompoundClass }}</td>
+            <td>{{ GeneCompoundsCtrl.concatAtcDescriptions (compound) }}</td>
             <td class="text-right">{{ compound.cancerTrialCount | number }}</td>
         </tr>
         </tbody>
