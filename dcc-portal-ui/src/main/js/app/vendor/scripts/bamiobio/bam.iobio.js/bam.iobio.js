@@ -17,6 +17,8 @@ var Bam = Class.extend({
     this.iobio.bamReadDepther = "wss://" + currentHost + "/bamreaddepther/";
     this.iobio.bamstatsAlive = "wss://" + currentHost + "/bamstatsalive/";
     
+    this.sampleClient = undefined;
+    
     return this;
   },
 
@@ -436,7 +438,10 @@ var Bam = Class.extend({
         }
       }
 
-      var client = new BinaryClient(me.iobio.bamstatsAlive);
+      if (me.sampleClient !== undefined) {
+        me.sampleClient.close(1000);
+      }
+      me.sampleClient = new BinaryClient(me.iobio.bamstatsAlive);
       var regStr = JSON.stringify((bedRegions || regions).map(function (d) {
         return {
           start: d.start,
@@ -444,12 +449,11 @@ var Bam = Class.extend({
           chr: d.name
         };
       }));
-// var samtoolsCmd = JSON.stringify((bedRegions || regions).map(function(d) { return {d.start,end:d.end,chr:d.name};}));
-// var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=-u 30000 -f 2000 -r \'' + regStr + '\' ' + encodeURIComponent(me._getBamRegionsUrl(regions)));
+      
       var url = encodeURI( me.iobio.bamstatsAlive + '?cmd=\'' + regStr + '\' ' + me.bamUri);
       var buffer = '';
-         client.on('open', function(stream){
-            stream = client.createStream({event:'run', params : {'url':url}});
+         me.sampleClient.on('open', function(stream){
+            stream = me.sampleClient.createStream({event:'run', params : {'url':url}});
             stream.on('error', function(err) {
               console.log(err);
             });
