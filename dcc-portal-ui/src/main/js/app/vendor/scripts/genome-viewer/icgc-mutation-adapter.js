@@ -173,7 +173,7 @@ IcgcMutationAdapter.prototype.getData = function (args) {
     var fc = _this.featureCache._getChunk(segment.start);
     var k = segment.chromosome + ':' + fc;
     if (_this.featureCache.cache[key] == null || _this.featureCache.cache[key][dataType] == null) {
-      _this.featureCache.putFeaturesByRegion(jsonResponse, segment, 'snp', dataType);
+      _this.featureCache.putFeaturesByRegion(jsonResponse || {}, segment, 'snp', dataType);
     }
 //        }
     /**/
