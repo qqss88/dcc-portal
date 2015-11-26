@@ -39,7 +39,7 @@
                             </tr>
                             <tr>
                                 <th>Compound Class</th>
-                                <td data-ng-bind=":: compound.drugClass"></td>
+                                <td data-ng-bind=":: compound.drugClass | formatCompoundClass"></td>
                             </tr>
                             <tr>
                                 <th>Clinical Trials</th>
@@ -122,7 +122,7 @@
             <section id="genes">
                 <div class="full">
                     <h3>
-                        Most Frequently Mutated Genes Targeted by this Compound
+                        Targeted Genes
 
                         <span class="open-in pull-right" data-ng-if="CompoundCtrl.getTargetedCompoundGenes() && CompoundCtrl.getTargetedCompoundGenes().length > 0">
                             Open in

@@ -84,7 +84,8 @@ public class DrugTypeModel extends TypeModel {
     public final String ID = "id";
     public final String ZINC_ID = "zincId";
     public final String NAME = "name";
-    public final String IMAGE_URL = "imageUrl";
+    public final String SMALL_IMAGE_URL = "smallImageUrl";
+    public final String LARGE_IMAGE_URL = "largeImageUrl";
     public final String INCHIKEY = "inchikey";
     public final String DRUG_CLASS = "drugClass";
 
@@ -172,7 +173,7 @@ public class DrugTypeModel extends TypeModel {
 
     // Top-level fields
     private final List<StringFieldModel> stringFields = transform(
-        newArrayList(NAME, IMAGE_URL, INCHIKEY, DRUG_CLASS),
+        newArrayList(NAME, SMALL_IMAGE_URL, LARGE_IMAGE_URL, INCHIKEY, DRUG_CLASS),
         DrugTypeModel::stringField);
 
     private final List<FieldModel> otherFields = newArrayList(primaryKey(ZINC_ID), numberField(CANCER_TRIAL_COUNT),

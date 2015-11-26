@@ -17,9 +17,10 @@
  */
 package org.icgc.dcc.portal.resource;
 
-import static com.google.common.collect.Lists.transform;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
@@ -112,9 +113,13 @@ public class DrugResource {
       @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
       ) {
     val drug = drugService.findOne(drugId);
-    val genes = transform(drug.getGenes(), gene -> gene.getEnsemblGeneId());
+    val geneIds = drug.getGenes().stream()
+        .filter(gene -> !isNullOrEmpty(gene.getEnsemblGeneId()))
+        .map(gene -> gene.getEnsemblGeneId())
+        .distinct()
+        .collect(toImmutableList());
 
-    return genes.isEmpty() ? emptyList() : mutationService.counts(genes, size.get(), order.equals("desc"));
+    return geneIds.isEmpty() ? emptyList() : mutationService.counts(geneIds, size.get(), order.equals("desc"));
   }
 
   @Path("/genes/{" + API_GENE_PARAM + "}")

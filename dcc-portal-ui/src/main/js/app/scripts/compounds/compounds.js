@@ -132,7 +132,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
           _name = compound.name,
           _synonyms = _arrayOrEmptyArray(compound.synonyms),
           _externalReferences = compound.externalReferences,
-          _imageURL = compound.imageUrl || null,
+          _imageURL = compound.smallImageUrl || null,
           _drugClass = compound.drugClass || '--',
           _cancerTrialCount = compound.cancerTrialCount || '--',
           _atcCodes = _arrayOrEmptyArray(compound.atcCodes),

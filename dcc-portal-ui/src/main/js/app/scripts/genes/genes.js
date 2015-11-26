@@ -255,8 +255,8 @@
     var _this = this;
 
     this.compoundUrl = RouteInfoService.get ('drugCompound').href;
-    this.concatAtcCodes = function (compound) {
-      var codes = _.map (_.get (compound, 'atcCodes', []), 'atcLevel5Codes');
+    this.concatAtcDescriptions = function (compound) {
+      var codes = _.map (_.get (compound, 'atcCodes', []), 'description');
       return _.isEmpty (codes) ? '--' : codes.join (', ');
     };
 
