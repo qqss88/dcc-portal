@@ -59,7 +59,7 @@
           "inframe_deletion",
           "disruptive_inframe_insertion",
           "inframe_insertion"]};
-        console.log(pathwayViewerCtrl);
+
         element.bind("mouseenter", function() {
           scrollTimer = setTimeout(function() {
             $('.pathwaysvg').attr('class', 'pathwaysvg');

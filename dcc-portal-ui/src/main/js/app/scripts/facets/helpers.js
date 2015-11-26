@@ -20,9 +20,17 @@
   var toJson = angular.toJson;
   var isDefined = angular.isDefined;
 
-  var module = angular.module('icgc.facets.helpers', []);
+  var module = angular.module('icgc.facets.helpers', ['icgc.facets']);
 
-  module.factory('Facets', function (LocationService) {
+  module.factory('Facets', function (LocationService, FacetConstants, $rootScope) {
+
+    function _broadcastFacetStatusChange(facet, isActive, changeType) {
+      $rootScope.$broadcast(FacetConstants.EVENTS.FACET_STATUS_CHANGE, {
+        facet: facet || '*',
+        isActive: isActive,
+        changeType: (changeType || FacetConstants.FACET_CHANGE_TYPE.SINGLE)
+      });
+    }
 
     function ensurePath(filters, params) {
       if (!filters.hasOwnProperty(params.type)) {
@@ -65,6 +73,7 @@
       // TODO make is possible to use 'is' or 'not'
       if (filters[params.type][params.facet].is.indexOf(params.term) === -1) {
         filters[params.type][params.facet].is.push(params.term);
+        _broadcastFacetStatusChange(params.term, true);
       }
 
       LocationService.setFilters(filters);
@@ -126,6 +135,7 @@
       }
 
       delete filters[params.type][params.facet];
+      _broadcastFacetStatusChange(params.facet, false);
 
       if (_.isEmpty(filters[params.type])) {
         delete filters[params.type];
@@ -143,6 +153,7 @@
      */
     function removeAll() {
       LocationService.removeFilters();
+      _broadcastFacetStatusChange(null, FacetConstants.FACET_CHANGE_TYPE.ALL);
     }
 
     /*

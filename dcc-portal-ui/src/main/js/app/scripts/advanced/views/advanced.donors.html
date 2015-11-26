@@ -2,7 +2,7 @@
     Loading Donors...
 </h3></div>
 <div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0 && AdvancedCtrl.Donor.donors.hitsLoaded" class="empty loading-text"><h3>No Donors Found.</h3></div>
-<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length">
+<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length && AdvancedCtrl.Donor.donors.hitsLoaded">
     <section style="position: relative">
         <div data-ng-class="{'graphs-collapsed': !donorExpand}" class="graphs">
             <pie items='AdvancedCtrl.Donor.pieProjectId' heading="Project" label="Donors" type="pie" width="195" group-percent="3"
