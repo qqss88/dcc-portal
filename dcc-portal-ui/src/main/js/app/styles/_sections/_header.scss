@@ -147,13 +147,13 @@ header {
   }
 
   &.t_nav__items__item__data_repositories a {
-    color: $greyDark;
-    border: .3rem solid $greyDark;
+    color: $repositories;
+    border: .3rem solid $repositories;
   }
 
   &.t_nav__items__item__data_repositories a:hover {
     color: $white;
-    background: $greyDark;
+    background: $repositories;
   }
 
   &.t_nav__items__item__download a {
@@ -352,7 +352,7 @@ header {
     color: $white;
   }
   .t_nav__items__item__data_repositories a {
-    background: $greyDark;
+    background: $repositories;
     color: $white;
   }
 }
@@ -409,7 +409,7 @@ header {
 #repository-page {
   .t_nav__items__item__data_repositories a {
     cursor: default;
-    background: $greyDark;
+    background: $repositories;
     color: $white;
     i {
       box-shadow: none;
