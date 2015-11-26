@@ -89,11 +89,22 @@ public class SearchRepository {
   @UtilityClass
   private class FieldNames {
 
+    // Fields to be included as prefix queries
     public final String FILE_NAME = "file_name";
-    public final String GENE_MUTATIONS = "geneMutations";
     public final String ID = "id";
+    public final String INCHIKEY = "inchikey";
+    public final String DRUG_BANK = "external_references_drugbank";
+    public final String CHEMBL = "external_references_chembl";
+    public final String ATC_CODES = "atc_codes_code";
+    public final String ATC_LEVEL5_CODES = "atc_level5_codes";
+
+    public final String GENE_MUTATIONS = "geneMutations";
 
   }
+
+  private static final List<String> PREFIX_QUERY_FIELDS = ImmutableList.of(
+      FieldNames.FILE_NAME, FieldNames.INCHIKEY, FieldNames.ID,
+      FieldNames.CHEMBL, FieldNames.DRUG_BANK, FieldNames.ATC_CODES, FieldNames.ATC_LEVEL5_CODES);
 
   private static final Kind KIND = Kind.KEYWORD;
   private static final Set<String> FIELD_KEYS = FIELDS_MAPPING.get(KIND).keySet();
@@ -195,6 +206,7 @@ public class SearchRepository {
     return client.prepareSearch(indexName, repoIndexName);
   }
 
+  // Helpers
   private static String[] toStringArray(Collection<String> source) {
     return source.stream().toArray(String[]::new);
   }
@@ -230,13 +242,16 @@ public class SearchRepository {
 
   private static QueryBuilder getQuery(Query query, String type) {
     val queryString = query.getQuery();
-    val prefixQuery = prefixQuery(FieldNames.FILE_NAME + EXACT_MATCH_SUFFIX, queryString);
     val keys = buildMultiMatchFieldList(FIELD_KEYS, queryString, type);
     val multiMatchQuery = multiMatchQuery(queryString, toStringArray(keys)).tieBreaker(TIE_BREAKER);
 
-    return boolQuery()
-        .should(prefixQuery)
-        .should(multiMatchQuery);
+    val result = boolQuery();
+
+    for (val field : PREFIX_QUERY_FIELDS) {
+      result.should(prefixQuery(field + EXACT_MATCH_SUFFIX, queryString));
+    }
+
+    return result.should(multiMatchQuery);
   }
 
   private static boolean shouldProcess(String sourceField) {
