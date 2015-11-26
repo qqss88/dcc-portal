@@ -34,7 +34,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>Inchikey</th>
+                                <th>InChIKey</th>
                                 <td data-ng-bind=":: compound.inchiKey"></td>
                             </tr>
                             <tr>
@@ -127,7 +127,7 @@
                         <span class="open-in pull-right" data-ng-if="CompoundCtrl.getTargetedCompoundGenes() && CompoundCtrl.getTargetedCompoundGenes().length > 0">
                             Open in
 
-                              <a href="/search?filters={{CompoundCtrl.getFilter()}}">
+                              <a href="/search/g?filters={{CompoundCtrl.getFilter()}}">
                                   Advanced Search
                               </a>
                                 |

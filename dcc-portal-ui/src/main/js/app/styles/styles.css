@@ -591,45 +591,45 @@ $green:     #859900;
 /* $red: #dc322f; */
 /* $redDarker: #BB3200; */
 /* $red: hsl(1, 71%, 52%); */
-/* line 93, _base/_colours.scss */
+/* line 94, _base/_colours.scss */
 .light {
   background-color: white;
   color: #333333;
 }
-/* line 81, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
   color: black;
 }
-/* line 84, _base/_colours.scss */
+/* line 85, _base/_colours.scss */
 .light a, .light a:active, .light a:visited, .light code.url {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 88, _base/_colours.scss */
+/* line 89, _base/_colours.scss */
 .light a:hover {
   background: rgba(230, 230, 230, 0.7);
 }
 
-/* line 97, _base/_colours.scss */
+/* line 98, _base/_colours.scss */
 .dark {
   background-color: #3f5973;
   color: white;
 }
-/* line 81, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: white;
 }
-/* line 84, _base/_colours.scss */
+/* line 85, _base/_colours.scss */
 .dark a, .dark a:active, .dark a:visited, .dark code.url {
   text-decoration: none;
   color: #ce6503;
 }
-/* line 88, _base/_colours.scss */
+/* line 89, _base/_colours.scss */
 .dark a:hover {
   background: rgba(72, 102, 132, 0.7);
 }
 
-/* line 101, _base/_colours.scss */
+/* line 102, _base/_colours.scss */
 html * {
   color-profile: sRGB;
   rendering-intent: auto;
@@ -1171,13 +1171,13 @@ header #brand img {
 }
 /* line 149, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__data_repositories a {
-  color: #666666;
-  border: 0.3rem solid #666666;
+  color: #638f56;
+  border: 0.3rem solid #638f56;
 }
 /* line 154, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__data_repositories a:hover {
   color: white;
-  background: #666666;
+  background: #638f56;
 }
 /* line 159, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
@@ -1381,7 +1381,7 @@ header #brand img {
 }
 /* line 354, _sections/_header.scss */
 #home-page .t_nav__items__item__data_repositories a {
-  background: #666666;
+  background: #638f56;
   color: white;
 }
 
@@ -1436,7 +1436,7 @@ header #brand img {
 /* line 410, _sections/_header.scss */
 #repository-page .t_nav__items__item__data_repositories a {
   cursor: default;
-  background: #666666;
+  background: #638f56;
   color: white;
 }
 /* line 414, _sections/_header.scss */
@@ -2467,12 +2467,12 @@ input.valid:focus {
 
 /* line 42, _modules/_labels.scss */
 .t_labels__label__pathways {
-  background-color: #1a9900;
+  background-color: #166aa2;
 }
 
 /* line 46, _modules/_labels.scss */
 .t_labels__label__files {
-  background-color: #666666;
+  background-color: #638f56;
 }
 
 /* line 50, _modules/_labels.scss */
@@ -2563,7 +2563,7 @@ h1 .t_badge_icon {
 
 /* line 60, _modules/_badges.scss */
 .t_badge__pathway {
-  background: #1a9900;
+  background: #166aa2;
 }
 
 /* line 64, _modules/_badges.scss */
@@ -2573,7 +2573,7 @@ h1 .t_badge_icon {
 
 /* line 69, _modules/_badges.scss */
 .t_badge__geneset {
-  background: #1a9900;
+  background: #166aa2;
 }
 
 /* line 73, _modules/_badges.scss */
@@ -2593,7 +2593,7 @@ h1 .t_badge_icon {
 
 /* line 85, _modules/_badges.scss */
 .t_badge__file {
-  background: #666666;
+  background: #638f56;
 }
 
 /* line 89, _modules/_badges.scss */
@@ -2632,7 +2632,7 @@ h1 .t_badge_icon {
 
 /* line 121, _modules/_badges.scss */
 .t_badge__data_repositories {
-  background: #666666;
+  background: #638f56;
 }
 
 /* line 125, _modules/_badges.scss */
@@ -2767,7 +2767,7 @@ h1 .t_badge_icon {
 
 /* line 63, _modules/_tabs.scss */
 .t_tabs__tab__file.active, .t_tabs__tab__file:hover {
-  border-top-color: #666666;
+  border-top-color: #638f56;
 }
 
 /* line 69, _modules/_tabs.scss */
