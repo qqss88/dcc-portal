@@ -276,27 +276,28 @@
           // Give angular some time to do digests then check for a
           // in page scroll
           
-          var match = hash.match(/^!([\w\-]+)$/i),
+          var match = hash ? hash.match(/^!([\w\-]+)$/i) : false,
             to = 0,
-            HEADER_HEIGHT = 49 + 10; // Height of header + some nice looking offset.
-          
+            HEADER_HEIGHT = 49 + 10, // Height of header + some nice looking offset.
+            el = null;
           
           if (match && match.length > 1) {
             hash = match[1];
             //$location.hash(hash);
             to = - HEADER_HEIGHT;
           }
-          
-          var el = jQuery('#' + hash);
-          
-          if (el.length === 0) {
-            console.warn('Could not find inline anchor with id ' + hash +
-              '\nAborting inline scroll...');
-            return;
+
+          if (hash) {
+             el = jQuery('#' + hash);
           }
-          console.log(to);
-          to += el.offset().top;
-          console.log(to);
+          
+          if (el && el.length > 0) {
+            to += Math.round(parseFloat(el.offset().top));
+            to = Math.max(0, to);
+          }
+
+
+
           jQuery('body,html').scrollTop( to );
         }
         
@@ -309,36 +310,11 @@
         }
 
         var _hash = $location.hash();
-        
-        if (_hash) {
+
+
           $timeout(function () { 
             _doInlineScroll(_hash);
           }, 200);
-          return;
-        }
-        else {
-          $window.scrollTo(0, 0);
-        }
-
-        
-
-        
-        /* Don't see this code ever referenced so I am temporarily disabling
-         * it to see if there are any adverse affects 
-         * */
-         
-        // Default behaviour is to scroll to top
-        // Any string that isn't [top,none] is treated as a jq selector
-        // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
-        /* if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
-          $window.scrollTo(0, 0);
-        } else {
-          offset = jQuery(state.scrollTo).offset();
-          if (offset) {
-            to = offset.top - 40;
-            jQuery('body,html').animate({ scrollTop: to }, 800);
-          }
-        } */
 
       }
 

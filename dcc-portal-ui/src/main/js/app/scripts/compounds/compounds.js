@@ -58,7 +58,6 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
         .then(function(targetGenes) {
           _targetedCompoundGenes = targetGenes;
           _targetedCompoundIds = compoundManager.getTargetedCompoundGeneIds();
-          console.log(targetGenes);
         });
     }
 
