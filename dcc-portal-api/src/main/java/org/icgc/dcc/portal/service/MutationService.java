@@ -9,6 +9,7 @@ import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Comparator;
@@ -122,7 +123,7 @@ public class MutationService {
     return range(0, responseItems.length).boxed()
         .map(i -> {
           final String geneId = genes.get(i);
-          final long count = responseItems[i].getResponse().getHits().getTotalHits();
+          final long count = getTotalHitCount(responseItems[i].getResponse());
 
           return new SimpleImmutableEntry<String, Long>(geneId, count);
         })
