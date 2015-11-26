@@ -61,12 +61,13 @@ $donor: $violet;
 $gene: $magenta;
 $mutation: $cyan;
 $project: $orangeLight;
-$pathway: $green;
+$pathway: $blue; //$green;
 $charts: $violet;
 $table: $magenta;
 $history: $green;
-$file: $greyDark;
+$repositories: hsl(106, 25%, 45%);
 $compound: hsl(342, 86%, 19%);
+$file: $repositories;
 
 $tooltipBorder: $greySlightlyLighter;
 $tooltipFill: white;
