@@ -299,6 +299,18 @@ h3:hover {
   background: $green;
 }
 
+a.no-style {
+  background: none;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    background: none;
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
 
 #buorg {
   div {
