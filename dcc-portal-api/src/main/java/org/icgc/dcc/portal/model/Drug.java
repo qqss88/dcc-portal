@@ -17,6 +17,8 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.fasterxml.jackson.databind.PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
+
 import java.util.List;
 
 import lombok.Data;
@@ -26,7 +28,6 @@ import lombok.val;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -55,8 +56,11 @@ public class Drug {
   @ApiModelProperty(value = "Name of the drug")
   String name;
 
-  @ApiModelProperty(value = "Image of the drug's molecule")
-  String imageUrl;
+  @ApiModelProperty(value = "Small version of the drug's molecule image")
+  String smallImageUrl;
+
+  @ApiModelProperty(value = "Large version of the drug's molecule image")
+  String largeImageUrl;
 
   @ApiModelProperty(value = "InChIKey of the drug")
   String inchikey;
@@ -174,11 +178,9 @@ public class Drug {
 
   // Helpers
   static final ObjectMapper createMapper() {
-    val strategy = PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
-    val result = new ObjectMapper();
-    result.setPropertyNamingStrategy(strategy);
+    val strategy = CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
 
-    return result;
+    return new ObjectMapper()
+        .setPropertyNamingStrategy(strategy);
   }
-
 }
