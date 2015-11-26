@@ -19,13 +19,13 @@ package org.dcc.portal.pql.meta;
 
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
-import static org.elasticsearch.common.collect.Lists.newArrayList;
-import static org.elasticsearch.common.collect.Lists.transform;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 
 import java.util.Collection;
@@ -42,10 +42,10 @@ import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.LongFieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.dcc.portal.pql.meta.field.StringFieldModel;
-import org.elasticsearch.common.collect.ImmutableSet;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Type model of Drug index type

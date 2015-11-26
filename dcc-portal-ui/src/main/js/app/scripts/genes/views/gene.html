@@ -444,17 +444,39 @@
     <span class="t_table_top">
       Showing <strong>{{ GeneCompoundsCtrl.compounds.length }}</strong> compounds
     </span>
+    <span ng-init="sortField = 'name'; sortDescendingly = false;" />
+
     <table class="table table-bordered table-striped table-condensed">
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Compound Class</th>
+            <th style="cursor: pointer"
+              ng-click="sortField = 'name'; sortDescendingly = ! sortDescendingly">
+              Name
+              <i style="color: hsl(0,0%,80%)" ng-if="sortField !== 'name'" class="icon-sort" />
+              <i ng-if="sortField === 'name'"
+                class="{{ sortDescendingly ? 'icon-sort-down' : 'icon-sort-up'}}" />
+            </th>
+            <th style="cursor: pointer"
+              ng-click="sortField = 'drugClass'; sortDescendingly = ! sortDescendingly">
+              Compound Class
+              <i style="color: hsl(0,0%,80%)" ng-if="sortField !== 'drugClass'" class="icon-sort" />
+              <i ng-if="sortField === 'drugClass'"
+                class="{{ sortDescendingly ? 'icon-sort-down' : 'icon-sort-up'}}" />
+            </th>
             <th>ATC Codes</th>
-            <th># Clinical Trials</th>
+
+            <th style="cursor: pointer"
+              ng-click="sortField = 'cancerTrialCount'; sortDescendingly = ! sortDescendingly">
+              # Clinical Trials
+              <i style="color: hsl(0,0%,80%)" ng-if="sortField !== 'cancerTrialCount'" class="icon-sort" />
+              <i ng-if="sortField === 'cancerTrialCount'"
+                class="{{ sortDescendingly ? 'icon-sort-down' : 'icon-sort-up'}}" />
+            </th>
         </tr>
         </thead>
+
         <tbody>
-        <tr ng-repeat="compound in GeneCompoundsCtrl.compounds">
+        <tr ng-repeat="compound in GeneCompoundsCtrl.compounds | orderBy:sortField:sortDescendingly">
             <td><a href="{{ GeneCompoundsCtrl.compoundUrl }}{{ compound.zincId }}">{{ compound.name }}</a></td>
             <td>{{ compound.drugClass }}</td>
             <td>{{ GeneCompoundsCtrl.concatAtcCodes (compound) }}</td>
