@@ -41,6 +41,8 @@
                           class="t_labels__label t_labels__label__pathways"></span>
                     <span data-toggle-param data-key='type' data-value="file"
                           class="t_labels__label t_labels__label__files"></span>
+                    <span data-toggle-param data-key='type' data-value="compound"
+                          class="t_labels__label t_labels__label__compounds" />
                 </div>
             </form>
         </div>
@@ -49,8 +51,69 @@
         <table class="t_quick">
             <tr data-ng-repeat="r in results.hits" data-ng-switch="r.type" class="t_quick__hit">
                 <td class="t_quick__hit__type">
-                    <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
+                    <span class="{{ badgeStyleClass (r.type) }}" />
                 </td>
+
+                <td class="t_quick__hit__text" data-ng-switch-when="compound">
+                    <a href="{{ compoundEntityUrl }}{{ r.id }}" data-ng-bind-html="r.name | highlight: activeQuery"></a>
+
+                    <ul class="t_quick__hit__text__details">
+                        <li>
+                            <span class="t_quick__hit__text__details__label">ZINC ID</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="r.id | highlight: activeQuery" />
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Compound Class</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="r.drugClass | highlight: activeQuery" />
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">InChIKey</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="r.inchikey | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="compooundSynonyms = concatMatches (r.synonyms)"
+                            ng-if="concatMatches (r.synonyms).length > 0">
+                            <span class="t_quick__hit__text__details__label">Synonyms</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="compooundSynonyms | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="atcCodes = concatMatches (r.atcCodes)"
+                            ng-if="concatMatches (r.atcCodes).length > 0">
+                            <span class="t_quick__hit__text__details__label">ATC Codes</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="atcCodes | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="atcLevel5Codes = concatMatches (r.atcLevel5Codes)"
+                            ng-if="concatMatches (r.atcLevel5Codes).length > 0">
+                            <span class="t_quick__hit__text__details__label">ATC Level5 Codes</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="atcLevel5Codes | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="trialConditionNames = concatMatches (r.trialConditionNames)"
+                            ng-if="concatMatches (r.trialConditionNames).length > 0">
+                            <span class="t_quick__hit__text__details__label">Trial Condition Names</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="trialConditionNames | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="externalReferencesDrugbank = concatMatches (r.externalReferencesDrugbank)"
+                            ng-if="concatMatches (r.externalReferencesDrugbank).length > 0">
+                            <span class="t_quick__hit__text__details__label">Ext. References Drugbank</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="externalReferencesDrugbank | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="externalReferencesChembl = concatMatches (r.externalReferencesChembl)"
+                            ng-if="concatMatches (r.externalReferencesChembl).length > 0">
+                            <span class="t_quick__hit__text__details__label">Ext. References Chembl</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="externalReferencesChembl | highlight: activeQuery" />
+                        </li>
+
+                        <li ng-init="atcCodeDescriptions = abridge (r.atcCodeDescriptions)"
+                            ng-if="abridge (r.atcCodeDescriptions).length > 0">
+                            <span class="t_quick__hit__text__details__label">ATC Code Descriptions</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="atcCodeDescriptions | highlight: activeQuery" />
+                        </li>
+                        <li ng-init="trialDescriptions = abridge (r.trialDescriptions)"
+                            ng-if="abridge (r.trialDescriptions).length > 0">
+                            <span class="t_quick__hit__text__details__label">Trial Descriptions</span>
+                            <span class="t_quick__hit__text__details__value" ng-bind-html="trialDescriptions | highlight: activeQuery" />
+                        </li>
+                    </ul>
+                </td>
+
                 <td class="t_quick__hit__text" data-ng-switch-when="file">
                     <a href="{{ dataRepoFileUrl }}{{ r.id }}" data-ng-bind-html="r.id | highlight:activeQuery"></a>
 
@@ -62,7 +125,7 @@
                               data-tooltip="{{r.fileName | withoutFirst | highlight:activeQuery}}" class="t_quick__hit__text__details__value">...</span>
                         </li>
                         <li>
-                            <span class="t_quick__hit__text__details__label">File Object ID</span>
+                            <span class="t_quick__hit__text__details__label">Object ID</span>
                             <span class="t_quick__hit__text__details__value">{{r.fileObjectId}}</span>
                         </li>
                         <li>
@@ -89,7 +152,7 @@
                                 data-ng-bind-html="r.synonyms | highlight:activeQuery "></span>
                         </li>
                         <li data-ng-if="r.uniprotkbSwissprot">
-                            <span class="t_quick__hit__text__details__label">UniProtKB/<br>Swiss-Prot</span>
+                            <span class="t_quick__hit__text__details__label">UniProtKB/Swiss-Prot</span>
                             <span class="t_quick__hit__text__details__value"
                                 data-ng-bind-html="r.uniprotkbSwissprot.join(', ')| highlight:activeQuery "></span>
                         </li>

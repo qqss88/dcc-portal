@@ -375,6 +375,12 @@
 
     this.translateCountryCode = CodeTable.translateCountryCode;
     this.countryName = CodeTable.countryName;
+    
+    this.awsOrCollab = function(fileCopies) {
+       return _.includes(_.pluck(fileCopies, 'repoCode'), 'aws-virginia') ||
+         _.includes(_.pluck(fileCopies, 'repoCode'), 'collaboratory');
+    };
+    
   });
 
   /**

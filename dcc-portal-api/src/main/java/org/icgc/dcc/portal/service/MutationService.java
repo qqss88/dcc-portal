@@ -1,11 +1,18 @@
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Comparator.comparing;
+import static java.util.stream.IntStream.range;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.query.PqlParser.parse;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
@@ -100,6 +108,27 @@ public class MutationService {
     val sr = mutationRepository.counts(queries);
 
     return getCounts(queries, sr);
+  }
+
+  public List<SimpleImmutableEntry<String, Long>> counts(@NonNull List<String> geneIds, int maxSize,
+      boolean sortDescendingly) {
+    val genes = geneIds.stream()
+        .filter(id -> !isNullOrEmpty(id))
+        .distinct()
+        .collect(toImmutableList());
+
+    final Comparator<SimpleImmutableEntry<String, Long>> comparator = comparing(SimpleImmutableEntry::getValue);
+    final MultiSearchResponse.Item[] responseItems = mutationRepository.counts(genes).getResponses();
+
+    return range(0, responseItems.length).boxed()
+        .map(i -> {
+          final long count = getTotalHitCount(responseItems[i].getResponse());
+
+          return new SimpleImmutableEntry<String, Long>(genes.get(i), count);
+        })
+        .sorted(sortDescendingly ? comparator.reversed() : comparator)
+        .limit(maxSize)
+        .collect(toImmutableList());
   }
 
   public Map<String, LinkedHashMap<String, Long>> nestedCounts(

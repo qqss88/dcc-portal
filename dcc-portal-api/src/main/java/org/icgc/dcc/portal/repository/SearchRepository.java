@@ -30,6 +30,10 @@ import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.EXACT_MATCH_SUFFIX;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.LOWERCASE_MATCH_SUFFIX;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.PARTIAL_MATCH_SUFFIX;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.boost;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 
 import java.util.Collection;
@@ -37,6 +41,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -54,11 +63,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -78,17 +82,29 @@ public class SearchRepository {
     public final String GENE_SET = "geneSet";
     public final String FILE = "file";
     public final String FILE_DONOR = "file-donor";
+    public final String DRUG = "compound";
 
   }
 
   @UtilityClass
   private class FieldNames {
 
+    // Fields to be included as prefix queries
     public final String FILE_NAME = "file_name";
-    public final String GENE_MUTATIONS = "geneMutations";
     public final String ID = "id";
+    public final String INCHIKEY = "inchikey";
+    public final String DRUG_BANK = "external_references_drugbank";
+    public final String CHEMBL = "external_references_chembl";
+    public final String ATC_CODES = "atc_codes_code";
+    public final String ATC_LEVEL5_CODES = "atc_level5_codes";
+
+    public final String GENE_MUTATIONS = "geneMutations";
 
   }
+
+  private static final List<String> PREFIX_QUERY_FIELDS = ImmutableList.of(
+      FieldNames.FILE_NAME, FieldNames.INCHIKEY, FieldNames.ID,
+      FieldNames.CHEMBL, FieldNames.DRUG_BANK, FieldNames.ATC_CODES, FieldNames.ATC_LEVEL5_CODES);
 
   private static final Kind KIND = Kind.KEYWORD;
   private static final Set<String> FIELD_KEYS = FIELDS_MAPPING.get(KIND).keySet();
@@ -107,10 +123,12 @@ public class SearchRepository {
       .put(Types.CURATED_SET, Type.GENESET_TEXT)
       .put(Types.FILE, Type.REPOSITORY_FILE_TEXT)
       .put(Types.FILE_DONOR, Type.REPOSITORY_FILE_DONOR_TEXT)
+      .put(Types.DRUG, Type.DRUG_TEXT)
       .build();
   private static final Map<String, String> TYPE_ID_MAPPINGS = transformValues(TYPE_MAPPINGS, type -> type.getId());
   private static final String MUTATION_PREFIX = TYPE_ID_MAPPINGS.get(Types.MUTATION);
 
+  // private static final String[] MULTIPLE_SEARCH_TYPES = Stream.of(
   private static final Set<String> MULTIPLE_SEARCH_TYPES = Stream.of(
       Types.GENE,
       /*
@@ -121,9 +139,18 @@ public class SearchRepository {
       Types.DONOR,
       Types.PROJECT,
       Types.MUTATION,
-      Types.GENE_SET)
+      Types.GENE_SET,
+      Types.DRUG)
       .map(t -> TYPE_ID_MAPPINGS.get(t))
+      // TODO
+      // .distinct()
+      // .toArray(String[]::new);
       .collect(toImmutableSet());
+
+  private static final List<String> SEARCH_SUFFIXES = ImmutableList.of(
+      boost(LOWERCASE_MATCH_SUFFIX, 2), PARTIAL_MATCH_SUFFIX);
+  private static final List<String> BOOSTED_SEARCH_SUFFIXES = ImmutableList.of(
+      boost(LOWERCASE_MATCH_SUFFIX, 2), boost(PARTIAL_MATCH_SUFFIX, 2));
 
   // Instance variables
   private final Client client;
@@ -179,6 +206,7 @@ public class SearchRepository {
     return client.prepareSearch(indexName, repoIndexName);
   }
 
+  // Helpers
   private static String[] toStringArray(Collection<String> source) {
     return source.stream().toArray(String[]::new);
   }
@@ -187,6 +215,7 @@ public class SearchRepository {
     val result = TYPE_ID_MAPPINGS.containsKey(type) ? newHashSet(TYPE_ID_MAPPINGS.get(type)) : MULTIPLE_SEARCH_TYPES;
 
     return toStringArray(result);
+    // return TYPE_ID_MAPPINGS.containsKey(type) ? new String[] { TYPE_ID_MAPPINGS.get(type) } : MULTIPLE_SEARCH_TYPES;
   }
 
   private static FilterBuilder getPostFilter(String type) {
@@ -204,6 +233,7 @@ public class SearchRepository {
     val others = boolFilter()
         .mustNot(termsFilter(field, Types.DONOR, Types.PROJECT));
 
+    // FIXME
     return result
         .should(donor)
         .should(project)
@@ -212,13 +242,16 @@ public class SearchRepository {
 
   private static QueryBuilder getQuery(Query query, String type) {
     val queryString = query.getQuery();
-    val prefixQuery = prefixQuery(FieldNames.FILE_NAME + ".raw", queryString);
     val keys = buildMultiMatchFieldList(FIELD_KEYS, queryString, type);
     val multiMatchQuery = multiMatchQuery(queryString, toStringArray(keys)).tieBreaker(TIE_BREAKER);
 
-    return boolQuery()
-        .should(prefixQuery)
-        .should(multiMatchQuery);
+    val result = boolQuery();
+
+    for (val field : PREFIX_QUERY_FIELDS) {
+      result.should(prefixQuery(field + EXACT_MATCH_SUFFIX, queryString));
+    }
+
+    return result.should(multiMatchQuery);
   }
 
   private static boolean shouldProcess(String sourceField) {
@@ -226,15 +259,12 @@ public class SearchRepository {
     return fieldsToSkip.stream().noneMatch(fieldToAvoid -> sourceField.equals(fieldToAvoid));
   }
 
-  private static final List<String> SEARCH_SUFFIXES = ImmutableList.of(".search^2", ".analyzed");
-  private static final List<String> BOOSTED_SEARCH_SUFFIXES = ImmutableList.of(".search^2", ".analyzed^2");
-
-  private static List<String> appendSearchSuffixes(String field) {
-    return transform(SEARCH_SUFFIXES, suffix -> field + suffix);
+  private static List<String> appendSuffixes(String field, List<String> suffixes) {
+    return transform(suffixes, suffix -> field + suffix);
   }
 
-  private static List<String> appendBoostedSearchSuffixes(String field) {
-    return transform(BOOSTED_SEARCH_SUFFIXES, suffix -> field + suffix);
+  private static List<String> appendSearchSuffixes(String field) {
+    return appendSuffixes(field, SEARCH_SUFFIXES);
   }
 
   @NonNull
@@ -258,11 +288,8 @@ public class SearchRepository {
     }
 
     // Don't boost without space or genes won't show when partially matched
-    if (queryString.contains(" ")) {
-      keys.addAll(appendBoostedSearchSuffixes(FieldNames.GENE_MUTATIONS));
-    } else {
-      keys.addAll(appendSearchSuffixes(FieldNames.GENE_MUTATIONS));
-    }
+    val geneMutationSearchSuffixes = queryString.contains(" ") ? BOOSTED_SEARCH_SUFFIXES : SEARCH_SUFFIXES;
+    keys.addAll(appendSuffixes(FieldNames.GENE_MUTATIONS, geneMutationSearchSuffixes));
 
     // Exact-match search on "id".
     keys.add(FieldNames.ID);

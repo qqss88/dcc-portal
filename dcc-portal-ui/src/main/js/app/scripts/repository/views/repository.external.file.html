@@ -18,6 +18,9 @@
       <li data-spy="donor" class="t_subnav__items__item">
         <a data-scrollto href="#donor">Donor</a>
       </li>
+      <li data-spy="bam-statistics" class="t_subnav__items__item" data-ng-if="fileCopies[0].fileFormat == 'BAM' && fileCtrlr.awsOrCollab(fileCopies)">
+        <a data-scrollto href="#bam-statistics">BAM Stats</a>
+      </li>
     </ul>
   </section>
 </aside>
@@ -203,7 +206,9 @@
               <br>
               <a ng-if="isS3"
                 href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}" target="_blank">
-                <i class="icon-download" />Metadata
+                <i class="icon-download" data-ng-if="fileCopy.repoName != 'Collaboratory'"  /><!--
+                --><i class="icon-external-link" data-ng-if="fileCopy.repoName === 'Collaboratory'"  /><!--
+                -->Metadata
               </a>
               <a ng-if="! isS3"
                 target="_blank" href="{{ metaDataUrl }}" tooltip="Show Metadata" title="{{ metaDataUrl }}">
@@ -285,10 +290,10 @@
         <td ng-bind="fileCtrlr.stringOrDefault (donorInfo.matchedControlSampleId)" />
       </tr>
     </table>
-
   </div>
-
 </section>
-
+<section id="bam-statistics" data-ng-if="fileCopies[0].fileFormat == 'BAM' && fileCtrlr.awsOrCollab(fileCopies)">
+  <bamstats bam-id="info.objectId" data-ng-if="fileCopies[0].fileFormat == 'BAM' && fileCtrlr.awsOrCollab(fileCopies)"></bamstats>
+</section>
 </article>
 </div>

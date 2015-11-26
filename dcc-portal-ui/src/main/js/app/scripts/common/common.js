@@ -26,6 +26,7 @@
     'icgc.common.location',
     'icgc.common.display',
     'icgc.common.external',
+    'icgc.common.text.utils',
 
     // UI
     'icgc.common.codetable',
@@ -213,4 +214,14 @@
       return input.slice(1,input.length).toString();
     };
   });
+
+  // TODO: Ideally this should be done during the ETL phase.
+  module.filter ('formatCompoundClass', function () {
+    var fda = 'fda';
+
+    return function (compoundClass) {
+      return (fda === compoundClass) ? compoundClass.toUpperCase() : _.capitalize (compoundClass);
+    };
+  });
+
 })();

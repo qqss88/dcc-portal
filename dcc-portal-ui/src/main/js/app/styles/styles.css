@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Lato:400,700,700italic,900,400italic,300");
 /* normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* normalize.scss v2.1.2 | MIT/GPLv2 License | bit.ly/normalize-with-compass */
 /* ==========================================================================
@@ -590,45 +591,45 @@ $green:     #859900;
 /* $red: #dc322f; */
 /* $redDarker: #BB3200; */
 /* $red: hsl(1, 71%, 52%); */
-/* line 92, _base/_colours.scss */
+/* line 94, _base/_colours.scss */
 .light {
   background-color: white;
   color: #333333;
 }
-/* line 80, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
   color: black;
 }
-/* line 83, _base/_colours.scss */
+/* line 85, _base/_colours.scss */
 .light a, .light a:active, .light a:visited, .light code.url {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 87, _base/_colours.scss */
+/* line 89, _base/_colours.scss */
 .light a:hover {
   background: rgba(230, 230, 230, 0.7);
 }
 
-/* line 96, _base/_colours.scss */
+/* line 98, _base/_colours.scss */
 .dark {
   background-color: #3f5973;
   color: white;
 }
-/* line 80, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: white;
 }
-/* line 83, _base/_colours.scss */
+/* line 85, _base/_colours.scss */
 .dark a, .dark a:active, .dark a:visited, .dark code.url {
   text-decoration: none;
   color: #ce6503;
 }
-/* line 87, _base/_colours.scss */
+/* line 89, _base/_colours.scss */
 .dark a:hover {
   background: rgba(72, 102, 132, 0.7);
 }
 
-/* line 100, _base/_colours.scss */
+/* line 102, _base/_colours.scss */
 html * {
   color-profile: sRGB;
   rendering-intent: auto;
@@ -1170,13 +1171,13 @@ header #brand img {
 }
 /* line 149, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__data_repositories a {
-  color: #666666;
-  border: 0.3rem solid #666666;
+  color: #638f56;
+  border: 0.3rem solid #638f56;
 }
 /* line 154, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__data_repositories a:hover {
   color: white;
-  background: #666666;
+  background: #638f56;
 }
 /* line 159, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
@@ -1380,7 +1381,7 @@ header #brand img {
 }
 /* line 354, _sections/_header.scss */
 #home-page .t_nav__items__item__data_repositories a {
-  background: #666666;
+  background: #638f56;
   color: white;
 }
 
@@ -1435,7 +1436,7 @@ header #brand img {
 /* line 410, _sections/_header.scss */
 #repository-page .t_nav__items__item__data_repositories a {
   cursor: default;
-  background: #666666;
+  background: #638f56;
   color: white;
 }
 /* line 414, _sections/_header.scss */
@@ -1672,7 +1673,7 @@ header #brand img {
   /* line 20, _sections/_results.scss */
   .t_quick__hit__text__details__label {
     text-align: right;
-    width: 8rem;
+    width: 12rem;
     border-right: 1px solid #f2f2f2;
   }
 }
@@ -2466,20 +2467,25 @@ input.valid:focus {
 
 /* line 42, _modules/_labels.scss */
 .t_labels__label__pathways {
-  background-color: #1a9900;
+  background-color: #166aa2;
 }
 
 /* line 46, _modules/_labels.scss */
 .t_labels__label__files {
-  background-color: #666666;
+  background-color: #638f56;
 }
 
 /* line 50, _modules/_labels.scss */
+.t_labels__label__compounds {
+  background-color: #5a0720;
+}
+
+/* line 54, _modules/_labels.scss */
 .manifest-cell {
   width: 28%;
   min-height: 31px;
 }
-/* line 53, _modules/_labels.scss */
+/* line 57, _modules/_labels.scss */
 .manifest-cell .manifest {
   display: inline-block;
   vertical-align: middle;
@@ -2557,7 +2563,7 @@ h1 .t_badge_icon {
 
 /* line 60, _modules/_badges.scss */
 .t_badge__pathway {
-  background: #1a9900;
+  background: #166aa2;
 }
 
 /* line 64, _modules/_badges.scss */
@@ -2567,7 +2573,7 @@ h1 .t_badge_icon {
 
 /* line 69, _modules/_badges.scss */
 .t_badge__geneset {
-  background: #1a9900;
+  background: #166aa2;
 }
 
 /* line 73, _modules/_badges.scss */
@@ -2576,11 +2582,21 @@ h1 .t_badge_icon {
 }
 
 /* line 77, _modules/_badges.scss */
-.t_badge__file {
-  background: #666666;
+.t_badge__compound {
+  background: #5a0720;
 }
 
 /* line 81, _modules/_badges.scss */
+.t_badge__compound:after {
+  content: "C";
+}
+
+/* line 85, _modules/_badges.scss */
+.t_badge__file {
+  background: #638f56;
+}
+
+/* line 89, _modules/_badges.scss */
 .t_badge__file:after {
   content: "F";
 }
@@ -2589,42 +2605,42 @@ h1 .t_badge_icon {
 .t_badge__geneset::first-letter {
   vertical-align: super;
 } */
-/* line 93, _modules/_badges.scss */
+/* line 101, _modules/_badges.scss */
 .t_badge__project, .t_badge__projects {
   background: #e9931c;
 }
 
-/* line 97, _modules/_badges.scss */
+/* line 105, _modules/_badges.scss */
 .t_badge__project:after {
   content: "P";
 }
 
-/* line 101, _modules/_badges.scss */
+/* line 109, _modules/_badges.scss */
 .t_badge__advanced {
   background: #166aa2;
 }
 
-/* line 105, _modules/_badges.scss */
+/* line 113, _modules/_badges.scss */
 .t_badge__analysis {
   background: #9b315b;
 }
 
-/* line 109, _modules/_badges.scss */
+/* line 117, _modules/_badges.scss */
 .t_badge__download {
   background: #1693c0;
 }
 
-/* line 113, _modules/_badges.scss */
+/* line 121, _modules/_badges.scss */
 .t_badge__data_repositories {
-  background: #666666;
+  background: #638f56;
 }
 
-/* line 117, _modules/_badges.scss */
+/* line 125, _modules/_badges.scss */
 .t_badge__q {
   background: #d33682;
 }
 
-/* line 122, _modules/_badges.scss */
+/* line 130, _modules/_badges.scss */
 .pcawg-badge {
   font-size: 0.5rem;
 }
@@ -2751,7 +2767,7 @@ h1 .t_badge_icon {
 
 /* line 63, _modules/_tabs.scss */
 .t_tabs__tab__file.active, .t_tabs__tab__file:hover {
-  border-top-color: #666666;
+  border-top-color: #638f56;
 }
 
 /* line 69, _modules/_tabs.scss */
@@ -4505,24 +4521,31 @@ td {
 }
 
 /* line 191, _modules/_pathwayviewer.scss */
+.RenderableOverlappedEntitySet {
+  stroke: #000;
+  stroke-width: 5px;
+  fill: #fff;
+}
+
+/* line 197, _modules/_pathwayviewer.scss */
 .ProcessNode {
   stroke: #1a9900;
   stroke-width: 2px;
   fill: #ebffe7;
 }
 
-/* line 197, _modules/_pathwayviewer.scss */
+/* line 203, _modules/_pathwayviewer.scss */
 .RenderableGene {
   stroke: #333;
   fill: none;
 }
 
-/* line 202, _modules/_pathwayviewer.scss */
+/* line 208, _modules/_pathwayviewer.scss */
 .RenderableText {
   font-size: 7px;
 }
 
-/* line 206, _modules/_pathwayviewer.scss */
+/* line 212, _modules/_pathwayviewer.scss */
 .RenderableCompartment {
   fill: #fbf7f4;
   stroke: #ffc38b;
@@ -4530,51 +4553,51 @@ td {
   fill-opacity: 0.25;
 }
 
-/* line 213, _modules/_pathwayviewer.scss */
+/* line 219, _modules/_pathwayviewer.scss */
 .RenderableStroke {
   stroke-width: 1px;
 }
 
-/* line 217, _modules/_pathwayviewer.scss */
+/* line 223, _modules/_pathwayviewer.scss */
 .renderableinteraction {
   stroke-width: 1.5px;
 }
 
-/* line 221, _modules/_pathwayviewer.scss */
+/* line 227, _modules/_pathwayviewer.scss */
 .entitysetandmemberlink, .entitysetandentitysetlink {
   stroke-dasharray: 5 7;
   stroke-width: 0.5px;
 }
 
-/* line 226, _modules/_pathwayviewer.scss */
+/* line 232, _modules/_pathwayviewer.scss */
 .Note {
   stroke: gray;
   fill: #ebffe7;
 }
 
-/* line 231, _modules/_pathwayviewer.scss */
+/* line 237, _modules/_pathwayviewer.scss */
 .pathway-sub-reaction-line {
   stroke-width: 2px;
   stroke: navy;
 }
 
-/* line 237, _modules/_pathwayviewer.scss */
+/* line 243, _modules/_pathwayviewer.scss */
 .RenderableMutated {
   fill: white;
 }
 
 /** ESSENTIALS **/
-/* line 243, _modules/_pathwayviewer.scss */
+/* line 249, _modules/_pathwayviewer.scss */
 .EntitySetAndMemberLink {
   stroke-dasharray: 5 7;
 }
 
-/* line 247, _modules/_pathwayviewer.scss */
+/* line 253, _modules/_pathwayviewer.scss */
 .EntitySetAndEntitySetLink {
   stroke-dasharray: 5 7;
 }
 
-/* line 251, _modules/_pathwayviewer.scss */
+/* line 257, _modules/_pathwayviewer.scss */
 .RenderableNodeText .RenderableNodeTextCell {
   text-align: center;
   height: 100%;
@@ -4582,35 +4605,35 @@ td {
   color: #444;
 }
 
-/* line 258, _modules/_pathwayviewer.scss */
+/* line 264, _modules/_pathwayviewer.scss */
 .RenderableCompartmentText {
   font-size: 9px;
   line-height: 1.1em;
 }
 
-/* line 264, _modules/_pathwayviewer.scss */
+/* line 270, _modules/_pathwayviewer.scss */
 .RenderableNodeText td {
   padding: none;
 }
 
-/* line 268, _modules/_pathwayviewer.scss */
+/* line 274, _modules/_pathwayviewer.scss */
 .RenderableNodeText tbody {
   line-height: normal;
 }
 
-/* line 272, _modules/_pathwayviewer.scss */
+/* line 278, _modules/_pathwayviewer.scss */
 .RenderableBorder {
   fill: none;
 }
 
 /** CONTAINER AND INFO BAR STYLES **/
-/* line 278, _modules/_pathwayviewer.scss */
+/* line 284, _modules/_pathwayviewer.scss */
 .pathwayviewercontainer body {
   margin: 0;
   background: none;
 }
 
-/* line 283, _modules/_pathwayviewer.scss */
+/* line 289, _modules/_pathwayviewer.scss */
 #pathway-viewer-mini {
   border: 1px solid #b3b3b3;
   position: relative;
@@ -4619,7 +4642,7 @@ td {
   background-color: white;
 }
 
-/* line 291, _modules/_pathwayviewer.scss */
+/* line 297, _modules/_pathwayviewer.scss */
 .pathway-legend, .pathway-info {
   position: absolute;
   top: 0;
@@ -4631,25 +4654,36 @@ td {
   background: white;
 }
 
-/* line 302, _modules/_pathwayviewer.scss */
+/* line 308, _modules/_pathwayviewer.scss */
+.pathway-legend-container {
+  width: 100%;
+  height: 100%;
+}
+/* line 314, _modules/_pathwayviewer.scss */
+.pathway-legend-container .pathway-legend-content {
+  width: 100%;
+  height: 100%;
+}
+
+/* line 320, _modules/_pathwayviewer.scss */
 .pathway-info {
   width: 30%;
   opacity: 0.95;
 }
 
-/* line 307, _modules/_pathwayviewer.scss */
+/* line 327, _modules/_pathwayviewer.scss */
 .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 313, _modules/_pathwayviewer.scss */
+/* line 333, _modules/_pathwayviewer.scss */
 .pathway-info-content .pathway-gene-table {
   margin: 2rem auto;
 }
 
-/* line 318, _modules/_pathwayviewer.scss */
+/* line 338, _modules/_pathwayviewer.scss */
 .pathway-gene-label, .pathway-gene-header-label {
   font-weight: lighter;
   padding-bottom: 0.5em !important;
@@ -4657,22 +4691,27 @@ td {
   text-align: center !important;
 }
 
-/* line 325, _modules/_pathwayviewer.scss */
+/* line 345, _modules/_pathwayviewer.scss */
+.gene-overlap-result a, .gene-overlap-result .pathway-gene-label a {
+  color: #ff9900;
+}
+
+/* line 349, _modules/_pathwayviewer.scss */
 .pathway-gene-header-label {
   font-weight: normal !important;
 }
 
-/* line 329, _modules/_pathwayviewer.scss */
+/* line 353, _modules/_pathwayviewer.scss */
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell {
   font-size: 10px;
 }
 
-/* line 333, _modules/_pathwayviewer.scss */
+/* line 357, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   margin-top: 0.5em;
 }
 
-/* line 337, _modules/_pathwayviewer.scss */
+/* line 361, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4 {
   margin-left: 1em;
   margin-right: 1em;
@@ -4684,44 +4723,44 @@ td {
   padding-top: 0.5em;
 }
 
-/* line 348, _modules/_pathwayviewer.scss */
+/* line 372, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   float: left;
   margin-left: -1.6em;
   font-size: 1.5em;
 }
 
-/* line 354, _modules/_pathwayviewer.scss */
+/* line 378, _modules/_pathwayviewer.scss */
 .pathway-info-svg {
   padding-left: 15%;
   padding-right: 15%;
   max-height: 150px;
 }
 
-/* line 360, _modules/_pathwayviewer.scss */
+/* line 384, _modules/_pathwayviewer.scss */
 .failed-reaction {
   stroke: red;
   stroke-width: 2px;
 }
 
-/* line 365, _modules/_pathwayviewer.scss */
+/* line 389, _modules/_pathwayviewer.scss */
 .lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode {
   background-color: #b5f9a7;
   border: 2px dotted red;
 }
 
-/* line 370, _modules/_pathwayviewer.scss */
+/* line 394, _modules/_pathwayviewer.scss */
 .lof-RenderableComplex, .lof-RenderableEntitySet {
   background-color: #b6e2ff;
   border: 2px dotted red;
 }
 
-/* line 375, _modules/_pathwayviewer.scss */
+/* line 399, _modules/_pathwayviewer.scss */
 .lof-cell {
   padding: 0px;
 }
 
-/* line 379, _modules/_pathwayviewer.scss */
+/* line 403, _modules/_pathwayviewer.scss */
 .node-text-body {
   -ms-word-break: break-all;
   -ms-word-wrap: break-all;
@@ -4733,7 +4772,7 @@ td {
   -moz-hyphens: auto;
 }
 
-/* line 390, _modules/_pathwayviewer.scss */
+/* line 414, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4752,57 +4791,57 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 408, _modules/_pathwayviewer.scss */
+/* line 432, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
   top: 0;
   background: white;
 }
-/* line 414, _modules/_pathwayviewer.scss */
+/* line 438, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 420, _modules/_pathwayviewer.scss */
+/* line 444, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
-/* line 425, _modules/_pathwayviewer.scss */
+/* line 449, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .subpath-link {
   padding-top: 4rem;
 }
 
-/* line 432, _modules/_pathwayviewer.scss */
+/* line 456, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 438, _modules/_pathwayviewer.scss */
+/* line 462, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
-/* line 443, _modules/_pathwayviewer.scss */
+/* line 467, _modules/_pathwayviewer.scss */
 :-moz-full-screen .subpath-link {
   padding-top: 4rem;
 }
 
-/* line 450, _modules/_pathwayviewer.scss */
+/* line 474, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 456, _modules/_pathwayviewer.scss */
+/* line 480, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
-/* line 461, _modules/_pathwayviewer.scss */
+/* line 485, _modules/_pathwayviewer.scss */
 :fullscreen .subpath-link {
   padding-top: 4rem;
 }
@@ -4810,7 +4849,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 469, _modules/_pathwayviewer.scss */
+/* line 493, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }
@@ -5557,6 +5596,904 @@ td {
   cursor: help;
 }
 
+/* line 1, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics {
+  /* For mobile phones in portrait view */
+}
+/* line 2, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics header {
+  font-size: 46px;
+  color: #2d8fc1;
+  text-align: left;
+}
+/* line 7, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics header a:visited {
+  color: none;
+}
+/* line 10, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics header a {
+  text-decoration: none;
+  color: #2d8fc1;
+}
+/* line 14, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics a {
+  text-decoration: none;
+  color: #2d8fc1;
+}
+/* line 18, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics header .iobio-project {
+  font-size: 18px;
+  letter-spacing: 6px;
+  margin-top: 8px;
+  margin-right: 33px;
+  color: #787878;
+}
+/* line 25, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics header .iobio-project a {
+  color: #787878;
+}
+/* line 28, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics header .iobio-project a:hover {
+  color: #2d8fc1;
+}
+/* line 31, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .file {
+  width: 250px;
+  text-align: center;
+}
+/* line 35, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .file-button {
+  border-radius: 4px;
+  width: 250px;
+  float: right;
+  background: #2d8fc1;
+  padding: 22px 30px;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+/* line 45, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .file label {
+  float: left;
+}
+/* line 48, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .file input {
+  position: absolute;
+  display: inline-block;
+  left: 0;
+  top: 0;
+  opacity: 0.01;
+  visibility: hidden;
+  cursor: pointer;
+}
+/* line 57, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .bedfile-button {
+  position: absolute;
+  right: 15px;
+  top: 20px;
+  font-size: 13px;
+  color: #3c3c3c;
+  cursor: pointer;
+  border-bottom: 1px solid #b4b4b4;
+}
+/* line 66, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #bedfile {
+  visibility: hidden;
+  display: none;
+}
+/* line 70, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics section {
+  margin: 0px;
+  padding: 0px;
+  display: -webkit-flex;
+  display: flex;
+  display: -ms-flexbox;
+  -webkit-flex-flow: row;
+  flex-flow: row;
+  border-bottom: none;
+}
+/* line 80, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics section#top {
+  min-height: 225px;
+}
+/* line 83, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics section#middle {
+  margin-top: 15px;
+  min-height: 600px;
+}
+/* line 87, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .panel {
+  margin: 20px;
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  border-radius: 2pt;
+  text-align: center;
+}
+/* line 94, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .panel > .title {
+  font-size: 1.7rem;
+  font-weight: lighter;
+}
+/* line 98, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .panel#depth-distribution {
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
+  -webkit-order: 1;
+  order: 1;
+  height: 250px;
+  position: relative;
+  width: 60rem;
+}
+/* line 107, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .panel#total-reads {
+  -webkit-flex: 1 1 150px;
+  flex: 1 1 150px;
+  -webkit-order: 2;
+  order: 2;
+  margin-right: 20px;
+  min-width: 130px;
+}
+/* line 115, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #percents {
+  margin-right: 20px;
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
+  -webkit-order: 1;
+  order: 1;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  flex-flow: row wrap;
+  width: 40%;
+}
+/* line 130, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #distributions {
+  -webkit-flex: 2 1 auto;
+  flex: 2 1 auto;
+  -webkit-order: 2;
+  order: 2;
+  display: -webkit-flex;
+  /*                display: flex;*/
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  width: 60%;
+}
+/* line 143, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .checkbox {
+  padding-left: 20px;
+}
+/* line 147, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .checkbox,
+#bam-statistics .checkbox .icons {
+  height: 13px;
+  line-height: 13px;
+  font-size: 13px;
+  font-weight: lighter;
+}
+/* line 153, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .hint {
+  font-size: 13px;
+  color: #aaaaaa;
+}
+/* line 157, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #percents .percent {
+  -webkit-flex: 1 1 39%;
+  font-size: 1.2rem;
+  font-weight: lighter;
+  flex: 1 1 30%;
+  position: relative;
+  min-width: 148px;
+  min-height: 160px;
+}
+/* line 166, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #percents .percent text {
+  font-size: 2rem;
+}
+/* line 169, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #percents .percent svg {
+  width: 100%;
+  height: 15rem;
+}
+@media screen and (max-width: 1534px) and (min-width: 721px) {
+  /* line 174, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #percents .percent svg {
+    width: 70%;
+    margin-left: 11%;
+    height: 17rem;
+  }
+}
+/* line 180, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #distributions .distribution {
+  -webkit-flex: 1 1 100%;
+  flex: 1 1 100%;
+  height: 20rem;
+  position: relative;
+  display: inline-block;
+  width: 45rem;
+  /*padding: 0px 15px 0px 15px*/
+}
+/* line 189, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .bar rect {
+  fill: #2d8fc1;
+  shape-rendering: crispEdges;
+}
+/* line 193, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .bar rect.unselected {
+  fill: #9C9E9F;
+}
+/* line 196, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .bar text {
+  fill: 'black';
+}
+/* line 200, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .axis path,
+#bam-statistics .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+/* line 205, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .global-panel .x.axis {
+  font-size: 9px;
+}
+/* line 208, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .global-panel .instruction {
+  font-size: 10px;
+  color: #aaaaaa;
+}
+/* line 212, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .avg line {
+  z-index: 10;
+  stroke: #3c3c3c;
+  stroke-dasharray: 5, 5;
+  stroke-width: 1px;
+}
+/* line 218, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .avg text {
+  fill: #b4b4b4;
+}
+/* line 221, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arc .fill {
+  fill: #2d8fc1;
+}
+/* line 224, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .alpha {
+  fill: rgba(45, 143, 193, 0.2);
+}
+/* line 227, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arc .percent {
+  fill: #646464;
+  color: #646464;
+  font-size: 23px;
+}
+/* line 232, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arc .total {
+  font-size: 10px;
+  letter-spacing: 3px;
+  font-weight: 400;
+  fill: #c8c8c8;
+  color: #c8c8c8;
+}
+/* line 239, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arrow_box {
+  position: relative;
+  background: #ffffff;
+  border: 2px solid #2d8fc1;
+  border-radius: 4px;
+}
+/* line 246, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arrow_box:after,
+#bam-statistics .arrow_box:before {
+  bottom: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 255, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arrow_box:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #ffffff;
+  border-width: 20px;
+  left: 78%;
+  margin-left: -20px;
+}
+/* line 262, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arrow_box:before {
+  border-color: rgba(45, 143, 193, 0);
+  border-bottom-color: #2d8fc1;
+  border-width: 23px;
+  left: 78%;
+  margin-left: -23px;
+}
+/* line 269, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arrow_box input {
+  border: none;
+  outline: none;
+  width: 610px;
+  margin: 8px;
+  color: #2d8fc1;
+  font: 300 30px quicksand;
+}
+/* line 277, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .arrow_box button {
+  font: 300 28px quicksand;
+}
+/* line 280, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .brush .extent {
+  stroke: #000;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+/* line 285, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+/* line 289, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .chart-chooser {
+  /*                font-size: 16px;*/
+  color: #b4b4b4;
+  font-weight: 400;
+  /*                text-align: right;*/
+}
+/* line 295, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .chart-chooser .selected {
+  color: #2d8fc1;
+  border-bottom: 1px solid #2d8fc1;
+}
+/* line 299, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .chart-chooser span {
+  margin: 0px 5px 0px 5px;
+  padding-bottom: 3px;
+  cursor: pointer;
+}
+/* line 304, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #seq-list {
+  margin: 0;
+  padding: 0;
+}
+/* line 308, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .seq-buttons {
+  display: inline;
+  margin-right: 6px;
+  padding: 0px 20px 0px 20px;
+  border-radius: 3px;
+  color: #2d8fc1;
+  font-family: helvetica;
+  font-size: 0.6em;
+  border: 1px solid #2d8fc1;
+  cursor: pointer;
+  cursor: hand;
+}
+/* line 320, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .seq-buttons.selected {
+  background: #2d8fc1;
+  color: white;
+}
+/* line 324, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .samplingLoader {
+  font-size: 14px;
+  font-weight: lighter;
+  color: #2687BE;
+  position: absolute;
+  width: 100%;
+  margin-top: 70px;
+  margin-left: -6px;
+  display: none;
+}
+/* line 334, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics .samplingLoader img {
+  height: 9px;
+}
+/* line 337, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #info {
+  margin: 23px auto 0px auto;
+  width: 100%;
+  text-align: center;
+}
+/* line 342, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #info ul {
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+}
+/* line 347, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #info li {
+  display: inline;
+  margin: 0px 0px 0px 50px;
+}
+/* line 351, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #footer {
+  position: relative;
+  margin-top: 100px;
+  width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 18px;
+  text-align: center;
+}
+/* line 360, ../vendor/styles/bamiobio/site.scss */
+#bam-statistics #footer a {
+  color: #6e6e6e;
+  color: #2d8fc1;
+  text-decoration: underline;
+}
+@media screen and (max-device-width: 640px), screen and (max-width: 640px) {
+  /* line 369, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #top,
+  #bam-statistics #page {
+    -webkit-flex-flow: row;
+    flex-flow: row;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+  }
+  /* line 376, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #depth-distribution,
+  #bam-statistics #total-reads {
+    /* Return them to document order */
+    -webkit-order: 0;
+    order: 0;
+  }
+  /* line 381, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #total-reads {
+    min-height: 160px;
+    max-height: 160px;
+  }
+  /* line 385, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #depth-distribution.panel .title {
+    padding-top: 10px;
+  }
+  /* line 388, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #depth-distribution.panel .hint {
+    margin-top: -7px;
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+  /* line 393, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics .bedfile-button {
+    top: 4px;
+    font-size: 11px;
+  }
+  /* line 397, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics .axis {
+    font-size: 11px;
+  }
+  /* line 400, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics section#middle {
+    margin-top: 15px;
+    min-height: 1000px;
+    -webkit-flex-flow: column;
+    flex-flow: column;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+  }
+  /* line 408, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #percents {
+    width: 100%;
+  }
+  /* line 411, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #distributions {
+    width: 100%;
+  }
+  /* line 414, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #percents .percent svg {
+    width: 80%;
+    height: 15rem;
+  }
+  /* line 418, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics .logos {
+    margin: 0px auto 10px auto;
+    width: 1000px;
+    text-align: center;
+    position: relative;
+    height: 60px;
+    color: #505050;
+  }
+}
+@media screen and (max-width: 508px) {
+  /* line 428, ../vendor/styles/bamiobio/site.scss */
+  #bam-statistics #percents .percent svg {
+    width: 50%;
+    height: 15rem;
+  }
+}
+
+/* line 435, ../vendor/styles/bamiobio/site.scss */
+.iobio-tooltip {
+  position: absolute;
+  text-align: center;
+  z-index: 20;
+  color: white;
+  padding: 4px 6px 4px 6px;
+  font: 11px arial;
+  background: #505050;
+  border: 0px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* line 1, ../vendor/styles/bamiobio/nprogress.scss */
+#bam-statistics {
+  /* Make clicks pass-through */
+  /* Fancy blur effect */
+  /* Remove these to get rid of the spinner */
+  @-webkit-keyframes nprogress-spinner {
+    /* line 63, ../vendor/styles/bamiobio/nprogress.scss */
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+
+    /* line 64, ../vendor/styles/bamiobio/nprogress.scss */
+    100% {
+      -webkit-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+
+  @-moz-keyframes nprogress-spinner {
+    /* line 67, ../vendor/styles/bamiobio/nprogress.scss */
+    0% {
+      -moz-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+
+    /* line 68, ../vendor/styles/bamiobio/nprogress.scss */
+    100% {
+      -moz-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+
+  @-o-keyframes nprogress-spinner {
+    /* line 71, ../vendor/styles/bamiobio/nprogress.scss */
+    0% {
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+
+    /* line 72, ../vendor/styles/bamiobio/nprogress.scss */
+    100% {
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+
+  @-ms-keyframes nprogress-spinner {
+    /* line 75, ../vendor/styles/bamiobio/nprogress.scss */
+    0% {
+      -ms-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+
+    /* line 76, ../vendor/styles/bamiobio/nprogress.scss */
+    100% {
+      -ms-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+
+  @keyframes nprogress-spinner {
+    /* line 79, ../vendor/styles/bamiobio/nprogress.scss */
+    0% {
+      transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+
+    /* line 80, ../vendor/styles/bamiobio/nprogress.scss */
+    100% {
+      transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+}
+
+}
+/* line 3, ../vendor/styles/bamiobio/nprogress.scss */
+#bam-statistics #nprogress {
+  pointer-events: none;
+  -webkit-pointer-events: none;
+}
+/* line 8, ../vendor/styles/bamiobio/nprogress.scss */
+#bam-statistics #nprogress .bar {
+  background: #29d;
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+/* line 21, ../vendor/styles/bamiobio/nprogress.scss */
+#bam-statistics #nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px #29d, 0 0 5px #29d;
+  opacity: 1.0;
+  -webkit-transform: rotate(3deg) translate(0px, -4px);
+  -moz-transform: rotate(3deg) translate(0px, -4px);
+  -ms-transform: rotate(3deg) translate(0px, -4px);
+  -o-transform: rotate(3deg) translate(0px, -4px);
+  transform: rotate(3deg) translate(0px, -4px);
+}
+/* line 38, ../vendor/styles/bamiobio/nprogress.scss */
+#bam-statistics #nprogress .spinner {
+  display: block;
+  position: fixed;
+  z-index: 100;
+  top: 15px;
+  right: 15px;
+}
+/* line 46, ../vendor/styles/bamiobio/nprogress.scss */
+#bam-statistics #nprogress .spinner-icon {
+  width: 14px;
+  height: 14px;
+  border: solid 2px transparent;
+  border-top-color: #29d;
+  border-left-color: #29d;
+  border-radius: 10px;
+  -webkit-animation: nprogress-spinner 400ms linear infinite;
+  -moz-animation: nprogress-spinner 400ms linear infinite;
+  -ms-animation: nprogress-spinner 400ms linear infinite;
+  -o-animation: nprogress-spinner 400ms linear infinite;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+@font-face {
+  font-family: 'Flat-UI-Icons';
+  src: url("../fonts/Flat-UI-Icons.eot");
+  src: url("../fonts/Flat-UI-Icons.eot?#iefix") format("embedded-opentype"), url("../vendor/styles/bamiobio/fonts/Flat-UI-Icons.woff") format("woff"), url("../vendor/bamiobio/fonts/Flat-UI-Icons.ttf") format("truetype"), url("../vendor/bamiobio/fonts/Flat-UI-Icons.svg#Flat-UI-Icons") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Use the following CSS code if you want to use data attributes for inserting your icons */
+/* line 10, ../vendor/styles/bamiobio/flat-ui.scss */
+[data-icon]:before {
+  font-family: 'Flat-UI-Icons';
+  content: attr(data-icon);
+  speak: none;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Use the following CSS code if you want to have a class per icon */
+/* line 24, ../vendor/styles/bamiobio/flat-ui.scss */
+.fui-check,
+.fui-checkbox-unchecked,
+.fui-checkbox-checked,
+.fui-check-inverted-2 {
+  display: inline-block;
+  font-family: 'Flat-UI-Icons';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*.fui-arrow-right:before {
+  content: "\e02c";
+}
+.fui-arrow-left:before {
+  content: "\e02d";
+}
+*/
+/* line 40, ../vendor/styles/bamiobio/flat-ui.scss */
+.fui-cmd:before {
+  content: "\e02f";
+}
+
+/* line 43, ../vendor/styles/bamiobio/flat-ui.scss */
+.fui-check-inverted:before {
+  content: "\e006";
+}
+
+/* line 47, ../vendor/styles/bamiobio/flat-ui.scss */
+.fui-checkbox-unchecked:before {
+  content: "\e033";
+}
+
+/* line 50, ../vendor/styles/bamiobio/flat-ui.scss */
+.fui-checkbox-checked:before {
+  content: "\e034";
+}
+
+/* line 53, ../vendor/styles/bamiobio/flat-ui.scss */
+.fui-check-inverted-2:before {
+  content: "\e000";
+}
+
+/* line 58, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox,
+.radio {
+  margin-bottom: 12px;
+  padding-left: 32px;
+  position: relative;
+  -webkit-transition: color 0.25s linear;
+  -moz-transition: color 0.25s linear;
+  -o-transition: color 0.25s linear;
+  transition: color 0.25s linear;
+  -webkit-backface-visibility: hidden;
+}
+
+/* line 69, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox input,
+.radio input {
+  outline: none !important;
+  display: none;
+}
+
+/* line 74, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox .icons,
+.radio .icons {
+  color: #bdc3c7;
+  display: block;
+  height: 20px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-size: 20px;
+  -webkit-transition: color 0.25s linear;
+  -moz-transition: color 0.25s linear;
+  -o-transition: color 0.25s linear;
+  transition: color 0.25s linear;
+  -webkit-backface-visibility: hidden;
+}
+
+/* line 94, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox .icons .first-icon,
+.radio .icons .first-icon,
+.checkbox .icons .second-icon,
+.radio .icons .second-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+
+/* line 102, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox .icons .second-icon,
+.radio .icons .second-icon {
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+/* line 107, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox:hover,
+.radio:hover .first-icon {
+  color: #ce6503;
+  cursor: pointer;
+}
+
+/* line 112, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox:hover .second-icon,
+.radio:hover .second-icon {
+  opacity: 1;
+  color: #ce6503;
+  cursor: pointer;
+  filter: alpha(opacity=100);
+}
+
+/* line 119, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.checked,
+.radio.checked {
+  color: #1693c0;
+  transition: color 0.5s;
+}
+
+/* line 124, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.checked .icons,
+.radio.checked .icons {
+  color: #166aa2;
+  transition: color 0.5s;
+}
+
+/* line 129, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.checked .first-icon,
+.radio.checked .first-icon {
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+/* line 134, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.checked .second-icon,
+.radio.checked .second-icon {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+
+/* line 139, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled,
+.radio.disabled {
+  cursor: default;
+  color: #e6e8ea;
+}
+
+/* line 144, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled .icons,
+.radio.disabled .icons {
+  color: #e6e8ea;
+}
+
+/* line 148, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled .first-icon,
+.radio.disabled .first-icon {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+
+/* line 153, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled .second-icon,
+.radio.disabled .second-icon {
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+/* line 158, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled.checked .icons,
+.radio.disabled.checked .icons {
+  color: #e6e8ea;
+}
+
+/* line 162, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled.checked .first-icon,
+.radio.disabled.checked .first-icon {
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+/* line 167, ../vendor/styles/bamiobio/flat-ui.scss */
+.checkbox.disabled.checked .second-icon,
+.radio.disabled.checked .second-icon {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+
+/* line 4, _modules/_bamiobio.scss */
+#bam-statistics {
+  line-height: normal;
+}
+/* line 6, _modules/_bamiobio.scss */
+#bam-statistics #bam-section {
+  border-bottom: none;
+}
+/* line 9, _modules/_bamiobio.scss */
+#bam-statistics .axis .tick text {
+  font-weight: lighter;
+  font-size: 0.6rem;
+}
+/* line 13, _modules/_bamiobio.scss */
+#bam-statistics #value {
+  position: relative;
+  font-size: 4rem;
+  color: #2687BE;
+  text-align: center;
+  padding-top: 2rem;
+}
+/* line 20, _modules/_bamiobio.scss */
+#bam-statistics #read-coverage {
+  font-size: 1.3rem;
+  font-weight: lighter;
+}
+
 /* line 3, _modules/_tokens.scss */
 .token-manager p {
   margin: 0 0 1em 0;
@@ -5944,37 +6881,43 @@ h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
 }
 
 /* line 234, styles.scss */
+h1.sticky-scrollfix {
+  border-bottom: 1px solid #f2f2f2;
+  padding-bottom: 0.43em;
+}
+
+/* line 239, styles.scss */
 aside.ui-scrollfix {
   top: 5rem;
 }
-/* line 236, styles.scss */
+/* line 241, styles.scss */
 aside.ui-scrollfix section {
   background: transparent;
 }
 
-/* line 241, styles.scss */
+/* line 247, styles.scss */
 .open-in {
   font-size: 1rem;
   color: #999999;
   text-transform: uppercase;
 }
 
-/* line 248, styles.scss */
+/* line 254, styles.scss */
 h3:hover .pilcrow {
   opacity: 1;
 }
 
-/* line 253, styles.scss */
+/* line 259, styles.scss */
 .pilcrow {
   opacity: .1;
 }
 
-/* line 257, styles.scss */
+/* line 263, styles.scss */
 .t_sidebar {
   position: relative;
 }
 
-/* line 261, styles.scss */
+/* line 267, styles.scss */
 .t_notify_popup, #buorg {
   position: fixed;
   z-index: 1000000;
@@ -5988,37 +6931,37 @@ h3:hover .pilcrow {
   font-family: inherit;
 }
 
-/* line 274, styles.scss */
+/* line 280, styles.scss */
 .t_notify_link {
   cursor: pointer;
   color: #FFF;
 }
 
-/* line 279, styles.scss */
+/* line 285, styles.scss */
 .t_notify_link:hover {
   text-decoration: underline;
 }
 
-/* line 284, styles.scss */
+/* line 290, styles.scss */
 .t_notify_body {
   font-size: 1rem;
 }
 
-/* line 288, styles.scss */
+/* line 294, styles.scss */
 .t_notify_warning {
   background: #e9931c;
 }
 
-/* line 292, styles.scss */
+/* line 298, styles.scss */
 .t_notify_success {
   background: #1a9900;
 }
 
-/* line 298, styles.scss */
+/* line 304, styles.scss */
 #buorg div {
   padding: 0;
 }
-/* line 302, styles.scss */
+/* line 308, styles.scss */
 #buorg #buorgclose {
   position: relative;
   float: right;
@@ -6032,14 +6975,14 @@ h3:hover .pilcrow {
   padding-right: 1rem;
 }
 
-/* line 316, styles.scss */
+/* line 322, styles.scss */
 .blur {
   -webkit-filter: blur(2px);
   -moz-filter: blur(2px);
   filter: blur(2px);
 }
 
-/* line 320, styles.scss */
+/* line 326, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -6053,18 +6996,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 334, styles.scss */
+/* line 340, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 339, styles.scss */
+/* line 345, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 343, styles.scss */
+/* line 349, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;

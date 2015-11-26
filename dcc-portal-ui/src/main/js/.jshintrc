@@ -53,6 +53,13 @@
     "X2JS": false,
     "dcc": false,
     "d3": false,
-    "PqlPegParser": false
+    "PqlPegParser": false,
+    
+    "movingLineD3": false,
+    "histogramViewFinderD3": false,
+    "histogramD3": false,
+    "bamD3": false,
+    "donutD3": false,
+    "Bam": false
   }
 }

@@ -42,11 +42,11 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.services']);
+  var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.services', 'icgc.pathways']);
 
   module.controller('GeneSetCtrl',
     function ($scope, $timeout, $state, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet) {
+      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet, PathwaysConstants) {
 
 
       var _ctrl = this, 
@@ -244,6 +244,11 @@
             });
 
             _ctrl.pathway.highlights = pathwayHighlights;
+
+
+            $scope.$broadcast(PathwaysConstants.EVENTS.MODEL_READY_EVENT, {});
+
+
           }).catch(function () {
             _ctrl.pathway.highlights = [];
           });

@@ -182,7 +182,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
             }
           },
           tooltip: {
-            enabled: false,
+            enabled: false
           },
           series: [
             {
@@ -310,7 +310,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           }
         },
         tooltip: {
-          enabled: false,
+          enabled: false
         },
         series: [
           {

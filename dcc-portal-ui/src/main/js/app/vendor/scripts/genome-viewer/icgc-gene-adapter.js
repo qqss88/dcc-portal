@@ -150,7 +150,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
       jsonResponse = data;
 
     }
-    
+
     if (typeof jsonResponse !== 'undefined') {
       for (var i = 0; i < jsonResponse.length; i++) {
         var feature = jsonResponse[i];
@@ -159,7 +159,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
         feature.id = feature.stableId;
         delete feature.externalName;
         delete feature.stableId;
-  
+
         for (var j = 0; j < feature.transcripts.length; j++) {
           var transcript = feature.transcripts[j];
           transcript.exons = transcript.exonToTranscripts;

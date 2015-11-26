@@ -18,12 +18,15 @@
         </div>
     </div>
     <div style="position: relative; margin-right: -2rem">
+        <div data-ng-if="AdvancedCtrl.loadingFacet" style="text-align:center; vertical-align: middle; position: absolute; height:100%; width:100%; z-index: 1; top: 0px; left: 0px; opacity: 0.8; background: #fff;">
+            <div style="margin-top: 1rem;"><i class="icon-spinner icon-spin"></i></div>
+        </div>
         <div data-ng-if="loading" class="loadingOverlay"></div>
-        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('donor')}"> 
+        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('donor')}">
             <div data-ng-if="AdvancedCtrl.state.hasVisitedFacet('donor')"
                  data-ng-include="'scripts/advanced/views/advanced.facets.donors.html'"></div>
         </div>
-        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('gene')}"> 
+        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('gene')}">
             <div data-ng-if="AdvancedCtrl.state.hasVisitedFacet('gene')"
                  data-ng-include="'scripts/advanced/views/advanced.facets.genes.html'"></div>
         </div>
@@ -64,12 +67,12 @@
          data-ng-if="AdvancedCtrl.state.hasVisitedTab('donor')"
          data-ng-class="{active: AdvancedCtrl.state.isTab('donor')}"
          data-ng-include="'scripts/advanced/views/advanced.donors.html'"></div>
-    <div class='t_tab_pane' 
+    <div class='t_tab_pane'
          data-ng-if="AdvancedCtrl.state.hasVisitedTab('gene')"
          data-ng-class="{active: AdvancedCtrl.state.isTab('gene')}">
         <div data-ng-include="'scripts/advanced/views/advanced.genes.html'"></div>
     </div>
-    <div class='t_tab_pane' 
+    <div class='t_tab_pane'
          data-ng-if="AdvancedCtrl.state.hasVisitedTab('mutation')"
          data-ng-class="{active: AdvancedCtrl.state.isTab('mutation')}">
         <div data-ng-include="'scripts/advanced/views/advanced.mutations.html'"></div>

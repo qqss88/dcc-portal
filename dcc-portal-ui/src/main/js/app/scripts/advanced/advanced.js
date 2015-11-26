@@ -65,11 +65,13 @@
         }
       };
 
-  var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services', 'icgc.sets.services']);
+  var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services', 'icgc.sets.services',
+    'icgc.facets']);
 
   module.controller('AdvancedCtrl',
     function ($scope, $rootScope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
-              AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings, RouteInfoService) {
+              AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings,
+              RouteInfoService, FacetConstants) {
 
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
@@ -117,6 +119,28 @@
         }
       });
 
+      $rootScope.$on(FacetConstants.EVENTS.FACET_STATUS_CHANGE, function(event, facetStatus) {
+        //console.log('Facet change: ', facetStatus);
+
+        if (! facetStatus.isActive) {
+          return;
+        }
+
+        _ctrl.loadingFacet = true;
+
+        if (_.get(_ctrl.Donor, 'donors', false)) {
+          _ctrl.Donor.donors.hitsLoaded = false;
+        }
+
+        if (_.get(_ctrl.Gene, 'genes', false)) {
+          _ctrl.Gene.genes.hitsLoaded = false;
+        }
+
+        if (_.get(_ctrl.Mutation, 'mutations', false)) {
+          _ctrl.Mutation.mutations.hitsLoaded = false;
+        }
+      });
+
       ///////////////////////////////////////////////////////////////////////////
 
       _ctrl.Page = Page;
@@ -156,8 +180,9 @@
             refreshOrder = _controllers;
             break;
         }
-        
-       
+        // Set the first controller request to be fired so we can use it in later contexts
+        refreshOrder[0].controllerUIActive = true;
+
         // Handy function used to perform our refresh requests
         // and unblock when certain conditions are met
         function _execRefresh(controllerObj) {
@@ -187,12 +212,17 @@
                 
                 _pageUnblockedTime = nowTime;
                 console.log('Advanced Search Page blocking stopped in ' + timeDelta + 'ms...');
+
                 Page.stopWork();
               }
               
               console.log('Promise #' + controllerObj.promiseCount + ' - Controller ID "' +
                 controllerObj.id + '" refreshed in ' +
                           (nowTime - controllerObj.startRunTime) + 'ms...');
+
+              if (_ctrl.loadingFacet && controllerObj.controllerUIActive) {
+                _ctrl.loadingFacet = false;
+              }
              
             });
            
