@@ -267,6 +267,9 @@
   module
     //.value('$anchorScroll', angular.noop)
     .run(function($state, $location, $window, $timeout, $rootScope) {
+
+      var _scrollTimeoutHandle = null;
+
       function scroll() {
          //var state = $state.$current, offset, to;
         
@@ -311,10 +314,16 @@
 
         var _hash = $location.hash();
 
+        // Prevent the timeout from being fired multiple times if called before previous
+        // timeout is complete. Make the last request the most valid.
+        if (_scrollTimeoutHandle) {
+          clearTimeout(_scrollTimeoutHandle);
+        }
 
-          $timeout(function () { 
+        _scrollTimeoutHandle = setTimeout(function () {
             _doInlineScroll(_hash);
-          }, 200);
+            _scrollTimeoutHandle = null;
+          }, 500);
 
       }
 
