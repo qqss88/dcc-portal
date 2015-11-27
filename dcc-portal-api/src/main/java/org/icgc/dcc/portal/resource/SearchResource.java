@@ -73,7 +73,7 @@ public class SearchResource {
       @ApiParam(value = "Start index of results") @QueryParam("from") @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = "Number of results returned", allowableValues = "range[1,100]") @QueryParam("size") @DefaultValue(DEFAULT_SIZE) IntParam size
       ) {
-    log.info("Request for keyword search: {}", q);
+    log.debug("Request for keyword search: {}", q);
 
     val query = Query.builder().query(q);
     val keywords = type.equals("file-donor") ?
@@ -87,7 +87,7 @@ public class SearchResource {
                 .order(DEFAULT_ORDER)
                 .build(), type);
 
-    log.info("Returning keyword search result: '{}'.", keywords);
+    log.debug("Returning keyword search result: '{}'.", keywords);
 
     return keywords;
   }

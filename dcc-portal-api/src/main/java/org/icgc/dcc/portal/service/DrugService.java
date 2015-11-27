@@ -82,8 +82,6 @@ public class DrugService {
   public Drug findOne(String id) {
     val response = repository.findOne(id);
 
-    log.info("GetResponse is: {}", response.getSourceAsString());
-
     return parse(response.getSourceAsString());
   }
 
@@ -100,7 +98,6 @@ public class DrugService {
   private static StatementNode toAst(Query query) {
     val pql = QUERY_CONVERTER.convert(query, DRUG);
 
-    log.info("pql for drug is: {}", pql);
     return PqlParser.parse(pql);
   }
 

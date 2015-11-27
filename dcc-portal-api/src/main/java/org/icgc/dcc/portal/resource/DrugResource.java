@@ -146,7 +146,7 @@ public class DrugResource {
       ) {
     val filters = filtersParam.get();
 
-    log.info(FIND_ALL_TEMPLATE, new Object[] { size, DONOR, from, sort, order, filters });
+    log.debug(FIND_ALL_TEMPLATE, new Object[] { size, DONOR, from, sort, order, filters });
 
     val query = regularFindAllJqlQuery(fields, include, filters, from, size, sort, order);
 

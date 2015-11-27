@@ -168,7 +168,7 @@ public class SearchRepository {
 
   @NonNull
   public SearchResponse findAll(Query query, String type) {
-    log.info("Requested search type is: '{}'.", type);
+    log.debug("Requested search type is: '{}'.", type);
 
     @SuppressWarnings("deprecation")
     val search = createSearch(type)
@@ -180,7 +180,7 @@ public class SearchRepository {
         .setQuery(getQuery(query, type))
         .setPostFilter(getPostFilter(type));
 
-    log.info("ES search query is: {}", search);
+    log.debug("ES search query is: {}", search);
     val response = search.execute().actionGet();
     log.debug("ES search result is: {}", response);
 
