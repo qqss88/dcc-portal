@@ -75,7 +75,7 @@
          <h3>GPG Verification</h3>
          <div>
             <p>To verify the signed software you will need to ensure you have downloaded our public key and imported it:</p>
-            <p>From a key server:<pre>$ gpg  --recv-key 0xAFE5D0B6</pre></p>
+            <p>From a key server:<pre>$ gpg --keyserver pgp.mit.edu --recv-key 0xAFE5D0B6</pre></p>
             <p>From a file:<pre>$ gpg --import icgc-software.pub</pre></p>
             <p>Once the public key has been imported you can verify the signature:</p>
             <p><pre>$ gpg icgc-storage-client-0.0.27-dist.tar.gz.asc</pre></p>
