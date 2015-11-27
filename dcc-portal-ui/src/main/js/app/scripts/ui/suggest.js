@@ -267,7 +267,7 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
   };
 });
 
-angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location, RouteInfoService) {
+angular.module('icgc.ui.suggest').directive('suggestPopup', function (LocationService, RouteInfoService) {
   var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
   var compoundUrl = RouteInfoService.get ('drugCompound').href;
 
@@ -284,22 +284,35 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location,
         scope.clearActive();
       };
 
+
       scope.click = function (item) {
+        var url = '';
+
         if (item) {
           var resourceType = item.type;
-          if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
-            resourceType = 'geneset';
-          } else if (item.type === 'file') {
-            $location.path (dataRepoFileUrl + item.id).search ({});
-            return;
-          } else if (item.type === 'compound') {
-            $location.path (compoundUrl + item.id).search ({});
-            return;
+
+          switch(resourceType.toLowerCase()) {
+            case 'curated_set':
+            case 'go_term':
+            case 'pathway':
+              url = '/genesets/';
+              break;
+            case 'file':
+              url = dataRepoFileUrl;
+              break;
+            case 'compound':
+              url = compoundUrl;
+              break;
+            default:
+              url = '/' + resourceType + 's/';
+              break;
           }
 
-          $location.path('/' + resourceType + 's/' + item.id).search({});
-        } else {
-          $location.path('/q').search({q: scope.query});
+          LocationService.goToPath(url + item.id);
+
+        }
+        else {
+          LocationService.goToPath('/q', {q: scope.query});
         }
       };
     }
