@@ -30939,7 +30939,7 @@ BamRenderer.prototype.render = function (response, args) {
         var strand = _.isFunction(_this.strand) ? _this.strand(feature) : _this.strand;
         var mateUnmappedFlag = _.isFunction(_this.mateUnmappedFlag) ? _this.mateUnmappedFlag(feature) : _this.mateUnmappedFlag;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
-        var tooltipContainerID = _this.tooltipContainerID || 'body';
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         if (insertSizeMin != 0 && insertSizeMax != 0 && !mateUnmappedFlag) {
@@ -31048,7 +31048,7 @@ BamRenderer.prototype.render = function (response, args) {
         var mateColor = mateSettings.getColor(mate, _this.region.chromosome);
         var readStrand = readSettings.getStrand(read);
         var matestrand = mateSettings.getStrand(mate);
-        var tooltipContainerID = _this.tooltipContainerID || 'body';
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         if (insertSizeMin != 0 && insertSizeMax != 0) {
@@ -31502,7 +31502,7 @@ FeatureRenderer.prototype.render = function (features, args) {
         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
-        var tooltipContainerID = _this.tooltipContainerID || 'body';
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         //get feature genomic information
@@ -31669,7 +31669,7 @@ GeneRenderer.prototype.render = function (features, args) {
         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
-        var tooltipContainerID = _this.tooltipContainerID || 'body';
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
 
@@ -31789,7 +31789,7 @@ GeneRenderer.prototype.render = function (features, args) {
                         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(transcript) : _this.tooltipTitle;
                         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(transcript) : _this.tooltipText;
                         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(transcript) : _this.infoWidgetId;
-                        var tooltipContainerID = _this.tooltipContainerID || 'body';
+                        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
                         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
                         //se resta el trozo del final del gen hasta el principio del transcrito y se le suma el texto del transcrito
@@ -31862,7 +31862,7 @@ GeneRenderer.prototype.render = function (features, args) {
                             var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(exon) : _this.infoWidgetId;
 
                             var exonGroup = SVG.addChild(args.svgCanvasFeatures, "g");
-                            var tooltipContainerID = _this.tooltipContainerID || 'body';
+                            var tooltipContainerID = _this.tooltipContainerID || '#genomic';
                             var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
 
@@ -32125,7 +32125,7 @@ SequenceRenderer.prototype.render = function(features, args) {
     var start = features.items.start;
     var seqStart = features.items.start;
     var seqString = features.items.sequence;
-    var tooltipContainerID = this.tooltipContainerID || 'body';
+    var tooltipContainerID = this.tooltipContainerID || '#genomic';
     var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
     for ( var i = 0; i < seqString.length; i++) {
@@ -32203,7 +32203,7 @@ VcfMultisampleRenderer.prototype.render = function (features, args) {
         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
-        var tooltipContainerID = _this.tooltipContainerID || 'body';
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         //get feature genomic information
