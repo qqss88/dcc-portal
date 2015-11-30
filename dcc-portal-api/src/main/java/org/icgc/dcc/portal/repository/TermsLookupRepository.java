@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.repository;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
@@ -33,7 +33,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -44,13 +44,10 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Term lookup services
- */
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
-public class TermsLookupService {
+public class TermsLookupRepository {
 
   /**
    * Constants.
@@ -63,6 +60,23 @@ public class TermsLookupService {
    */
   @NonNull
   private final Client client;
+
+  /**
+   * Supported index types.
+   */
+  @Getter
+  @RequiredArgsConstructor(access = PRIVATE)
+  public enum TermLookupType {
+
+    GENE_IDS("gene-ids"),
+    MUTATION_IDS("mutation-ids"),
+    DONOR_IDS("donor-ids"),
+    FILE_IDS("file-ids");
+
+    @NonNull
+    private final String name;
+
+  }
 
   @PostConstruct
   public void init() {
@@ -146,20 +160,4 @@ public class TermsLookupService {
     return settings.toString();
   }
 
-  /**
-   * Supported index types.
-   */
-  @Getter
-  @RequiredArgsConstructor(access = PRIVATE)
-  public enum TermLookupType {
-
-    GENE_IDS("gene-ids"),
-    MUTATION_IDS("mutation-ids"),
-    DONOR_IDS("donor-ids"),
-    FILE_IDS("file-ids");
-
-    @NonNull
-    private final String name;
-
-  }
 }

@@ -21,7 +21,7 @@ import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_TEXT;
 import static org.icgc.dcc.portal.model.IndexModel.Type.REPOSITORY_FILE_DONOR_TEXT;
-import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
 
 import java.util.ArrayList;
@@ -56,9 +56,9 @@ import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.repository.RepositoryFileRepository;
+import org.icgc.dcc.portal.repository.TermsLookupRepository;
+import org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
-import org.icgc.dcc.portal.service.TermsLookupService;
-import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -109,7 +109,7 @@ public class UnionAnalyzer {
   @NonNull
   private final EntityListRepository entityListRepository;
   @NonNull
-  private final TermsLookupService termLookupService;
+  private final TermsLookupRepository termsLookupRepository;
   @NonNull
   private final GeneRepository geneRepository;
   @NonNull
@@ -142,7 +142,7 @@ public class UnionAnalyzer {
   private final static MatchAllQueryBuilder MATCH_ALL = QueryBuilders.matchAllQuery();
 
   private static TermsLookupFilterBuilder buildTermsFilter(final TermLookupType type, final UUID id) {
-    return TermsLookupService.createTermsLookupFilter(FIELD_NAME, type, id);
+    return TermsLookupRepository.createTermsLookupFilter(FIELD_NAME, type, id);
   }
 
   private static BoolFilterBuilder toBoolFilterFrom(final UnionUnit unionDefinition,
@@ -291,7 +291,7 @@ public class UnionAnalyzer {
       }
 
       val lookupType = entityType.toLookupType();
-      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
+      termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       // Done - update status to finished
       entityListRepository.update(newEntity.updateStateToFinished(totalHits), dataVersion);
@@ -374,7 +374,7 @@ public class UnionAnalyzer {
       log.debug("The result of running a FilterParam query is: '{}'", entityIds);
 
       val lookupType = entitySetDefinition.getType().toLookupType();
-      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
+      termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       val count = getCountFrom(response, max);
       // Done - update status to finished
@@ -406,7 +406,7 @@ public class UnionAnalyzer {
     val entityIds = repositoryFileRepository.findAllDonorIds(query, maxSetSize);
 
     val lookupType = entitySet.getType().toLookupType();
-    termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySet.isTransient());
+    termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, entitySet.isTransient());
 
     val count = entityIds.size();
     // Done - update status to finished
@@ -430,7 +430,7 @@ public class UnionAnalyzer {
     val lookupType = entitySet.getType().toLookupType();
 
     val repoList = (ArrayNode) entitySet.getFilters().path("file").path("repoName").path("is");
-    termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, repoList.get(0).asText());
+    termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, repoList.get(0).asText());
 
     val count = entityIds.size();
     // Done - update status to finished
@@ -470,7 +470,7 @@ public class UnionAnalyzer {
 
   public List<String> retriveListItems(@NonNull final EntitySet entityList) {
     val lookupTypeName = entityList.getType().toLookupType().getName();
-    val query = client.prepareGet(TermsLookupService.TERMS_LOOKUP_INDEX_NAME,
+    val query = client.prepareGet(TermsLookupRepository.TERMS_LOOKUP_INDEX_NAME,
         lookupTypeName, entityList.getId().toString());
 
     val response = query.execute().actionGet();
@@ -493,7 +493,7 @@ public class UnionAnalyzer {
     val intersectionUnits = unionDefinition.getIntersection();
     for (val mustId : intersectionUnits) {
       val mustTerms =
-          TermsLookupService.createTermsLookupFilter("_id", TermsLookupService.TermLookupType.DONOR_IDS, mustId);
+          TermsLookupRepository.createTermsLookupFilter("_id", TermsLookupRepository.TermLookupType.DONOR_IDS, mustId);
       boolFilter.must(mustTerms);
     }
 
@@ -501,7 +501,7 @@ public class UnionAnalyzer {
     val exclusionUnits = unionDefinition.getExclusions();
     for (val notId : exclusionUnits) {
       val mustNotTerms =
-          TermsLookupService.createTermsLookupFilter("_id", TermsLookupService.TermLookupType.DONOR_IDS, notId);
+          TermsLookupRepository.createTermsLookupFilter("_id", TermsLookupRepository.TermLookupType.DONOR_IDS, notId);
       boolFilter.mustNot(mustNotTerms);
     }
     return boolFilter;

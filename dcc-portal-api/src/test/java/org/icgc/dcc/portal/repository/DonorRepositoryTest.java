@@ -40,8 +40,7 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.service.TermsLookupService;
-import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
+import org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType;
 import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -324,14 +323,14 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
   }
 
   private void setUpTermsLookup(final UUID id1, final UUID id2) {
-    val termsLookupService = new TermsLookupService(es.client());
+    val termsLookupRepository = new TermsLookupRepository(es.client());
     val lookupType = TermLookupType.DONOR_IDS;
 
     val donorSet1 = newArrayList("DO1", "DO3", "DO5", "DO7", "DO9");
-    termsLookupService.createTermsLookup(lookupType, id1, donorSet1);
+    termsLookupRepository.createTermsLookup(lookupType, id1, donorSet1);
 
     val donorSet2 = newArrayList("DO2", "DO4", "DO5", "DO6", "DO8");
-    termsLookupService.createTermsLookup(lookupType, id2, donorSet2);
+    termsLookupRepository.createTermsLookup(lookupType, id2, donorSet2);
   }
 
 }
