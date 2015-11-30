@@ -213,7 +213,7 @@ IcgcMutationAdapter.prototype.getData = function (args) {
         var chunkEnd = parseInt((chunks[i] * this.featureCache.chunkSize) + this.featureCache.chunkSize - 1);
         updateEnd = false;
       }
-console.log(args.chromosome);
+
       if (chunks[i + 1] != null) {
         if (chunks[i] + 1 == chunks[i + 1]) {
           updateEnd = true;
