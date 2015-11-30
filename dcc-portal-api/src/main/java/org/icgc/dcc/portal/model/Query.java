@@ -28,6 +28,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.icgc.dcc.portal.util.ObjectNodeDeserializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
@@ -36,6 +37,7 @@ import com.google.common.collect.ImmutableList;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Accessors(chain = true)
 public class Query {
 

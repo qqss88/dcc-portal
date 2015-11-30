@@ -110,7 +110,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           title:'Sequence',
           height: 30,
           visibleRegionSize: 200,
-          renderer: new SequenceRenderer({tooltipContainerID: '#gv-application'}),
+          renderer: new SequenceRenderer({tooltipContainerID: '#genomic'}),
           dataAdapter: new SequenceAdapter({
             category: 'genomic',
             subCategory: 'region',
@@ -150,7 +150,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           minTranscriptRegionSize: 300000,
           height: 100,
           renderer: new GeneRenderer({
-            tooltipContainerID: '#gv-application',
+            tooltipContainerID: '#genomic',
             handlers: {
               'feature:click': function (e) {
                 var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
@@ -177,7 +177,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           height: 100,
 
           renderer: new FeatureRenderer({
-            tooltipContainerID: '#gv-application',
+            tooltipContainerID: '#genomic',
             label: function (f) {
               return f.id;
             },
@@ -411,7 +411,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           title:'Sequence',
           height: 30,
           visibleRegionSize: 200,
-          renderer: new SequenceRenderer({tooltipContainerID: '#gv-application'}),
+          renderer: new SequenceRenderer({tooltipContainerID: '#genomic'}),
           dataAdapter: new SequenceAdapter({
             category: 'genomic',
             subCategory: 'region',
@@ -422,7 +422,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         genomeViewer.addTrack(tracks.sequence);
 
         var featureGeneType = _.extend({}, FEATURE_TYPES.gene);
-        var icgcGeneOverviewRenderer = new FeatureRenderer(_.extend(featureGeneType, {tooltipContainerID: '#gv-application'}));
+        var icgcGeneOverviewRenderer = new FeatureRenderer(_.extend(featureGeneType, {tooltipContainerID: '#genomic'}));
 
         icgcGeneOverviewRenderer.on({
           'feature:click': function (e) {
@@ -453,7 +453,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           minTranscriptRegionSize: 300000,
           height: 100,
           renderer: new GeneRenderer({
-            tooltipContainerID: '#gv-application',
+            tooltipContainerID: '#genomic',
             handlers: {
               'feature:click': function (e) {
                 var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
@@ -480,7 +480,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           height: 100,
 
           renderer: new FeatureRenderer({
-            tooltipContainerID: '#gv-application',
+            tooltipContainerID: '#genomic',
             label: function (f) {
               return f.id;
             },
