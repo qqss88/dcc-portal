@@ -62,6 +62,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -96,11 +102,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -161,13 +162,13 @@ public class DonorRepository implements Repository {
 
   private static final int SCAN_BATCH_SIZE = 1000;
 
-  private final static TimeValue KEEP_ALIVE = new TimeValue(10000);
+  private static final Jql2PqlConverter CONVERTER = Jql2PqlConverter.getInstance();
+  private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private final Client client;
   private final String index;
   private final String repoIndexName;
   private final QueryEngine queryEngine;
-  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   @Autowired
   DonorRepository(Client client, IndexModel indexModel, QueryEngine queryEngine,
@@ -182,17 +183,25 @@ public class DonorRepository implements Repository {
   @Override
   @NonNull
   public SearchResponse findAllCentric(Query query) {
-    val pql = converter.convert(query, DONOR_CENTRIC);
-    val request = queryEngine.execute(pql, DONOR_CENTRIC);
+    val pql = CONVERTER.convert(query, DONOR_CENTRIC);
+    log.info("pql of findAllCentric is: {}", pql);
 
-    log.info("Request of Donor findAllCentric is: '{}'.", request);
+    val request = queryEngine.execute(pql, DONOR_CENTRIC);
+    val response = request.getRequestBuilder().execute().actionGet();
+
+    return response;
+  }
+
+  @NonNull
+  public SearchResponse findAllCentric(StatementNode pqlAst) {
+    val request = queryEngine.execute(pqlAst, DONOR_CENTRIC);
     val response = request.getRequestBuilder().execute().actionGet();
 
     return response;
   }
 
   private SearchRequestBuilder projectDonorCountSearch(Query query, String facetName) {
-    val pqlAst = parse(converter.convert(query, DONOR_CENTRIC));
+    val pqlAst = parse(CONVERTER.convert(query, DONOR_CENTRIC));
     pqlAst.setFacets(facets(facetName));
 
     val result = queryEngine.execute(pqlAst, DONOR_CENTRIC).getRequestBuilder().setNoFields();
@@ -428,7 +437,7 @@ public class DonorRepository implements Repository {
   public long count(Query query) {
     log.info("Converting {}", query.getFilters());
 
-    val pql = converter.convertCount(query, DONOR_CENTRIC);
+    val pql = CONVERTER.convertCount(query, DONOR_CENTRIC);
 
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     return request.getRequestBuilder().setSearchType(COUNT).execute().actionGet().getHits().getTotalHits();
@@ -440,7 +449,7 @@ public class DonorRepository implements Repository {
 
     for (val query : queries.values()) {
       log.info("Converting {}", query.getFilters());
-      val pql = converter.convertCount(query, DONOR_CENTRIC);
+      val pql = CONVERTER.convertCount(query, DONOR_CENTRIC);
       val request = queryEngine.execute(pql, DONOR_CENTRIC);
       search.add(request.getRequestBuilder());
     }
@@ -455,7 +464,7 @@ public class DonorRepository implements Repository {
       for (val innerQuery : nestedQuery.values()) {
         log.info("Nested converting {}", innerQuery);
 
-        val pql = converter.convertCount(innerQuery, DONOR_CENTRIC);
+        val pql = CONVERTER.convertCount(innerQuery, DONOR_CENTRIC);
         val request = queryEngine.execute(pql, DONOR_CENTRIC);
 
         search.add(request.getRequestBuilder());
@@ -515,7 +524,7 @@ public class DonorRepository implements Repository {
     // TODO: Now assume 5000 ids at least
     Set<String> donorIds = newHashSetWithExpectedSize(5000);
 
-    val pql = converter.convert(query, DONOR_CENTRIC);
+    val pql = CONVERTER.convert(query, DONOR_CENTRIC);
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     val requestBuilder = request.getRequestBuilder()
         .setSearchType(SCAN)

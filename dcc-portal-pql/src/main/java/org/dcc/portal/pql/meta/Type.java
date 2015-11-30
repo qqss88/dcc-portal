@@ -32,7 +32,8 @@ public enum Type {
   OBSERVATION_CENTRIC("observation-centric", "observation"),
   PROJECT("project", "project"),
   REPOSITORY_FILE("file-centric", "file"),
-  GENE_SET("gene-set", "gene-set");
+  GENE_SET("gene-set", "gene-set"),
+  DRUG("drug-centric", "drug");
 
   @NonNull
   private final String id;

@@ -25,11 +25,20 @@ function IcgcMutationAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = 'http://localhost:8080/api/browser';
+  this.host = window.$icgcApp.getQualifiedHost() + '/api/browser';
   this.gzip = true;
 
   this.params = {};
+
+
+  this.setSpecies = function(species) {
+    this.species = species;
+  };
+
   if (args != null) {
+
+    this.chromosomeLimitMap = args.chromosomeLimitMap || {};
+
     if (args.host != null) {
       this.host = args.host;
     }
@@ -72,7 +81,7 @@ function IcgcMutationAdapter(args) {
       }
     }
   }
-  this.featureCache = new FeatureCache(argsFeatureCache);
+  this.featureCache = new FileFeatureCache(argsFeatureCache);
 }
 
 IcgcMutationAdapter.prototype.clearData = function () {
@@ -209,13 +218,13 @@ IcgcMutationAdapter.prototype.getData = function (args) {
         if (chunks[i] + 1 == chunks[i + 1]) {
           updateEnd = true;
         } else {
-          var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+          var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
           queries.push(query);
           updateStart = true;
           updateEnd = true;
         }
       } else {
-        var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+        var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
         queries.push(query);
         updateStart = true;
         updateEnd = true;

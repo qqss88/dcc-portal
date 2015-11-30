@@ -30,7 +30,9 @@ angular.module('icgc.ui', [
   'icgc.ui.tooltip',
   'icgc.ui.scroll',
   'icgc.ui.fileUpload',
-  'icgc.ui.badges'
+  'icgc.ui.badges',
+  'icgc.ui.copyPaste',
+  'icgc.ui.popover'
 ]);
 
 
@@ -128,7 +130,7 @@ angular.module('app.ui.hidetext', []).directive('hideText', function () {
     link: function (scope, element, attrs) {
       var previous, next;
 
-      scope.limit = 250;
+      scope.limit = attrs.textLimit || 250;
 
       previous = attrs.text;
       next = attrs.text.length > scope.limit ? attrs.text.slice(0, scope.limit) + '...' : attrs.text;
@@ -240,8 +242,529 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
     }
   };
 });
+//Mike
+angular.module('icgc.ui.popover', [])
+  .directive('popover', function ($sce) {
+    return {
+      restrict: 'AE',
+      transclude: true,
+      replace: true,
+      scope: {
+        'popoverAnchorText': '@popoverAnchorLabel',
+        'popoverTitle': '@',
+        'assistIconClass': '@popoverAssistIconClass',
+        'assistIconPositionBefore': '@popoverAssistIconPositionBefore',
+        'isOpen': '=popoverIsOpen'
+      },
+      templateUrl: '/scripts/ui/views/popover.html',
+      link: function (scope, element) {
+
+        function Popover(id) {
+          var _popoverEl = element.find(id),
+              _outerBorder = _popoverEl.find('.popover-inner-container-border'),
+              _popoverContent = _popoverEl.find('.popover-inner-container'),
+              _self = this,
+              _containerHoverCount = 0,
+              _timeout_in_ms = 700;
+
+          function _init() {
+
+            _popoverEl.hover(function() {
+              _self.show();
+            },
+            function() {
+              _self.hide();
+            });
+
+          }
+
+          function _popoverStatusCheck() {
+            setTimeout(_popoverShow, _timeout_in_ms);
+          }
+
+          function _popoverShow(shouldShow) {
+
+            if (shouldShow === true) {
+              _popoverEl.show();
+              _outerBorder.fadeIn('fast');
+              _popoverContent.fadeIn('fast');
+            }
+            else if (_containerHoverCount === 0) {
+              _popoverContent.fadeOut('fast');
+              _outerBorder.fadeOut('fast', function() {
+                _popoverEl.hide();
+              });
+
+            }
+          }
 
 
+          _init();
+
+
+          // Popover Public API
+          this.show = function() {
+            _containerHoverCount++;
+
+            _popoverShow(true);
+            _popoverStatusCheck();
+          };
+
+          this.hide = function() {
+            _containerHoverCount  = Math.max(0, _containerHoverCount - 1 );
+            _popoverStatusCheck();
+          };
+
+          this.popoverTimeout = function(timeoutInMS) {
+
+            if (arguments.length > 0) {
+              _timeout_in_ms = timeoutInMS;
+            }
+
+            return _timeout_in_ms;
+          };
+
+
+        }
+      
+        function _init() {
+          var popover = new Popover('.popover-outer-container');
+          scope.title = $sce.trustAsHtml(scope.popoverTitle);
+          scope.anchorText = $sce.trustAsHtml(scope.popoverAnchorText); 
+          scope.isAssistIconBeforeLabel = scope.assistIconPositionBefore === 'true' ? true : false;
+
+
+          element.hover(
+            function() {
+              popover.show();
+            },
+            function() {
+              setTimeout(function() {
+                popover.hide();
+              }, popover.popoverTimeout());
+            }
+          );
+
+        }
+
+
+
+
+        _init();
+      }
+  };
+});
+
+angular.module('icgc.ui.copyPaste', [])
+  .provider('copyPaste', function () {
+    var _provider = this,
+        _zeroClipPath = '//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.swf',
+        _copyPasteConfig = {};
+    
+    // Getter/Setter for flash fallback
+    _provider.zeroClipboardPath = function (path) {
+
+      if (typeof path !== 'string') {
+        return _zeroClipPath;
+      }
+      
+      _zeroClipPath = path;
+    }; 
+    
+    _provider.config = function (config) {
+      
+      if (! angular.isObject(config)) {
+        return _copyPasteConfig;
+      }
+      
+      _copyPasteConfig = config;
+    };
+    
+    
+    _provider.$get = function () {
+      return _provider;
+    };
+     
+  })
+  .run(function (copyPaste) {
+    
+    if (! angular.isDefined(window.ZeroClipboard) ) {
+     console.warn('The copyPaste module depends on ZeroClipboard Version 2.2.0+.' +
+        '\nPlease include this dependency!');
+     return;
+    }
+    
+    var zeroClipboardPathConfig = {
+        swfPath: copyPaste.zeroClipboardPath(),
+        trustedDomains: ['*'],
+        allowScriptAccess: 'always',
+        forceHandCursor: true,
+        debug: true
+    };
+    
+    // Configure ZeroClipboard in case we need to use it later.
+    ZeroClipboard.config(angular.extend(zeroClipboardPathConfig, copyPaste.config));
+  })
+  .directive('copyToClip', function ($document) {
+
+        return {
+          restrict: 'A',
+          transclude: true,
+          template: '<div class="copy-to-clip-container">' +
+                      '<div class="copy-to-clip-message-container">' +
+                        '<div class="copy-to-clip-message-content"></div>' +
+                        '<div class="arrow"></div>' +
+                      '</div>' +
+                      '<div class="copy-to-clip-content" data-ng-transclude></div>' +
+                    '</div>',         
+            scope: {
+                onCopy: '&',
+                onError: '&',
+                copyData: '=',
+                onCopyFocusOn: '@',
+                onCopySuccessMessage: '@',
+                onHoverMessage: '@'
+            },
+            link: function (scope, element, attrs) {
+
+             function _selectText() {
+
+                var textEl = _focusOnCopySelector[0],
+                    range = null;
+
+                if (window.getSelection) {  // The cool browsers...
+                  var selection = window.getSelection();
+                  range = _document.createRange();
+                  range.selectNodeContents(textEl);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }
+                else if (_document.body.createTextRange) { // Fail... M$
+                  range = _document.body.createTextRange();
+                  range.moveToElementText(textEl);
+                  range.select();
+                }
+
+             }
+              
+             function _focusCopyEl() {
+               if (! _focusOnCopySelector || _focusOnCopySelector.length === 0) {
+                 return;
+               }
+
+               _focusOnCopySelector.focus();
+
+              if (_focusOnCopySelector.is(':input')) {
+                _focusOnCopySelector[0].setSelectionRange(0, _focusOnCopySelector.val().length);
+              }
+              else {
+                _selectText();
+              }
+
+             }
+
+              function _hideTipMessage() {
+                if (!_showCopyTips || _showingCopiedStatusMessage) {
+                  return;
+                }
+
+                _messageBubble.fadeOut('fast');
+              }
+
+              function _showTipMessage(isSuccess, overrideMessage, timeoutInMS) {
+
+                // Status copy messages take priority over other messages
+                if (!_showCopyTips || _showingCopiedStatusMessage) {
+                  return;
+                }
+                
+                var msg = '',
+                    copyPasteCommandKey = 'Ctrl',
+                    copyCommandAlphaKey = 'c',
+                    pasteCommandAlphaKey = 'v';  
+                    
+                
+                
+                if (typeof overrideMessage === 'string') { // We are using this as a tooltip/status notifier
+                  msg = overrideMessage;
+                }
+                else { // Or else we handle success/failure of copy
+                  switch (_browserOSPlatform) {
+                    case 'mac':
+                      copyPasteCommandKey = '&#x2318;';
+                      break;
+                    default:
+                      break;
+                  }
+
+                  _showingCopiedStatusMessage = true;
+
+                  if (isSuccess) {
+                    msg = scope.onCopySuccessMessage ? scope.onCopySuccessMessage : '';
+
+
+                    if (! msg) {
+                      msg += 'Press ' + copyPasteCommandKey +
+                             '-' + pasteCommandAlphaKey + ' to paste.';
+                    }
+                  }
+                  else if (isSuccess) {
+                    msg = 'Press' + copyPasteCommandKey + '-' + copyCommandAlphaKey +
+                    ' to copy and ' + copyPasteCommandKey + '-' +
+                    pasteCommandAlphaKey + ' to paste.';
+                  }
+                }
+               
+                _messageConfirmationBody.html(msg);
+                  
+                _messageBubble.css({ 
+                    top: - (_messageBubble.outerHeight() + 3)
+                });
+
+                _messageBubble.fadeIn('fast');
+              
+              
+                if (_previousMessageTimeout !== null) {
+                  clearTimeout(_previousMessageTimeout);
+                }
+              
+                _previousMessageTimeout = setTimeout(function () {
+                  _messageBubble.fadeOut('fast');
+                  _previousMessageTimeout = null;
+                  _showingCopiedStatusMessage = false;
+                }, timeoutInMS || 2500);
+              }
+              
+              //
+              function _createTextArea(text) {
+
+                if (!_textArea) {
+                  _textArea = _document.createElement('textarea');
+                  _textArea.style.position = 'absolute';
+                  _textArea.style.top = '-10000px';
+                  _textArea.style.left = '0px';
+                  _documentBody.appendChild(_textArea);
+                }  
+                  
+                _textArea.textContent = text;
+
+                return _textArea;
+              }
+                
+          
+              //
+              function _copyTextArea(textArea) {
+                   
+                  // Set inline style to override css styles
+                  _documentBody.style.webkitUserSelect = 'initial';
+
+                  var selection = _document.getSelection();
+                  selection.removeAllRanges();
+                  textArea.select();
+
+                  if (! _document.execCommand('copy')) {
+                      throw new Error('Failure to perform copy using built-in copy-and-paste!');
+                  }
+                  
+                  selection.removeAllRanges();
+
+                  // Reset inline style
+                  _documentBody.style.webkitUserSelect = '';
+              }
+                
+              //
+              function _initCopyZeroClipboard() {
+
+                if (_zeroClipBoardClient !== null) {
+                  return;     
+                }
+
+                var isNativeCopySupported = false;
+               
+                _zeroClipBoardClient = new ZeroClipboard(_targetElement);
+                
+                _zeroClipBoardClient.on({
+                  'copy': function (e) {
+                    e.clipboardData.setData(_dataMimeType, scope.copyData);
+                    _focusCopyEl();
+                  },
+                  'beforecopy': function () {
+                    // In our listener look to see if we can use the native copy
+                    if (_testNativeCopy()) {
+                      isNativeCopySupported = true;
+                    }
+                  },
+                  'aftercopy': function () { 
+                    // Execute this in the angular context...
+                    scope.$apply(scope.onCopy);
+                    _showTipMessage(true);
+                    
+                    // After the first copy if native copy is supported
+                    // kill this client
+                    if (isNativeCopySupported) {
+                      setTimeout(function () { 
+                        _zeroClipBoardClient.destroy();
+                        _zeroClipBoardClient = null;
+                        _initNativeCopyClipboard();
+                      }, 10);
+                    }                 
+                  },
+                  'ready': function () {
+                    // We are good to go!
+                    
+                  },
+                  'error': function (e) {
+                    // Something bad happened
+                     if (scope.onError) {
+                        scope.onError({error: e});
+                     }
+                  }
+
+                });
+          
+              }
+              
+              function _initNativeCopyClipboard() {
+                _targetElement.on('click', function (event) {
+                    
+                    event.stopPropagation();
+
+                    try {
+                      _copyText(scope.copyData);
+
+                      _focusCopyEl();
+
+                      if (scope.onCopy) {
+                        scope.onCopy();
+                      }
+
+                      _showTipMessage(true);
+
+                    }
+                    catch (e) {
+
+                      _showTipMessage(false);
+
+                      if (scope.onError) {
+                        scope.onError({ error: e });
+                      }
+                    }
+
+                  });
+              }
+                
+              //
+              function _copyText(text) {
+
+                try {
+                  _copyTextArea(_createTextArea(text));
+                }
+                catch (e) {
+                  // Remove the textarea we just created since we can't reuse it/
+                  _documentBody.removeChild(_textArea);
+                  _textArea = null;
+                  
+                  throw new Error('Failure to perform copy using native copy command!');
+                  
+                }
+                  
+              }
+              
+              //
+              function _testNativeCopy() {
+                var isNativeCopySupported = true;
+                
+                try {
+                  _copyTextArea(_createTextArea('.'));
+                }
+                catch (e) {
+                  isNativeCopySupported = false;
+                }
+                
+                return isNativeCopySupported;
+              }
+              
+              //
+              function _init() {
+ 
+                ////////////////////////////////////////////////////////////////
+                // Copy strategy
+                ////////////////////////////////////////////////////////////////
+                // 1. Load ZeroClipboard flash if it's supported. If native
+                //    copy is supported on the first copy it will fallback to 
+                //    it and destroy the flash movie being used. If not it will
+                //    continue to use it.
+                //
+                // 2. If flash is not supported it will try to use the native 
+                //    copy. If the native copy fails it will call the optional
+                //    onError method which can be passed into the directive
+                //    from a parent scope (controller).
+                ////////////////////////////////////////////////////////////////
+
+                element.addClass('copy-to-clip');
+
+                if (scope.onHoverMessage) {
+                  element.hover(
+                    function() {
+                      _showTipMessage(null, scope.onHoverMessage, 1500);
+                    },
+                    function() {
+                      _hideTipMessage();
+                    }
+                  );
+                }
+                
+                if (_zeroClipboardSupported) {
+                  _initCopyZeroClipboard();
+                }
+                else {
+                  _initNativeCopyClipboard();
+                }
+                
+                 if (_promptOnCopy) {
+                  _showTipMessage(null, 'Click here to copy to your clipboard.');
+                }
+                
+                // Destroy the ZeroClipboard Client if it exists...and remove listeners
+                scope.$on('$destroy', function () {
+                  if (_zeroClipBoardClient !== null) {
+                    _zeroClipBoardClient.destroy();
+                  }
+                  
+                  // Cleanup the textarea if it's there...
+                  if (_textArea !== null) {
+                    _documentBody.removeChild(_textArea);
+                  }
+                  
+                  _targetElement.unbind('click');
+                });
+              }
+              
+              
+              var _zeroClipBoardClient = null,
+                // Do some tests to see if we have a chance with Flash
+                _zeroClipboardSupported = !ZeroClipboard.isFlashUnusable(),
+                _document = $document[0],
+                _dataMimeType = attrs.mimeType || 'text/plain',
+                _documentBody = _document.body,
+                _textArea = null,
+                _showCopyTips = attrs.showCopyTips === 'false' ? false : true,
+                _promptOnCopy = attrs.promptOnCopy === 'true' ? true : false,
+                _targetElement = element.find('.copy-to-clip-content'),
+                _messageConfirmationBody = element.find('.copy-to-clip-message-content'),
+                _messageBubble = element.find('.copy-to-clip-message-container'),
+                _focusOnCopySelector = scope.onCopyFocusOn ? element.find(scope.onCopyFocusOn) : false,
+                _previousMessageTimeout = null,
+                _showingCopiedStatusMessage = false,
+                _browserOSPlatform = window.navigator.platform ?
+                  (navigator.platform.toLowerCase().indexOf('mac') >= 0 ? 'mac' : 'win') : 'win';
+              
+            
+              _init(); 
+                
+            }
+        };
+    });
 /**
  * Used in keyword search, should rename - DC
  */
@@ -283,27 +806,27 @@ angular.module('app.ui.toggle', []).directive('toggleParam', function (LocationS
   };
 });
 
-angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
+angular.module('icgc.ui.badges', []).directive('pcawgBadge', function () {
   return {
     restrict: 'E',
     replace: true,
     template: '<span class="badge pcawg-badge">PCAWG</span>'
   };
 })
-.directive('studyBadge', function() {
-  return {
-    restrict: 'E',
-    replace: true,
-    scope: {
-      study: '@',
-      text: '@'
-    },
-    template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div>' +
+  .directive('studyBadge', function () {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        study: '@',
+        text: '@'
+      },
+      template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div>' +
       '<div><span data-ng-if="!isPcawg">{{ text }}</span></div></div>',
-    link: function (scope) {
-      scope.isPcawg = (scope.study || '').toUpperCase() === 'PCAWG';
-      // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
-      scope.text = scope.text || scope.study;
-    }
-  };
-});
+      link: function (scope) {
+        scope.isPcawg = (scope.study || '').toUpperCase() === 'PCAWG';
+        // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
+        scope.text = scope.text || scope.study;
+      }
+    };
+  });

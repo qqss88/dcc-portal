@@ -37,7 +37,7 @@
     <meta name="fragment" content="!"/>
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title data-ng-bind-template="{{ AppCtrl.Page.title() }} :: ICGC Data Portal"></title>
+    <title data-ng-bind-template="{{ AppCtrl.Page.title() }} | ICGC Data Portal"></title>
     <meta name="description" content="ICGC Data Portal"/>
     <meta name="viewport" content="width=device-width"/>
 
@@ -126,7 +126,9 @@
 </div>
 <div class="wrap light ng-cloak">
     <login></login>
-    <header data-ng-include="'/scripts/common/views/header.html'"></header>
+    <header data-ng-controller="MainHeaderController as controller"
+      data-ng-include="'/scripts/common/views/header.html'">
+    </header>
     <div class="content transition-fade" data-ui-view></div>
     <div class="push"></div>
 </div>
@@ -162,6 +164,7 @@
 <script src="bower_components/angular-lodash/angular-lodash.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 <script src="bower_components/angularjs-toaster/toaster.js"></script>
+<script src="bower_components/zeroclipboard/dist/ZeroClipboard.js"></script>
 <!-- endbuild -->
 
 
@@ -176,6 +179,24 @@
 <script src="scripts/ui/table2CSV.js"></script>
 <!-- endbuild -->
 
+
+<!--  BAM iobio -->
+<!-- build:js scripts/bamiobio.min.js -->
+<script src="vendor/scripts/bamiobio/class.js"></script>
+<script src="vendor/scripts/bamiobio/rdp.js"></script>
+<script src="vendor/scripts/bamiobio/queue.min.js"></script>
+<script src="vendor/scripts/bamiobio/donut.d3.js"></script>
+<script src="vendor/scripts/bamiobio/histogram.d3.js"></script>
+<script src="vendor/scripts/bamiobio/histogramViewFinder.d3.js"></script>
+<script src="vendor/scripts/bamiobio/movingLine.d3.js"></script>
+<script src="vendor/scripts/bamiobio/nprogress.js"></script>
+<script src="vendor/scripts/bamiobio/bam.d3.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/bam.iobio.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/bam.js"></script>
+<script src="vendor/scripts/bamiobio/bam.iobio.js/bin.js"></script>
+<script src="vendor/scripts/bamiobio/binary.js"></script>
+<script src="vendor/scripts/bamiobio/flatui-checkbox.js"></script>
+<!-- endbuild -->
 
 <!-- Genome Viewer -->
 <!-- build:js scripts/genome-viewer-deps.1.min.js -->
@@ -208,6 +229,7 @@
 <script src="scripts/app.js"></script>
 <script src="scripts/common/common.js"></script>
 <script src="scripts/common/services.js"></script>
+<script src="scripts/common/header.js"></script>
 <script src="scripts/common/footer.js"></script>
 <script src="scripts/common/version.js"></script>
 <script src="scripts/common/notify.js"></script>
@@ -221,6 +243,7 @@
 <script src="scripts/common/portalfeature.js"></script>
 <script src="scripts/common/pcawg.js"></script>
 <script src="scripts/common/translator.js"></script>
+<script src="scripts/common/abridger.js"></script>
 <script src="scripts/common/pql/pqlparser.js"></script>
 <script src="scripts/common/pql/PqlQueryObjectService.js"></script>
 <script src="scripts/common/pql/PqlUtilService.js"></script>
@@ -253,9 +276,7 @@
 <script src="scripts/modules/projectmutationviewer/directive.js"></script>
 <script src="scripts/modules/venn23/venn23.js"></script>
 <script src="scripts/modules/pathwayviewer/pathways.js"></script>
-<script src="scripts/modules/pathwayviewer/renderer-utils.js"></script>
-<script src="scripts/modules/pathwayviewer/renderer.js"></script>
-<script src="scripts/modules/pathwayviewer/model.js"></script>
+<script src="scripts/modules/pathwayviewer/services.js"></script>
 <script src="scripts/modules/pathwayviewer/controller.js"></script>
 <script src="scripts/modules/pathwayviewer/directive.js"></script>
 <script src="scripts/keyword/keyword.js"></script>
@@ -263,6 +284,7 @@
 <script src="scripts/projects/projects.js"></script>
 <script src="scripts/donors/donors.js"></script>
 <script src="scripts/genes/genes.js"></script>
+<script src="scripts/compounds/compounds.js"></script>
 <script src="scripts/mutations/mutations.js"></script>
 <script src="scripts/genesets/services.js"></script>
 <script src="scripts/genesets/genesets.js"></script>
@@ -280,6 +302,7 @@
 <script src="scripts/repository/repository.js"></script>
 <script src="scripts/repository/routes.js"></script>
 <script src="scripts/repository/services.js"></script>
+<script src="scripts/repository/directives.js"></script>
 <script src="scripts/facets/facets.js"></script>
 <script src="scripts/facets/terms.js"></script>
 <script src="scripts/facets/current.js"></script>

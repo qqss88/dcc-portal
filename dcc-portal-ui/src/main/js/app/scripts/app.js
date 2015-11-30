@@ -44,9 +44,6 @@
           return _version;
         };
 
-        this.getVersion = function() {
-          return _version;
-        };
 
         this.getBasePathURL = function() {
           return  (_host ? '//' + _host : '') +
@@ -54,21 +51,11 @@
               (_context + '/v' + _version);
         };
 
-        this.getBasePathURL = function() {
-          return  (_host ? '//' + _host : '') +
-                  (_port ? ':' + _port : '')  +
-                  (_context + '/v' + _version);
-        };
-
         this.setDebugEnabled = function(isDebugEnabled) {
           _isDebugEnabled = isDebugEnabled;
           return this;
         };
 
-        this.setDebugEnabled = function(isDebugEnabled) {
-          _isDebugEnabled = isDebugEnabled;
-          return this;
-        };
 
         this.isDebugEnabled = function() {
           return _isDebugEnabled;
@@ -121,7 +108,7 @@
              provider = _angularInjector.get(dependencyName);
           }
           catch (e) {
-            console.error('Cannot find dependeny with name: ' + dependencyName);
+            console.error('Cannot find dependency with name: ' + dependencyName);
             provider = null;
           }
 
@@ -132,7 +119,15 @@
           return _APIInterface.setDebugEnabled(isAPIDebugEnabled);
         }
 
+        function __getQualifiedHost() {
+          var url = '';
 
+          if ( _isLocalUIRun === true ) {
+            url = window.location.protocol + '//' + _defaultDevHost + ':' + _defaultDevPort;
+          }
+
+          return url;
+        }
 
         ///////////////////////////////////////////////////////
         // Public API
@@ -177,6 +172,8 @@
         this.getAngularInjector = __getAngularInjector;
 
         this.getAngularProvider = __getAngularProvider;
+
+        this.getQualifiedHost = __getQualifiedHost;
 
 
       return this;
@@ -231,6 +228,7 @@
     'icgc.projects',
     'icgc.donors',
     'icgc.genes',
+    'icgc.compounds',
     'icgc.mutations',
     'icgc.advanced',
     'icgc.releases',
@@ -267,35 +265,75 @@
   // https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
   // modified for our needs
   module
-    .value('$anchorScroll', angular.noop)
-    .run(function($state, $stateParams, $window, $rootScope) {
-      function scroll() {
-        var state, offset, to;
-        state = $state.$current;
+    //.value('$anchorScroll', angular.noop)
+    .run(function($state, $location, $window, $timeout, $rootScope) {
 
-        // Prevents browser window from jumping around while navigating analyses
-        if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
+      var _scrollTimeoutHandle = null;
+
+      function scroll() {
+         //var state = $state.$current, offset, to;
+        
+        
+
+        function _doInlineScroll(hash) {
+          // Give angular some time to do digests then check for a
+          // in page scroll
+          
+          var match = hash ? hash.match(/^!([\w\-]+)$/i) : false,
+            to = 0,
+            HEADER_HEIGHT = 49 + 10, // Height of header + some nice looking offset.
+            el = null;
+          
+          if (match && match.length > 1) {
+            hash = match[1];
+            //$location.hash(hash);
+            to = - HEADER_HEIGHT;
+          }
+
+          if (hash) {
+             el = jQuery('#' + hash);
+          }
+          
+          if (el && el.length > 0) {
+            to += Math.round(parseFloat(el.offset().top));
+            to = Math.max(0, to);
+          }
+
+
+
+          jQuery('body,html').scrollTop( to );
+        }
+        
+        /////
+        
+        
+        // Prevents browser window from jumping around while navigating analysis
+        if (['analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
 
+        var _hash = $location.hash();
 
-        // Default behaviour is to scroll to top
-        // Any string that isn't [top,none] is treated as a jq selector
-        // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
-        if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
-          $window.scrollTo(0, 0);
-        } else {
-          offset = jQuery(state.scrollTo).offset();
-          if (offset) {
-            to = offset.top - 40;
-            jQuery('body,html').animate({ scrollTop: to }, 800);
-          }
+        // Prevent the timeout from being fired multiple times if called before previous
+        // timeout is complete. Make the last request the most valid.
+        if (_scrollTimeoutHandle) {
+          clearTimeout(_scrollTimeoutHandle);
         }
+
+        _scrollTimeoutHandle = setTimeout(function () {
+            _doInlineScroll(_hash);
+            _scrollTimeoutHandle = null;
+          }, 500);
 
       }
 
       $rootScope.$on('$viewContentLoaded', scroll);
       $rootScope.$on('$stateChangeSuccess', scroll);
+      
+      // Add UI Router Debug if there is a fatal state change error
+      $rootScope.$on('$stateChangeError', function () { 
+        console.error('State Change Error Occurred. Error occurred with arguments: ', arguments);
+      });
     });
 
 
@@ -313,8 +351,14 @@
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
-                          markdownConverterProvider, localStorageServiceProvider, API) {
-
+                          markdownConverterProvider, localStorageServiceProvider, API,
+    copyPasteProvider) {
+                            
+    // Let copyPasteProvider know where the flash app for copying and pasting is
+    var copyPastePath = window.$ICGC_DEV_CONFIG ? null : 'bower_components/zeroclipboard/dist/ZeroClipboard.swf';
+    copyPasteProvider.zeroClipboardPath(copyPastePath);
+    
+    
     // Disables debugging information
     $compileProvider.debugInfoEnabled(false);
 

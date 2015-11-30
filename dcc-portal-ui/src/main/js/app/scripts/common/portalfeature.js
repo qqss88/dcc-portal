@@ -3,6 +3,7 @@
     
     function PortalFeatureConstructor(features, $state, LocationService, Settings) {
       
+
       function _enable(feature) {
         if (features.hasOwnProperty(feature) === false) { return; }
         features[feature] = true;
@@ -10,7 +11,7 @@
           $state.go($state.current.name, {}, {reload: true});
         }
       }
-  
+
       function _disable(feature) {
         if (features.hasOwnProperty(feature) === false) { return; }
         features[feature] = false;
@@ -18,6 +19,7 @@
           $state.go($state.current.name, {}, {reload: true});
         }
       }
+
   
       function init(settingsJson) {
         for (var featureName in settingsJson.featureFlags) {
@@ -28,24 +30,24 @@
           }
         }
       }
-  
+
       // Allow features to be turned on via query param on application load
+
       Settings.get().then(init);
-    
-  
+
       this.get = function(s) {
         if (features.hasOwnProperty(s) === false) { return false; }
         return features[s];
       };
-  
+
       this.enable = function(s) {
         _enable(s);
       };
-  
+
       this.disable = function(s) {
         _disable(s);
       };
-  
+
       this.list = function() {
         return features;
       };
@@ -60,13 +62,13 @@
    */
   angular.module('icgc.portalfeature', [])
     .provider('PortalFeature', function() {
-       
+
        var _enabledFeatures = {
-          AUTH_TOKEN: false,
-          ICGC_CLOUD: false,
-          SOFTWARE_PAGE: false
+          AUTH_TOKEN: true,
+          ICGC_CLOUD: true,
+          SOFTWARE_PAGE: true
        };
-       
+
       this.hasFeature = function(featureID) {
         return _.get(_enabledFeatures, featureID, false);
       };
@@ -76,6 +78,6 @@
       }];
   });
 
-  
-    
+
+
 })();

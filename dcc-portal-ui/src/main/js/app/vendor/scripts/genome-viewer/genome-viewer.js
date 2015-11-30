@@ -27278,11 +27278,11 @@ function GeneTrack(args) {
 
 
 GeneTrack.prototype.clean = function() {
-    //    console.time("-----------------------------------------empty");
+        console.time("-----------------------------------------empty");
     while (this.svgCanvasFeatures.firstChild) {
         this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
     }
-    //    console.timeEnd("-----------------------------------------empty");
+        console.timeEnd("-----------------------------------------empty");
     this._clean();
 };
 
@@ -27836,8 +27836,8 @@ AlignmentRenderer.prototype.render = function (response, args) {
 
                 $(featureGroup).qtip({
                     content: {text: tooltipText, title: tooltipTitle},
-                    position: {target: "mouse", adjust: {x: 25, y: 15}},
-                    style: {width: 300, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                    position: { my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: -25, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+                    style: {tip: { corner: true }, width: 300, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                     show: 'mouseenter',
                     hide: 'mousedown mouseup mouseleave'
                 });
@@ -27898,6 +27898,8 @@ AlignmentRenderer.prototype.render = function (response, args) {
         var mateColor = mateSettings.getColor(mate, _this.region.chromosome);
         var readStrand = readSettings.getStrand(read);
         var matestrand = mateSettings.getStrand(mate);
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
+        var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         if (insertSizeMin != 0 && insertSizeMax != 0) {
             if (Math.abs(read.inferredInsertSize) > insertSizeMax) {
@@ -27996,8 +27998,8 @@ AlignmentRenderer.prototype.render = function (response, args) {
 
                 $(readEls).qtip({
                     content: {text: readSettings.getTipText(read), title: readSettings.getTipTitle(read)},
-                    position: {target: "mouse", adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                    style: {width: 280, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                    position: { my: 'top center', at: 'bottom center', target: $(readEls), adjust: {x: -25, y: 0, resize:true} /*, viewport: $(window) */, effect: false},
+                    style: { tip: { corner: true }, width: 280, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                     show: 'click',
                     hide: 'click mouseleave'
                 });
@@ -28012,8 +28014,8 @@ AlignmentRenderer.prototype.render = function (response, args) {
                 });
                 $(mateEls).qtip({
                     content: {text: mateSettings.getTipText(mate), title: mateSettings.getTipTitle(mate)},
-                    position: {target: "mouse", adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                    style: {width: 280, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                    position: { my: 'top center', at: 'bottom center', target: $(mateEls), adjust: {x: -25, y: 0, resize:true} /*, viewport: $(window) */, effect: false},
+                    style: { tip: { corner: true }, width: 280, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                     show: 'click',
                     hide: 'click mouseleave'
                 });
@@ -28547,8 +28549,8 @@ FeatureClusterRenderer.prototype.render = function (features, args) {
                     }
                 }
             },
-            position: {target: 'mouse', adjust: {x: 25, y: 15}},
-            style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+            position: { my: 'top center', at: 'bottom center', target: $(rect), adjust: {x: -25, y: 0, resize:true}},
+            style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
             show: {delay: 300},
             hide: {delay: 300}
         });
@@ -28655,6 +28657,8 @@ FeatureRenderer.prototype.render = function (features, args) {
         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
+        var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         //get feature genomic information
         var start = feature.start;
@@ -28723,8 +28727,8 @@ FeatureRenderer.prototype.render = function (features, args) {
                     $(featureGroup).qtip({
                         content: {text: tooltipText, title: tooltipTitle},
 //                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
-                        position: {target: "mouse", adjust: {x: 25, y: 15}},
-                        style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                        position: {my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: -25, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+                        style: { tip: { corner: true },  width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                         show: {delay: 300},
                         hide: {delay: 300}
                     });
@@ -28830,6 +28834,8 @@ GeneRenderer.prototype.render = function (features, args) {
         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
+        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
+        var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
 
         //get feature genomic information
@@ -28917,8 +28923,8 @@ GeneRenderer.prototype.render = function (features, args) {
                 $(featureGroup).qtip({
                     content: {text: tooltipText, title: tooltipTitle},
                     // position: {target: "mouse", adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                    position: {target: "mouse", adjust: {x: 25, y: 15}},
-                    style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                    position: {my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+                    style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                     show: {delay: 300},
                     hide: {delay: 300}
                 });
@@ -28953,6 +28959,8 @@ GeneRenderer.prototype.render = function (features, args) {
                         var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(transcript) : _this.tooltipTitle;
                         var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(transcript) : _this.tooltipText;
                         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(transcript) : _this.infoWidgetId;
+                        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
+                        var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
                         //  se resta el trozo del final del gen hasta el principio del transcrito y se le suma el texto del transcrito
                         // var svgLabelWidth = _this.getLabelWidth(label, args);
@@ -28992,8 +29000,8 @@ GeneRenderer.prototype.render = function (features, args) {
                         $(transcriptGroup).qtip({
                             content: {text: tooltipText, title: tooltipTitle},
                             // position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                            position: {target: "mouse", adjust: {x: 25, y: 15}},
-                            style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                            position: {my: 'top center', at: 'bottom center', target: $(transcriptGroup), adjust: {x: 25, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+                            style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                             show: {delay: 300},
                             hide: {delay: 300}
                         });
@@ -29329,6 +29337,9 @@ SequenceRenderer.prototype._paintSequenceChunk = function (chunk, args) {
     var start = chunk.start;
     var seqStart = chunk.start;
     var seqString = chunk.sequence;
+    var tooltipContainerID = this.tooltipContainerID || '#genomic';
+    var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
+
 
     for (var i = 0; i < seqString.length; i++) {
         var x = args.pixelPosition + middle - ((args.position - start) * args.pixelBase);
@@ -29343,8 +29354,8 @@ SequenceRenderer.prototype._paintSequenceChunk = function (chunk, args) {
         text.textContent = seqString.charAt(i);
         $(text).qtip({
             content: seqString.charAt(i) + " " + (seqStart + i).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")/*+'<br>'+phastCons[i]+'<br>'+phylop[i]*/,
-            position: {target: "mouse", adjust: {x: 25, y: 15}},
-            style: {width: true, classes: this.toolTipfontClass + ' qtip-light qtip-shadow'},
+            position: {my: 'top center', at: 'bottom center', target: $(text), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+            style: { tip: { corner: true }, width:true, classes: this.toolTipfontClass+' qtip-light qtip-shadow'},
             show: {delay: 300},
             hide: {delay: 300}
         });
@@ -29748,6 +29759,8 @@ VcfMultisampleRenderer.prototype._drawFeatureMultiSample = function (feature, ar
     var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
     var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
     var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
+    var tooltipContainerID = _this.tooltipContainerID || '#genomic';
+    var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
     //get feature genomic information
     var start = feature.start;
@@ -29866,8 +29879,8 @@ VcfMultisampleRenderer.prototype._drawFeatureMultiSample = function (feature, ar
     $(featureGroup).qtip({
         content: {text: tooltipText + '<br>' + feature.samples[lastSampleIndex], title: tooltipTitle},
 //                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
-        position: {target: "mouse", adjust: {x: 25, y: 15}},
-        style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+        position: {my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+        style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
         show: {delay: 300},
         hide: {delay: 300}
     });

@@ -42,6 +42,24 @@ function IcgcMutationTrack(args) {
   _.extend(this, args);
 }
 
+
+IcgcMutationTrack.prototype.initializeDom = function(targetId) {
+  this._initializeDom(targetId);
+
+  this.main = SVG.addChild(this.contentDiv, 'svg', {
+    'class': 'trackSvg',
+    'x': 0,
+    'y': 0,
+    'width': this.width
+  });
+  this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+    'class': 'features',
+    'x': -this.pixelPosition,
+    'width': this.svgCanvasWidth
+  });
+  this.updateHeight();
+};
+
 IcgcMutationTrack.prototype.render = function (targetId) {
   var _this = this;
   this.initializeDom(targetId);
@@ -78,12 +96,21 @@ IcgcMutationTrack.prototype.render = function (targetId) {
   jQuery('body').append(this.modalDiv);
 };
 
+IcgcMutationTrack.prototype.clean = function() {
+  //    console.time("-----------------------------------------empty");
+  while (this.svgCanvasFeatures.firstChild) {
+    this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+  }
+  //    console.timeEnd("-----------------------------------------empty");
+  this._clean();
+};
+
 IcgcMutationTrack.prototype.draw = function () {
   this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
   this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
 
   this.updateHistogramParams();
-  this.cleanSvg();
+  this.clean();
 
   if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
     this.setLoading(true);
@@ -94,9 +121,9 @@ IcgcMutationTrack.prototype.draw = function () {
       histogram: this.histogram,
       interval: this.interval
     });
-    this.invalidZoomText.setAttribute('visibility', 'hidden');
+    //this.invalidZoomText.setAttribute('visibility', 'hidden');
   } else {
-    this.invalidZoomText.setAttribute('visibility', 'visible');
+    //this.invalidZoomText.setAttribute('visibility', 'visible');
   }
 };
 

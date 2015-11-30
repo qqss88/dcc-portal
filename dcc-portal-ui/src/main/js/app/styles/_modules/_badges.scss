@@ -74,6 +74,14 @@ h1 {
   content: "S";
 }
 
+.t_badge__compound {
+  background: $compound;
+}
+
+.t_badge__compound:after {
+  content: "C";
+}
+
 .t_badge__file {
   background: $file;
 }
@@ -108,6 +116,10 @@ h1 {
 
 .t_badge__download {
   background: $cyan;
+}
+
+.t_badge__data_repositories {
+  background: $repositories;
 }
 
 .t_badge__q {

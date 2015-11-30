@@ -33,10 +33,22 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models']);
+  function ensureArray (array) {
+    return _.isArray (array) ? array : [];
+  }
+  function ensureString (string) {
+    return _.isString (string) ? string.trim() : '';
+  }
+
+  function caseInsensitivelyContains (word, partial) {
+    return _.contains (word.toUpperCase(), partial.toUpperCase());
+  }
+
+
+  var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models', 'icgc.common.text.utils']);
 
   module.controller('KeywordController',
-    function ($scope, Page, LocationService, debounce, Keyword) {
+    function ($scope, Page, LocationService, debounce, Keyword, RouteInfoService, Abridger) {
       var pageSize;
 
       $scope.from = 1;
@@ -46,6 +58,8 @@
       $scope.type = LocationService.getParam('type') || 'all';
       $scope.isBusy = false;
       $scope.isFinished = false;
+      $scope.dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+      $scope.compoundEntityUrl = RouteInfoService.get ('drugCompound').href;
 
       Page.setTitle('Results for ' + $scope.query);
       Page.setPage('q');
@@ -63,6 +77,48 @@
 
         $scope.from += pageSize;
         getResults({scroll: true});
+      };
+
+
+      $scope.badgeStyleClass = function (type) {
+        var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
+        return 't_badge t_badge__' + definedType;
+      };
+
+      var maxConcat = 3;
+
+      $scope.concatMatches = function (array) {
+        var target = $scope.query;
+        var matches = _(ensureArray (array))
+          .filter (function (element) {
+            return caseInsensitivelyContains (ensureString (element), target);
+          })
+          .take (maxConcat);
+
+        return matches.join (', ');
+      };
+
+      $scope.concatIfContains = function (array) {
+        array = ensureArray (array);
+
+        var target = $scope.query;
+        var contains = _.any (array, function (element) {
+          return caseInsensitivelyContains (ensureString (element), target);
+        });
+
+        return contains ? array.join (', ') : '';
+      };
+
+      var maxAbrigementLength = 120;
+      var abridger = new Abridger.Abridger (maxAbrigementLength);
+
+      $scope.abridge = function (array) {
+        var target = $scope.query;
+        var match = _.find (ensureArray (array), function (sentence) {
+          return caseInsensitivelyContains (ensureString (sentence), target);
+        });
+
+        return match ? abridger.abridge (match, target) : '';
       };
 
       $scope.quickFn = function () {

@@ -1,5 +1,7 @@
 package org.icgc.dcc.portal.service;
 
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.repository.GeneRepository.GENE_ID_SEARCH_FIELDS;
@@ -12,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,7 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,8 +45,10 @@ import com.google.common.collect.Multimap;
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneService {
 
+  private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
+  private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
+
   private final GeneRepository geneRepository;
-  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
@@ -149,12 +155,19 @@ public class GeneService {
     return result;
   }
 
+  @NonNull
   public Genes findAllCentric(Query query) {
+    return findAllCentric(query, false);
+  }
+
+  @NonNull
+  public Genes findAllCentric(Query query, boolean facetsOnly) {
     val projectIds = Lists.<String> newArrayList();
 
     // Get a list of projectId to filter the projects sub-object in the gene model
     // FIXME This won't support NOT
     val path = query.getFilters().path("donor").path("projectId");
+
     if (path.path("is").isArray()) {
       for (JsonNode id : path.get("is")) {
         projectIds.add(String.valueOf(id).replaceAll("\"", ""));
@@ -164,24 +177,31 @@ public class GeneService {
       projectIds.add(String.valueOf(path.get("is")).replaceAll("\"", ""));
     }
 
-    val response = geneRepository.findAllCentric(query);
+    val pql =
+        facetsOnly ? QUERY_CONVERTER.convertCount(query, GENE_CENTRIC) : QUERY_CONVERTER.convert(query, GENE_CENTRIC);
+    log.info("PQL of findAllCentric is: {}", pql);
+
+    val pqlAst = parse(pql);
+    val response = geneRepository.findAllCentric(pqlAst);
     log.debug("Response: {}", response);
+
     val hits = response.getHits();
-
-    boolean includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
-
+    val includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
     val list = ImmutableList.<Gene> builder();
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.GENE);
-      if (includeScore) fieldMap.put("_score", hit.getScore());
+
+      if (includeScore) {
+        fieldMap.put("_score", hit.getScore());
+      }
+
       fieldMap.put("projectIds", projectIds);
       list.add(new Gene(fieldMap));
     }
 
-    Genes genes = new Genes(list.build());
-    genes.addFacets(aggregationsConverter.convert(response.getAggregations()));
-    // genes.setFacets(response.getFacets());
+    val genes = new Genes(list.build());
+    genes.addFacets(AGGS_TO_FACETS_CONVERTER.convert(response.getAggregations()));
     genes.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return genes;

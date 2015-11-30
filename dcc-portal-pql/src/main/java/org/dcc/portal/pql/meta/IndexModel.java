@@ -30,6 +30,7 @@ public class IndexModel {
   private static final ProjectTypeModel PROJECT_TYPE_MODEL = new ProjectTypeModel();
   private static final RepositoryFileTypeModel REPO_FILE_TYPE_MODEL = new RepositoryFileTypeModel();
   private static final GeneSetTypeModel GENE_SET_TYPE_MODEL = new GeneSetTypeModel();
+  private static final DrugTypeModel DRUG_TYPE_MODEL = new DrugTypeModel();
 
   public static TypeModel getTypeModel(Type type) {
     switch (type) {
@@ -47,6 +48,8 @@ public class IndexModel {
       return REPO_FILE_TYPE_MODEL;
     case GENE_SET:
       return GENE_SET_TYPE_MODEL;
+    case DRUG:
+      return DRUG_TYPE_MODEL;
     }
 
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
@@ -78,6 +81,10 @@ public class IndexModel {
 
   public static TypeModel getGeneSetTypeModel() {
     return GENE_SET_TYPE_MODEL;
+  }
+
+  public static TypeModel getDrugTypeModel() {
+    return DRUG_TYPE_MODEL;
   }
 
 }

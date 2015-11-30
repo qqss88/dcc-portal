@@ -24,16 +24,18 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.nested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.reverseNested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.repository.BaseElasticSearchTest;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
 import org.junit.Test;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AggregationToFacetConverterTest extends BaseElasticSearchTest {
@@ -45,6 +47,7 @@ public class AggregationToFacetConverterTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() {
+    this.testIndex = TestIndex.RELEASE;
     es.execute(createIndexMappings(Type.MUTATION_CENTRIC).withData(bulkFile(getClass())));
   }
 
@@ -116,7 +119,7 @@ public class AggregationToFacetConverterTest extends BaseElasticSearchTest {
 
   private SearchResponse executeQuery(AggregationBuilder<?>... builder) {
     val request = es.client()
-        .prepareSearch(INDEX.getIndex())
+        .prepareSearch(testIndex.getName())
         .setTypes(Type.MUTATION_CENTRIC.getId())
         .addAggregation(builder[0])
         .addAggregation(builder[1]);

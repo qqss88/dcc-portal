@@ -1,8 +1,8 @@
 <div data-ng-init="repoContextID = repositoryCtrl.getRepoContextID()">
     <h1 class="repo-header" data-ng-if="repoContextID == 'aws-virginia'">
-        <img src="styles/images/repositories/home/aws_logo.svg" width="120" class="logo" alt="ICGC AWS Logo" />
+        <img src="styles/images/repositories/home/aws_logo.svg" width="260" class="logo" alt="ICGC AWS Logo" />
         <span>
-            User Guide: ICGC Data Analysis on the Cloud
+            ICGC on the Amazon Cloud
         </span>
     </h1>
     <h1 class="repo-header" data-ng-if="repoContextID == 'collaboratory'">
@@ -18,7 +18,7 @@
 
                 <stacked height="250"
                     data-title="Donor Distribution by Primary Site"
-                    data-subtitle="{{repositoryCtrl.getRepoSummaryData().projectCount}} projects and {{summary.primarySiteCount}} primary sites"
+                    data-subtitle="{{repositoryCtrl.getRepoSummaryData().projectCount}} projects and {{repositoryCtrl.getRepoSummaryData().primarySiteCount}} primary sites"
                     data-y-label="Donors"
                     data-alternate-brightness="true"
                     data-items="repositoryCtrl.getPrimarySites()"
@@ -50,7 +50,7 @@
                             <td data-ng-bind="type.uiName"></td>
                             <td class="text-right" data-ng-bind="type.donorCount | number"></td>
                             <td class="text-right">
-                                <a href="/repository/external?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
+                                <a href="/repositories?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
                             </td>
                             <td data-ng-bind="type.fileFormat.join(', ')"></td>
                             <td class="text-right" data-ng-bind="type.fileSize | bytes"></td>
@@ -59,7 +59,7 @@
                 </table>
             
                 <span>
-                    Available data as of <a href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
+                    Available data as of <a href="/repositories?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
                 </span>
             </div>
             <!-- -->     

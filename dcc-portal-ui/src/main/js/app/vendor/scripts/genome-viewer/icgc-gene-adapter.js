@@ -24,11 +24,20 @@ function IcgcGeneAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = 'http://localhost:8080/api/browser';
+  this.host = window.$icgcApp.getQualifiedHost() + '/api/browser';
   this.gzip = true;
+
+  this.setSpecies = function(species) {
+    this.species = species;
+  };
+
+  this.chunksDisplayed = {};
 
   this.params = {};
   if (args != null) {
+
+    this.chromosomeLimitMap = args.chromosomeLimitMap || {};
+
     if (args.host != null) {
       this.host = args.host;
     }
@@ -71,7 +80,7 @@ function IcgcGeneAdapter(args) {
       }
     }
   }
-  this.featureCache = new FeatureCache(argsFeatureCache);
+  this.featureCache = new FileFeatureCache(argsFeatureCache);
 }
 
 IcgcGeneAdapter.prototype.clearData = function () {
@@ -151,7 +160,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
       jsonResponse = data;
 
     }
-    
+
     if (typeof jsonResponse !== 'undefined') {
       for (var i = 0; i < jsonResponse.length; i++) {
         var feature = jsonResponse[i];
@@ -160,7 +169,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
         feature.id = feature.stableId;
         delete feature.externalName;
         delete feature.stableId;
-  
+
         for (var j = 0; j < feature.transcripts.length; j++) {
           var transcript = feature.transcripts[j];
           transcript.exons = transcript.exonToTranscripts;
@@ -231,13 +240,13 @@ IcgcGeneAdapter.prototype.getData = function (args) {
         if (chunks[i] + 1 == chunks[i + 1]) {
           updateEnd = true;
         } else {
-          var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+          var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
           queries.push(query);
           updateStart = true;
           updateEnd = true;
         }
       } else {
-        var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+        var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
         queries.push(query);
         updateStart = true;
         updateEnd = true;

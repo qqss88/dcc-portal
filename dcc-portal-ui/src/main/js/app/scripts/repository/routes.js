@@ -19,28 +19,25 @@
 
   'use strict';
 
-  var module = angular.module('icgc.repository', ['icgc.repository.services', 'icgc.repository.controllers']);
+  var module = angular.module('icgc.repository', ['icgc.repository.services', 'icgc.repository.controllers',
+                                                  'icgc.repository.directives']);
 
   module.config(function ($stateProvider) {
-    $stateProvider.state('repository', {
-      url: '/repository',
-      templateUrl: '/scripts/repository/views/repository.html',
-      controller: 'RepositoryController as RepositoryController',
-      data: {
-        tab: 'icgc' // Default
-      }
+
+    $stateProvider.state ('dataReleases', {
+      url: '/releases*path',
+      templateUrl: '/scripts/repository/views/repository.icgc.html',
+      controller: 'ICGCRepoController as ICGCRepoController'
     });
 
-    $stateProvider.state('repository.external', {
-      url: '/external',
-      reloadOnSearch: false,
-      data : {
-        tab: 'external'
-      }
+    $stateProvider.state ('dataRepositories', {
+      url: '/repositories',
+      templateUrl: '/scripts/repository/views/repository.external.html',
+      controller: 'ExternalRepoController as ExternalRepoController'
     });
 
-    $stateProvider.state('file', {
-      url: '/repository/external/files/:id',
+    $stateProvider.state ('dataRepositoryFile', {
+      url: '/repositories/files/:id',
       templateUrl: '/scripts/repository/views/repository.external.file.html',
       controller: 'ExternalFileInfoController as fileCtrlr',
       resolve: {
@@ -50,16 +47,6 @@
       }
     });
 
-    $stateProvider.state('repository.icgc', {
-      url: '/icgc*path',
-      reloadOnSearch: true,
-      data : {
-        tab: 'icgc'
-      }
-    });
-
   });
 
 })();
-
-

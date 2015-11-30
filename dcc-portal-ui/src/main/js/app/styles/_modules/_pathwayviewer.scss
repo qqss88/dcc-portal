@@ -188,6 +188,12 @@ $compartmentBorder:#ffc38b;
   stroke-width:$lineThicknessThick;
 }
 
+.RenderableOverlappedEntitySet {
+  stroke: #000;
+  stroke-width: 5px;
+  fill: #fff;
+}
+
 .ProcessNode{
   stroke: $primaryNodeBorder;
   stroke-width:$lineThicknessThicker;
@@ -299,10 +305,24 @@ $compartmentBorder:#ffc38b;
   background: white;
 }
 
+.pathway-legend-container {
+  //overflow-x: visible;
+  //overflow-y: auto;
+  width: 100%;
+  height: 100%;
+
+  .pathway-legend-content {
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .pathway-info{
   width: 30%;
   opacity: 0.95;
 }
+
+
 
 .pathway-info-content{
   line-height: 1.4rem;
@@ -320,6 +340,10 @@ $compartmentBorder:#ffc38b;
   padding-bottom: 0.5em !important;
   padding-top:0.5em !important;
   text-align: center !important;
+}
+
+.gene-overlap-result  a, .gene-overlap-result .pathway-gene-label  a {
+  color: #ff9900;
 }
 
 .pathway-gene-header-label{

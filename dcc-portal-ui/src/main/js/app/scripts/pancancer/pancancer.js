@@ -49,15 +49,17 @@
     Page.stopWork();
     Page.setPage('entity');
     Page.setTitle('PCAWG');
-  });
-
+  }); 
+  
 
   module.controller('PancancerController',
-    function($scope, Page, PancancerService, ExternalRepoService) {
+    function($scope, Page, PancancerService, ExternalRepoService, RouteInfoService) {
 
     Page.stopWork();
     Page.setPage('entity');
     Page.setTitle('PCAWG');
+
+    $scope.dataRepoUrl = RouteInfoService.get ('dataRepositories').href;
 
     function refresh() {
       // Get stats

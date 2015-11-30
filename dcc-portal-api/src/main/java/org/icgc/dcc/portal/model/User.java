@@ -20,26 +20,17 @@ package org.icgc.dcc.portal.model;
 import java.io.Serializable;
 import java.util.UUID;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Representation of a User that stores user information during a HTTP session information.
  */
-@JsonPropertyOrder({
-    "id",
-    "userName",
-    "passwordDigest",
-    "firstName",
-    "lastName",
-    "emailAddress",
-    "openIDIdentifier",
-    "sessionToken",
-    "authorities"
+@JsonPropertyOrder({ "id", "userName", "passwordDigest", "firstName", "lastName", "emailAddress", "openIDIdentifier", "sessionToken", "authorities"
 })
 @Data
 @NoArgsConstructor
@@ -65,10 +56,16 @@ public class User implements Serializable {
   private String openIDIdentifier = "";
 
   /**
-   * Daco access
+   * DACO access
    */
   @JsonProperty
   private Boolean daco = false;
+
+  /**
+   * DACO access
+   */
+  @JsonProperty
+  private Boolean cloudAccess = false;
 
   /**
    * A shared secret between the cluster and the user's browser that is revoked when the session ends

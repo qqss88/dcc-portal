@@ -42,6 +42,32 @@ function IcgcGeneTrack(args) {
   _.extend(this, args);
 }
 
+IcgcGeneTrack.prototype.initializeDom = function(targetId) {
+  this._initializeDom(targetId);
+
+  this.main = SVG.addChild(this.contentDiv, 'svg', {
+    'class': 'trackSvg',
+    'x': 0,
+    'y': 0,
+    'width': this.width
+  });
+  this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+    'class': 'features',
+    'x': -this.pixelPosition,
+    'width': this.svgCanvasWidth
+  });
+  this.updateHeight();
+};
+
+IcgcGeneTrack.prototype.clean = function() {
+  //    console.time("-----------------------------------------empty");
+  while (this.svgCanvasFeatures.firstChild) {
+    this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+  }
+  //    console.timeEnd("-----------------------------------------empty");
+  this._clean();
+};
+
 IcgcGeneTrack.prototype.render = function (targetId) {
   var _this = this;
   this.initializeDom(targetId);
@@ -85,7 +111,7 @@ IcgcGeneTrack.prototype.draw = function () {
 
   this.updateTranscriptParams();
   this.updateHistogramParams();
-  this.cleanSvg();
+  this.clean();
 
   if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
     this.setLoading(true);
@@ -100,9 +126,9 @@ IcgcGeneTrack.prototype.draw = function () {
       transcript: this.transcript
     });
 
-    this.invalidZoomText.setAttribute('visibility', 'hidden');
+    //this.invalidZoomText.setAttribute('visibility', 'hidden');
   } else {
-    this.invalidZoomText.setAttribute('visibility', 'visible');
+    //this.invalidZoomText.setAttribute('visibility', 'visible');
   }
 
 };
@@ -209,5 +235,6 @@ IcgcGeneTrack.prototype._getFeaturesByChunks = function (response) {
       this.chunksDisplayed[chunks[i].key + dataType] = true;
     }
   }
+  console.log(features)
   return features;
 };

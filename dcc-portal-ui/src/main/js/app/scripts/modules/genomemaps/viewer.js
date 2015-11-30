@@ -34,6 +34,31 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         var regionObj = new Region({chromosome: 1, start: 1, end: 1}),
         done = false;
 
+      var _chromosomeLimitMap = {
+        1: 249250621,
+        2: 243199373,
+        3: 198022430,
+        4: 191154276,
+        5: 180915260,
+        6: 171115067,
+        7: 159138663,
+        8: 146364022,
+        9: 141213431,
+        10: 135534747,
+        11: 135006516,
+        12: 133851895,
+        13: 115169878,
+        14: 107349540,
+        15: 102531392,
+        16: 90354753,
+        17: 81195210,
+        18: 78077248,
+        19: 59128983,
+        20: 63025520,
+        21: 48129895,
+        22: 51304566
+      };
+
       function getSpecies(callback) {
         CellBaseManager.get({
           host: GMService.getConfiguration().cellBaseHost,
@@ -59,7 +84,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         });
       }
 
-      
+
       function setup() {
         regionObj.start = parseInt(regionObj.start);
         regionObj.end = parseInt(regionObj.end);
@@ -121,15 +146,20 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
             'region:change': function (event) {
               genomeViewer._regionChangeHandler(event);
             },
-            'restoreDefaultRegion:click': function (event) {
+            'region:move': function (event) {
+              genomeViewer._regionMoveHandler(event);
+            },
+            /*'restoreDefaultRegion:click': function (event) {
               Utils.setMinRegion(genomeViewer.defaultRegion, genomeViewer.getSVGCanvasWidth());
               event.region = genomeViewer.defaultRegion;
               genomeViewer.trigger('region:change', event);
-            }
+            }*/
           }
         });
         genomeViewer.on('region:change', function (event) {
-          navigationBar.setRegion(event.region, genomeViewer.zoom);
+          if (event.sender !== navigationBar) {
+            navigationBar.setRegion(event.region);
+          }
         });
         genomeViewer.on('region:move', function (event) {
           if (event.sender !== navigationBar) {
@@ -141,13 +171,13 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         /** Add tracks **/
         tracks.sequence = new FeatureTrack({
           title: 'Sequence',
-          height: 25,
+          height: 30,
           visibleRegionSize: 200,
-          renderer: new SequenceRenderer(),
+          renderer: new SequenceRenderer({tooltipContainerID: '#genomic'}),
           dataAdapter: new CellBaseAdapter({
-            category: "genomic",
-            subCategory: "region",
-            resource: "sequence",
+            category: 'genomic',
+            subCategory: 'region',
+            resource: 'sequence',
             params: {},
             species: genomeViewer.species,
             cacheConfig: {
@@ -157,54 +187,28 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         });
         genomeViewer.addTrack(tracks.sequence);
 
-        var geneRenderConfig = {
-          label: function (f) {
-            var str = '';
-            str += (f.strand < 0 || f.strand == '-') ? '<' : '';
-            str += (f.strand > 0 || f.strand == '+') ? '>' : '';
-            str += ' ' + f.externalName + ' ';
-            str += (f.biotype != null && f.biotype != '') ? ' [' + f.biotype + ']' : '';
-            return str;
-          },
-          tooltipTitle: function (f) {
-            return 'ICGC Gene - <span style="color:#283e5d">' + f.externalName + '</span>';
-          },
-          tooltipText: function (f) {
-            var color = GENE_BIOTYPE_COLORS[f.biotype];
-            var str = '';
-            str += 'id:&nbsp;<span style="color:#166aa2">' + f.stableId + '</span><br>';
-            str += 'biotype:&nbsp;<span style="font-weight: bold;color:' + color + ';">' + f.biotype + '</span><br>';
-            str += FEATURE_TYPES.getTipCommons(f);
-            str += '<br>description:&nbsp;<span style="font-weight: bold;">' + f.description + '</span><br>';
-            return str;
-          },
-          color: function (f) {
-            return GENE_BIOTYPE_COLORS[f.biotype];
-          },
-          infoWidgetId: "stableId",
-          height: 4,
-          histogramColor: "lightblue",
-          handlers: {
-            'feature:click': function (e) {
-              var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'stableId' : 'geneId'];
-              scope.$apply(function () {
-                $location.path(path).search({}).search({});
-              });
-            }
-          },
-        };
+        var icgcGeneOverviewRenderer = new FeatureRenderer(FEATURE_TYPES.gene);
+        icgcGeneOverviewRenderer.on({
+          'feature:click': function (e) {
+            scope.$apply(function () {
+              $location.path('/genes/' + e.feature.id).search({});
+            });
+          }
+        });
 
-        tracks.icgcGeneOverviewTrack = new FeatureTrack({
-          title: 'ICGC Gene context',
+        tracks.icgcGeneOverviewTrack = new IcgcGeneTrack({
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
-          height: 100,
-          renderer: new FeatureRenderer(geneRenderConfig),
-          dataAdapter: new FeatureTemplateAdapter({
-            multiRegions: true,
-            histogramMultiRegions: false,
+          //height: 100,
+          autoHeight: true,
+          renderer: icgcGeneOverviewRenderer,
+          dataAdapter: new IcgcGeneAdapter({
+            resource: 'gene',
+            chromosomeLimitMap: _chromosomeLimitMap,
+            //multiRegions: true,
+            //histogramMultiRegions: false,
             /* TODO: use BASE_URL */
-            uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene',
+            //uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene',
             cacheConfig: {
               chunkSize: 100000
             }
@@ -212,74 +216,53 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         });
         genomeViewer.addOverviewTrack(tracks.icgcGeneOverviewTrack);
 
-        tracks.icgcGeneTrack = new FeatureTrack({
+
+        tracks.icgcGeneTrack = new IcgcGeneTrack({
           title: 'ICGC Genes',
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
           minTranscriptRegionSize: 300000,
           height: 100,
-          renderer: new GeneRenderer(geneRenderConfig),
-          dataAdapter: new FeatureTemplateAdapter({
-            multiRegions: true,
-            histogramMultiRegions: false,
+          renderer: new GeneRenderer({
+            tooltipContainerID: '#genomic',
+            handlers: {
+              'feature:click': function (e) {
+                var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
+                scope.$apply(function () {
+                  $location.path(path).search({}).search({});
+                });
+              }
+            }
+          }),
+          dataAdapter: new IcgcGeneAdapter({
+            //multiRegions: true,
+            resource: 'gene',
+            chromosomeLimitMap: _chromosomeLimitMap,
+            //multiRegions: true,
+            //histogramMultiRegions: false,
             /* TODO: use BASE_URL */
-            uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene&dataType=withTranscripts',
+            //uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene&dataType=withTranscripts',
             cacheConfig: {
               chunkSize: 100000
-            },
-            parse: function (response) {
-              // adapt feature keys to fit with GeneRenderer
-              var res = [];
-              for (var i = 0; i < response.length; i++) {
-                var features = [];
-                for (var j = 0; j < response[i].length; j++) {
-                  var feature = response[i][j];
-                  feature.transcripts = feature.transcripts || [];
-                  feature.name = feature.externalName;
-                  feature.id = feature.stableId;
-                  delete feature.externalName;
-                  delete feature.stableId;
-
-                  for (var k = 0; k < feature.transcripts.length; k++) {
-                    var transcript = feature.transcripts[k];
-                    transcript.exons = transcript.exonToTranscripts;
-                    transcript.name = transcript.externalName;
-                    transcript.id = transcript.stableId;
-                    transcript.geneId = feature.id;
-                    transcript.genomicCodingEnd = transcript.codingRegionEnd;
-                    transcript.genomicCodingStart = transcript.codingRegionStart;
-                    delete transcript.exonToTranscripts;
-                    delete transcript.externalName;
-                    delete transcript.stableId;
-                    delete transcript.codingRegionEnd;
-                    delete transcript.codingRegionStart;
-
-                    for (var l = 0; l < transcript.exons.length; l++) {
-                      var exon = transcript.exons[l];
-                      _.extend(exon, exon.exon);
-                      delete exon.exon;
-                      exon.id = exon.stableId;
-                      exon.geneId = feature.id;
-                      delete exon.stableId;
-                    }
-                  }
-                  features.push(feature);
-                }
-                res.push(features);
-              }
-              return res;
             }
           })
         });
+
         genomeViewer.addTrack(tracks.icgcGeneTrack);
 
 
-        var mutationRenderConfig = {
+        tracks.icgcMutationsTrack = new IcgcMutationTrack({
+          title: 'ICGC Mutations',
+          minHistogramRegionSize: 10000,
+          maxLabelRegionSize: 3000,
+          height: 100,
+          renderer: new FeatureRenderer({
+            tooltipContainerID: '#genomic',
           label: function (f) {
             return f.id;
           },
           tooltipTitle: function (f) {
-            return 'ICGC mutation - <span style="color:#283e5d">' + f.id + '</span>';
+              return '<span class="gmtitle">ICGC mutation' + ' - ' + f.id + '</span>';
           },
           tooltipText: function (f) {
             var consequences = GMService.tooltipConsequences(f.consequences), fi;
@@ -308,7 +291,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
                 return 'black';
             }
           },
-          infoWidgetId: 'id',
+          infoWidgetId: 'mutationCds',
           height: 8,
           histogramColor: 'orange',
           handlers: {
@@ -320,237 +303,28 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
               });
             }
           }
-        };
-
-        tracks.icgcMutationsTrack = new FeatureTrack({
-          title: 'ICGC Mutations',
-          minHistogramRegionSize: 10000,
-          maxLabelRegionSize: 3000,
-          height: 100,
-          renderer: new FeatureRenderer(mutationRenderConfig),
-          dataAdapter: new FeatureTemplateAdapter({
-            multiRegions: true,
-            histogramMultiRegions: false,
-            /* TODO: use BASE_URL  */
-            uriTemplate: 'https://dcc.icgc.org/api/browser/mutation?segment={region}&resource=mutation',
-            cacheConfig: {
+        }),
+          dataAdapter: new IcgcMutationAdapter({
+            resource: 'mutation',
+            //multiRegions: true,
+            //histogramMultiRegions: false,
+            chromosomeLimitMap: _chromosomeLimitMap,
+            featureCache: {
               chunkSize: 10000
             }
           })
         });
+
+
+
         genomeViewer.addTrack(tracks.icgcMutationsTrack);
         /** End add tracks **/
 
         genomeViewer.draw();
+        //genomeViewer.enableAutoHeight();
 
-        genomeViewer.toggleAutoHeight(true);
-
-//        genomeViewer = genomeViewer || new GenomeViewer({
-//            cellBaseHost: GMService.getConfiguration().cellBaseHost,
-//            cellBaseVersion: 'v3',
-//            target: 'genome-viewer',
-////          autoRender: true,
-//            width: 1135,
-//            region: regionObj,
-//            defaultRegion: regionObj,
-//            sidePanel: false,
-//            drawNavigationBar: false,
-//            navigationBarConfig: {
-//              componentsConfig: {
-//                restoreDefaultRegionButton: false,
-//                regionHistoryButton: false,
-//                speciesButton: false,
-//                chromosomesButton: false,
-////                karyotypeButton:false,
-////                chromosomeButton:false,
-////                regionButton:false,
-////                zoomControl:false,
-//                windowSizeControl: false,
-//                positionControl: false,
-////                moveControl:false,
-////                autoheightButton:false,
-////                compactButton:false,
-//                searchControl: false
-//              }
-//            },
-//            drawKaryotypePanel: true,
-//            drawChromosomePanel: true,
-//            drawRegionOverviewPanel: true,
-//            karyotypePanelConfig: {
-//              hidden: true,
-//              collapsed: false,
-//              collapsible: false
-//            },
-//            chromosomePanelConfig: {
-//              hidden: true,
-//              collapsed: false,
-//              collapsible: false
-//            },
-//            version: 'Powered by ' +
-//            '<a target="_blank" href="http://www.genomemaps.org/">Genome Maps</a>'
-//          });
-//
-//        navigationBar = new IcgcNavigationBar({
-//          zoom: genomeViewer.zoom,
-//          handlers: {
-//            'region:change': function (event) {
-//              genomeViewer._regionChangeHandler(event);
-//            },
-//            'region:move': function (event) {
-//              genomeViewer._regionMoveHandler(event);
-//            },
-//            'zoom:change': function (event) {
-//              genomeViewer.setZoom(event.zoom);
-//              genomeViewer.region.load(genomeViewer._calculateRegionByZoom(event.zoom));
-//              genomeViewer.setRegion(genomeViewer.region);
-//            }
-//          }
-//        });
-//        genomeViewer.on('region:change', function (event) {
-//          if (event.sender !== navigationBar) {
-//            navigationBar.setRegion(event.region);
-//          }
-//        });
-//        genomeViewer.on('region:move', function (event) {
-//          if (event.sender !== navigationBar) {
-//            navigationBar.moveRegion(event.region);
-//          }
-//        });
-//
-//        genomeViewer.setNavigationBar(navigationBar);
-//
-//        // Adding tracks
-//        tracks.sequence = new SequenceTrack({
-//          title: 'Sequence',
-//          height: 30,
-//          visibleRegionSize: 200,
-//          renderer: new SequenceRenderer(),
-//          dataAdapter: new SequenceAdapter({
-//            category: 'genomic',
-//            subCategory: 'region',
-//            resource: 'sequence',
-//            species: genomeViewer.species
-//          })
-//        });
-//        genomeViewer.addTrack(tracks.sequence);
-//
-//        var icgcGeneOverviewRenderer = new FeatureRenderer(FEATURE_TYPES.gene);
-//        icgcGeneOverviewRenderer.on({
-//          'feature:click': function (e) {
-//            scope.$apply(function () {
-//              $location.path('/genes/' + e.feature.id).search({});
-//            });
-//          }
-//        });
-//        tracks.icgcGeneOverviewTrack = new IcgcGeneTrack({
-//          minHistogramRegionSize: 20000000,
-//          maxLabelRegionSize: 10000000,
-//          height: 100,
-//          renderer: icgcGeneOverviewRenderer,
-//          dataAdapter: new IcgcGeneAdapter({
-//            resource: 'gene',
-//            featureCache: {
-//              chunkSize: 50000
-//            }
-//          })
-//        });
-//        genomeViewer.addOverviewTrack(tracks.icgcGeneOverviewTrack);
-//
-//
-//        tracks.icgcGeneTrack = new IcgcGeneTrack({
-//          title: 'ICGC Genes',
-//          minHistogramRegionSize: 20000000,
-//          maxLabelRegionSize: 10000000,
-//          minTranscriptRegionSize: 300000,
-//          height: 100,
-//          renderer: new GeneRenderer({
-//            handlers: {
-//              'feature:click': function (e) {
-//                var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
-//                scope.$apply(function () {
-//                  $location.path(path).search({}).search({});
-//                });
-//              }
-//            }
-//          }),
-//
-//          dataAdapter: new IcgcGeneAdapter({
-//            resource: 'gene',
-//            featureCache: {
-//              chunkSize: 50000
-//            }
-//          })
-//        });
-//        genomeViewer.addTrack(tracks.icgcGeneTrack);
-//
-//        tracks.icgcMutationsTrack = new IcgcMutationTrack({
-//          title: 'ICGC Mutations',
-//          minHistogramRegionSize: 10000,
-//          maxLabelRegionSize: 3000,
-//          height: 100,
-//
-//          renderer: new FeatureRenderer({
-//            label: function (f) {
-//              return f.id;
-//            },
-//            tooltipTitle: function (f) {
-//              return '<span class="gmtitle">ICGC mutation' + ' - ' + f.id + '</span>';
-//            },
-//            tooltipText: function (f) {
-//              var consequences = GMService.tooltipConsequences(f.consequences), fi;
-//              fi = (f.functionalImpact && _.contains(f.functionalImpact, 'High')) ? 'High' : 'Low';
-//
-//              return '<span class="gmkeys">mutation:&nbsp;</span>' + f.mutation + '<br>' +
-//                '<span class="gmkeys">reference allele:&nbsp;</span>' + f.refGenAllele + '<br>' +
-//                '<span class="gmkeys">mutation type:&nbsp;</span>' + f.mutationType + '<br>' +
-//                '<span class="gmkeys">project info:</span><br>' + f.projectInfo.join('<br>') + '<br>' +
-//                '<span class="gmkeys">consequences:<br></span>' + consequences + '<br>' +
-//                '<span class="gmkeys">source:&nbsp;</span>ICGC<br>' +
-//                '<span class="gmkeys">start-end:&nbsp;</span>' + f.start + '-' + f.end + '<br>' +
-//                '<span class="gmkeys">functional impact:&nbsp;</span>' + fi;
-//            },
-//            color: function (feat) {
-//              switch (feat.mutationType) {
-//                case 'single base substitution':
-//                  return 'Chartreuse';
-//                case 'insertion of <=200bp':
-//                  return 'orange';
-//                case 'deletion of <=200bp':
-//                  return 'red';
-//                case 'multiple base substitution (>=2bp and <=200bp)':
-//                  return 'lightblue';
-//                default:
-//                  return 'black';
-//              }
-//            },
-//            infoWidgetId: 'mutationCds',
-//            height: 8,
-//            histogramColor: 'orange',
-//            handlers: {
-//              'feature:mouseover': function (e) {
-//              },
-//              'feature:click': function (e) {
-//                scope.$apply(function () {
-//                  $location.path('/mutations/' + e.feature.id).search({});
-//                });
-//              }
-//            }
-//          }),
-//
-//          dataAdapter: new IcgcMutationAdapter({
-//            resource: 'mutation',
-//            featureCache: {
-//              chunkSize: 10000
-//            }
-//          })
-//        });
-//        genomeViewer.addTrack(tracks.icgcMutationsTrack);
-//
-//        genomeViewer.draw();
-//        genomeViewer.toggleAutoHeight(true);
-//
-//        genomeViewer.karyotypePanel.hide();
-//        genomeViewer.chromosomePanel.hide();
+        genomeViewer.karyotypePanel.hide();
+        genomeViewer.chromosomePanel.hide();
       }
 
 
@@ -779,9 +553,9 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         /** Add tracks **/
         tracks.sequence = new FeatureTrack({
           title: 'Sequence',
-          height: 25,
+          height: 30,
           visibleRegionSize: 200,
-          renderer: new SequenceRenderer(),
+          renderer: new SequenceRenderer({tooltipContainerID: '#genomic'}),
           dataAdapter: new CellBaseAdapter({
             category: "genomic",
             subCategory: "region",
@@ -795,7 +569,8 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         });
         genomeViewer.addTrack(tracks.sequence);
 
-        var geneRenderConfig = {
+        var featureGeneRendererParams = {
+          tooltipContainerID: '#genomic',
           label: function (f) {
             var str = '';
             str += (f.strand < 0 || f.strand == '-') ? '<' : '';
@@ -832,159 +607,152 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           },
         };
 
-        tracks.icgcGeneOverviewTrack = new FeatureTrack({
-          title: 'ICGC Gene context',
+        var icgcGeneOverviewRenderer = new FeatureRenderer(featureGeneRendererParams);
+
+        /*icgcGeneOverviewRenderer.on({
+          'feature:click': function (e) {
+            scope.$apply(function () {
+              $location.path('/genes/' + e.feature.id).search({});
+            });
+          }
+        }); */
+        tracks.icgcGeneOverviewTrack = new IcgcGeneTrack({
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
           height: 100,
-          renderer: new FeatureRenderer(geneRenderConfig),
-          dataAdapter: new FeatureTemplateAdapter({
-            multiRegions: true,
-            histogramMultiRegions: false,
-            /* TODO: use BASE_URL */
-            uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene',
-            cacheConfig: {
+          renderer: icgcGeneOverviewRenderer,
+          dataAdapter: new IcgcGeneAdapter({
+            resource: 'gene',
+            chromosomeSizes: chromosomeSizes,
+            featureCache: {
               chunkSize: 100000
-            },
-            chromosomeSizes: chromosomeSizes
+            }
           })
         });
+
         genomeViewer.addOverviewTrack(tracks.icgcGeneOverviewTrack);
 
-        tracks.icgcGeneTrack = new FeatureTrack({
+        tracks.icgcGeneTrack = new IcgcGeneTrack({
           title: 'ICGC Genes',
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
           minTranscriptRegionSize: 300000,
           height: 100,
-          renderer: new GeneRenderer(geneRenderConfig),
-          dataAdapter: new FeatureTemplateAdapter({
+          renderer: new GeneRenderer({
+          tooltipContainerID: '#genomic',
+            handlers: {
+              'feature:click': function (e) {
+                var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
+                scope.$apply(function () {
+                  $location.path(path).search({}).search({});
+                });
+              }
+            }
+          }),
+          chromosomeSizes: chromosomeSizes,
+          dataAdapter: new IcgcGeneAdapter({
+            resource: 'gene',
             multiRegions: true,
             histogramMultiRegions: false,
-            /* TODO: use BASE_URL */
-            uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene&dataType=withTranscripts',
-            cacheConfig: {
+            featureCache: {
               chunkSize: 100000
-            },
-            chromosomeSizes: chromosomeSizes,
-            parse: function (response) {
-              // adapt feature keys to fit with GeneRenderer
-              var res = [];
-              for (var i = 0; i < response.length; i++) {
-                var features = [];
-                for (var j = 0; j < response[i].length; j++) {
-                  var feature = response[i][j];
-                  feature.transcripts = feature.transcripts || [];
-                  feature.name = feature.externalName;
-                  feature.id = feature.stableId;
-                  delete feature.externalName;
-                  delete feature.stableId;
-
-                  for (var k = 0; k < feature.transcripts.length; k++) {
-                    var transcript = feature.transcripts[k];
-                    transcript.exons = transcript.exonToTranscripts;
-                    transcript.name = transcript.externalName;
-                    transcript.id = transcript.stableId;
-                    transcript.geneId = feature.id;
-                    transcript.genomicCodingEnd = transcript.codingRegionEnd;
-                    transcript.genomicCodingStart = transcript.codingRegionStart;
-                    delete transcript.exonToTranscripts;
-                    delete transcript.externalName;
-                    delete transcript.stableId;
-                    delete transcript.codingRegionEnd;
-                    delete transcript.codingRegionStart;
-
-                    for (var l = 0; l < transcript.exons.length; l++) {
-                      var exon = transcript.exons[l];
-                      _.extend(exon, exon.exon);
-                      delete exon.exon;
-                      exon.id = exon.stableId;
-                      exon.geneId = feature.id;
-                      delete exon.stableId;
-                    }
-                  }
-                  features.push(feature);
-                }
-                res.push(features);
-              }
-              return res;
             }
           })
+
         });
         genomeViewer.addTrack(tracks.icgcGeneTrack);
 
 
-        var mutationRenderConfig = {
-          label: function (f) {
-            return f.id;
-          },
-          tooltipTitle: function (f) {
-            return 'ICGC mutation - <span style="color:#283e5d">' + f.id + '</span>';
-          },
-          tooltipText: function (f) {
-            var consequences = GMService.tooltipConsequences(f.consequences), fi;
-            fi = (f.functionalImpact && _.contains(f.functionalImpact, 'High')) ? 'High' : 'Low';
-
-            return '<span class="gmkeys">mutation:&nbsp;</span>' + f.mutation + '<br>' +
-              '<span class="gmkeys">reference allele:&nbsp;</span>' + f.refGenAllele + '<br>' +
-              '<span class="gmkeys">mutation type:&nbsp;</span>' + f.mutationType + '<br>' +
-              '<span class="gmkeys">project info:</span><br>' + f.projectInfo.join('<br>') + '<br>' +
-              '<span class="gmkeys">consequences:<br></span>' + consequences + '<br>' +
-              '<span class="gmkeys">source:&nbsp;</span>ICGC<br>' +
-              '<span class="gmkeys">start-end:&nbsp;</span>' + f.start + '-' + f.end + '<br>' +
-              '<span class="gmkeys">functional impact:&nbsp;</span>' + fi;
-          },
-          color: function (feat) {
-            switch (feat.mutationType) {
-              case 'single base substitution':
-                return 'Chartreuse';
-              case 'insertion of <=200bp':
-                return 'orange';
-              case 'deletion of <=200bp':
-                return 'red';
-              case 'multiple base substitution (>=2bp and <=200bp)':
-                return 'lightblue';
-              default:
-                return 'black';
-            }
-          },
-          infoWidgetId: 'id',
-          height: 8,
-          histogramColor: 'orange',
-          handlers: {
-            //'feature:mouseover': function (e) {
-            //},
-            'feature:click': function (e) {
-              scope.$apply(function () {
-                $location.path('/mutations/' + e.feature.id).search({});
-              });
-            }
-          }
-        };
-
-        tracks.icgcMutationsTrack = new FeatureTrack({
+        tracks.icgcMutationsTrack = new IcgcMutationTrack({
           title: 'ICGC Mutations',
           minHistogramRegionSize: 10000,
           maxLabelRegionSize: 3000,
           height: 100,
-          renderer: new FeatureRenderer(mutationRenderConfig),
-          dataAdapter: new FeatureTemplateAdapter({
+
+          renderer: new FeatureRenderer({
+            tooltipContainerID: '#genomic',
+            label: function (f) {
+              return f.id;
+            },
+            tooltipTitle: function (f) {
+              return '<span class="gmtitle">ICGC mutation' + ' - ' + f.id + '</span>';
+            },
+            tooltipText: function (f) {
+              var consequences = GMService.tooltipConsequences(f.consequences), fi;
+              fi = (f.functionalImpact && _.contains(f.functionalImpact, 'High')) ? 'High' : 'Low';
+
+              return '<span class="gmkeys">mutation:&nbsp;</span>' + f.mutation + '<br>' +
+                     '<span class="gmkeys">reference allele:&nbsp;</span>' + f.refGenAllele + '<br>' +
+                     '<span class="gmkeys">mutation type:&nbsp;</span>' + f.mutationType + '<br>' +
+                     '<span class="gmkeys">project info:</span><br>' + f.projectInfo.join('<br>') + '<br>' +
+                     '<span class="gmkeys">consequences:<br></span>' + consequences + '<br>' +
+                     '<span class="gmkeys">source:&nbsp;</span>ICGC<br>' +
+                     '<span class="gmkeys">start-end:&nbsp;</span>' + f.start + '-' + f.end + '<br>' +
+                     '<span class="gmkeys">functional impact:&nbsp;</span>' + fi;
+            },
+            color: function (feat) {
+              switch (feat.mutationType) {
+                case 'single base substitution':
+                  return 'Chartreuse';
+                case 'insertion of <=200bp':
+                  return 'orange';
+                case 'deletion of <=200bp':
+                  return 'red';
+                case 'multiple base substitution (>=2bp and <=200bp)':
+                  return 'lightblue';
+                default:
+                  return 'black';
+              }
+            },
+            infoWidgetId: 'mutationCds',
+            height: 8,
+            histogramColor: 'orange',
+            handlers: {
+              //'feature:mouseover': function (e) {
+              //},
+              'feature:click': function (e) {
+                scope.$apply(function () {
+                  $location.path('/mutations/' + e.feature.id).search({});
+                });
+              }
+            }
+          }),
+          dataAdapter: new IcgcMutationAdapter({
+            resource: 'mutation',
             multiRegions: true,
             histogramMultiRegions: false,
-            /* TODO: use BASE_URL  */
-            uriTemplate: 'https://dcc.icgc.org/api/browser/mutation?segment={region}&resource=mutation',
-            cacheConfig: {
+            featureCache: {
               chunkSize: 10000
-            },
-            chromosomeSizes: chromosomeSizes
+            }
           })
         });
+
         genomeViewer.addTrack(tracks.icgcMutationsTrack);
         /** End add tracks **/
 
         genomeViewer.draw();
 
-        genomeViewer.toggleAutoHeight(true);
+        //genomeViewer.toggleAutoHeight(true);
+
+        var fullScreenHandler = function() {
+          if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            jQuery('#gv-fullscreen-ctrl').removeClass('icon-resize-small');
+            jQuery('#gv-fullscreen-ctrl').addClass('icon-resize-full');
+          } else {
+            jQuery('#gv-fullscreen-ctrl').removeClass('icon-resize-full');
+            jQuery('#gv-fullscreen-ctrl').addClass('icon-resize-small');
+          }
+
+          // Ensure our setWidth triggers after the genome viewers interal resize callbacks
+          setTimeout( function() {
+            genomeViewer.setWidth(jQuery('.t_gv__navbar').width());}, 100);
+        };
+
+        if (document.addEventListener){
+          document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+          document.addEventListener('mozfullscreenchange', fullScreenHandler);
+          document.addEventListener('fullscreenchange', fullScreenHandler);
+        }
 
         scope.$on('gv:set:region', function (e, params) {
           genomeViewer.setRegion(params);

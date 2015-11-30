@@ -7,7 +7,7 @@
   ]);
 
   module.config(function ($stateProvider) {
-    $stateProvider.state('analyses', {
+    $stateProvider.state('analysis', {
       url: '/analysis',
       reloadOnSearch: false,
       templateUrl: 'scripts/analysis/views/analysis.html',
@@ -16,7 +16,7 @@
         tab: 'analysis'
       }
     });
-    $stateProvider.state('analyses.sets', {
+    $stateProvider.state('analysis.sets', {
       url: '/sets',
       reloadOnSearch: false,
       data : {
@@ -25,13 +25,13 @@
     });
 
     // We can't seem to have a single state for /x and /x/y
-    $stateProvider.state('analyses.viewhome', {
+    $stateProvider.state('analysis.viewhome', {
       url: '/view',
       data: {
         tab: 'view'
       }
     });
-    $stateProvider.state('analyses.view', {
+    $stateProvider.state('analysis.view', {
       url: '/view/:type/:id',
       //reloadOnSearch: false,
       data: {
@@ -57,13 +57,16 @@
    *   - AnalysisListController: manage saved analysis
    *   - NewAnalysisController: creates new analysis
    */
-  module.controller('AnalysisController', function ($scope, $timeout, $state, $location, Page, AnalysisService) {
+  module
+    .constant('DEFAULT_SELECTED_TAB_CONSTANT', 'sets')
+    .controller('AnalysisController', function ($scope, $timeout, $state, $location, Page,
+                                                AnalysisService, DEFAULT_SELECTED_TAB_CONSTANT) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
 
 
-    $scope.currentTab = $state.current.data.tab || 'analysis';
+    $scope.currentTab = $state.current.data.tab || DEFAULT_SELECTED_TAB_CONSTANT;
     $scope.savedAnalyses = AnalysisService.getAll();
 
     $scope.AnalysisService = AnalysisService;
@@ -71,7 +74,7 @@
     $scope.$watch(function () {
       return $state.current.data.tab;
     }, function () {
-      $scope.currentTab = $state.current.data.tab || 'analysis';
+      $scope.currentTab = $state.current.data.tab || DEFAULT_SELECTED_TAB_CONSTANT;
     });
 
     $scope.$watch(function() {

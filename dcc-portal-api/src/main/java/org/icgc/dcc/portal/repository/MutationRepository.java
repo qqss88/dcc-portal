@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
@@ -29,6 +30,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -46,10 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -72,6 +74,7 @@ public class MutationRepository implements Repository {
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
     val pql = converter.convert(query, MUTATION_CENTRIC);
     val search = queryEngine.execute(pql, MUTATION_CENTRIC);
@@ -80,6 +83,13 @@ public class MutationRepository implements Repository {
 
     SearchResponse response = search.getRequestBuilder().execute().actionGet();
     return response;
+  }
+
+  @NonNull
+  public SearchResponse findAllCentric(StatementNode pqlAst) {
+    val search = queryEngine.execute(pqlAst, MUTATION_CENTRIC);
+
+    return search.getRequestBuilder().execute().actionGet();
   }
 
   /**
@@ -124,6 +134,21 @@ public class MutationRepository implements Repository {
 
     for (val query : queries.values()) {
       val pql = converter.convertCount(query, MUTATION_CENTRIC);
+      search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
+    }
+
+    log.debug("{}", search);
+    return search.execute().actionGet();
+  }
+
+  @NonNull
+  public MultiSearchResponse counts(List<String> geneIds) {
+    val pqlTemplate = "count(), nested (transcript, in (gene.id, '%s'))";
+    val search = client.prepareMultiSearch();
+
+    for (val id : geneIds) {
+      val pql = format(pqlTemplate, id);
+
       search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
     }
 

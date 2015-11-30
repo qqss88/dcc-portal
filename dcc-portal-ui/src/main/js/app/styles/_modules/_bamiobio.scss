@@ -1,0 +1,24 @@
+@import "../vendor/styles/bamiobio/site.scss";
+@import "../vendor/styles/bamiobio/nprogress.scss";
+@import "../vendor/styles/bamiobio/flat-ui.scss";
+#bam-statistics {
+  line-height: normal;
+  #bam-section {
+    border-bottom: none;
+  }
+  .axis .tick text {
+    font-weight: lighter;
+    font-size: 0.6rem;
+  }
+  #value {
+    position: relative;
+    font-size: 4rem;
+    color: #2687BE;
+    text-align: center;
+    padding-top: 2rem;
+  }
+  #read-coverage {
+    font-size: 1.3rem;
+    font-weight: lighter;
+  }
+}

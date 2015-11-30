@@ -30,7 +30,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.icgc.dcc.common.client.api.ICGCEntityNotFoundException;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
@@ -58,6 +57,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthResource extends BaseResource {
 
   private static final String DACO_ACCESS_KEY = "daco";
+  private static final String CLOUD_ACCESS_KEY = "cloudAccess";
   private static final String TOKEN_KEY = "token";
   private static final String PASSWORD_KEY = "password";
   private static final String USERNAME_KEY = "username";
@@ -185,13 +185,18 @@ public class AuthResource extends BaseResource {
     log.debug("[{}] Created user: {}", sessionTokenString, user);
 
     try {
-      log.debug("[{}] Checking if the user has the DACO access", sessionTokenString);
-      if (authService.hasDacoAccess(userName, userType)) {
+      log.debug("[{}] Checking if the user has DACO and cloud access", sessionTokenString);
+      val dacoUserOpt = authService.getDacoUser(userType, userName);
+      if (dacoUserOpt.isPresent()) {
+        val dacoUser = dacoUserOpt.get();
         log.info("[{}] Granted DACO access to the user", sessionTokenString);
         user.setDaco(true);
+
+        if (dacoUser.isCloudAccess()) {
+          log.info("[{}] Granted DACO cloud access to the user", sessionTokenString);
+          user.setCloudAccess(true);
+        }
       }
-    } catch (ICGCEntityNotFoundException e) {
-      log.debug("[{}] User '{}' is not granted the DACO access", sessionTokenString, userName);
     } catch (ICGCException e) {
       throwAuthenticationException("Failed to grant DACO access to the user",
           format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
@@ -211,7 +216,7 @@ public class AuthResource extends BaseResource {
   @POST
   @Path("/login")
   public Response login(Map<String, String> creds) {
-    checkRequest((creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
+    checkRequest((creds == null || creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
     val username = creds.get(USERNAME_KEY);
     log.info("Logging into CUD as {}", username);
 
@@ -278,8 +283,11 @@ public class AuthResource extends BaseResource {
     log.debug("Creating successful verified response for user: {}", user);
     val cookie = createSessionCookie(CrowdProperties.SESSION_TOKEN_NAME, user.getSessionToken().toString());
 
-    return Response.ok(ImmutableMap.of(TOKEN_KEY, user.getSessionToken(), USERNAME_KEY, user.getEmailAddress(),
-        DACO_ACCESS_KEY, user.getDaco()))
+    return Response.ok(ImmutableMap.of(
+        TOKEN_KEY, user.getSessionToken(),
+        USERNAME_KEY, user.getEmailAddress(),
+        DACO_ACCESS_KEY, user.getDaco(),
+        CLOUD_ACCESS_KEY, user.getCloudAccess()))
         .header(SET_COOKIE, cookie.toString())
         .build();
   }

@@ -1,8 +1,8 @@
-<div data-ng-if="!AdvancedCtrl.Donor.donors" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
+<div data-ng-if="!AdvancedCtrl.Donor.donors || ! AdvancedCtrl.Donor.donors.hitsLoaded" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
     Loading Donors...
 </h3></div>
-<div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0" class="empty loading-text"><h3>No Donors Found.</h3></div>
-<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length">
+<div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0 && AdvancedCtrl.Donor.donors.hitsLoaded" class="empty loading-text"><h3>No Donors Found.</h3></div>
+<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length && AdvancedCtrl.Donor.donors.hitsLoaded">
     <section style="position: relative">
         <div data-ng-class="{'graphs-collapsed': !donorExpand}" class="graphs">
             <pie items='AdvancedCtrl.Donor.pieProjectId' heading="Project" label="Donors" type="pie" width="195" group-percent="3"
@@ -37,7 +37,6 @@
         <h3>
             Donors
 
-
             <span class="action-toolbar pull-right">
                <span class="action-item">
                    <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('donor', AdvancedCtrl.Donor.donors.pagination.total)">Save Donor Set</a>
@@ -52,13 +51,13 @@
                </span>
                <span class="action-item">
                    <span>
-                      <i class="icon-database"></i><span></span><a href="" data-ng-click="AdvancedCtrl.viewExternal('donor', AdvancedCtrl.Donor.donors.pagination.total)">View in External Repositories</a></span>
+                      <i class="icon-download-cloud"></i><span>
+                      <a href="" data-ng-click="AdvancedCtrl.viewExternal('donor', AdvancedCtrl.Donor.donors.pagination.total)">
+                      View in {{:: AdvancedCtrl.dataRepoTitle }}</a></span>
                    </span>
                </span>
             </span>
         </h3>
-
-
 
         <div class="t_table_top">
             <span data-table-counts data-label="donors" data-page="AdvancedCtrl.Donor.donors.pagination"></span>

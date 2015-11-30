@@ -21,6 +21,7 @@ import static java.lang.String.format;
 import static org.dcc.portal.pql.ast.visitor.Visitors.createEsAstVisitor;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
@@ -51,6 +52,7 @@ public class QueryEngine {
   private final QueryContext observationContext;
   private final QueryContext projectContext;
   private final QueryContext repositoryFileContext;
+  private final QueryContext drugContext;
 
   public QueryEngine(@NonNull Client client, @NonNull String index) {
     this.requestBuilder = new EsRequestBuilder(client);
@@ -61,6 +63,7 @@ public class QueryEngine {
     this.observationContext = new QueryContext(index, OBSERVATION_CENTRIC);
     this.projectContext = new QueryContext(index, PROJECT);
     this.repositoryFileContext = new QueryContext(index, REPOSITORY_FILE);
+    this.drugContext = new QueryContext(index, DRUG);
   }
 
   public QueryRequest execute(@NonNull String pql, @NonNull Type type) {
@@ -98,6 +101,8 @@ public class QueryEngine {
       return projectContext;
     case REPOSITORY_FILE:
       return repositoryFileContext;
+    case DRUG:
+      return drugContext;
     default:
       throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
     }

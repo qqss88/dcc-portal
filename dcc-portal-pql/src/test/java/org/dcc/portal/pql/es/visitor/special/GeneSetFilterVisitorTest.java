@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.visitor.special;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
@@ -314,6 +315,8 @@ public class GeneSetFilterVisitorTest {
     case MUTATION_CENTRIC:
       contextOpt = getMutationContextOptional();
       break;
+    default:
+      fail("The 'indexType' argument in this test can only be DONOR_CENTRIC or MUTATION_CENTRIC.");
     }
 
     val result = root.accept(visitor, contextOpt).get();

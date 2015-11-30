@@ -1,6 +1,6 @@
 {  
   "index":{  
-    "_index":"test-repo-index",
+    "_index":"test-icgc-repository",
     "_type":"file-centric",
     "_id":"FI49283"
   }
@@ -36,8 +36,8 @@
       "file_md5sum": "ffe2ed5dedcf27e52280c16db5eb2d04",
       "last_modified": 1420480562,
       "index_file": {
-        "id": "62de8725-94ee-5f4f-9778-d8ce288a2f1e",
-        "file_id": "FI210995",
+        "id": "FI210995",
+        "object_id": "62de8725-94ee-5f4f-9778-d8ce288a2f1e",
         "file_name": "ffe2ed5dedcf27e52280c16db5eb2d04.bam.bai",
         "file_format": "BAI",
         "file_size": 11381552,
@@ -78,7 +78,7 @@
 
 {  
   "index":{  
-    "_index":"test-repo-index",
+    "_index":"test-icgc-repository",
     "_type":"file-centric",
     "_id":"FI226785"
   }
