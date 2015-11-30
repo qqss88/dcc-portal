@@ -19,8 +19,13 @@ package org.icgc.dcc.portal.repository;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
+import static java.lang.Math.min;
 import static lombok.AccessLevel.PRIVATE;
 import static org.elasticsearch.index.query.FilterBuilders.termsLookupFilter;
+import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_TEXT;
+import static org.icgc.dcc.portal.model.IndexModel.Type.REPOSITORY_FILE_DONOR_TEXT;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.toBoolFilterFrom;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.toDonorBoolFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
 import java.util.Collections;
@@ -28,11 +33,22 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Min;
 
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
+import org.icgc.dcc.portal.config.PortalProperties;
+import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
+import org.icgc.dcc.portal.model.UnionUnit;
+import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
@@ -55,11 +71,31 @@ public class TermsLookupRepository {
   public static final String TERMS_LOOKUP_PATH = "values";
   public static final String TERMS_LOOKUP_INDEX_NAME = "terms-lookup";
 
+  private final static MatchAllQueryBuilder MATCH_ALL = QueryBuilders.matchAllQuery();
+
   /**
    * Dependencies.
    */
   @NonNull
   private final Client client;
+  @Value("#{indexName}")
+  private final String indexName;
+  @Value("#{repoIndexName}")
+  private final String repoIndexName;
+  @NonNull
+  private final PortalProperties properties;
+
+  /**
+   * Configuration.
+   */
+  @Min(1)
+  private int maxNumberOfHits;
+  @Min(1)
+  private int maxMultiplier;
+  @Min(1)
+  private int maxUnionCount;
+  @Min(1)
+  private int maxPreviewNumberOfHits;
 
   /**
    * Supported index types.
@@ -107,6 +143,12 @@ public class TermsLookupRepository {
     } catch (Throwable t) {
       propagate(t);
     }
+
+    val setOpSettings = properties.getSetOperation();
+    maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
+    maxMultiplier = setOpSettings.getMaxMultiplier();
+    maxUnionCount = maxNumberOfHits * maxMultiplier;
+    maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
   }
 
   @SneakyThrows
@@ -149,6 +191,83 @@ public class TermsLookupRepository {
         .lookupIndex(TERMS_LOOKUP_INDEX_NAME)
         .lookupType(type.getName())
         .lookupPath(TERMS_LOOKUP_PATH);
+  }
+
+  public SearchResponse runUnionEsQuery(
+      final String indexTypeName,
+      @NonNull final SearchType searchType,
+      @NonNull final BoolFilterBuilder boolFilter,
+      final int max) {
+
+    val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
+
+    val search = client
+        .prepareSearch(indexName)
+        .setTypes(indexTypeName)
+        .setSearchType(searchType)
+        .setQuery(query)
+        .setSize(max)
+        .setNoFields();
+
+    log.debug("ElasticSearch query is: '{}'", search);
+    val response = search.execute().actionGet();
+    log.debug("ElasticSearch result is: '{}'", response);
+
+    return response;
+  }
+
+  public SearchResponse donorSearchRequest(final BoolFilterBuilder boolFilter) {
+    val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
+
+    val search = client
+        .prepareSearch(repoIndexName, indexName)
+        .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
+        .setQuery(query)
+        .setSize(maxUnionCount)
+        .setNoFields()
+        .setSearchType(SearchType.DEFAULT);
+
+    log.debug("ElasticSearch query is: '{}'", search);
+    val response = search.execute().actionGet();
+    log.debug("ElasticSearch result is: '{}'", response);
+
+    return response;
+  }
+
+  public long getUnionCount(
+      final UnionUnit unionDefinition,
+      final BaseEntitySet.Type entityType) {
+
+    val response = runUnionEsQuery(
+        entityType.getIndexTypeName(),
+        SearchType.COUNT,
+        toBoolFilterFrom(unionDefinition, entityType),
+        maxUnionCount);
+
+    val count = getCountFrom(response, maxUnionCount);
+    log.debug("Total hits: {}", count);
+
+    return count;
+  }
+
+  public SearchResponse getDonorUnion(final Iterable<UnionUnit> definitions) {
+    val boolFilter = toBoolFilterFrom(definitions, BaseEntitySet.Type.DONOR);
+    val response = donorSearchRequest(boolFilter);
+
+    return response;
+  }
+
+  public long getDonorCount(final UnionUnit unionDefinition) {
+    val boolFilter = toDonorBoolFilter(unionDefinition);
+    val response = donorSearchRequest(boolFilter);
+
+    return SearchResponses.getHitIdsSet(response).size();
+  }
+
+  private long getCountFrom(@NonNull final SearchResponse response, final long max) {
+    val result = SearchResponses.getTotalHitCount(response);
+
+    return min(max, result);
   }
 
   private String createSettings() {
