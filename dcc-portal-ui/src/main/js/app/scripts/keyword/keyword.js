@@ -53,10 +53,6 @@
     var keyword2 = keyword.toUpperCase();
 
     var tokens = [keyword2].concat (words (keyword2));
-    var matchKeyword = _.find (tokens, function (token) {
-      return _.contains (phrase2, token);
-    });
-
     var matchKeyword = _(tokens)
       .unique()
       .find (function (token) {

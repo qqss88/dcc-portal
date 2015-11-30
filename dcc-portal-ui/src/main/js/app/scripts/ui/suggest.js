@@ -106,7 +106,6 @@ angular.module('icgc.ui.suggest').controller('suggestController',
         return _.contains (phrase2, token);
       });
 
-
     return ! _.isUndefined (matchKeyword);
   }
 

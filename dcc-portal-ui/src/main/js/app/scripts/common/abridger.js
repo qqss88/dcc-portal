@@ -45,7 +45,8 @@
     return _.words (phrase, /[^, ]+/g);
   }
 
-  // Abridger class - trying to keep this class lightweight so not using prototype (will do so if there's need to subclass)
+  // Abridger class - trying to keep this class lightweight
+  // so not using prototype (will do so if there's need to subclass)
   function Abridger (maxLength) {
     var ellipsis = '...';
 
