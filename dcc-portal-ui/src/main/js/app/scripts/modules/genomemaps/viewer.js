@@ -56,7 +56,10 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         19: 59128983,
         20: 63025520,
         21: 48129895,
-        22: 51304566
+        22: 51304566,
+        X: 155270560,
+        Y: 59373566,
+        MT: 16569
       };
 
       function getSpecies(callback) {
@@ -181,7 +184,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
             params: {},
             species: genomeViewer.species,
             cacheConfig: {
-              chunkSize: 100
+              chunkSize: 1000
             }
           })
         });
@@ -205,8 +208,8 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           dataAdapter: new IcgcGeneAdapter({
             resource: 'gene',
             chromosomeLimitMap: _chromosomeLimitMap,
-            //multiRegions: true,
-            //histogramMultiRegions: false,
+            multiRegions: true,
+            histogramMultiRegions: false,
             /* TODO: use BASE_URL */
             //uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene',
             cacheConfig: {
@@ -222,7 +225,8 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
           minTranscriptRegionSize: 300000,
-          height: 100,
+          //height: 100,
+          autoHeight: true,
           renderer: new GeneRenderer({
             tooltipContainerID: '#genomic',
             handlers: {
@@ -238,8 +242,8 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
             //multiRegions: true,
             resource: 'gene',
             chromosomeLimitMap: _chromosomeLimitMap,
-            //multiRegions: true,
-            //histogramMultiRegions: false,
+            multiRegions: true,
+            histogramMultiRegions: false,
             /* TODO: use BASE_URL */
             //uriTemplate: 'https://dcc.icgc.org/api/browser/gene?segment={region}&resource=gene&dataType=withTranscripts',
             cacheConfig: {

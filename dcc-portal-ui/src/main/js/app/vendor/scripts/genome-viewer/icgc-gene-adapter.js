@@ -203,7 +203,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
     var k = segment.chromosome + ':' + fc;
 
     if (_this.featureCache.cache[key] == null || _this.featureCache.cache[key][dataType] == null) {
-      _this.featureCache.putFeaturesByRegion(jsonResponse, segment, 'gene', dataType);
+      _this.featureCache.putFeaturesByRegion(jsonResponse || {}, segment, 'gene', dataType);
     }
 //        }
 

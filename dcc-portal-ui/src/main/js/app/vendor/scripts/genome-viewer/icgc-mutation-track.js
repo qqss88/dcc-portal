@@ -35,6 +35,7 @@ function IcgcMutationTrack(args) {
   //save default render reference;
   this.defaultRenderer = this.renderer;
   this.histogramRenderer = new HistogramRenderer();
+  this.resource = this.dataAdapter.resource;
 
   this.chunksDisplayed = {};
 
@@ -42,6 +43,44 @@ function IcgcMutationTrack(args) {
   _.extend(this, args);
 }
 
+
+IcgcMutationTrack.prototype.updateHeight = function () {
+  //this._updateHeight();
+  if (this.histogram) {
+    this.contentDiv.style.height = this.histogramRenderer.histogramHeight + 5 + 'px';
+    this.main.setAttribute('height', this.histogramRenderer.histogramHeight);
+    return;
+  }
+
+  var renderedHeight = this.svgCanvasFeatures.getBoundingClientRect().height;
+  this.main.setAttribute('height', renderedHeight);
+
+  if (this.resizable) {
+    if (this.autoHeight == false) {
+      this.contentDiv.style.height = this.height + 10 + 'px';
+    } else if (this.autoHeight == true) {
+      var x = this.pixelPosition;
+      var width = this.width;
+      var lastContains = 0;
+      for (var i in this.renderedArea) {
+        if (this.renderedArea[i].contains({
+            start: x,
+            end: x + width
+          })) {
+          lastContains = i;
+        }
+      }
+      var visibleHeight = parseInt(lastContains) + 30;
+      this.contentDiv.style.height = visibleHeight + 10 + 'px';
+      this.main.setAttribute('height', visibleHeight);
+    }
+  }
+};
+
+IcgcMutationTrack.prototype.setWidth = function(width) {
+  this._setWidth(width);
+  this.main.setAttribute("width", this.width);
+};
 
 IcgcMutationTrack.prototype.initializeDom = function(targetId) {
   this._initializeDom(targetId);
