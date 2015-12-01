@@ -252,7 +252,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         tracks.icgcGeneOverviewTrack = new IcgcGeneTrack({
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
-          //height: 100,
+          height: 100,
           autoHeight: true,
           renderer: icgcGeneOverviewRenderer,
           dataAdapter: new IcgcGeneAdapter({
@@ -275,8 +275,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           minHistogramRegionSize: 20000000,
           maxLabelRegionSize: 10000000,
           minTranscriptRegionSize: 300000,
-          //height: 100,
-          autoHeight: true,
+          height: 100,
           renderer: new GeneRenderer({
             tooltipContainerID: '#genomic',
             handlers: {
@@ -560,7 +559,6 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         tracks.sequence = new FeatureTrack({
           title: 'Sequence',
           height: 30,
-          autoHeight: true,
           visibleRegionSize: 200,
           renderer: new SequenceRenderer({tooltipContainerID: '#genomic'}),
           dataAdapter: new CellBaseAdapter({
@@ -647,7 +645,6 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           maxLabelRegionSize: 10000000,
           minTranscriptRegionSize: 300000,
           height: 100,
-          autoHeight: true,
           renderer: new GeneRenderer({
           tooltipContainerID: '#genomic',
             handlers: {
@@ -678,7 +675,6 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           minHistogramRegionSize: 10000,
           maxLabelRegionSize: 3000,
           height: 100,
-          autoHeight: true,
 
           renderer: new FeatureRenderer({
             tooltipContainerID: '#genomic',
