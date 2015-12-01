@@ -147,7 +147,8 @@
 
         Keyword.getList({q: $scope.query, type: $scope.type, size: pageSize, from: $scope.from})
           .then(function (response) {
-            $scope.isFinished = response.pagination.total - $scope.from < pageSize;
+            var total = _.get (response, 'pagination', 0);
+            $scope.isFinished = (total < 1) || total - $scope.from < pageSize;
             $scope.isBusy = false;
             $scope.activeQuery = saved;
 
