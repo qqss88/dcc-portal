@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015 (c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -20,37 +20,90 @@
 
   _.mixin ({
     pairUp: function (arrays) {
-      var resolved = _.map (arrays, function (o) {
-        return o.value();
-      });
-      return _.zip.apply (_, resolved);
+      return _.zip.apply (_, arrays);
     }
   });
 
-  function caseInsensitivelyContains (word, partial) {
-    return _.contains (word.toUpperCase(), partial.toUpperCase());
+  function ensureArray (array) {
+    return _.isArray (array) ? array : [];
   }
 
-  // Abridger class
-  // TODO: enforce the rule of calling 'new' to instantiate an instance
+  function ensureString (string) {
+    return _.isString (string) ? string.trim() : '';
+  }
+
+  // Higher-order function to return a partial function (to perform substring) for a sentence (captured).
+  function subStringer (sentence) {
+    var f = _.spread (_.partial (_.method, 'substr'));
+
+    return function (positions) {
+      return f (positions) (sentence);
+    };
+  }
+
+  function words (phrase) {
+    return _.words (phrase, /[^, ]+/g);
+  }
+
+  // Abridger class - trying to keep this class lightweight
+  // so not using prototype (will do so if there's need to subclass)
   function Abridger (maxLength) {
     var ellipsis = '...';
+
+    // TODO: re-joining like this actually doesn't necessarily
+    // reproduce the original partial sentence as _.words() strips out punctuations.
+    function reconstruct (fragments, sentence) {
+      var joined = fragments.join (' ').trim();
+      var dots = function (f) {
+        return f (sentence, joined) ? '' : ellipsis;
+      };
+
+      return dots (_.startsWith) + joined + dots (_.endsWith);
+    }
+
+    function anyMatch (sentence, keyword) {
+      if (_.isEmpty (sentence)) {
+        return {};
+      }
+
+      var sentence2 = sentence.toUpperCase();
+      var keyword2 = keyword.toUpperCase();
+
+      var tokens = [keyword2].concat (words (keyword2));
+      var matchKeyword = _(tokens)
+        .unique()
+        .find (function (token) {
+          return _.contains (sentence2, token);
+        });
+
+      return _.isUndefined (matchKeyword) ? {} : {
+        sentence: sentence,
+        keyword: matchKeyword
+      };
+    }
+
+    //
     var _this = this;
 
     this.maxLength = maxLength;
 
     this.find = function (sentence, keyword) {
-      var words = _.words (sentence);
-      var index = _.findIndex (words, function (word) {
-        return caseInsensitivelyContains (word, keyword);
-      });
+      var sentence2 = sentence.toUpperCase();
+      var keyword2 = keyword.toUpperCase();
 
+      var index = sentence2.indexOf (keyword2);
+      var start = _.lastIndexOf (sentence2, ' ', index) + 1;
+      var end = _.indexOf (sentence2, ' ', index + keyword2.length);
+      end = (end < 0) ? sentence2.length : end;
+
+      var substring = subStringer (sentence);
       return {
-        target: words [index],
-        left: _(words).take (index).reverse(),
-        right: _(words).slice (index).rest()
+        target: [substring ([start, end - start])],
+        left: words (substring ([0, start])),
+        right: words (substring ([end]))
       };
     };
+
     var withinLimit = this.withinLimit = function (newElements) {
       var combined = _(_this.resultArray).concat (newElements);
 
@@ -69,6 +122,7 @@
         return true;
       } else {
 
+        // This mutates currentProcessor.
         if (_.size (left) >= _.size (right)) {
           if (withinLimit (left)) {
             _this.currentProcessor = _this.processLeftOnly;
@@ -113,38 +167,55 @@
 
       return false;
     };
+
     this.hasRoom = function (newElements) {
       return _this.currentProcessor (newElements);
     };
 
-    this.format = function (fragments, sentence) {
-      var joined = fragments.join (' ').trim();
-      var dots = function (f) {
-        return f (sentence, joined) ? '' : ellipsis;
-      };
-
-      return dots (_.startsWith) + joined + dots (_.endsWith);
+    this.init = function (initResult) {
+      _this.resultArray = initResult;
+      _this.currentProcessor = _this.processLeftAndRight;
     };
 
-    this.abridge = function (sentence, keyword) {
-      var finding = _this.find (sentence, keyword);
+    this.abridge = function (sentences, keyword) {
+      keyword = ensureString (keyword);
 
-      _this.resultArray = [finding.target];
-      _this.currentProcessor = _this.processLeftAndRight;
+      if (_.isEmpty (keyword)) {
+        return '';
+      }
 
+      var matchingPair = _.reduce (ensureArray (sentences), function (result, sentence) {
+        return _.isEmpty (result) ? anyMatch (ensureString (sentence), keyword) : result;
+      }, {});
+
+      if (_.isEmpty (matchingPair)) {
+        return '';
+      }
+
+      var finding = _this.find (matchingPair.sentence, matchingPair.keyword);
+
+      if (_.isEmpty (finding)) {
+        return '';
+      }
+
+      _this.init (finding.target);
+
+      // This is a hack as it violates FP. If this hurts, turn it into a for-loop with guards.
       _([finding.left, finding.right])
         .pairUp()
         .takeWhile (_this.hasRoom)
         .value();
 
-      return _this.format (_this.resultArray, sentence);
+      return reconstruct (_this.resultArray, matchingPair.sentence);
     };
 
+    // Declaring these fields here is more for the purpose of documentation,
+    // less about initialization, as init() resets these two fields.
     this.currentProcessor = this.processLeftAndRight;
     this.resultArray = [];
   }
 
-
+  // Expose Abridger as an NG service
   var namespace = 'icgc.common.text.utils';
   var serviceName = 'Abridger';
 
@@ -152,7 +223,9 @@
 
   module.factory (serviceName, function () {
     return {
-      Abridger: Abridger
+      of: function (maxLength) {
+        return new Abridger (maxLength);
+      }
     };
   });
 })();

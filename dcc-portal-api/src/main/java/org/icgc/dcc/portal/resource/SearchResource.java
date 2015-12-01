@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.resource;
 
+import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.List;
@@ -53,7 +54,9 @@ import com.yammer.metrics.annotation.Timed;
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class SearchResource {
 
+  private static final Keywords EMPTY_RESULT = new Keywords(emptyList());
   private static final String DEFAULT_FILTERS = "{}";
+
   protected static final String DEFAULT_SIZE = "10";
   protected static final String DEFAULT_FROM = "1";
   protected static final String DEFAULT_SORT = "_score";
@@ -74,6 +77,10 @@ public class SearchResource {
       @ApiParam(value = "Number of results returned", allowableValues = "range[1,100]") @QueryParam("size") @DefaultValue(DEFAULT_SIZE) IntParam size
       ) {
     log.debug("Request for keyword search: {}", q);
+
+    if (q.isEmpty()) {
+      return EMPTY_RESULT;
+    }
 
     val query = Query.builder().query(q);
     val keywords = type.equals("file-donor") ?

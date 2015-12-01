@@ -87,20 +87,35 @@ angular.module('icgc.ui.suggest').controller('suggestController',
     return _.isString (string) ? string.trim() : '';
   }
 
-  function caseInsensitivelyContains (word, partial) {
-    return _.contains (word.toUpperCase(), partial.toUpperCase());
+  function words (phrase) {
+    return _.words (phrase, /[^, ]+/g);
+  }
+
+  function partiallyContainsIgnoringCase (phrase, keyword) {
+    if (_.isEmpty (phrase)) {
+      return false;
+    }
+
+    var phrase2 = phrase.toUpperCase();
+    var keyword2 = keyword.toUpperCase();
+
+    var tokens = [keyword2].concat (words (keyword2));
+    var matchKeyword = _(tokens)
+      .unique()
+      .find (function (token) {
+        return _.contains (phrase2, token);
+      });
+
+    return ! _.isUndefined (matchKeyword);
   }
 
   var maxAbrigementLength = 80;
-  var abridger = new Abridger.Abridger (maxAbrigementLength);
+  var abridger = Abridger.of (maxAbrigementLength);
 
   function abridge (array) {
     var target = $scope.query;
-    var match = _.find (ensureArray (array), function (sentence) {
-      return caseInsensitivelyContains (ensureString (sentence), target);
-    });
 
-    return match ? abridger.abridge (match, target) : '';
+    return abridger.abridge (array, target);
   }
 
   var maxConcat = 3;
@@ -108,7 +123,7 @@ angular.module('icgc.ui.suggest').controller('suggestController',
   function concatMatches (array, target) {
     var matches = _(ensureArray (array))
       .filter (function (element) {
-        return caseInsensitivelyContains (ensureString (element), target);
+        return partiallyContainsIgnoringCase (ensureString (element), target);
       })
       .take (maxConcat);
 
