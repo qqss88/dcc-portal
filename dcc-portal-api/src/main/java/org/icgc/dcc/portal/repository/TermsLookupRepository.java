@@ -104,10 +104,7 @@ public class TermsLookupRepository {
   @RequiredArgsConstructor(access = PRIVATE)
   public enum TermLookupType {
 
-    GENE_IDS("gene-ids"),
-    MUTATION_IDS("mutation-ids"),
-    DONOR_IDS("donor-ids"),
-    FILE_IDS("file-ids");
+    GENE_IDS("gene-ids"), MUTATION_IDS("mutation-ids"), DONOR_IDS("donor-ids"), FILE_IDS("file-ids");
 
     @NonNull
     private final String name;
@@ -116,6 +113,12 @@ public class TermsLookupRepository {
 
   @PostConstruct
   public void init() {
+    val setOpSettings = properties.getSetOperation();
+    maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
+    maxMultiplier = setOpSettings.getMaxMultiplier();
+    maxUnionCount = maxNumberOfHits * maxMultiplier;
+    maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
+
     val indexName = TERMS_LOOKUP_INDEX_NAME;
     val index = client.admin().indices();
 
@@ -143,12 +146,6 @@ public class TermsLookupRepository {
     } catch (Throwable t) {
       propagate(t);
     }
-
-    val setOpSettings = properties.getSetOperation();
-    maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
-    maxMultiplier = setOpSettings.getMaxMultiplier();
-    maxUnionCount = maxNumberOfHits * maxMultiplier;
-    maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
   }
 
   @SneakyThrows
