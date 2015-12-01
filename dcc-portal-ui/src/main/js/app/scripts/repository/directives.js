@@ -359,6 +359,7 @@
           }
           return d;
         }
+
         // Setup length histrogram chart
         charts.lengthChart = histogramViewFinderD3().width(width)
           .height(height);
