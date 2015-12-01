@@ -44,7 +44,6 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.query.PqlParseTreeVisitor;
 import org.dcc.portal.pql.utils.Tests;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
@@ -66,6 +65,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.junit.Test;
 
 @Slf4j
+@SuppressWarnings("deprecation")
 public class PqlParseTreeVisitorTest {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new DonorCentricTypeModel());
@@ -337,7 +337,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitSelectTest() {
     val parseTree = createParseTree("select(ageAtDiagnosis, gender)");
-    val selectContext = (SelectContext) parseTree.getChild(0);
+    val selectContext = (SelectContext) parseTree.getChild(0).getChild(0);
     val fieldsNode = (FieldsNode) VISITOR.visitSelect(selectContext);
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
     assertThat(fieldsNode.getFields()).containsOnly("donor_age_at_diagnosis", "donor_sex");
@@ -346,7 +346,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitSelectAllTest() {
     val parseTree = createParseTree("select(*)");
-    val selectContext = (SelectContext) parseTree.getChild(0);
+    val selectContext = (SelectContext) parseTree.getChild(0).getChild(0);
     val fieldsNode = (FieldsNode) VISITOR.visitSelect(selectContext);
 
     val fields = IndexModel.getDonorCentricTypeModel().getFields();
@@ -411,7 +411,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitFacetsTest() {
     val parseTree = createParseTree("facets(gender, id)");
-    val facetsContext = (FacetsContext) parseTree.getChild(0);
+    val facetsContext = (FacetsContext) parseTree.getChild(0).getChild(0);
     val facetsNode = (AggregationsNode) VISITOR.visitFacets(facetsContext);
     log.debug("Facets node: {}", facetsNode);
 
