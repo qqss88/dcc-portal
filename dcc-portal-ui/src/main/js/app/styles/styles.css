@@ -6168,7 +6168,7 @@ td {
 }
 
 /* line 486, ../vendor/styles/bamiobio/site.scss */
-.iobio-tooltip {
+#iobio-tooltip {
   position: absolute;
   text-align: center;
   z-index: 20;

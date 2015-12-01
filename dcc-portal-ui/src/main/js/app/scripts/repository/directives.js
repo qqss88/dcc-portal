@@ -77,6 +77,7 @@
           });
         };
 
+        // Highlights the selected chromosome button
         scope.highlightSelectedSeq = function (chrId) {
           scope.chromosomes.forEach(function (chr) {
             if (chr.id === chrId) {
@@ -89,14 +90,14 @@
         };
 
         scope.setSelectedSeq = function (selectedChrId, start, end) {
-          var dataId = selectedChrId;
-          charts.depthChart(bam.readDepth[dataId]);
+          scope.chromosomeId = selectedChrId;
+          charts.depthChart(bam.readDepth[scope.chromosomeId]);
           // Reset brush
           resetBrush();
           // Start sampling
           if (start !== undefined && end !== undefined) {
             goSampling({
-              sequenceNames: [dataId],
+              sequenceNames: [scope.chromosomeId],
               'start': start,
               'end': end
             });
@@ -106,7 +107,7 @@
               brush.extent([start, end]));
           } else {
             goSampling({
-              sequenceNames: [dataId]
+              sequenceNames: [scope.chromosomeId]
             });
           }
         };
@@ -118,14 +119,16 @@
           }
           sampleMultiplier += 1;
           var options = {
-            sequenceNames: [getSelectedSeqId()],
+            sequenceNames: [scope.chromosomeId],
             binNumber: binNumber + parseInt(binNumber / 4 * sampleMultiplier),
             binSize: binSize + parseInt(binSize / 4 * sampleMultiplier)
           };
-          if (charts.depthChart.brush().extent().length !== 0 &&
-            charts.depthChart.brush().extent().toString() !== '0,0') {
-            options.start = parseInt(charts.depthChart.brush().extent()[0]);
-            options.end = parseInt(charts.depthChart.brush().extent()[1]);
+          // Sets new options and samples for new statistics
+          var lengthExtent = charts.depthChart.brush().extent();
+          if (lengthExtent.length !== 0 &&
+            lengthExtent.toString() !== '0,0') {
+            options.start = parseInt(lengthExtent[0]);
+            options.end = parseInt(lengthExtent[1]);
           }
           goSampling(options);
         };
@@ -175,13 +178,13 @@
               // Update depth distribution
               charts.depthChart.on('brushend', function (x, brush) {
                 var options = {
-                  sequenceNames: [getSelectedSeqId()]
+                  sequenceNames: [scope.chromosomeId]
                 };
                 if (!brush.empty()) {
                   options.start = parseInt(brush.extent()[0]);
                   options.end = parseInt(brush.extent()[1]);
                   scope.region = {
-                    chr: getSelectedSeqId(),
+                    chr: scope.chromosomeId,
                     'start': options.start,
                     'end': options.end
                   };
@@ -206,10 +209,9 @@
           brush(g);
         }
 
+        // Determines the format of the current total reads sampled and shortens if necessary
         function updateTotalReads(totalReads) {
-
           var numOfReadDigits = totalReads.toString().length;
-
           if (numOfReadDigits <= 3) {
             scope.readsSampled.value = totalReads;
             scope.readsSampled.units = '';
@@ -220,29 +222,29 @@
             scope.readsSampled.value = Math.round(totalReads / 1000000);
             scope.readsSampled.units = 'million';
           }
+          // Need to trigger a digest cycle if one is not already in progress
+          // Timeout needs a function as a parameter, passed in empty function
           $timeout($.noop, 0);
         }
 
         function goSampling(options) {
           // Add default options
           options = $.extend({
-            exomeSampling: 'checked' === $('#depth-distribution input')
-              .attr('checked'),
             bed: window.bed,
             onEnd: function () {
               cfpLoadingBar.complete();
             }
           }, options);
-          var rand = Math.random().toString(36).substr(2, 9);
           // Turn on sampling message and off svg
           $('section#middle svg').css('display', 'none');
           $('.samplingLoader').css('display', 'block');
           updateTotalReads(0);
           cfpLoadingBar.start();
+          // Sets progress bar to 0 because of existing progress bar on page
           cfpLoadingBar.set(0);
           // Update selected stats
           bam.sampleStats(function (data, seq) {
-            if (getSelectedSeqId() !== seq) {
+            if (scope.chromosomeId !== seq) {
               return;
             }
             // Turn off sampling message
@@ -272,7 +274,7 @@
             }
             // Update charts
             updatePercentCharts(data, sampleDonutChart);
-            updateTotalReads(data.total_reads, rand);
+            updateTotalReads(data.total_reads);
             updateHistogramCharts(data, undefined, 'sampleBar');
           }, options);
         }
@@ -346,8 +348,7 @@
               return [+k, +histograms.baseq_hist[k]];
             });
           }
-          selection = d3.select(
-            '#mapping-quality-distribution-chart').datum(d);
+          selection = d3.select('#mapping-quality-distribution-chart').datum(d);
           charts.qualityChart(selection);
         }
 
