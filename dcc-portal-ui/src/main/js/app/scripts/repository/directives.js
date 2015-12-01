@@ -27,15 +27,15 @@
         bamId: '='
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
-      link: function (scope) {
+      link: function (scope, element) {
         // Initialize charts
         // Get height width of histogram charts and set viewboxes
         var readCoverageSvg = $('#read-coverage-distribution-chart');
         var width = readCoverageSvg.width();
         var height = readCoverageSvg.height();
-        
+
         // Viewboxes
-        var dists = document.getElementsByClassName('focus');
+        var dists = $('.focus', element);
 
         // Setup donut chart
         var sampleDonutChart = donutD3().radius(100).klass(
@@ -50,34 +50,23 @@
         var sampleMultiplier = 1;
         var sampleMultiplierLimit = 4;
 
-        var bam;
+        var bam = new Bam(scope.bamId);
 
         var charts = {};
-        var bamId = scope.bamId;
-        scope.chromosomes = [];
-        scope.showOutliers = false;
-        scope.readsSampled = {};
-        scope.chartDataId = 'frag_hist';
-        scope.chromosomeId;
 
         // Setup main window read depth chart
         charts.depthChart = movingLineD3('#read-depth-container');
 
         // Setup read coverage histogram chart
         var readCoverageChart = histogramViewFinderD3().width(width).height(height);
-        
+
         readCoverageChart.yAxis().tickFormat(function (d) {
           return d * 100 + '%';
         });
 
-        // Need to be set at runtime to get accurate height/width
-        for (var i = 0; i < dists.length; i++) {
-          dists[i].setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-        }
-
         scope.toggleOutliers = function () {
           scope.showOutliers = !scope.showOutliers;
-            var h = sampleStats[scope.chartDataId],
+          var h = sampleStats[scope.lengthChartDataId],
             d = Object.keys(h).map(function (k) {
               return [+k, +h[k]];
             }),
@@ -144,7 +133,6 @@
           goSampling(options);
         };
 
-
         scope.toggleChart = function (event, chartId) {
           var elem = event.target;
           if ($(elem).hasClass('selected')) {
@@ -155,8 +143,14 @@
           $(pair).toggleClass('selected');
 
           // Redraw chart
-          scope.chartDataId = elem.getAttribute('data-id');
-          var h = sampleStats[scope.chartDataId];
+          var h;
+          if (elem.getAttribute('data-id') === 'frag_hist' || elem.getAttribute('data-id') === 'length_hist') {
+            scope.lengthChartDataId = elem.getAttribute('data-id');
+            h = sampleStats[scope.lengthChartDataId];
+          } else {
+            scope.qualityChartDataId = elem.getAttribute('data-id');
+            h = sampleStats[scope.qualityChartDataId];
+          }
           var d = Object.keys(h).map(function (k) {
             return [+k, +h[k]];
           });
@@ -325,7 +319,7 @@
           }
 
           // Update read length distribution
-          if (scope.chartDataId === 'frag_hist') {
+          if (scope.lengthChartDataId === 'frag_hist') {
             d = Object.keys(histograms.frag_hist).filter(
               function (i) {
                 return histograms.frag_hist[i] !== '0';
@@ -345,7 +339,7 @@
           });
 
           // Update map quality distribution
-          if (scope.chartDataId === 'mapq_hist') {
+          if (scope.qualityChartDataId === 'mapq_hist') {
             d = Object.keys(histograms.mapq_hist).map(function (k) {
               return [+k, +histograms.mapq_hist[k]];
             });
@@ -367,11 +361,6 @@
           return d;
         }
 
-        if (bamId !== undefined) {
-          bam = new Bam(bamId);
-          goBam();
-        }
-
         // Setup length histrogram chart
         charts.lengthChart = histogramViewFinderD3().width(width)
           .height(height);
@@ -383,11 +372,23 @@
         charts.qualityChart.xAxis().tickFormat(tickFormatter);
         charts.qualityChart.yAxis().tickFormat(tickFormatter);
 
+        scope.chromosomes = [];
+        scope.showOutliers = false;
+        scope.readsSampled = {};
+        scope.lengthChartDataId = 'frag_hist';
+        scope.qualityChartDataId = 'mapq_hist';
+
+        // Need to be set at runtime to get accurate height/width
+        for (var i = 0; i < dists.length; i++) {
+          dists[i].setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        }
+
         scope.$on('$destroy', function () {
           if (bam.sampleClient !== undefined) {
             bam.sampleClient.close(1000);
           }
         });
+        goBam();
       }
     };
   });
