@@ -248,10 +248,15 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
       };
 
       function enter(e) {
-        if (suggest === 'tags') {
-          addId();
-        } else {
-          goTo(e);
+        if (scope.results === undefined) {
+          return;
+        }
+        else { 
+          if (suggest === 'tags') {
+            addId();
+          } else {
+            goTo(e);
+          }
         }
 
         scope.focus = false;
