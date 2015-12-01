@@ -444,7 +444,7 @@ function ICGCGruntConfigProvider() {
             dot: true,
             cwd: '<%= yeoman.app %>',
             dest: '<%= yeoman.dist %>/styles/fonts/',
-            src: ['vendor/scripts/genome-viewer/vendor/font-awesome/fonts/*' ]
+            src: ['vendor/scripts/genome-viewer/vendor/fontawesome/fonts/*' ]
           }
         ]
       }
