@@ -10,13 +10,17 @@ function histogramD3() {
       xAxis = d3.svg.axis().scale(x).orient("bottom"),
       yAxis = d3.svg.axis().scale(y).orient("left").ticks(6),
       brush = d3.svg.brush().x(x);
-      
-  var div = d3.select('body')
+  
+  if (d3.select('#iobio-tooltip')[0][0] !== null) {
+    var div = d3.select('#iobio-tooltip');
+  } else {
+    var div = d3.select('body')
       .append("div")
-      .attr('class', 'iobio-tooltip')
+      .attr('id', 'iobio-tooltip')
       .style('left', '0px')
       .style('top', '0px')
       .style('opacity', 0);
+  }
 
   function chart(selection, options) {
     // merge options and defaults
