@@ -17,7 +17,6 @@
  */
 package org.icgc.dcc.portal.analysis;
 
-import static java.lang.Math.min;
 import static org.icgc.dcc.portal.repository.TermsLookupRepository.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.toBoolFilterFrom;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
@@ -26,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.Min;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -96,18 +92,6 @@ public class UnionAnalyzer {
   @NonNull
   private final RepositoryFileRepository repositoryFileRepository;
 
-  /**
-   * Configuration.
-   */
-  @Min(1)
-  private int maxNumberOfHits;
-  @Min(1)
-  private int maxMultiplier;
-  @Min(1)
-  private int maxUnionCount;
-  @Min(1)
-  private int maxPreviewNumberOfHits;
-
   @Async
   public void calculateUnionUnitCounts(@NonNull final UUID id, @NonNull final UnionAnalysisRequest request) {
     UnionAnalysisResult analysis = null;
@@ -149,8 +133,7 @@ public class UnionAnalyzer {
     val definitions = definition.getUnion();
     val entityType = definition.getType();
 
-    val response = unionAll(definitions, entityType, maxPreviewNumberOfHits);
-
+    val response = unionAll(definitions, entityType, termsLookupRepository.getMaxPreviewNumberOfHits());
     return SearchResponses.getHitIds(response);
   }
 
@@ -175,6 +158,7 @@ public class UnionAnalyzer {
       SearchResponse response;
       long totalHits;
       Iterable<String> entityIds;
+      val maxUnionCount = termsLookupRepository.getMaxUnionCount();
       if (entityType == BaseEntitySet.Type.DONOR) {
         response = termsLookupRepository.getDonorUnion(definitions);
         entityIds = SearchResponses.getHitIdsSet(response);
@@ -234,15 +218,6 @@ public class UnionAnalyzer {
         max);
 
     return response;
-  }
-
-  @PostConstruct
-  private void init() {
-    val setOpSettings = properties.getSetOperation();
-    maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
-    maxMultiplier = setOpSettings.getMaxMultiplier();
-    maxUnionCount = maxNumberOfHits * maxMultiplier;
-    maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
   }
 
 }

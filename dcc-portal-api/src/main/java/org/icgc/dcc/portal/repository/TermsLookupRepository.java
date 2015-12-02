@@ -95,8 +95,10 @@ public class TermsLookupRepository {
   @Min(1)
   private int maxMultiplier;
   @Min(1)
+  @Getter
   private int maxUnionCount;
   @Min(1)
+  @Getter
   private int maxPreviewNumberOfHits;
 
   /**
