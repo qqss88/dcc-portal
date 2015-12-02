@@ -1018,7 +1018,12 @@ public class RepositoryFileRepository {
 
   @SneakyThrows
   public Map<String, String> getIndexMetaData() {
-    return indexService.getIndexMetaData(client, repoIndexName);
+    try {
+      return indexService.getIndexMetaData(client, repoIndexName);
+    } catch (NullPointerException e) {
+      indexService.clearCache();
+      return indexService.getIndexMetaData(client, repoIndexName);
+    }
   }
 
 }
