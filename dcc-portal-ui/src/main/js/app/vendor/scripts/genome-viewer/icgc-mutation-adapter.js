@@ -19,6 +19,8 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** DEPRECATED **/
+
 function IcgcMutationAdapter(args) {
 
   _.extend(this, Backbone.Events);
@@ -27,7 +29,16 @@ function IcgcMutationAdapter(args) {
   this.gzip = true;
 
   this.params = {};
+
+
+  this.setSpecies = function(species) {
+    this.species = species;
+  };
+
   if (args != null) {
+
+    this.chromosomeLimitMap = args.chromosomeLimitMap || {};
+
     if (args.host != null) {
       this.host = args.host;
     }
@@ -207,13 +218,13 @@ IcgcMutationAdapter.prototype.getData = function (args) {
         if (chunks[i] + 1 == chunks[i + 1]) {
           updateEnd = true;
         } else {
-          var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+          var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
           queries.push(query);
           updateStart = true;
           updateEnd = true;
         }
       } else {
-        var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+        var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
         queries.push(query);
         updateStart = true;
         updateEnd = true;
@@ -245,7 +256,7 @@ IcgcMutationAdapter.prototype._callWebService = function (segmentString, callbac
   };
 
   var url = this.host + '/' + this.resource + this._getQuery(callParams);
-//    console.log(url);
+    console.log(url);
   $.ajax({
     type: 'GET',
     url: url,

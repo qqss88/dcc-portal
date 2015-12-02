@@ -1,5 +1,5 @@
-/*! genome-viewer September 10, 2014 16:18:07 */
-/*! lib September 10, 2014 16:18:04 */
+/*! genome-viewer November 16, 2015 12:40:36 */
+/*! lib November 16, 2015 12:40:34 */
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -26,31 +26,53 @@ var Utils = {
     characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
 
     number: {
-        sign: function (x) {
+        sign: function(x) {
             return x ? x < 0 ? -1 : 1 : 0;
         }
     },
     //Methods
-    formatNumber: function (position) {
+    formatNumber: function(position) {
         return position.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
     },
-    formatText: function (text, spaceChar) {
+    formatText: function(text, spaceChar) {
         text = text.replace(new RegExp(spaceChar, "gi"), " ");
         text = text.charAt(0).toUpperCase() + text.slice(1);
         return text;
     },
-    isFunction: function (s) {
+    titleCase: function(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);;
+    },
+    camelCase: function(str) {
+        return str.toLowerCase().replace(/[.-_\s](.)/g, function(match, group1) {
+            return group1.toUpperCase();
+        })
+    },
+    camelToSpace: function(str) {
+        var result = str.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
+        return result.charAt(0).toUpperCase() + result.slice(1);
+    },
+    closest: function(element, selector) {
+        var matches = (element.matches) ? 'matches' : 'msMatchesSelector';
+        while (element) {
+            if (element[matches](selector)) {
+                break;
+            }
+            element = element.parentElement;
+        }
+        return element;
+    },
+    isFunction: function(s) {
         return typeof(s) === 'function' || s instanceof Function;
     },
-    parseDate: function (strDate) {
-        return strDate.substring(0, 4) + " " + strDate.substring(4, 6) + " " + strDate.substring(6, 8) + ", " + strDate.substring(8, 10) + ":" + strDate.substring(10, 12) + ":" + strDate.substring(12, 14);
+    parseDate: function(strDate) {
+        return strDate.substring(4, 6) + "/" + strDate.substring(6, 8) + "/" + strDate.substring(0, 4) + " " + strDate.substring(8, 10) + ":" + strDate.substring(10, 12) + ":" + strDate.substring(12, 14);
     },
-    genId: function (prefix) {
+    genId: function(prefix) {
         prefix = prefix || '';
         prefix = prefix.length == 0 ? prefix : prefix + '-';
         return prefix + this.randomString();
     },
-    randomString: function (length) {
+    randomString: function(length) {
         length = length || 10;
         var str = "";
         for (var i = 0; i < length; i++) {
@@ -58,41 +80,45 @@ var Utils = {
         }
         return str;
     },
-    getRandomInt: function (min, max) {
+    getRandomInt: function(min, max) {
         // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Math/random
         // Using Math.round() will give you a non-uniform distribution!
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
-    endsWithIgnoreCase: function (str, test) {
+    endsWithIgnoreCase: function(str, test) {
         var regex = new RegExp('^.*\\.(' + test + ')$', 'i');
         return regex.test(str);
     },
-    endsWith: function (str, test) {
-        var regex = new RegExp('^.*\\.(' + test + ')$');
-        return regex.test(str);
+    endsWith: function(str, test) {
+        return str.length >= test.length && str.substr(str.length - test.length) == test;
     },
-    addQueryParamtersToUrl: function (paramsWS, url) {
+    addQueryParamtersToUrl: function(paramsWS, url) {
         var chr = "?";
         if (url.indexOf("?") != -1) {
             chr = "&";
         }
-        var query = "";
-        for (var key in paramsWS) {
-            if (paramsWS[key] != null)
-                query += key + "=" + paramsWS[key].toString() + "&";
-        }
+        var query = Utils.queryString(paramsWS);
         if (query != "")
-            query = chr + query.substring(0, query.length - 1);
+            query = chr + query;
         return url + query;
     },
-    randomColor: function () {
+    queryString: function(obj) {
+        var items = [];
+        for (var key in obj) {
+            if (obj[key] != null && obj[key] != undefined) {
+                items.push(key + '=' + obj[key]);
+            }
+        }
+        return items.join('&');
+    },
+    randomColor: function() {
         var color = "";
         for (var i = 0; i < 6; i++) {
             color += ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f'][Math.floor(Math.random() * 16)]);
         }
         return "#" + color;
     },
-    colorLuminance: function (hex, lum) {
+    colorLuminance: function(hex, lum) {
         // validate hex string
         hex = String(hex).replace(/[^0-9a-f]/gi, '');
         hex = String(hex).replace(/#/gi, '');
@@ -102,7 +128,8 @@ var Utils = {
         lum = lum || 0;
 
         // convert to decimal and change luminosity
-        var rgb = "#", c, i;
+        var rgb = "#",
+            c, i;
         for (i = 0; i < 3; i++) {
             c = parseInt(hex.substr(i * 2, 2), 16);
             c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
@@ -111,18 +138,17 @@ var Utils = {
 
         return rgb;
     },
-    getSpeciesFromAvailable: function (availableSpecies, speciesCode) {
-        for (var i = 0; i < availableSpecies.items.length; i++) {
-            var phylos = availableSpecies.items[i].items;
-            for (var j = 0; j < phylos.length; j++) {
-                var species = phylos[j];
-                if (this.getSpeciesCode(species.text) == speciesCode) {
+    getSpeciesFromAvailable: function(availableSpecies, speciesCode) {
+        for (var phylos in availableSpecies) {
+            for (var i = 0; i < availableSpecies[phylos].length; i++) {
+                var species = availableSpecies[phylos][i];
+                if (species.id === speciesCode || species.scientificName.toLowerCase() === speciesCode.toLowerCase()) {
                     return species;
                 }
             }
         }
     },
-    getSpeciesCode: function (speciesName) {
+    getSpeciesCode: function(speciesName) {
         var pair = speciesName.split(" ");
         var code;
         if (pair.length < 3) {
@@ -132,12 +158,175 @@ var Utils = {
 
         }
         return code;
-
     },
-    test: function () {
+    basicValidationForm: function(scope) {
+        var validated = true;
+        var msg = "";
+        if (scope.$.outdir.selectedFile === undefined || scope.$.outdir.selectedFile.type != "FOLDER") {
+            msg += "Error: Please select an output folder.\n";
+            validated = false;
+        }
+        if (scope.$.inputFile.selectedFile === undefined || scope.$.inputFile.selectedFile.type != "FILE") {
+            msg += "Error: Please select an input file.\n";
+            validated = false;
+        }
+        if (scope.$.jobName.value == "") {
+            msg += "Error: Please add a job name.\n";
+            validated = false;
+        }
+        if (!validated) {
+            alert(msg)
+        }
+        return validated;
+    },
+    getUrl: function(fileId) {
+        return OpencgaManager.files.download({
+            id: fileId,
+            query: {
+                sid: Cookies("bioinfo_sid")
+            },
+            request: {
+                url: true
+            }
+        });
+    },
+    getFileContent: function(callback, fileId) {
+        OpencgaManager.files.content({
+            id: fileId,
+            query: {
+                sid: Cookies("bioinfo_sid")
+            },
+            request: {
+                success: function(response) {
+                    callback(response);
+                },
+                error: function() {
+                    this.message = 'Server error, try again later.';
+                }
+            }
+        })
+    },
+    loadExampleFile: function(callback, toolName, exampleFileName) {
+
+        var me = this;
+        OpencgaManager.files.contentExample({
+            query: {
+                toolName: toolName,
+                fileName: exampleFileName
+            },
+            request: {
+                //method: 'POST',
+                success: function(response) {
+                    callback(response);
+                    //                            debugger
+                    //                            me.loadedMainSelectChanged(false,true);
+                },
+                error: function() {
+                    alert('Server error, try again later.');
+                }
+            }
+        })
+    },
+    downloadExampleFile: function(toolName, fileName) {
+        var url = OpencgaManager.files.downloadExample({
+            query: {
+                toolName: toolName,
+                fileName: fileName
+            },
+            request: {
+                url: true
+            }
+        });
+        var link = document.createElement('a');
+        link.href = url;
+        //link.setAttribute("download", "download.zip");
+        var event = new MouseEvent('click', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+        });
+        link.dispatchEvent(event);
+    },
+    argsParser: function(form, args) {
+        if (form.toolName == args.tool) {
+            for (var key in args) {
+                if (typeof(args[key]) == "object") {
+                    if (form.$[key] !== undefined)
+                        form.$[key].selectedFile = args[key];
+                } else {
+                    var elems = form.shadowRoot.querySelectorAll('input[name="' + key + '"]');
+                    if (form.$[key] !== undefined) {
+                        switch (form.$[key].type) {
+                            case "checkbox":
+                                form.$[key].checked = args[key];
+                            default:
+                                form.$[key].value = args[key];
+                        }
+                    }
+                    for (var i = 0; i < elems.length; i++) {
+                        var elem = elems[i];
+                        if (elem.value == args[key])
+                            elem.checked = true;
+                    }
+
+                }
+            }
+        }
+    },
+    getLinks: function(terms) {
+        var links = [];
+        for (var i = 0; i < terms.length; i++) {
+            var term = terms[i];
+            links.push(Utils.getLink(term));
+        }
+        return links;
+    },
+    getLink: function(term) {
+        var link = "http://www.ebi.ac.uk/QuickGO/GTerm?id=";
+        if (term.indexOf("(") >= 0) {
+            var id = term.split("(");
+            if (id.length > 1)
+                id = id[1];
+            id = id.split(")")[0];
+
+        } else
+            id = term;
+        if (id.indexOf("IPR") == 0)
+            link = "http://www.ebi.ac.uk/interpro/entry/";
+        link = link + id;
+        return link;
+    },
+    myRound: function(value, decimals) {
+        decimals = typeof decimals !== 'undefined' ? decimals : 2;
+        value = parseFloat(value);
+        /** rounding **/
+        if (Math.abs(value) >= 1)
+            value = value.toFixed(decimals);
+        else
+            value = value.toPrecision(decimals);
+        value = parseFloat(value);
+        return value;
+    },
+    formatNumber: function(value, decimals) {
+        value = Utils.myRound(value, decimals);
+
+        if (Math.abs(value) > 0 && Math.abs(value) < 0.001)
+            value = value.toExponential();
+        return value;
+    },
+    getSpecies: function(specieValue, species) {
+        for (var i = 0; i < species.length; i++) {
+            var specie = species[i];
+            if (specie.value == specieValue) {
+                return specie;
+            }
+        }
+        return null;
+    },
+    test: function() {
         return this;
     },
-    cancelFullscreen: function () {
+    cancelFullscreen: function() {
         if (document.cancelFullScreen) {
             document.cancelFullScreen();
         } else if (document.mozCancelFullScreen) {
@@ -146,7 +335,7 @@ var Utils = {
             document.webkitCancelFullScreen();
         }
     },
-    launchFullScreen: function (element) {
+    launchFullScreen: function(element) {
         if (element.requestFullScreen) {
             element.requestFullScreen();
         } else if (element.mozRequestFullScreen) {
@@ -155,7 +344,7 @@ var Utils = {
             element.webkitRequestFullScreen();
         }
     },
-    parseJobCommand: function (item) {
+    parseJobCommand: function(item) {
         var commandObject = {};
         var commandArray = item.commandLine.split(/ -{1,2}/g);
         var tableHtml = '<table cellspacing="0" style="max-width:400px;border-collapse: collapse;border:1px solid #ccc;"><tbody>';
@@ -188,9 +377,12 @@ var Utils = {
             tableHtml += '</tr>';
         }
         tableHtml += '</tbody></table>';
-        return {html: tableHtml, data: commandObject};
+        return {
+            html: tableHtml,
+            data: commandObject
+        };
     },
-    htmlTable: function (object) {
+    htmlTable: function(object) {
         var tableHtml = '';
         tableHtml += '<table cellspacing="0" style="border-collapse: collapse;border:1px solid #ccc;"><tbody>';
         for (var key in object) {
@@ -202,29 +394,126 @@ var Utils = {
         tableHtml += '</tbody></table>';
         return tableHtml;
     },
-    camelCase: function (input) {
-        return input.toLowerCase().replace(/[.-_\s](.)/g, function (match, group1) {
-            return group1.toUpperCase();
-        })
-    },
-    msg: function (title, msg) {
-        var div = $('<div class="ocb-msg-hidden"><div>' + title + '</div><div>' + msg + '</div></div>')[0];
-        $('body').append(div);
-        setTimeout(function () {
-            $(div).addClass('ocb-msg-shown');
+    msg: function(title, msg) {
+        var div = document.createElement('div');
+        div.classList.add('jso-msg-hidden');
+        var titleDiv = document.createElement('div');
+        titleDiv.textContent = title;
+        var msgDiv = document.createElement('div');
+        msgDiv.textContent = msg;
+        div.appendChild(titleDiv);
+        div.appendChild(msgDiv);
+        document.body.appendChild(div);
+        setTimeout(function() {
+            div.classList.add('jso-msg-shown');
         }, 10);
-        setTimeout(function () {
-            $(div).removeClass('ocb-msg-shown');
+        setTimeout(function() {
+            div.classList.remove('jso-msg-shown');
         }, 2000);
-        setTimeout(function () {
-            $(div).remove();
+        setTimeout(function() {
+            document.body.removeChild(div);
+            div = null;
         }, 2200);
     },
-    
-    getChromosomes: function(data) {
-      return _.get(data, 'response.result.chromosomes')|| 
-      _.get(data, 'response[0].result[0].chromosomes') ||
-      _.get(data, 'response[0].result.chromosomes');
+    repeat: function(string, count) {
+        if (string == null) {
+            throw new TypeError('can\'t convert ' + string + ' to object');
+        }
+        var str = '' + string;
+        count = +count;
+        if (count != count) {
+            count = 0;
+        }
+        if (count < 0) {
+            throw new RangeError('repeat count must be non-negative');
+        }
+        if (count == Infinity) {
+            throw new RangeError('repeat count must be less than infinity');
+        }
+        count = Math.floor(count);
+        if (str.length == 0 || count == 0) {
+            return '';
+        }
+        // Ensuring count is a 31-bit integer allows us to heavily optimize the
+        // main part. But anyway, most current (august 2014) browsers can't handle
+        // strings 1 << 28 chars or longer, so:
+        if (str.length * count >= 1 << 28) {
+            throw new RangeError('repeat count must not overflow maximum string size');
+        }
+        var rpt = '';
+        for (;;) {
+            if ((count & 1) == 1) {
+                rpt += str;
+            }
+            count >>>= 1;
+            if (count == 0) {
+                break;
+            }
+            str += str;
+        }
+        return rpt;
+
+    },
+    clone: function(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    },
+    timeDiff: function(timeStart, timeEnd) {
+        var ts = new Date(Date.parse(timeStart));
+        var te = new Date(Date.parse(timeEnd));
+
+        if (isNaN(ts) || isNaN(te)) {
+            return "";
+        }
+
+        if (ts < te) {
+            var milisec_diff = te - ts;
+        } else {
+            var milisec_diff = ts - te;
+        }
+
+        var days = Math.floor(milisec_diff / 1000 / 60 / (60 * 24));
+        var daysMessage = days + " Days ";
+        if (days === 0) {
+            daysMessage = '';
+        }
+        var date_diff = new Date(milisec_diff);
+        var hours = date_diff.getHours() - 1;
+        var hoursMessage = hours + " hour";
+        var minutesMessage = date_diff.getMinutes() + " minute";
+        var secondsMessage = date_diff.getSeconds() + " second";
+        if (hours !== 1) {
+            hoursMessage += 's ';
+        } else {
+            hoursMessage += ' ';
+        }
+        if (date_diff.getMinutes() !== 1) {
+            minutesMessage += 's ';
+        } else {
+            minutesMessage += ' ';
+        }
+        if (date_diff.getSeconds() !== 1) {
+            secondsMessage += 's ';
+        } else {
+            secondsMessage += ' ';
+        }
+        if (hours === 0) {
+            hoursMessage = '';
+        }
+        if (date_diff.getMinutes() === 0) {
+            minutesMessage = '';
+        }
+        if (date_diff.getSeconds() === 0) {
+            secondsMessage = '';
+        }
+        return daysMessage + hoursMessage + minutesMessage + secondsMessage;
+    },
+    deleteIndexedDB: function() {
+        window.indexedDB.webkitGetDatabaseNames().onsuccess = function(sender, args) {
+            var r = sender.target.result;
+            for (var i in r) {
+                indexedDB.deleteDatabase(r[i]);
+            }
+        };
     }
 
 };
@@ -237,138 +526,15 @@ Utils.images = {
     warning: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIsSURBVDjLpVNLSJQBEP7+h6uu62vLVAJDW1KQTMrINQ1vPQzq1GOpa9EppGOHLh0kCEKL7JBEhVCHihAsESyJiE4FWShGRmauu7KYiv6Pma+DGoFrBQ7MzGFmPr5vmDFIYj1mr1WYfrHPovA9VVOqbC7e/1rS9ZlrAVDYHig5WB0oPtBI0TNrUiC5yhP9jeF4X8NPcWfopoY48XT39PjjXeF0vWkZqOjd7LJYrmGasHPCCJbHwhS9/F8M4s8baid764Xi0Ilfp5voorpJfn2wwx/r3l77TwZUvR+qajXVn8PnvocYfXYH6k2ioOaCpaIdf11ivDcayyiMVudsOYqFb60gARJYHG9DbqQFmSVNjaO3K2NpAeK90ZCqtgcrjkP9aUCXp0moetDFEeRXnYCKXhm+uTW0CkBFu4JlxzZkFlbASz4CQGQVBFeEwZm8geyiMuRVntzsL3oXV+YMkvjRsydC1U+lhwZsWXgHb+oWVAEzIwvzyVlk5igsi7DymmHlHsFQR50rjl+981Jy1Fw6Gu0ObTtnU+cgs28AKgDiy+Awpj5OACBAhZ/qh2HOo6i+NeA73jUAML4/qWux8mt6NjW1w599CS9xb0mSEqQBEDAtwqALUmBaG5FV3oYPnTHMjAwetlWksyByaukxQg2wQ9FlccaK/OXA3/uAEUDp3rNIDQ1ctSk6kHh1/jRFoaL4M4snEMeD73gQx4M4PsT1IZ5AfYH68tZY7zv/ApRMY9mnuVMvAAAAAElFTkSuQmCC",
     edit: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB80lEQVR42o2T30tTURzArb8ioiAI6kHoZeF7CGE/IISCUDNCqAeL3rIWPfSwByskYUEJIhSChBhJFAiNqMVYPqRuc4tcW3NLt3C7u3d3d3c/+nS+0GRK0134cC6c8/ncc+7ltgFt6jqgcCg6duGQYq84deoBR6lU0iqVSq1arfI/1Dxut3u0Htke6BC5UChgmuYm+XyeXC5HOp1GIsnQNJHJi3x/7WJh/CSLT9r7Rd4jAVlgWRa2bSOjYBgGmqaRyWQwkq9Y8wyhLb0BI0VuaRrfo671xoDIwmakWCyi6zrr36bILt/HXp1l7cNDioEZqnEvgYmr1paAOgYy1u/l3NrqHNngPWpFL8XodTa+3CD8YoCvz/o078i5o1sC29FT78kG7lCzfJgrl7ESvejLThLPuxk8fbhP3KaBVFCdeX7on9yP9bOHfPAu0bEzmKkg4jQNpEKzhOduqW1/xIoNUEpcQlM7WXl6Cj39Q9Y0D4Q/TRJ662Tx3WOS/guYsV42Fm4THe/G/B2T97Jz4OVwJ+hxImPn8Tj381k91TfShfErIvLuAde1Y9g+N7Z/FL/rBDODR8gmgpTL5To7B3o69zF8pR3Pg7PMT90kn47LJ22kaeCPghapidP4Lxy3bduUiVZktdaQH7AxcFAiUm0Rhzji/gUhbp0s2Zf2xwAAAABJRU5ErkJggg==",
     info: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAJ1SURBVHjafJJdSJNhFMd/z3QzLWdZrnQmSA2DPqRCK4KuhIq66kLoAy/qoqCguqqL6JsgLwoKKhCMSIy6CDKKRFZZYYQRVhJl02nWmG5uc19u7/vuPV0lW7QOnIsHnt+P8z/Pg4gw26aZ0263uzEUCn2IxWJjXq/3JqBETLIZ8gkePLhfKyKy/Z5HHJf7xe0Jic/n65mejizPK0inUiSTKUSE0dHRhxf6JoSDb4Rjr4QDz0REJBgMtmczFrJKKYVSCjCYnPR/W1FuAwQSGjbHXAA0LRXKZnIm0NJpgAKvd/hSOBz2iIj0eiPS2vtDYsmUPH/uPg9YshklIrOyCb+/eUG5ve3au5C99W2AqGbgKivk8R4X1lSkv2pJZaNmmBQVWWeZnAiGoa+3KovdyBjsW2kn/SvK4Jcgtaf7cDqrGkQMUDkBcgXVS2tOHjp8dG2jOXT1yo5lYOpgFTB0wKTAOqdQMlqOoDD7EE8kREwGXr/oWTg4HjxONAklBayuKSUeT/hFTxrwnwlAMa8I1qyrP3H95RiQgUiC/RsWM+wZ6jIME0M38wtSM0mmojM4nc6mzr5xKDQgnWb/pmoedT29EU3pTMUS+QVKKerq6kqnI3EVHwmAplO8qBh7WTFnzpz9bOg6FovlfxGEixfOrfT6YxCOQ1rDUaIAG4EJ38+PAwNb/95Bzj8ITAZwLHbMT0yHw3N33YVwEnQDqss41VzPkaalX6Iz+m6Xy/Xp34JAAICR7187nLWuvbe6h9C0DA2uRTTVV9J++87OlpaWJxUVFf9+xj+1cfOWls6OO93Nq1zblMVm9flG3pcvXNPm90+E/777ewB+UIqdqtYXHAAAAABJRU5ErkJggg==",
-//    bucket: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB90BCg4hBcbCoOMAAABsSURBVDjLY2RgYFBjYGCIZCAPLGeBam4g0wAGJgYKARMDA8NZCvSfZYQy6sk0oJEFiUNqODRQLQxGDYCAb2To/YZswEsyDHiJbMAHMgz4gO6F5aTkQpgXYElZkoGBgZeEbL2cgYHhMwMDw3MA93ARk+mSg4gAAAAASUVORK5CYII=",
+    //    bucket: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB90BCg4hBcbCoOMAAABsSURBVDjLY2RgYFBjYGCIZCAPLGeBam4g0wAGJgYKARMDA8NZCvSfZYQy6sk0oJEFiUNqODRQLQxGDYCAb2To/YZswEsyDHiJbMAHMgz4gO6F5aTkQpgXYElZkoGBgZeEbL2cgYHhMwMDw3MA93ARk+mSg4gAAAAASUVORK5CYII=",
     bucket: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QkQDC8RTstxRAAAAGBJREFUOMtjYBgswIWBgeE/idiFgYGBgRFqwH8GBoYGEi1tYGBgYGRBE9QjUvMlGANmgCsDA8NuElzRANXDwAQV2ENGuO1BNoBsMGoAlQ3wJTIdNEDVYgU+ROQBH6rmQgAWgB19xco60wAAAABJRU5ErkJggg==",
-//    dir: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsSAAALEgHS3X78AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89+bN/rXXPues852zzwfACAyWSDNRNYAMqUIeEeCDx8TG4eQuQIEKJHAAEAizZCFz/SMBAPh+PDwrIsAHvgABeNMLCADATZvAMByH/w/qQplcAYCEAcB0kThLCIAUAEB6jkKmAEBGAYCdmCZTAKAEAGDLY2LjAFAtAGAnf+bTAICd+Jl7AQBblCEVAaCRACATZYhEAGg7AKzPVopFAFgwABRmS8Q5ANgtADBJV2ZIALC3AMDOEAuyAAgMADBRiIUpAAR7AGDIIyN4AISZABRG8lc88SuuEOcqAAB4mbI8uSQ5RYFbCC1xB1dXLh4ozkkXKxQ2YQJhmkAuwnmZGTKBNA/g88wAAKCRFRHgg/P9eM4Ors7ONo62Dl8t6r8G/yJiYuP+5c+rcEAAAOF0ftH+LC+zGoA7BoBt/qIl7gRoXgugdfeLZrIPQLUAoOnaV/Nw+H48PEWhkLnZ2eXk5NhKxEJbYcpXff5nwl/AV/1s+X48/Pf14L7iJIEyXYFHBPjgwsz0TKUcz5IJhGLc5o9H/LcL//wd0yLESWK5WCoU41EScY5EmozzMqUiiUKSKcUl0v9k4t8s+wM+3zUAsGo+AXuRLahdYwP2SycQWHTA4vcAAPK7b8HUKAgDgGiD4c93/+8//UegJQCAZkmScQAAXkQkLlTKsz/HCAAARKCBKrBBG/TBGCzABhzBBdzBC/xgNoRCJMTCQhBCCmSAHHJgKayCQiiGzbAdKmAv1EAdNMBRaIaTcA4uwlW4Dj1wD/phCJ7BKLyBCQRByAgTYSHaiAFiilgjjggXmYX4IcFIBBKLJCDJiBRRIkuRNUgxUopUIFVIHfI9cgI5h1xGupE7yAAygvyGvEcxlIGyUT3UDLVDuag3GoRGogvQZHQxmo8WoJvQcrQaPYw2oefQq2gP2o8+Q8cwwOgYBzPEbDAuxsNCsTgsCZNjy7EirAyrxhqwVqwDu4n1Y8+xdwQSgUXACTYEd0IgYR5BSFhMWE7YSKggHCQ0EdoJNwkDhFHCJyKTqEu0JroR+cQYYjIxh1hILCPWEo8TLxB7iEPENyQSiUMyJ7mQAkmxpFTSEtJG0m5SI+ksqZs0SBojk8naZGuyBzmULCAryIXkneTD5DPkG+Qh8lsKnWJAcaT4U+IoUspqShnlEOU05QZlmDJBVaOaUt2ooVQRNY9aQq2htlKvUYeoEzR1mjnNgxZJS6WtopXTGmgXaPdpr+h0uhHdlR5Ol9BX0svpR+iX6AP0dwwNhhWDx4hnKBmbGAcYZxl3GK+YTKYZ04sZx1QwNzHrmOeZD5lvVVgqtip8FZHKCpVKlSaVGyovVKmqpqreqgtV81XLVI+pXlN9rkZVM1PjqQnUlqtVqp1Q61MbU2epO6iHqmeob1Q/pH5Z/YkGWcNMw09DpFGgsV/jvMYgC2MZs3gsIWsNq4Z1gTXEJrHN2Xx2KruY/R27iz2qqaE5QzNKM1ezUvOUZj8H45hx+Jx0TgnnKKeX836K3hTvKeIpG6Y0TLkxZVxrqpaXllirSKtRq0frvTau7aedpr1Fu1n7gQ5Bx0onXCdHZ4/OBZ3nU9lT3acKpxZNPTr1ri6qa6UbobtEd79up+6Ynr5egJ5Mb6feeb3n+hx9L/1U/W36p/VHDFgGswwkBtsMzhg8xTVxbzwdL8fb8VFDXcNAQ6VhlWGX4YSRudE8o9VGjUYPjGnGXOMk423GbcajJgYmISZLTepN7ppSTbmmKaY7TDtMx83MzaLN1pk1mz0x1zLnm+eb15vft2BaeFostqi2uGVJsuRaplnutrxuhVo5WaVYVVpds0atna0l1rutu6cRp7lOk06rntZnw7Dxtsm2qbcZsOXYBtuutm22fWFnYhdnt8Wuw+6TvZN9un2N/T0HDYfZDqsdWh1+c7RyFDpWOt6azpzuP33F9JbpL2dYzxDP2DPjthPLKcRpnVOb00dnF2e5c4PziIuJS4LLLpc+Lpsbxt3IveRKdPVxXeF60vWdm7Obwu2o26/uNu5p7ofcn8w0nymeWTNz0MPIQ+BR5dE/C5+VMGvfrH5PQ0+BZ7XnIy9jL5FXrdewt6V3qvdh7xc+9j5yn+M+4zw33jLeWV/MN8C3yLfLT8Nvnl+F30N/I/9k/3r/0QCngCUBZwOJgUGBWwL7+Hp8Ib+OPzrbZfay2e1BjKC5QRVBj4KtguXBrSFoyOyQrSH355jOkc5pDoVQfujW0Adh5mGLw34MJ4WHhVeGP45wiFga0TGXNXfR3ENz30T6RJZE3ptnMU85ry1KNSo+qi5qPNo3ujS6P8YuZlnM1VidWElsSxw5LiquNm5svt/87fOH4p3iC+N7F5gvyF1weaHOwvSFpxapLhIsOpZATIhOOJTwQRAqqBaMJfITdyWOCnnCHcJnIi/RNtGI2ENcKh5O8kgqTXqS7JG8NXkkxTOlLOW5hCepkLxMDUzdmzqeFpp2IG0yPTq9MYOSkZBxQqohTZO2Z+pn5mZ2y6xlhbL+xW6Lty8elQfJa7OQrAVZLQq2QqboVFoo1yoHsmdlV2a/zYnKOZarnivN7cyzytuQN5zvn//tEsIS4ZK2pYZLVy0dWOa9rGo5sjxxedsK4xUFK4ZWBqw8uIq2Km3VT6vtV5eufr0mek1rgV7ByoLBtQFr6wtVCuWFfevc1+1dT1gvWd+1YfqGnRs+FYmKrhTbF5cVf9go3HjlG4dvyr+Z3JS0qavEuWTPZtJm6ebeLZ5bDpaql+aXDm4N2dq0Dd9WtO319kXbL5fNKNu7g7ZDuaO/PLi8ZafJzs07P1SkVPRU+lQ27tLdtWHX+G7R7ht7vPY07NXbW7z3/T7JvttVAVVN1WbVZftJ+7P3P66Jqun4lvttXa1ObXHtxwPSA/0HIw6217nU1R3SPVRSj9Yr60cOxx++/p3vdy0NNg1VjZzG4iNwRHnk6fcJ3/ceDTradox7rOEH0x92HWcdL2pCmvKaRptTmvtbYlu6T8w+0dbq3nr8R9sfD5w0PFl5SvNUyWna6YLTk2fyz4ydlZ19fi753GDborZ752PO32oPb++6EHTh0kX/i+c7vDvOXPK4dPKy2+UTV7hXmq86X23qdOo8/pPTT8e7nLuarrlca7nuer21e2b36RueN87d9L158Rb/1tWeOT3dvfN6b/fF9/XfFt1+cif9zsu72Xcn7q28T7xf9EDtQdlD3YfVP1v+3Njv3H9qwHeg89HcR/cGhYPP/pH1jw9DBY+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAKNJREFUeNrEk7sNwkAQBefQ5m6BTiAAQssZiMh0QFUIMrAEpKYD8ynAJeD4nXQEkJHgu4CXv9GsdteFEEjJgMQ4gPli+aWx227cLwAD8FK8QZ4XTyCL6B6qal+YlzLgCpSn87HpbTCdzAKwAkpg1Bdgn/nbmDLQmby6hC3W5qUGGEcCGpNUJwBq09tgHdO+Pe61eamNvIMLgEkaxuoDuL9/42sAM20/EZafbV8AAAAASUVORK5CYII=",
+    //    dir: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsSAAALEgHS3X78AAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89+bN/rXXPues852zzwfACAyWSDNRNYAMqUIeEeCDx8TG4eQuQIEKJHAAEAizZCFz/SMBAPh+PDwrIsAHvgABeNMLCADATZvAMByH/w/qQplcAYCEAcB0kThLCIAUAEB6jkKmAEBGAYCdmCZTAKAEAGDLY2LjAFAtAGAnf+bTAICd+Jl7AQBblCEVAaCRACATZYhEAGg7AKzPVopFAFgwABRmS8Q5ANgtADBJV2ZIALC3AMDOEAuyAAgMADBRiIUpAAR7AGDIIyN4AISZABRG8lc88SuuEOcqAAB4mbI8uSQ5RYFbCC1xB1dXLh4ozkkXKxQ2YQJhmkAuwnmZGTKBNA/g88wAAKCRFRHgg/P9eM4Ors7ONo62Dl8t6r8G/yJiYuP+5c+rcEAAAOF0ftH+LC+zGoA7BoBt/qIl7gRoXgugdfeLZrIPQLUAoOnaV/Nw+H48PEWhkLnZ2eXk5NhKxEJbYcpXff5nwl/AV/1s+X48/Pf14L7iJIEyXYFHBPjgwsz0TKUcz5IJhGLc5o9H/LcL//wd0yLESWK5WCoU41EScY5EmozzMqUiiUKSKcUl0v9k4t8s+wM+3zUAsGo+AXuRLahdYwP2SycQWHTA4vcAAPK7b8HUKAgDgGiD4c93/+8//UegJQCAZkmScQAAXkQkLlTKsz/HCAAARKCBKrBBG/TBGCzABhzBBdzBC/xgNoRCJMTCQhBCCmSAHHJgKayCQiiGzbAdKmAv1EAdNMBRaIaTcA4uwlW4Dj1wD/phCJ7BKLyBCQRByAgTYSHaiAFiilgjjggXmYX4IcFIBBKLJCDJiBRRIkuRNUgxUopUIFVIHfI9cgI5h1xGupE7yAAygvyGvEcxlIGyUT3UDLVDuag3GoRGogvQZHQxmo8WoJvQcrQaPYw2oefQq2gP2o8+Q8cwwOgYBzPEbDAuxsNCsTgsCZNjy7EirAyrxhqwVqwDu4n1Y8+xdwQSgUXACTYEd0IgYR5BSFhMWE7YSKggHCQ0EdoJNwkDhFHCJyKTqEu0JroR+cQYYjIxh1hILCPWEo8TLxB7iEPENyQSiUMyJ7mQAkmxpFTSEtJG0m5SI+ksqZs0SBojk8naZGuyBzmULCAryIXkneTD5DPkG+Qh8lsKnWJAcaT4U+IoUspqShnlEOU05QZlmDJBVaOaUt2ooVQRNY9aQq2htlKvUYeoEzR1mjnNgxZJS6WtopXTGmgXaPdpr+h0uhHdlR5Ol9BX0svpR+iX6AP0dwwNhhWDx4hnKBmbGAcYZxl3GK+YTKYZ04sZx1QwNzHrmOeZD5lvVVgqtip8FZHKCpVKlSaVGyovVKmqpqreqgtV81XLVI+pXlN9rkZVM1PjqQnUlqtVqp1Q61MbU2epO6iHqmeob1Q/pH5Z/YkGWcNMw09DpFGgsV/jvMYgC2MZs3gsIWsNq4Z1gTXEJrHN2Xx2KruY/R27iz2qqaE5QzNKM1ezUvOUZj8H45hx+Jx0TgnnKKeX836K3hTvKeIpG6Y0TLkxZVxrqpaXllirSKtRq0frvTau7aedpr1Fu1n7gQ5Bx0onXCdHZ4/OBZ3nU9lT3acKpxZNPTr1ri6qa6UbobtEd79up+6Ynr5egJ5Mb6feeb3n+hx9L/1U/W36p/VHDFgGswwkBtsMzhg8xTVxbzwdL8fb8VFDXcNAQ6VhlWGX4YSRudE8o9VGjUYPjGnGXOMk423GbcajJgYmISZLTepN7ppSTbmmKaY7TDtMx83MzaLN1pk1mz0x1zLnm+eb15vft2BaeFostqi2uGVJsuRaplnutrxuhVo5WaVYVVpds0atna0l1rutu6cRp7lOk06rntZnw7Dxtsm2qbcZsOXYBtuutm22fWFnYhdnt8Wuw+6TvZN9un2N/T0HDYfZDqsdWh1+c7RyFDpWOt6azpzuP33F9JbpL2dYzxDP2DPjthPLKcRpnVOb00dnF2e5c4PziIuJS4LLLpc+Lpsbxt3IveRKdPVxXeF60vWdm7Obwu2o26/uNu5p7ofcn8w0nymeWTNz0MPIQ+BR5dE/C5+VMGvfrH5PQ0+BZ7XnIy9jL5FXrdewt6V3qvdh7xc+9j5yn+M+4zw33jLeWV/MN8C3yLfLT8Nvnl+F30N/I/9k/3r/0QCngCUBZwOJgUGBWwL7+Hp8Ib+OPzrbZfay2e1BjKC5QRVBj4KtguXBrSFoyOyQrSH355jOkc5pDoVQfujW0Adh5mGLw34MJ4WHhVeGP45wiFga0TGXNXfR3ENz30T6RJZE3ptnMU85ry1KNSo+qi5qPNo3ujS6P8YuZlnM1VidWElsSxw5LiquNm5svt/87fOH4p3iC+N7F5gvyF1weaHOwvSFpxapLhIsOpZATIhOOJTwQRAqqBaMJfITdyWOCnnCHcJnIi/RNtGI2ENcKh5O8kgqTXqS7JG8NXkkxTOlLOW5hCepkLxMDUzdmzqeFpp2IG0yPTq9MYOSkZBxQqohTZO2Z+pn5mZ2y6xlhbL+xW6Lty8elQfJa7OQrAVZLQq2QqboVFoo1yoHsmdlV2a/zYnKOZarnivN7cyzytuQN5zvn//tEsIS4ZK2pYZLVy0dWOa9rGo5sjxxedsK4xUFK4ZWBqw8uIq2Km3VT6vtV5eufr0mek1rgV7ByoLBtQFr6wtVCuWFfevc1+1dT1gvWd+1YfqGnRs+FYmKrhTbF5cVf9go3HjlG4dvyr+Z3JS0qavEuWTPZtJm6ebeLZ5bDpaql+aXDm4N2dq0Dd9WtO319kXbL5fNKNu7g7ZDuaO/PLi8ZafJzs07P1SkVPRU+lQ27tLdtWHX+G7R7ht7vPY07NXbW7z3/T7JvttVAVVN1WbVZftJ+7P3P66Jqun4lvttXa1ObXHtxwPSA/0HIw6217nU1R3SPVRSj9Yr60cOxx++/p3vdy0NNg1VjZzG4iNwRHnk6fcJ3/ceDTradox7rOEH0x92HWcdL2pCmvKaRptTmvtbYlu6T8w+0dbq3nr8R9sfD5w0PFl5SvNUyWna6YLTk2fyz4ydlZ19fi753GDborZ752PO32oPb++6EHTh0kX/i+c7vDvOXPK4dPKy2+UTV7hXmq86X23qdOo8/pPTT8e7nLuarrlca7nuer21e2b36RueN87d9L158Rb/1tWeOT3dvfN6b/fF9/XfFt1+cif9zsu72Xcn7q28T7xf9EDtQdlD3YfVP1v+3Njv3H9qwHeg89HcR/cGhYPP/pH1jw9DBY+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAKNJREFUeNrEk7sNwkAQBefQ5m6BTiAAQssZiMh0QFUIMrAEpKYD8ynAJeD4nXQEkJHgu4CXv9GsdteFEEjJgMQ4gPli+aWx227cLwAD8FK8QZ4XTyCL6B6qal+YlzLgCpSn87HpbTCdzAKwAkpg1Bdgn/nbmDLQmby6hC3W5qUGGEcCGpNUJwBq09tgHdO+Pe61eamNvIMLgEkaxuoDuL9/42sAM20/EZafbV8AAAAASUVORK5CYII=",
     dir: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDNzU0RUNBNzU3OEIxMUUyOEM3QzkxOEZDOTU1RTdFMCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDNzU0RUNBODU3OEIxMUUyOEM3QzkxOEZDOTU1RTdFMCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkM3NTRFQ0E1NTc4QjExRTI4QzdDOTE4RkM5NTVFN0UwIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkM3NTRFQ0E2NTc4QjExRTI4QzdDOTE4RkM5NTVFN0UwIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+S/WxbAAAAERJREFUeNpi/P//PwMlgJFSA1g2bNiAzYQLQOwIxB8IGcCEQ9wAiPcDsQBBF+CRAxnynlwXEA1GDRg1gCqZiWIDAAIMADidE0PBoGsZAAAAAElFTkSuQmCC",
     r: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB90CDRIvNbHTpbwAAADjSURBVDjLpZFBbsIwEEUfVRZYahcVK3qKXoauMFK5C91nkyUB+xC5BqeAA7SKq1B5ugl2EiC04UkjayzN17NnROTRWvvJFbTWL8CBHqbGWOlSlqVkWSbGWAGm3aGHZiMiAByPP6FOd1rP2W7NvhvSCvDe10E+VJPFQpPnm1ZIcsmgPgJVVZGmaejX63y/XL4/AV/JJYPTCeDcN7PZWyuwKAqA8wARqSsGKDVGqXGjV8H07AnRQPq21TK8+YSBAQMN4hb6Df7wB/5eA+4zmEyehxk451itPrhFksSxUeP+lf+z+wXwdayJk/mqtgAAAABJRU5ErkJggg==",
     box: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wMHAwRAVvTmTAAAAK/SURBVDjLpZM9bFxFGEXPNzPvZ+39sb2xHceREjDQBwlDCqqIiiotokAghYKEjvSkQkKJkEiB0lOkoAHaBAokFCQKUATIIOLIMbHWrHfX+7zvvZk3MzQODUgU3PJK5+g2F/5n5N/Kb66/1NNK3hAxr4HcFqVuvfju18V/Cu58sPmMVnJZ4K32Qr+t8za+KnCz4kCUuiGibm5euTv5h+CL958/nxj1XivVF+e6C9TVhPmFdbROgEhwNU1d4m09UaJuInLjhct3DgDUh5ee7j14PLxulLvYP/0seadPkub88Wib0eB3bDkmxgbRoFPpxeCuKvjsyQIzOyqImT7/y8Mh++NveW7jLFmrx6m1NlWxz6PHA7otQ7tloAmYJE9isOeeCJRtIrULLLUTjsqG7+//xs72z7jZgCTNONlVJKEiuobW0jqSaoiet19dFQATJcc2FSFEciNoLYwOHcPDASvdjM5cQntxlbR9gqacoFSK84VsnOrkH11Zdmp0FFXjobSeCFgXSDS0Eo11ge7yGXSaU092UUlCaEpC8FK4tDcu4rzZ2a/S+bWI94HSAgFigDQD24Cvp4gIOp0juBJvC2L07B1Uc/Mtg9k7sHMbywZrA3lLECV4AtaCpAp79CcmzXHlhOBrAJrGyNbOVBY7qTO1C9r5EKyPSttAiJEs01SuQStFkrdp6gKd5AzHjixVxCDxp+1paZRUxoc4Kp36bndYbS53U5WlCq0CMYIPMY7GI0mNpiqmGK0oK4jIveGkPgRqfTBt3A8Pqtvrq52HtglnGh9XIaKUkCQ6nj6RyWBsmdXCtFI/bu2Fq5c+3roGzIAgWokCDNACOhfOLb781Ip+vd+RC2dXWibROkxKvvp1z376yZe7d4HpMdz8/YVjiQYyoA30Ti6la2++0n/n83vTW/e3ix1gcgzXgPchBoC/AFu/UBF5InryAAAAAElFTkSuQmCC",
     bluebox: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wMHAwTE5pcivoAAALsSURBVDjLXZPPaxxlGMc/77wz+3N2k822tWsTIrQFe/BWEKxKCV5UohdFhJ60p6rgUfpP6C0K4kHx0ENEkV7aElHwUikhFVosRGoTm83+3pnZnXfed2beHtItIQ98+Z6+H57nga8AsNYKDkYcEofcHvKZEEJYcSTszPzqL3fmf3+w/+a51tytby9d6D0N5UecGeBZ8MPv/jh9fy/6dKzMpVPHmvWdbl/XCvKn5Wbl6+ufrNwGssMgYa2VgFj58sZr7VB/LqX3zlKrydJzTTzXxdqcx90hO+0Bk2l8Z74i1z6+cOba5VfOqGeAb3579M/NR53T40xwrDGHFALPEUjn4LoMi0ktwWTKXqCIqAVrbyycvHj2hHYBR+bO8Q/Ov0imEzZ2xrRDRalQwC9LLBalUgaJQy+tU6gvIBJbv3j2RA4IFxDdICFa9ulMCrz/UgOs5kEwpeh57I4Nt/dzsmLOYlEThgFjUePp33IHoD9SJAbuTVyudRweixJvnVtg3/i00wpLPiwQ0hkO6YYKawWj0UjONqAfKHwDkxTqqeW/RHA3hO2+Zqk05e5wTD9KmOqMKDEUqoLNzU0PyF2AQaBoaIhiw0h6TIwgUDCODb5NiWJNlKREyhAozXwOW1tbFSmlcAHbD2KaytCdGgyWglfEs4LeNKeaa4axYRgpwlgTTTXVDDqdTslaewAYh4kNlKUbZsTGonOwCYwm1vq5Ft1AMYgU08SQR5o0gziOcRxHuoCNtdl6uPHX6/Vmi3Yyh9I5IoEgMdkgT9x+qJhEGrdQo77cJMuy+4DJskwLa60DOCtf3HhZpfZKtVx+L3x+sfCv8CFxTINd72HfodQ4aQp5fP24/v/Hd4Nf/5RSJmma6lkXZn1wPvvq5qndsbhS9esf/Zy/UEtzxnURfn8+/fuHV7m353mecV1XSym1lDI72kaxvr5e3N7eruyP0tpG/e3LK/rW2mLNUb7vm3K5nFarVdNqtbJer2dXV1fzJ6cDpboAZRAGAAAAAElFTkSuQmCC",
     refresh: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAK8AAACvABQqw0mAAAAAd0SU1FB90CFA8bKScXIjIAAAJ1SURBVDjLlVJdSJNRGH7es+/7NlduWFLTKAskwjJqZYiBglJhLKguqou6EFkFIkLQH9IPBFI3BsouzMJupGYRajcqmeBFhWBU5oUgpZikrSnzZ9v3nW/ndKEbziXUAwfOOe/7Puc9z/MCq1DwMmB1NX/rzfCNnsc/gK08lPgnnT8Cs33BULg0HI4YKdkHX9DqKwKArXXv1bTMTFcoyruC89E8MxaDw659t6rKhIUwRBLdP2t2v/5bBwQA+5pH8ibnIj3BucgWIQRASw8RERTGYFUtsGmWYUXKmqmr7t4UAnal54GQ8lq8MBlyOU0CEnA67MiwqfvHbhZ+Smgg6o9eV2L8Nhk6wI2lZeggrpvE+TTjxgxxQ4IbmJsJYSa00JQiotnguacJ8zIZOmDosAnzTpowt8tGj0s0ejZqprnDKmPHSNebjHDkUPatt4cTTbZ+LsmO79XK52dZxTNp9/ovAEDnaM62lo8HHrd9SVfiOelVryrSq9vrEx0s8sW2tuEzDgDgT875bcIsjy6owwAwHhjnYT5bGTL29PiHyuwAMO873aL/Ct5PiPjwXe5vq7KJW2hdJxENMFInGCkhIblLj80WRoyxGxZmh1XJGlSIlV8s6A8kuVDXn+MF6JHC7GBkBSNlOSRgiihMsQhAgJGGNNU1atc2HPG6O8YSBABwt2/nGyFlGSCSB4UIBMuyoQKMFNiUjIApRH5t8YfpFOOrO/JrhZBVUiJLxq2ipIkY8Z36uivpC6txqb3YbhqhIingFlLmxmLSKyXAGAaYqh13aFjfcHJwfE2ClSitK9psc85PMVC3M999orX4Kcf/wuPb27VW7A+O2QVVA1M1CQAAAABJRU5ErkJggg==",
-    newitem: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89+bN/rXXPues852zzwfACAyWSDNRNYAMqUIeEeCDx8TG4eQuQIEKJHAAEAizZCFz/SMBAPh+PDwrIsAHvgABeNMLCADATZvAMByH/w/qQplcAYCEAcB0kThLCIAUAEB6jkKmAEBGAYCdmCZTAKAEAGDLY2LjAFAtAGAnf+bTAICd+Jl7AQBblCEVAaCRACATZYhEAGg7AKzPVopFAFgwABRmS8Q5ANgtADBJV2ZIALC3AMDOEAuyAAgMADBRiIUpAAR7AGDIIyN4AISZABRG8lc88SuuEOcqAAB4mbI8uSQ5RYFbCC1xB1dXLh4ozkkXKxQ2YQJhmkAuwnmZGTKBNA/g88wAAKCRFRHgg/P9eM4Ors7ONo62Dl8t6r8G/yJiYuP+5c+rcEAAAOF0ftH+LC+zGoA7BoBt/qIl7gRoXgugdfeLZrIPQLUAoOnaV/Nw+H48PEWhkLnZ2eXk5NhKxEJbYcpXff5nwl/AV/1s+X48/Pf14L7iJIEyXYFHBPjgwsz0TKUcz5IJhGLc5o9H/LcL//wd0yLESWK5WCoU41EScY5EmozzMqUiiUKSKcUl0v9k4t8s+wM+3zUAsGo+AXuRLahdYwP2SycQWHTA4vcAAPK7b8HUKAgDgGiD4c93/+8//UegJQCAZkmScQAAXkQkLlTKsz/HCAAARKCBKrBBG/TBGCzABhzBBdzBC/xgNoRCJMTCQhBCCmSAHHJgKayCQiiGzbAdKmAv1EAdNMBRaIaTcA4uwlW4Dj1wD/phCJ7BKLyBCQRByAgTYSHaiAFiilgjjggXmYX4IcFIBBKLJCDJiBRRIkuRNUgxUopUIFVIHfI9cgI5h1xGupE7yAAygvyGvEcxlIGyUT3UDLVDuag3GoRGogvQZHQxmo8WoJvQcrQaPYw2oefQq2gP2o8+Q8cwwOgYBzPEbDAuxsNCsTgsCZNjy7EirAyrxhqwVqwDu4n1Y8+xdwQSgUXACTYEd0IgYR5BSFhMWE7YSKggHCQ0EdoJNwkDhFHCJyKTqEu0JroR+cQYYjIxh1hILCPWEo8TLxB7iEPENyQSiUMyJ7mQAkmxpFTSEtJG0m5SI+ksqZs0SBojk8naZGuyBzmULCAryIXkneTD5DPkG+Qh8lsKnWJAcaT4U+IoUspqShnlEOU05QZlmDJBVaOaUt2ooVQRNY9aQq2htlKvUYeoEzR1mjnNgxZJS6WtopXTGmgXaPdpr+h0uhHdlR5Ol9BX0svpR+iX6AP0dwwNhhWDx4hnKBmbGAcYZxl3GK+YTKYZ04sZx1QwNzHrmOeZD5lvVVgqtip8FZHKCpVKlSaVGyovVKmqpqreqgtV81XLVI+pXlN9rkZVM1PjqQnUlqtVqp1Q61MbU2epO6iHqmeob1Q/pH5Z/YkGWcNMw09DpFGgsV/jvMYgC2MZs3gsIWsNq4Z1gTXEJrHN2Xx2KruY/R27iz2qqaE5QzNKM1ezUvOUZj8H45hx+Jx0TgnnKKeX836K3hTvKeIpG6Y0TLkxZVxrqpaXllirSKtRq0frvTau7aedpr1Fu1n7gQ5Bx0onXCdHZ4/OBZ3nU9lT3acKpxZNPTr1ri6qa6UbobtEd79up+6Ynr5egJ5Mb6feeb3n+hx9L/1U/W36p/VHDFgGswwkBtsMzhg8xTVxbzwdL8fb8VFDXcNAQ6VhlWGX4YSRudE8o9VGjUYPjGnGXOMk423GbcajJgYmISZLTepN7ppSTbmmKaY7TDtMx83MzaLN1pk1mz0x1zLnm+eb15vft2BaeFostqi2uGVJsuRaplnutrxuhVo5WaVYVVpds0atna0l1rutu6cRp7lOk06rntZnw7Dxtsm2qbcZsOXYBtuutm22fWFnYhdnt8Wuw+6TvZN9un2N/T0HDYfZDqsdWh1+c7RyFDpWOt6azpzuP33F9JbpL2dYzxDP2DPjthPLKcRpnVOb00dnF2e5c4PziIuJS4LLLpc+Lpsbxt3IveRKdPVxXeF60vWdm7Obwu2o26/uNu5p7ofcn8w0nymeWTNz0MPIQ+BR5dE/C5+VMGvfrH5PQ0+BZ7XnIy9jL5FXrdewt6V3qvdh7xc+9j5yn+M+4zw33jLeWV/MN8C3yLfLT8Nvnl+F30N/I/9k/3r/0QCngCUBZwOJgUGBWwL7+Hp8Ib+OPzrbZfay2e1BjKC5QRVBj4KtguXBrSFoyOyQrSH355jOkc5pDoVQfujW0Adh5mGLw34MJ4WHhVeGP45wiFga0TGXNXfR3ENz30T6RJZE3ptnMU85ry1KNSo+qi5qPNo3ujS6P8YuZlnM1VidWElsSxw5LiquNm5svt/87fOH4p3iC+N7F5gvyF1weaHOwvSFpxapLhIsOpZATIhOOJTwQRAqqBaMJfITdyWOCnnCHcJnIi/RNtGI2ENcKh5O8kgqTXqS7JG8NXkkxTOlLOW5hCepkLxMDUzdmzqeFpp2IG0yPTq9MYOSkZBxQqohTZO2Z+pn5mZ2y6xlhbL+xW6Lty8elQfJa7OQrAVZLQq2QqboVFoo1yoHsmdlV2a/zYnKOZarnivN7cyzytuQN5zvn//tEsIS4ZK2pYZLVy0dWOa9rGo5sjxxedsK4xUFK4ZWBqw8uIq2Km3VT6vtV5eufr0mek1rgV7ByoLBtQFr6wtVCuWFfevc1+1dT1gvWd+1YfqGnRs+FYmKrhTbF5cVf9go3HjlG4dvyr+Z3JS0qavEuWTPZtJm6ebeLZ5bDpaql+aXDm4N2dq0Dd9WtO319kXbL5fNKNu7g7ZDuaO/PLi8ZafJzs07P1SkVPRU+lQ27tLdtWHX+G7R7ht7vPY07NXbW7z3/T7JvttVAVVN1WbVZftJ+7P3P66Jqun4lvttXa1ObXHtxwPSA/0HIw6217nU1R3SPVRSj9Yr60cOxx++/p3vdy0NNg1VjZzG4iNwRHnk6fcJ3/ceDTradox7rOEH0x92HWcdL2pCmvKaRptTmvtbYlu6T8w+0dbq3nr8R9sfD5w0PFl5SvNUyWna6YLTk2fyz4ydlZ19fi753GDborZ752PO32oPb++6EHTh0kX/i+c7vDvOXPK4dPKy2+UTV7hXmq86X23qdOo8/pPTT8e7nLuarrlca7nuer21e2b36RueN87d9L158Rb/1tWeOT3dvfN6b/fF9/XfFt1+cif9zsu72Xcn7q28T7xf9EDtQdlD3YfVP1v+3Njv3H9qwHeg89HcR/cGhYPP/pH1jw9DBY+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAtxJREFUeNqM0llIVHEUBvDv3vlfZ8ac6zZtWpmamtliUUHRDlFJWlEYLdBLtG/QBlFJQUTSU089RZRlG4EvkS9NlqkpldHyYLk1OurcOzp30vHO/y6nBwsSIvzgvBw+fpyHA8MwwDmHbdsjQwSbCACkYDBYp6pqU3Fxcfyf/Z+eYRjQOQf+Bnw+30IiIsMwhizL4n3lV6mn7BzZtm1yzn8SETU0NKz+J2ARobe3t85/+SI1506j9hOHqTEO9FYEtR/ZTx/n5FDH6eOkquoni2g00NjUtEzTtBYioneLCulVHKg2yUkNmelUn5VOtUlueu0SqDE/m4iIIpFI64fm5vU65xAMIlicR9rOn/UEKytgmQbYuARAEDAqRLCiQxBFhtTNWzDzxk1LcjgkFhuKIhLR2qJKcN5Al/q7reF/cXUHoA0MtA9Gh4klJIxz6ro+PZiVC0uOw1jimJEDWZbTDhw8lCi0+/3PtUeV696ePIPUnIwxAf3fOjG/7AK8e/e9ZH2K0uWdPRdivANm3NguED1OJBYWQunvDwgAXIqifO54+CC7/tSxMQELL11B/r6D3cnJybniQDis25Ikfn1wD2GdQLIMISkF5JFhudwgjwySkyCkpILkRER0wpf7d2FJkqSoapQRRPCYjoLDR+EY70VXbS2YxCC4nAARbAAQBJBlwTIMZJRsQN7W7eA6t9O8XkE0jRhWLV2y+Gdm9q0dT6rMhLw8dPn7EAoEMBSLIcpjCPUEEPD3gU1Kw+6qZ6TPKrizq3TbAjUUIkFRVYAIkkfG99bWp4P1b7Z0vq5BXtFGPN6zE6Zuo7SiAh01PkycV4jJRRt96VOmrOHhMESHiBEAgMkNlGwqmXC78mG1DXtQdruTgx/eF5g6x9Tly1pCmtYjMSnxatnFTeXXyn8wxiCMAgxz5EmcTjCXCynxblf1C9910eFwrl254nh/dDhqcQ5zeBgAwBiDIAr4NQAWJarVjshqqgAAAABJRU5ErkJggg==",
-    pathwayParent: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAVklEQVR42tVSQQoAIAza0/a0/bwuLUZJaJ0SPGSbSGZW4O5t5UnfMC4mqwHSocFTgkRENEWHg0l0pnG9KMX+szqYSqku020GLKGB0gJlIL8B2w4N9h90t4HQjSs2eNAAAAAASUVORK5CYII=",
-    pathway: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANklEQVR42mNgGCzgPxRTbADZBiFr/I9FjmTDGCgx5D8BcYLe/E8kpq0LqBoG/ymNRvonpCEGAFWvKtY210w0AAAAAElFTkSuQmCC"
-};
-
-Utils.genBamVariants = function (seq, size, x, y) {
-    var length = seq.length;
-    var s = size / 6;
-    //if(x==null){x=0;}
-    //if(y==null){y=0;}
-    var d = "";
-    for (var i = 0; i < length; i++) {
-        switch (seq.charAt(i)) {
-            case "A" :
-                d += "M" + ((2.5 * s) + x) + "," + (y) +
-                    "l-" + (2.5 * s) + "," + (6 * s) +
-                    "l" + s + ",0" +
-                    "l" + (0.875 * s) + ",-" + (2 * s) +
-                    "l" + (2.250 * s) + ",0" +
-                    "l" + (0.875 * s) + "," + (2 * s) +
-                    "l" + s + ",0" +
-                    "l-" + (2.5 * s) + ",-" + (6 * s) +
-                    "l-" + (0.5 * s) + ",0" +
-                    "l0," + s +
-                    "l" + (0.75 * s) + "," + (2 * s) +
-                    "l-" + (1.5 * s) + ",0" +
-                    "l" + (0.75 * s) + ",-" + (2 * s) +
-                    "l0,-" + s +
-                    " ";
-                break;
-            case "T" :
-                d += "M" + ((0.5 * s) + x) + "," + (y) +
-                    "l0," + s +
-                    "l" + (2 * s) + ",0" +
-                    "l0," + (5 * s) +
-                    "l" + s + ",0" +
-                    "l0,-" + (5 * s) +
-                    "l" + (2 * s) + ",0" +
-                    "l0,-" + s +
-                    " ";
-                break;
-            case "C" :
-                d += "M" + ((5 * s) + x) + "," + ((0 * s) + y) +
-                    "l-" + (2 * s) + ",0" +
-                    "l-" + (1.5 * s) + "," + (0.5 * s) +
-                    "l-" + (0.5 * s) + "," + (1.5 * s) +
-                    "l0," + (2 * s) +
-                    "l" + (0.5 * s) + "," + (1.5 * s) +
-                    "l" + (1.5 * s) + "," + (0.5 * s) +
-                    "l" + (2 * s) + ",0" +
-                    "l0,-" + s +
-                    "l-" + (2 * s) + ",0" +
-                    "l-" + (0.75 * s) + ",-" + (0.25 * s) +
-                    "l-" + (0.25 * s) + ",-" + (0.75 * s) +
-                    "l0,-" + (2 * s) +
-                    "l" + (0.25 * s) + ",-" + (0.75 * s) +
-                    "l" + (0.75 * s) + ",-" + (0.25 * s) +
-                    "l" + (2 * s) + ",0" +
-                    " ";
-                break;
-            case "G" :
-                d += "M" + ((5 * s) + x) + "," + ((0 * s) + y) +
-                    "l-" + (2 * s) + ",0" +
-                    "l-" + (1.5 * s) + "," + (0.5 * s) +
-                    "l-" + (0.5 * s) + "," + (1.5 * s) +
-                    "l0," + (2 * s) +
-                    "l" + (0.5 * s) + "," + (1.5 * s) +
-                    "l" + (1.5 * s) + "," + (0.5 * s) +
-                    "l" + (2 * s) + ",0" +
-                    "l0,-" + (3 * s) +
-                    "l-" + (s) + ",0" +
-                    "l0," + (2 * s) +
-                    "l-" + (s) + ",0" +
-                    "l-" + (0.75 * s) + ",-" + (0.25 * s) +
-                    "l-" + (0.25 * s) + ",-" + (0.75 * s) +
-                    "l0,-" + (2 * s) +
-                    "l" + (0.25 * s) + ",-" + (0.75 * s) +
-                    "l" + (0.75 * s) + ",-" + (0.25 * s) +
-                    "l" + (2 * s) + ",0" +
-                    " ";
-//                d += "M" + ((5 * s) + x) + "," + ((0 * s) + y) +
-//                    "l-" + (2 * s) + ",0" +
-//                    "l-" + (2 * s) + "," + (2 * s) +
-//                    "l0," + (2 * s) +
-//                    "l" + (2 * s) + "," + (2 * s) +
-//                    "l" + (2 * s) + ",0" +
-//                    "l0,-" + (3 * s) +
-//                    "l-" + (1 * s) + ",0" +
-//                    "l0," + (2 * s) +
-//                    "l-" + (0.5 * s) + ",0" +
-//                    "l-" + (1.5 * s) + ",-" + (1.5 * s) +
-//                    "l0,-" + (1 * s) +
-//                    "l" + (1.5 * s) + ",-" + (1.5 * s) +
-//                    "l" + (1.5 * s) + ",0" +
-//                    " ";
-                break;
-            case "N" :
-                d += "M" + ((0.5 * s) + x) + "," + ((0 * s) + y) +
-                    "l0," + (6 * s) +
-                    "l" + s + ",0" +
-                    "l0,-" + (4.5 * s) +
-                    "l" + (3 * s) + "," + (4.5 * s) +
-                    "l" + s + ",0" +
-                    "l0,-" + (6 * s) +
-                    "l-" + s + ",0" +
-                    "l0," + (4.5 * s) +
-                    "l-" + (3 * s) + ",-" + (4.5 * s) +
-                    " ";
-                break;
-            case "d" :
-                d += "M" + ((0 * s) + x) + "," + ((2.5 * s) + y) +
-                    "l" + (6 * s) + ",0" +
-                    "l0," + (s) +
-                    "l-" + (6 * s) + ",0" +
-                    "l0,-" + (s) +
-                    " ";
-                break;
-            default:
-                d += "M0,0";
-                break;
-        }
-        x += size;
-    }
-    return d;
+    newitem: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AUkSYqIQkQSoghodkVUcERRUUEG8igiAOOjoCMFVEsDIoK2AfkIaKOg6OIisr74Xuja9a89+bN/rXXPues852zzwfACAyWSDNRNYAMqUIeEeCDx8TG4eQuQIEKJHAAEAizZCFz/SMBAPh+PDwrIsAHvgABeNMLCADATZvAMByH/w/qQplcAYCEAcB0kThLCIAUAEB6jkKmAEBGAYCdmCZTAKAEAGDLY2LjAFAtAGAnf+bTAICd+Jl7AQBblCEVAaCRACATZYhEAGg7AKzPVopFAFgwABRmS8Q5ANgtADBJV2ZIALC3AMDOEAuyAAgMADBRiIUpAAR7AGDIIyN4AISZABRG8lc88SuuEOcqAAB4mbI8uSQ5RYFbCC1xB1dXLh4ozkkXKxQ2YQJhmkAuwnmZGTKBNA/g88wAAKCRFRHgg/P9eM4Ors7ONo62Dl8t6r8G/yJiYuP+5c+rcEAAAOF0ftH+LC+zGoA7BoBt/qIl7gRoXgugdfeLZrIPQLUAoOnaV/Nw+H48PEWhkLnZ2eXk5NhKxEJbYcpXff5nwl/AV/1s+X48/Pf14L7iJIEyXYFHBPjgwsz0TKUcz5IJhGLc5o9H/LcL//wd0yLESWK5WCoU41EScY5EmozzMqUiiUKSKcUl0v9k4t8s+wM+3zUAsGo+AXuRLahdYwP2SycQWHTA4vcAAPK7b8HUKAgDgGiD4c93/+8//UegJQCAZkmScQAAXkQkLlTKsz/HCAAARKCBKrBBG/TBGCzABhzBBdzBC/xgNoRCJMTCQhBCCmSAHHJgKayCQiiGzbAdKmAv1EAdNMBRaIaTcA4uwlW4Dj1wD/phCJ7BKLyBCQRByAgTYSHaiAFiilgjjggXmYX4IcFIBBKLJCDJiBRRIkuRNUgxUopUIFVIHfI9cgI5h1xGupE7yAAygvyGvEcxlIGyUT3UDLVDuag3GoRGogvQZHQxmo8WoJvQcrQaPYw2oefQq2gP2o8+Q8cwwOgYBzPEbDAuxsNCsTgsCZNjy7EirAyrxhqwVqwDu4n1Y8+xdwQSgUXACTYEd0IgYR5BSFhMWE7YSKggHCQ0EdoJNwkDhFHCJyKTqEu0JroR+cQYYjIxh1hILCPWEo8TLxB7iEPENyQSiUMyJ7mQAkmxpFTSEtJG0m5SI+ksqZs0SBojk8naZGuyBzmULCAryIXkneTD5DPkG+Qh8lsKnWJAcaT4U+IoUspqShnlEOU05QZlmDJBVaOaUt2ooVQRNY9aQq2htlKvUYeoEzR1mjnNgxZJS6WtopXTGmgXaPdpr+h0uhHdlR5Ol9BX0svpR+iX6AP0dwwNhhWDx4hnKBmbGAcYZxl3GK+YTKYZ04sZx1QwNzHrmOeZD5lvVVgqtip8FZHKCpVKlSaVGyovVKmqpqreqgtV81XLVI+pXlN9rkZVM1PjqQnUlqtVqp1Q61MbU2epO6iHqmeob1Q/pH5Z/YkGWcNMw09DpFGgsV/jvMYgC2MZs3gsIWsNq4Z1gTXEJrHN2Xx2KruY/R27iz2qqaE5QzNKM1ezUvOUZj8H45hx+Jx0TgnnKKeX836K3hTvKeIpG6Y0TLkxZVxrqpaXllirSKtRq0frvTau7aedpr1Fu1n7gQ5Bx0onXCdHZ4/OBZ3nU9lT3acKpxZNPTr1ri6qa6UbobtEd79up+6Ynr5egJ5Mb6feeb3n+hx9L/1U/W36p/VHDFgGswwkBtsMzhg8xTVxbzwdL8fb8VFDXcNAQ6VhlWGX4YSRudE8o9VGjUYPjGnGXOMk423GbcajJgYmISZLTepN7ppSTbmmKaY7TDtMx83MzaLN1pk1mz0x1zLnm+eb15vft2BaeFostqi2uGVJsuRaplnutrxuhVo5WaVYVVpds0atna0l1rutu6cRp7lOk06rntZnw7Dxtsm2qbcZsOXYBtuutm22fWFnYhdnt8Wuw+6TvZN9un2N/T0HDYfZDqsdWh1+c7RyFDpWOt6azpzuP33F9JbpL2dYzxDP2DPjthPLKcRpnVOb00dnF2e5c4PziIuJS4LLLpc+Lpsbxt3IveRKdPVxXeF60vWdm7Obwu2o26/uNu5p7ofcn8w0nymeWTNz0MPIQ+BR5dE/C5+VMGvfrH5PQ0+BZ7XnIy9jL5FXrdewt6V3qvdh7xc+9j5yn+M+4zw33jLeWV/MN8C3yLfLT8Nvnl+F30N/I/9k/3r/0QCngCUBZwOJgUGBWwL7+Hp8Ib+OPzrbZfay2e1BjKC5QRVBj4KtguXBrSFoyOyQrSH355jOkc5pDoVQfujW0Adh5mGLw34MJ4WHhVeGP45wiFga0TGXNXfR3ENz30T6RJZE3ptnMU85ry1KNSo+qi5qPNo3ujS6P8YuZlnM1VidWElsSxw5LiquNm5svt/87fOH4p3iC+N7F5gvyF1weaHOwvSFpxapLhIsOpZATIhOOJTwQRAqqBaMJfITdyWOCnnCHcJnIi/RNtGI2ENcKh5O8kgqTXqS7JG8NXkkxTOlLOW5hCepkLxMDUzdmzqeFpp2IG0yPTq9MYOSkZBxQqohTZO2Z+pn5mZ2y6xlhbL+xW6Lty8elQfJa7OQrAVZLQq2QqboVFoo1yoHsmdlV2a/zYnKOZarnivN7cyzytuQN5zvn//tEsIS4ZK2pYZLVy0dWOa9rGo5sjxxedsK4xUFK4ZWBqw8uIq2Km3VT6vtV5eufr0mek1rgV7ByoLBtQFr6wtVCuWFfevc1+1dT1gvWd+1YfqGnRs+FYmKrhTbF5cVf9go3HjlG4dvyr+Z3JS0qavEuWTPZtJm6ebeLZ5bDpaql+aXDm4N2dq0Dd9WtO319kXbL5fNKNu7g7ZDuaO/PLi8ZafJzs07P1SkVPRU+lQ27tLdtWHX+G7R7ht7vPY07NXbW7z3/T7JvttVAVVN1WbVZftJ+7P3P66Jqun4lvttXa1ObXHtxwPSA/0HIw6217nU1R3SPVRSj9Yr60cOxx++/p3vdy0NNg1VjZzG4iNwRHnk6fcJ3/ceDTradox7rOEH0x92HWcdL2pCmvKaRptTmvtbYlu6T8w+0dbq3nr8R9sfD5w0PFl5SvNUyWna6YLTk2fyz4ydlZ19fi753GDborZ752PO32oPb++6EHTh0kX/i+c7vDvOXPK4dPKy2+UTV7hXmq86X23qdOo8/pPTT8e7nLuarrlca7nuer21e2b36RueN87d9L158Rb/1tWeOT3dvfN6b/fF9/XfFt1+cif9zsu72Xcn7q28T7xf9EDtQdlD3YfVP1v+3Njv3H9qwHeg89HcR/cGhYPP/pH1jw9DBY+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5jz/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAtxJREFUeNqM0llIVHEUBvDv3vlfZ8ac6zZtWpmamtliUUHRDlFJWlEYLdBLtG/QBlFJQUTSU089RZRlG4EvkS9NlqkpldHyYLk1OurcOzp30vHO/y6nBwsSIvzgvBw+fpyHA8MwwDmHbdsjQwSbCACkYDBYp6pqU3Fxcfyf/Z+eYRjQOQf+Bnw+30IiIsMwhizL4n3lV6mn7BzZtm1yzn8SETU0NKz+J2ARobe3t85/+SI1506j9hOHqTEO9FYEtR/ZTx/n5FDH6eOkquoni2g00NjUtEzTtBYioneLCulVHKg2yUkNmelUn5VOtUlueu0SqDE/m4iIIpFI64fm5vU65xAMIlicR9rOn/UEKytgmQbYuARAEDAqRLCiQxBFhtTNWzDzxk1LcjgkFhuKIhLR2qJKcN5Al/q7reF/cXUHoA0MtA9Gh4klJIxz6ro+PZiVC0uOw1jimJEDWZbTDhw8lCi0+/3PtUeV696ePIPUnIwxAf3fOjG/7AK8e/e9ZH2K0uWdPRdivANm3NguED1OJBYWQunvDwgAXIqifO54+CC7/tSxMQELL11B/r6D3cnJybniQDis25Ikfn1wD2GdQLIMISkF5JFhudwgjwySkyCkpILkRER0wpf7d2FJkqSoapQRRPCYjoLDR+EY70VXbS2YxCC4nAARbAAQBJBlwTIMZJRsQN7W7eA6t9O8XkE0jRhWLV2y+Gdm9q0dT6rMhLw8dPn7EAoEMBSLIcpjCPUEEPD3gU1Kw+6qZ6TPKrizq3TbAjUUIkFRVYAIkkfG99bWp4P1b7Z0vq5BXtFGPN6zE6Zuo7SiAh01PkycV4jJRRt96VOmrOHhMESHiBEAgMkNlGwqmXC78mG1DXtQdruTgx/eF5g6x9Tly1pCmtYjMSnxatnFTeXXyn8wxiCMAgxz5EmcTjCXCynxblf1C9910eFwrl254nh/dDhqcQ5zeBgAwBiDIAr4NQAWJarVjshqqgAAAABJRU5ErkJggg=="
 };
 
 /*
@@ -657,7 +823,7 @@ Region.prototype = {
         if (_.isString(obj)) {
             return this.parse(obj);
         }
-        this.chromosome = obj.chromosome || this.chromosome;
+        this.chromosome = this._checkChromosomeAlias(obj) || this.chromosome;
 
         if (typeof obj.position !== 'undefined') {
             obj.start = parseInt(obj.position);
@@ -692,6 +858,28 @@ Region.prototype = {
         }
     },
 
+    multiParse: function (str) {
+        if (_.isObject(str)) {
+            this.load(obj);
+        }
+        var pattern = /^([a-zA-Z0-9_])+\:([0-9])+\-([0-9])+(,([a-zA-Z0-9_])+\:([0-9])+\-([0-9])+)*$/;
+        var pattern2 = /^\[([a-zA-Z0-9_])+\:([0-9])+\-([0-9])+(,([a-zA-Z0-9_])+\:([0-9])+\-([0-9])+)*\]$/;
+
+        var withoutBrackets = str;
+        if (pattern2.test(str)) {
+            withoutBrackets = str.slice(1, str.length - 1);
+        }
+
+        var regions = [];
+        if (pattern.test(withoutBrackets)) {
+            var splitRegions = withoutBrackets.split(",");
+            for (var i = 0; i < splitRegions.length; i++) {
+                regions.push(new Region(splitRegions[i]));
+            }
+        }
+        return regions;
+    },
+
     center: function () {
         return this.start + Math.floor((this.length()) / 2);
     },
@@ -715,9 +903,19 @@ Region.prototype = {
             str = this.chromosome + ":" + this.start + "-" + this.end;
         }
         return str;
+    },
+
+    _checkChromosomeAlias: function (obj) {
+        for (var i = 0; i < Region.chromosomeAlias.length; i++) {
+            var alias = Region.chromosomeAlias[i];
+            if(alias in obj){
+                return obj[alias];
+            }
+        }
     }
 };
 
+Region.chromosomeAlias = ['chromosome','sequenceName'];
 
 
 function Grid(args) {
@@ -998,59 +1196,70 @@ FeatureBinarySearchTree.prototype = {
  */
 
 var CellBaseManager = {
-    host: 'https://www.ebi.ac.uk/cellbase/webservices/rest',
+    host: (typeof CELLBASE_HOST === 'undefined') ? 'http://bioinfo.hpc.cam.ac.uk/cellbase' : CELLBASE_HOST,
     version: 'v3',
-    get: function (args) {
+    get: function(args) {
         var success = args.success;
         var error = args.error;
-        var async = (_.isUndefined(args.async) || _.isNull(args.async) ) ? true : args.async;
-        var urlConfig = _.omit(args, ['success', 'error', 'async']);
+        var async = (args.async == false) ? false: true;
+
+        // remove XMLHttpRequest keys
+        var ignoreKeys = ['success', 'error', 'async'];
+        var urlConfig = {};
+        for (var prop in args) {
+            if (hasOwnProperty.call(args, prop) && args[prop] != null && ignoreKeys.indexOf(prop) == -1) {
+                urlConfig[prop] = args[prop];
+            }
+        }
 
         var url = CellBaseManager.url(urlConfig);
-        if(typeof url === 'undefined'){
+        if (typeof url === 'undefined') {
             return;
         }
-        console.log(url);
+        
+        if (window.CELLBASE_LOG != null && CELLBASE_LOG === true) {
+            console.log(url);
+        }
 
         var d;
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            async: async,
-            success: function (data, textStatus, jqXHR) {
-                if($.isPlainObject(data) || $.isArray(data)){
-//                    data.params = args.params;
-//                    data.resource = args.resource;
-//                    data.category = args.category;
-//                    data.subCategory = args.subCategory;
-                    if (_.isFunction(success)) success(data);
-                    d = data;
-                }else{
-                    console.log('Cellbase returned a non json object or list, please check the url.');
-                    console.log(url);
-                    console.log(data)
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
-                if (_.isFunction(error)) error(jqXHR, textStatus, errorThrown);
+        var request = new XMLHttpRequest();
+        request.onload = function() {
+            var contentType = this.getResponseHeader('Content-Type');
+            if (contentType === 'application/json') {
+                var parsedResponse = JSON.parse(this.response);
+                if (typeof success === "function") success(parsedResponse);
+                d = parsedResponse;
+            } else {
+                console.log('Cellbase returned a non json object or list, please check the url.');
+                console.log(url);
+                console.log(this.response)
             }
-        });
+        };
+        request.onerror = function() {
+            console.log("CellBaseManager: Ajax call returned " + this.statusText);
+            if (typeof error === "function") error(this);
+        };
+        request.open("GET", url, async);
+        request.send();
         return d;
+
     },
-    url: function (args) {
-        if (!$.isPlainObject(args)) args = {};
-        if (!$.isPlainObject(args.params)) args.params = {};
+    url: function(args) {
+        if (args == null) {
+            args = {};
+        }
+        if (args.params == null) {
+            args.params = {};
+        }
 
         var version = this.version;
-        if(typeof args.version !== 'undefined' && args.version != null){
+        if (args.version != null) {
             version = args.version
         }
 
         var host = this.host;
-        if (typeof args.host !== 'undefined' && args.host != null) {
-            host =  args.host;
+        if (args.host != null) {
+            host = args.host;
         }
 
         delete args.host;
@@ -1061,31 +1270,42 @@ var CellBaseManager = {
             version: version
         };
 
-        var params = {
-            of: 'json'
-        };
-
-        _.extend(config, args);
-        _.extend(config.params, params);
+        for (var prop in args) {
+            if (hasOwnProperty.call(args, prop) && args[prop] != null) {
+                config[prop] = args[prop];
+            }
+        }
 
         var query = '';
-        if(typeof config.query !== 'undefined' && config.query != null){
-            if ($.isArray(config.query)) {
-                config.query = config.query.toString();
-            }
-            query = '/' + config.query;
+        if (config.query != null) {
+            query = '/' + config.query.toString();
         }
 
         //species can be the species code(String) or an object with text attribute
-        if ($.isPlainObject(config.species)) {
-            config.species = Utils.getSpeciesCode(config.species.text);
+        if (config.species && config.species.id != null) {
+            if (config.species.assembly != null) {
+                config.params["assembly"] = config.species.assembly.name;
+            }
+            // TODO Remove temporary fix
+            if (config.subCategory === 'chromosome') {
+                delete config.params["assembly"]
+            }
+            config.species = Utils.getSpeciesCode(config.species.scientificName);
         }
 
-        var url = config.host + '/' + config.version + '/' + config.species + '/' + config.category + '/' + config.subCategory + query + '/' + config.resource;
+        var url;
+        if (config.category === 'meta') {
+            url = config.host + '/webservices/rest/' + config.version + '/' + config.category + '/' + config.subCategory;
+        } else {
+            url = config.host + '/webservices/rest/' + config.version + '/' + config.species + '/' + config.category + '/' + config.subCategory + query + '/' + config.resource;
+        }
+
+
         url = Utils.addQueryParamtersToUrl(config.params, url);
         return url;
     }
 };
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -1108,475 +1328,1395 @@ var CellBaseManager = {
  *
  */
 
+/**
+ * Composes an url with the given parameters.
+ * resourceType: any of OpencgaManager.resourceTypes.
+ * resourceId: id of the resource in catalog.
+ * action: all actions are in OpencgaManager.actions, but some methods don't allow every action.
+ * queryParams: Object with the query parameters.
+ * args: Object with extra arguments, like the success callback function, or host override.
+ *
+ * examples of use:
+ *
+ * OpencgaManager.users.create({
+ *      query:{
+ *          userId: 'user1',
+ *          name: 'User One',
+ *          email: 'user@example.com',
+ *          password: 'password_one'
+ *      },
+ *      request:{
+ *          success:function(response){
+ *              console.log(response);
+ *          },
+ *          error:function(){
+ *              console.log('Server error');
+ *          }
+ *      }
+ * });
+ *
+ * OpencgaManager.users.login({
+ *      id:'user1',
+ *      query:{
+ *          password: 'password_one'
+ *      },
+ *      request:{
+ *          success:function(response){
+ *              console.log(response);
+ *          },
+ *          error:function(){
+ *              console.log('Server error');
+ *          }
+ *      }
+ * });
+ *
+ * OpencgaManager.users.info({
+ *      id:'user1',
+ *      query:{
+ *          sid: Cookies('bioinfo_sid'),
+ *          lastActivity: 'lastActivity'
+ *      },
+ *      request:{
+ *          success:function(response){
+ *              console.log(response);
+ *          },
+ *          error:function(){
+ *              console.log('Server error');
+ *          }
+ *      }
+ * });
+ *
+ *    http://cafetal:8080/opencga/rest/files/3/fetch?region=20:100-200&sid=nsrblm
+ *    http://cafetal:8080/opencga/rest/files/17/fetch?sid=eUZtTdnA9EU89vjACyAe&region=20%3A80000-82000&view_as_pairs=false&include_coverage=true&process_differences=false
+ *    http://cafetal:8080/opencga/rest/files/17/fetch?sid=eUZtTdnA9EU89vjACyAe&region=20%3A80000-82000&view_as_pairs=false&include_coverage=true&process_differences=false
+ */
 var OpencgaManager = {
-    host: (typeof OPENCGA_HOST === 'undefined') ? 'http://ws.bioinfo.cipf.es/opencga/rest' : OPENCGA_HOST,
-    getHost: function () {
-        return OpencgaManager.host;
-    },
-    setHost: function (hostUrl) {
-        OpencgaManager.host = hostUrl;
-    },
-    doGet: function (url, successCallback, errorCallback) {
-        $.ajax({
-            type: "GET",
-            url: url,
-            success: successCallback,
-            error: errorCallback
-        });
-    },
-    doPost: function (url, formData, successCallback, errorCallback) {
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: formData,
-            processData: false,  // tell jQuery not to process the data
-            contentType: false,  // tell jQuery not to set contentType
-            success: successCallback,
-            error: errorCallback
-        });
-    },
-    getQuery: function (paramsWS) {
-        var query = "";
-        for (var key in paramsWS) {
-            if (paramsWS[key] != null)
-                query += key + '=' + paramsWS[key] + '&';
+    // host: (typeof OPENCGA_HOST === 'undefined') ? 'http://ws.bioinfo.cipf.es/opencga/rest' : OPENCGA_HOST,
+    // host: (typeof OPENCGA_HOST === 'undefined') ? 'http://cafetal:8080/opencga/rest' : OPENCGA_HOST,
+    host: window.OPENCGA_HOST,
+    version: (typeof OPENCGA_VERSION === 'undefined') ? 'v1' : OPENCGA_VERSION,
+
+    users: {
+        login: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'login');
+        },
+        logout: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'logout');
+        },
+        read: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'info');
+        },
+        update: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'update');
+        },
+        updateEmail: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'change-email');
+        },
+        updatePassword: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'change-password');
+        },
+        resetPassword: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'reset-password');
+        },
+        create: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'create');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'users', 'delete');
         }
-        if (query != '')
-            query = "?" + query.slice(0, -1);
-        return query;
     },
 
-
-    getAccountUrl: function (accountId) {
-        return OpencgaManager.getHost() + '/account/' + accountId;
-    },
-    getStorageUrl: function (accountId) {
-        return OpencgaManager.getAccountUrl(accountId) + '/storage';
-    },
-    getAdminProfileUrl: function (accountId) {
-        return OpencgaManager.getAccountUrl(accountId) + '/admin/profile';
-    },
-    getAdminBucketUrl: function (accountId, bucketId) {
-        return OpencgaManager.getAccountUrl(accountId) + '/admin/bucket/' + bucketId;
-    },
-    getAdminProjectUrl: function (accountId, projectId) {
-        return OpencgaManager.getAccountUrl(accountId) + '/admin/project/' + projectId;
-    },
-    getBucketUrl: function (accountId, bucketId) {
-        return OpencgaManager.getStorageUrl(accountId) + '/' + bucketId;
-    },
-    getObjectUrl: function (accountId, bucketId, objectId) {
-        return OpencgaManager.getStorageUrl(accountId) + '/' + bucketId + '/' + objectId;
-    },
-    getAnalysisUrl: function (accountId, analysis) {
-        return OpencgaManager.getAccountUrl(accountId) + '/analysis/' + analysis;
-    },
-    getJobAnalysisUrl: function (accountId, jobId) {
-        return OpencgaManager.getAccountUrl(accountId) + '/analysis/job/' + jobId;
-    },
-    getUtilsUrl: function () {
-        return OpencgaManager.getHost() + '/utils';
-    },
-    /*ACCOUNT METHODS*/
-    createAccount: function (args) {
-//      accountId, email, name, password, suiteId
-        var queryParams = {
-            'name': args.name,
-            'email': args.email,
-            'password': args.password,
-            'suiteid': args.suiteId
-        };
-        var url = OpencgaManager.getAccountUrl(args.accountId) + '/create' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    login: function (args) {
-//        accountId, password, suiteId
-        var queryParams = {
-            'password': args.password,
-            'suiteid': args.suiteId
-        };
-        var url = OpencgaManager.getAccountUrl(args.accountId) + '/login' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    logout: function (args) {
-//        accountId, sessionId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAccountUrl(args.accountId) + '/logout' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    getAccountInfo: function (args) {
-//        accountId, sessionId, lastActivity
-//        console.log(args.lastActivity)
-        var queryParams = {
-            'last_activity': args.lastActivity,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAccountUrl(args.accountId) + '/info' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                if (data.response.errorMsg === '') {
-                    args.success(data.response.result[0]);
-                } else {
-                    $.cookie('bioinfo_sid', null);
-                    $.cookie('bioinfo_sid', null, {path: '/'});
-                    $.cookie('bioinfo_account', null);
-                    $.cookie('bioinfo_account', null, {path: '/'});
-                    console.log(data);
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    changePassword: function (args) {
-//        accountId, sessionId, old_password, new_password1, new_password2
-        var queryParams = {
-            'old_password': args.old_password,
-            'new_password1': args.new_password1,
-            'new_password2': args.new_password2,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAdminProfileUrl(args.accountId) + '/change_password' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    resetPassword: function (args) {
-//        accountId, email
-        var queryParams = {
-            'email': args.email
-        };
-        var url = OpencgaManager.getAdminProfileUrl(args.accountId) + '/reset_password' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    changeEmail: function (args) {
-//        accountId, sessionId, new_email
-        var queryParams = {
-            'new_email': args.new_email,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAdminProfileUrl(args.accountId) + '/change_email' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    /* BUCKET METHODS */
-    getBuckets: function () {
-        return 'TODO';
-    },
-
-    createBucket: function (args) {
-//        bucketId, description, accountId, sessionId
-        var queryParams = {
-            'description': args.description,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAdminBucketUrl(args.accountId, args.bucketId) + '/create' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    refreshBucket: function (args) {
-//        accountId, bucketId, sessionId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAdminBucketUrl(args.accountId, args.bucketId) + '/refresh' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    renameBucket: function (args) {
-//        accountId, bucketId, newBucketId, sessionId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getAdminBucketUrl(args.accountId, args.bucketId) + '/rename/' + args.newBucketId + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    deleteBucket: 'TODO',
-    shareBucket: 'TODO',
-
-    uploadObjectToBucket: function (args) {
-//        accountId, sessionId, bucketId, objectId, formData, parents
-        var queryParams = {
-            'parents': (args.parents || false),
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/upload' + OpencgaManager.getQuery(queryParams);
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: args.formData,
-            processData: false,  // tell jQuery not to process the data
-            contentType: false,  // tell jQuery not to set contentType
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    createDirectory: function (args) {
-//        accountId, sessionId, bucketId, objectId, parents
-        args.objectId = args.objectId.replace(new RegExp("/", "gi"), ":");
-        var queryParams = {
-            'parents': (args.parents || false),
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/create_directory' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    deleteObjectFromBucket: function (args) {
-//        accountId, sessionId, bucketId, objectId
-        args.objectId = args.objectId.replace(new RegExp("/", "gi"), ":");
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/delete' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    pollObject: function (args) {
-//       accountId, sessionId, bucketId, objectId
-        var queryParams = {
-            'start': args.start,
-            'limit': args.limit,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/poll' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            async: args.async,
-            success: function (data, textStatus, jqXHR) {
-                args.success(data);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    grepObject: function (args) {
-//       accountId, sessionId, bucketId, objectId
-        var queryParams = {
-            'pattern': encodeURIComponent(args.pattern),
-            'ignoreCase': args.ignoreCase,
-            'multi': args.multi,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/grep' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            async: args.async,
-            success: function (data, textStatus, jqXHR) {
-                args.success(data);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    region: function (args) {
-//        accountId, sessionId, bucketId, objectId, region, queryParams
-        args.objectId = args.objectId.replace(new RegExp("/", "gi"), ":");
-        args.queryParams["sessionid"] = args.sessionId;
-        args.queryParams["region"] = args.region;
-        args.queryParams["cellbasehost"] = CELLBASE_HOST + '/' + CELLBASE_VERSION;
-
-        if (OpencgaManager.host.indexOf("localhost") != -1) {
-            args.queryParams["region"] = args.region;
-            args.queryParams["filepath"] = args.objectId;
-            var url = OpencgaManager.host + '/storage/fetch' + OpencgaManager.getQuery(args.queryParams);
-        } else {
-            var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/fetch' + OpencgaManager.getQuery(args.queryParams);
+    projects: {
+        list: function(args) {
+            return OpencgaManager._doRequest(args, 'projects', 'all-projects');
+        },
+        read: function(args) {
+            return OpencgaManager._doRequest(args, 'projects', 'info');
+        },
+        update: function(args) {
+            return OpencgaManager._doRequest(args, 'projects', 'update');
+        },
+        create: function(args) {
+            return OpencgaManager._doRequest(args, 'projects', 'create');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'projects', 'delete');
+        },
+        studies: function(args) {
+            return OpencgaManager._doRequest(args, 'projects', 'studies');
         }
+    },
 
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-//                args.success(data.response);
+    studies: {
+        list: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'all-studies');
+        },
+        read: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'info');
+        },
+        update: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'update');
+        },
+        create: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'create');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'delete');
+        },
+        analysis: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'analysis');
+        },
+        jobs: function(args) {
+            return OpencgaManager._doRequest(args, 'studies', 'jobs');
+        },
+        samples: function (args) {
+            return OpencgaManager._doRequest(args, 'studies', 'samples');
+        }
+    },
 
-//               TODO fix
-                if (!(data.substr(0, 5).indexOf('ERROR') != -1)) {
-                    var jsonData = JSON.parse(data);
-                    var r = {response: []};
-                    for (var i = 0; i < args.region.length; i++) {
-                        var result = jsonData[i];
-                        // TODO temporal fix
-                        r.response.push({
-                            id: args.region[i],
-                            result: jsonData[i]
-                        });
+    files: {
+        list: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'list');
+        },
+        fetch: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'fetch');
+        },
+        alignments: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'alignments');
+        },
+        variants: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'variants');
+        },
+        read: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'info');
+        },
+        info: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'info');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'delete');
+        },
+        index: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'index');
+        },
+        search: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'search');
+        },
+        filesByFolder: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'files');
+        },
+        content: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'content');
+        },
+        contentGrep: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'content-grep');
+        },
+        createFolder: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'create-folder');
+        },
+        setHeader: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'set-header');
+        },
+        contentExample: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'content-example');
+        },
+        downloadExample: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'download-example');
+        },
+        update: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'update');
+        },
+        download: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'download');
+        },
+        upload: function(args) {
+            return OpencgaManager._doRequest(args, 'files', 'upload');
+        },
+        upload2: function(args) {
+            /** Check if exists a file with the same name **/
+            var query = {
+                sid: Cookies('bioinfo_sid'),
+                studyId: args.studyId,
+            };
+            // if (window.OPENCGA_OLD_URL_FORMAT != null && OPENCGA_OLD_URL_FORMAT === true) {
+            //     var splitIndex = args.relativeFilePath.lastIndexOf("/") + 1;
+            //     query.name = args.relativeFilePath.substring(splitIndex);
+            //     query.directory = args.relativeFilePath.substring(0, splitIndex);
+            // } else {
+            // }
+            query.path = args.relativeFilePath;
+            OpencgaManager.files.search({
+                query: query,
+                request: {
+                    success: function(response) {
+                        if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                            if (response.response[0].result.length == 0) {
+
+                                /** No file found with the same name -> start upload **/
+                                var url = OpencgaManager._url({
+                                    query: {
+                                        sid: args.sid
+                                    },
+                                    request: {}
+                                }, 'files', 'upload');
+                                args.url = url;
+                                OpencgaManager._uploadFile(args);
+
+                            } else {
+                                args.error('File already exists');
+                            }
+                        } else {
+                            args.error(response.response[0].errorMsg);
+                        }
+                    },
+                    error: function() {
+                        args.error('Server error, try again later.');
                     }
-                    args.success(r);
-//                args.success({resource: args.queryParams["category"], response: JSON.parse(data), filename: args.objectId, query: args.region, params: args.queryParams});
                 }
+            });
+        }
 
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-
-        function success(data) {
-
+    },
+    jobs: {
+        create: function(args) {
+            return OpencgaManager._doRequest(args, 'jobs', 'create');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'jobs', 'delete');
         }
     },
+    samples: {
+        search: function(args) {
+            return OpencgaManager._doRequest(args, 'samples', 'search');
+        }
+    },
+    util: {
+        proxy: function(args) {
+            return OpencgaManager._doRequest(args, 'util', 'proxy');
+        }
+    },
+    tools: {
+        search: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'search');
+        },
+        info: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'info');
+        },
+        help: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'help');
+        },
+        update: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'update');
+        },
+        delete: function(args) {
+            return OpencgaManager._doRequest(args, 'tools', 'delete');
+        }
+    },
+    //analysis: {
+    //    jobs: function (args) {
+    //        return OpencgaManager._doRequest(args, 'analysis', 'jobs');
+    //    },
+    //    create: function (args) {
+    //        return OpencgaManager._doRequest(args, 'analysis', 'create');
+    //},
+    _url: function(args, api, action) {
+        var host = OpencgaManager.host;
+        if (typeof args.request.host !== 'undefined' && args.request.host != null) {
+            host = args.request.host;
+        }
+        var version = OpencgaManager.version;
+        if (typeof args.request.version !== 'undefined' && args.request.version != null) {
+            version = args.request.version;
+        }
+        var id = '';
+        if (typeof args.id !== 'undefined' && args.id != null) {
+            id = '/' + args.id;
+        }
 
-    /* JOB METHODS */
-    jobResult: function (args) {
-//        accountId, sessionId, jobId, format
-        //@Path("/{accountid}/{bucketname}/job/{jobid}/result.{format}")
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/result.js' + OpencgaManager.getQuery(queryParams);
-        //var url = OpencgaManager.getHost() + '/job/'+jobId+'/result.'+format+'?incvisites=true&sessionid='+sessionId;
+        var url = host + '/webservices/rest/' + version + '/' + api + id + '/' + action;
+        // if (window.OPENCGA_OLD_URL_FORMAT != null && OPENCGA_OLD_URL_FORMAT === true) {
+        //     if (action == 'jobs') {
+        //         action = 'job'
+        //     }
+        //     if (api == 'jobs') {
+        //         api = 'job'
+        //     }
+        //     url = host + '/rest/' + api + id + '/' + action;
+        // }
+        url = Utils.addQueryParamtersToUrl(args.query, url);
+        return url;
+    },
 
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
+    _doRequest: function(args, api, action) {
+        var url = OpencgaManager._url(args, api, action);
+        if (args.request.url === true) {
+            return url;
+        } else {
+            var method = 'GET';
+            if (typeof args.request.method !== 'undefined' && args.request.method != null) {
+                method = args.request.method;
             }
-        });
+            var async = true;
+            if (typeof args.request.async !== 'undefined' && args.request.async != null) {
+                async = args.request.async;
+            }
 
+            if (window.OPENCGA_LOG != null && OPENCGA_LOG === true) {
+                console.log(url);
+            }
+            var request = new XMLHttpRequest();
+            request.onload = function() {
+                var contentType = this.getResponseHeader('Content-Type');
+                if (contentType === 'application/json') {
+                    args.request.success(JSON.parse(this.response), this);
+                } else {
+                    args.request.success(this.response, this);
+                }
+            };
+            request.onerror = function() {
+                args.request.error(this);
+            };
+            request.open(method, url, async);
+            request.send();
+            return url;
+        }
+    },
+    _uploadFile: function(args) {
+        var url = args.url;
+        var inputFile = args.inputFile;
+        var fileName = args.fileName;
+        var userId = args.userId;
+        var studyId = args.studyId;
+        var relativeFilePath = args.relativeFilePath;
+        var fileFormat = args.fileFormat;
+        var bioFormat = args.bioFormat;
+        var description = args.description;
+        var callbackProgress = args.callbackProgress;
+
+        /**/
+        var resume = true;
+        var resumeInfo = {};
+        var chunkMap = {};
+        var chunkId = 0;
+        var blob = inputFile;
+        var BYTES_PER_CHUNK = 2 * 1024 * 1024;
+        var SIZE = blob.size;
+        var NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
+        var start;
+        var end;
+
+
+        var getResumeInfo = function(formData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, false); //false = sync call
+            xhr.send(formData);
+            var response = JSON.parse(xhr.responseText);
+            return response.response[0];
+        };
+        var checkChunk = function(id, size, resumeInfo) {
+            if (typeof resumeInfo[id] === 'undefined') {
+                return false;
+            } else if (resumeInfo[id].size != size /*|| resumeInfo[id].hash != hash*/ ) {
+                return false;
+            }
+            return true;
+        };
+        var processChunk = function(c) {
+            var chunkBlob = blob.slice(c.start, c.end);
+
+            if (checkChunk(c.id, chunkBlob.size, resumeInfo) == false) {
+                var formData = new FormData();
+                formData.append('chunk_content', chunkBlob);
+                formData.append('chunk_id', c.id);
+                formData.append('chunk_size', chunkBlob.size);
+                /*formData.append('chunk_hash', hash);*/
+                formData.append("filename", fileName);
+                formData.append('userId', userId);
+                formData.append('studyId', studyId);
+                formData.append('relativeFilePath', relativeFilePath);
+                /*formData.append('chunk_gzip', );*/
+                if (c.last) {
+                    formData.append("last_chunk", true);
+                    formData.append("total_size", SIZE);
+                    formData.append("fileFormat", fileFormat);
+                    formData.append("bioFormat", bioFormat);
+                    formData.append("description", description);
+                }
+                uploadChunk(formData, c, function(chunkResponse) {
+                    callbackProgress(c, NUM_CHUNKS, chunkResponse);
+                    if (!c.last) {
+                        processChunk(chunkMap[(c.id + 1)]);
+                    } else {
+
+                    }
+                });
+            } else {
+                callbackProgress(c, NUM_CHUNKS);
+                if (!c.last) {
+                    processChunk(chunkMap[(c.id + 1)]);
+                } else {
+
+                }
+            }
+
+        };
+        var uploadChunk = function(formData, chunk, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.onload = function(e) {
+                chunk.done = true;
+                console.log("chunk done");
+                callback(JSON.parse(xhr.responseText));
+            };
+            xhr.send(formData);
+        };
+
+        /**/
+        /**/
+
+        if (resume) {
+            var resumeFormData = new FormData();
+            resumeFormData.append('resume_upload', resume);
+            resumeFormData.append('filename', fileName);
+            resumeFormData.append('userId', userId);
+            resumeFormData.append('studyId', studyId);
+            resumeFormData.append('relativeFilePath', relativeFilePath);
+            resumeInfo = getResumeInfo(resumeFormData);
+        }
+
+        start = 0;
+        end = BYTES_PER_CHUNK;
+        while (start < SIZE) {
+            var last = false;
+            if (chunkId == (NUM_CHUNKS - 1)) {
+                last = true;
+            }
+            chunkMap[chunkId] = {
+                id: chunkId,
+                start: start,
+                end: end,
+                done: false,
+                last: last
+            };
+            start = end;
+            end = start + BYTES_PER_CHUNK;
+            chunkId++;
+        }
+        processChunk(chunkMap[0]);
+
+    }
+};
+
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+// resourceTypes: {
+//     USERS: "users",
+//     PROJECTS: "projects",
+//     STUDIES: "studies",
+//     FILES: "files",
+//     ANALYSES: "analyses",
+//     JOBS: "jobs"
+// },
+// actions: {
+//     LOGIN: "login",
+//     LOGOUT: "logout",
+//     CREATE: "create",
+//     UPLOAD: "upload",
+//     INFO: "info",
+//     LIST: "list",
+//     FETCH: "fetch",
+//     UPDATE: "update",
+//     DELETE: "delete"
+// },
+// httpMethods: {}, // defined after OpencgaManager
+//
+// /**
+//  * @param queryParams required: password, sid (sessionId)
+//  * @return sid (sessionId)
+//  */
+// login: function(userId, queryParams, args) {
+//     this._call(this.resourceTypes.USERS, userId, this.actions.LOGIN, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// logout: function(userId, queryParams, args) {
+//     this._call(this.resourceTypes.USERS, "", this.actions.LOGOUT, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: {resource}Id, password, sid (sessionId)
+//  */
+// create: function(resourceType, queryParams, args) {
+//     this._call(resourceType, "", this.actions.CREATE, queryParam, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// upload: function(resourceType, queryParams, args) {
+//     this._call(resourceType, "", this.actions.UPLOAD, queryParams, args);
+// },
+// /**
+//  * @param action restricted to OpencgaManager.actions.INFO, OpencgaManager.actions.FETCH
+//  * @param queryParams required: sid (sessionId)
+//  */
+// get: function(resourceType, resourceId, action, queryParams, args) {
+//     //        resourceId = "7";
+//     _.extend(queryParams, {
+//         sid: "RNk4P0ttFGHyqLA3YGS8",
+//         view_as_pairs: 'false',
+//         include_coverage: 'true',
+//         process_differences: 'false'
+//     });
+//     this._call(resourceType, resourceId, action, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// list: function(resourceType, queryParams, args) {
+//     this._call(resourceType, "", this.actions.LIST, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// update: function(resourceType, resourceId, queryParams, args) {
+//     this._call(resourceType, resourceId, this.actions.UPDATE, queryParams, args);
+// },
+// /**
+//  * @param queryParams required: sid (sessionId)
+//  */
+// delete: function(resourceType, resourceId, queryParams, args) {
+//     this._call(resourceType, resourceId, this.actions.DELETE, queryParams, args);
+// },
+//
+// _call: function(resourceType, resourceId, action, queryParams, args) {
+//     var url = this._url(resourceType, resourceId, action, queryParams, args);
+//
+//     if (typeof url === 'undefined' || url == null) {
+//         return;
+//     }
+//     console.log(url);
+//     var async = (_.isUndefined(args.async) || _.isNull(args.async)) ? true: args.async;
+//     var success = args.success;
+//     var error = args.error;
+//
+//     var d;
+//     $.ajax({
+//         type: OpencgaManager.httpMethods[resourceType],
+//         url: url,
+//         dataType: 'json', //still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//         async: async,
+//         success: function(data, textStatus, jqXHR) {
+//             if ($.isPlainObject(data) || $.isArray(data)) {
+//                 //                    data.params = args.params;
+//                 //                    data.resource = args.resource;
+//                 //                    data.category = args.category;
+//                 //                    data.subCategory = args.subCategory;
+//                 if (_.isFunction(success)) {
+//                     success(data);
+//                 }
+//                 d = data;
+//             } else {
+//                 console.log('Cellbase returned a non json object or list, please check the url.');
+//                 console.log(url);
+//                 console.log(data)
+//             }
+//         },
+//         error: function(jqXHR, textStatus, errorThrown) {
+//             console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
+//             if (_.isFunction(error)) {
+//                 error(jqXHR, textStatus, errorThrown);
+//             }
+//         }
+//     });
+//     return url;
+// },
+//
+// _url2: function(resourceType, resourceId, action, queryParams, args) {
+//     if (resourceId == undefined || resourceId == null) {
+//         resourceId = "";
+//     } else {
+//         resourceId = resourceId + "/";
+//     }
+//     var host = this.host;
+//     if (typeof args.host !== 'undefined' && args.host != null) {
+//         host = args.host;
+//     }
+//     var opencga = this.opencga;
+//     if (typeof args.opencga !== 'undefined' && args.opencga != null) {
+//         opencga = args.opencga;
+//     }
+//     /* still no version in the REST api
+//      var version = this.version;
+//      if(typeof args.version !== 'undefined' && args.version != null){
+//      version = args.version
+//      }
+//      */
+//     var url = host + opencga + resourceType + '/' + resourceId + action;
+//     /*
+//      _.extend(queryParams, {
+//      sid: 'RNk4P0ttFGHyqLA3YGS8',
+//      view_as_pairs: 'false',
+//      include_coverage: 'true',
+//      process_differences: 'false'
+//      });*/
+//
+//     url = Utils.addQueryParamtersToUrl(queryParams, url);
+//     return url;
+// }
+
+/*
+ get: function (args) {
+ var success = args.success;
+ var error = args.error;
+ var async = (_.isUndefined(args.async) || _.isNull(args.async) ) ? true : args.async;
+ var urlConfig = _.omit(args, ['success', 'error', 'async']);
+
+ var url = OpencgaManager.url(urlConfig);
+ if(typeof url === 'undefined'){
+ return;
+ }
+ console.log(url);
+
+ var d;
+ $.ajax({
+ type: "GET",
+ url: url,
+ dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+ async: async,
+ success: function (data, textStatus, jqXHR) {
+ if($.isPlainObject(data) || $.isArray(data)){
+ //                    data.params = args.params;
+ //                    data.resource = args.resource;
+ //                    data.category = args.category;
+ //                    data.subCategory = args.subCategory;
+ if (_.isFunction(success)) {
+ success(data);
+ }
+ d = data;
+ }else{
+ console.log('Cellbase returned a non json object or list, please check the url.');
+ console.log(url);
+ console.log(data)
+ }
+ },
+ error: function (jqXHR, textStatus, errorThrown) {
+ console.log("CellBaseManager: Ajax call returned : " + errorThrown + '\t' + textStatus + '\t' + jqXHR.statusText + " END");
+ if (_.isFunction(error)) error(jqXHR, textStatus, errorThrown);
+ }
+ });
+ return d;
+ },*/
+//////// old version
+//    host: (typeof OPENCGA_HOST === 'undefined') ? 'http://ws.bioinfo.cipf.es/opencga/rest' : OPENCGA_HOST,
+//    getHost: function () {
+//        return OpencgaManager.host;
+//    },
+//    setHost: function (hostUrl) {
+//        OpencgaManager.host = hostUrl;
+//    },
+//    doGet: function (url, successCallback, errorCallback) {
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            success: successCallback,
+//            error: errorCallback
+//        });
+//    },
+//    doPost: function (url, formData, successCallback, errorCallback) {
+//        $.ajax({
+//            type: "POST",
+//            url: url,
+//            data: formData,
+//            processData: false,  // tell jQuery not to process the data
+//            contentType: false,  // tell jQuery not to set contentType
+//            success: successCallback,
+//            error: errorCallback
+//        });
+//    },
+//    getQuery: function (paramsWS) {
+//        var query = "";
+//        for (var key in paramsWS) {
+//            if (paramsWS[key] != null)
+//                query += key + '=' + paramsWS[key] + '&';
+//        }
+//        if (query != '')
+//            query = "?" + query.slice(0, -1);
+//        return query;
+//    },
+//
+//
+//    getAccountUrl: function (accountId) {
+//        return OpencgaManager.getHost() + '/account/' + accountId;
+//    },
+//    getStorageUrl: function (accountId) {
+//        return OpencgaManager.getAccountUrl(accountId) + '/storage';
+//    },
+//    getAdminProfileUrl: function (accountId) {
+//        return OpencgaManager.getAccountUrl(accountId) + '/admin/profile';
+//    },
+//    getAdminBucketUrl: function (accountId, bucketId) {
+//        return OpencgaManager.getAccountUrl(accountId) + '/admin/bucket/' + bucketId;
+//    },
+//    getAdminProjectUrl: function (accountId, projectId) {
+//        return OpencgaManager.getAccountUrl(accountId) + '/admin/project/' + projectId;
+//    },
+//    getBucketUrl: function (accountId, bucketId) {
+//        return OpencgaManager.getStorageUrl(accountId) + '/' + bucketId;
+//    },
+//    getObjectUrl: function (accountId, bucketId, objectId) {
+//        return OpencgaManager.getStorageUrl(accountId) + '/' + bucketId + '/' + objectId;
+//    },
+//    getAnalysisUrl: function (accountId, analysis) {
+//        return OpencgaManager.getAccountUrl(accountId) + '/analysis/' + analysis;
+//    },
+//    getJobAnalysisUrl: function (accountId, jobId) {
+//        return OpencgaManager.getAccountUrl(accountId) + '/analysis/job/' + jobId;
+//    },
+//    getUtilsUrl: function () {
+//        return OpencgaManager.getHost() + '/utils';
+//    },
+//    /*ACCOUNT METHODS*/
+//    createAccount: function (args) {
+////      accountId, email, name, password, suiteId
+//        var queryParams = {
+//            'name': args.name,
+//            'email': args.email,
+//            'password': args.password,
+//            'suiteid': args.suiteId
+//        };
+//        var url = OpencgaManager.getAccountUrl(args.accountId) + '/create' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    login: function (args) {
+////        accountId, password, suiteId
+//        var queryParams = {
+//            'password': args.password,
+//            'suiteid': args.suiteId
+//        };
+//        var url = OpencgaManager.getAccountUrl(args.accountId) + '/login' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    logout: function (args) {
+////        accountId, sessionId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAccountUrl(args.accountId) + '/logout' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    getAccountInfo: function (args) {
+////        accountId, sessionId, lastActivity
+////        console.log(args.lastActivity)
+//        var queryParams = {
+//            'last_activity': args.lastActivity,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAccountUrl(args.accountId) + '/info' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                if (data.response.errorMsg === '') {
+//                    args.success(data.response.result[0]);
+//                } else {
+//                    $.cookie('bioinfo_sid', null);
+//                    $.cookie('bioinfo_sid', null, {path: '/'});
+//                    $.cookie('bioinfo_account', null);
+//                    $.cookie('bioinfo_account', null, {path: '/'});
+//                    console.log(data);
+//                }
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    changePassword: function (args) {
+////        accountId, sessionId, old_password, new_password1, new_password2
+//        var queryParams = {
+//            'old_password': args.old_password,
+//            'new_password1': args.new_password1,
+//            'new_password2': args.new_password2,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAdminProfileUrl(args.accountId) + '/change_password' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    resetPassword: function (args) {
+////        accountId, email
+//        var queryParams = {
+//            'email': args.email
+//        };
+//        var url = OpencgaManager.getAdminProfileUrl(args.accountId) + '/reset_password' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    changeEmail: function (args) {
+////        accountId, sessionId, new_email
+//        var queryParams = {
+//            'new_email': args.new_email,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAdminProfileUrl(args.accountId) + '/change_email' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    /* BUCKET METHODS */
+//    getBuckets: function () {
+//        return 'TODO';
+//    },
+//
+//    createBucket: function (args) {
+////        bucketId, description, accountId, sessionId
+//        var queryParams = {
+//            'description': args.description,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAdminBucketUrl(args.accountId, args.bucketId) + '/create' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    refreshBucket: function (args) {
+////        accountId, bucketId, sessionId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAdminBucketUrl(args.accountId, args.bucketId) + '/refresh' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    renameBucket: function (args) {
+////        accountId, bucketId, newBucketId, sessionId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getAdminBucketUrl(args.accountId, args.bucketId) + '/rename/' + args.newBucketId + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    deleteBucket: 'TODO',
+//    shareBucket: 'TODO',
+//
+//    uploadObjectToBucket: function (args) {
+////        accountId, sessionId, bucketId, objectId, formData, parents
+//        var queryParams = {
+//            'parents': (args.parents || false),
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/upload' + OpencgaManager.getQuery(queryParams);
+//        $.ajax({
+//            type: "POST",
+//            url: url,
+//            data: args.formData,
+//            processData: false,  // tell jQuery not to process the data
+//            contentType: false,  // tell jQuery not to set contentType
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    createDirectory: function (args) {
+////        accountId, sessionId, bucketId, objectId, parents
+//        args.objectId = args.objectId.replace(new RegExp("/", "gi"), ":");
+//        var queryParams = {
+//            'parents': (args.parents || false),
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/create_directory' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    deleteObjectFromBucket: function (args) {
+////        accountId, sessionId, bucketId, objectId
+//        args.objectId = args.objectId.replace(new RegExp("/", "gi"), ":");
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/delete' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    pollObject: function (args) {
+////       accountId, sessionId, bucketId, objectId
+//        var queryParams = {
+//            'start': args.start,
+//            'limit': args.limit,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/poll' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            async: args.async,
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    grepObject: function (args) {
+////       accountId, sessionId, bucketId, objectId
+//        var queryParams = {
+//            'pattern': encodeURIComponent(args.pattern),
+//            'ignoreCase': args.ignoreCase,
+//            'multi': args.multi,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/grep' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            async: args.async,
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    region: function (args) {
+////        accountId, sessionId, bucketId, objectId, region, queryParams
+//        args.objectId = args.objectId.replace(new RegExp("/", "gi"), ":");
+//        args.queryParams["sessionid"] = args.sessionId;
+//        args.queryParams["region"] = args.region;
+//        args.queryParams["cellbasehost"] = CELLBASE_HOST + '/' + CELLBASE_VERSION;
+//
+//        if (OpencgaManager.host.indexOf("localhost") != -1) {
+//            args.queryParams["region"] = args.region;
+//            args.queryParams["filepath"] = args.objectId;
+//            var url = OpencgaManager.host + '/storage/fetch' + OpencgaManager.getQuery(args.queryParams);
+//        } else {
+//            var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/fetch' + OpencgaManager.getQuery(args.queryParams);
+//        }
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+////                args.success(data.response);
+//
+////               TODO fix
+//                if (!(data.substr(0, 5).indexOf('ERROR') != -1)) {
+//                    var jsonData = JSON.parse(data);
+//                    var r = {response: []};
+//                    for (var i = 0; i < args.region.length; i++) {
+//                        var result = jsonData[i];
+//                        // TODO temporal fix
+//                        r.response.push({
+//                            id: args.region[i],
+//                            result: jsonData[i]
+//                        });
+//                    }
+//                    args.success(r);
+////                args.success({resource: args.queryParams["category"], response: JSON.parse(data), filename: args.objectId, query: args.region, params: args.queryParams});
+//                }
+//
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//
+//        function success(data) {
+//
+//        }
+//    },
+//
+//    /* JOB METHODS */
+//    jobResult: function (args) {
+////        accountId, sessionId, jobId, format
+//        //@Path("/{accountid}/{bucketname}/job/{jobid}/result.{format}")
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/result.js' + OpencgaManager.getQuery(queryParams);
+//        //var url = OpencgaManager.getHost() + '/job/'+jobId+'/result.'+format+'?incvisites=true&sessionid='+sessionId;
+//
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//
+////        function success(data) {
+////            args.success(data);
+////        }
+////
+////        function error(data) {
+////            if (_.isFunction(args.error)) args.error(data);
+////        }
+////
+////        OpencgaManager.doGet(url, success, error);
+////        console.log(url);
+//    },
+//    jobResultUrl: function (args) {
+////        accountId, sessionId, jobId, format
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        return OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/result.js' + OpencgaManager.getQuery(queryParams);
+//    },
+//    jobStatus: function (args) {
+////        accountId, sessionId, jobId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/status' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    table: function (args) {
+////        accountId, sessionId, jobId, filename, colNames, colVisibility
+//        var queryParams = {
+//            'filename': args.filename,
+//            'colNames': args.colNames,
+//            'colVisibility': args.colVisibility,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/table' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    tableurl: function (args) {
+////        accountId, sessionId, jobId, filename, colNames, colVisibility
+//        var queryParams = {
+//            'filename': args.filename,
+//            'colNames': args.colNames,
+//            'colVisibility': args.colVisibility,
+//            'sessionid': args.sessionId
+//        };
+//        return OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/table' + OpencgaManager.getQuery(queryParams);
+//    },
+//
+//    poll: function (args) {
+////        accountId, sessionId, jobId, filename, zip
+//        var queryParams = {
+//            'filename': args.filename,
+//            'sessionid': args.sessionId
+//        };
+//        var url;
+//        if (args.zip == true) {
+//            url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/poll' + OpencgaManager.getQuery(queryParams);
+//            open(url);
+//        } else {
+//            queryParams['zip'] = false;
+//            url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/poll' + OpencgaManager.getQuery(queryParams);
+//
+//            $.ajax({
+//                type: "GET",
+//                url: url,
+//                async: args.async,
+//                success: function (data, textStatus, jqXHR) {
+//                    args.success(data);
+//                },
+//                error: function (jqXHR, textStatus, errorThrown) {
+//                    if (_.isFunction(args.error)) args.error(jqXHR);
+//                }
+//            });
+//        }
+//    },
+//
+//    jobFileGrep: function (args) {
+////        accountId, sessionId, jobId, filename, zip
+//        var queryParams = {
+//            'pattern': encodeURIComponent(args.pattern),
+//            'ignoreCase': args.ignoreCase,
+//            'multi': args.multi,
+//            'filename': args.filename,
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/grep' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            async: args.async,
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//
+//    pollurl: function (args) {
+////        accountId, sessionId, jobId, filename
+//        var queryParams = {
+//            'filename': args.filename,
+//            'sessionid': args.sessionId,
+//            'zip': false
+//        };
+//        return OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/poll' + OpencgaManager.getQuery(queryParams);
+//        //debugger
+//    },
+//
+//    deleteJob: function (args) {
+////        accountId, sessionId, jobId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/delete' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    downloadJob: function (args) {
+////        accountId, sessionId, jobId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        open(OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/download' + OpencgaManager.getQuery(queryParams));
+//    },
+//
+//    jobInfo: function (args) {
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/info' + OpencgaManager.getQuery(queryParams);
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//
+//    /* ANALYSIS */
+//    runAnalysis: function (args) {
+////        analysis, paramsWS
+//        var accountId = args.paramsWS.accountid;
+//        var queryParams = {
+////            'projectId':'default'
+//        };
+//        var url = OpencgaManager.getAnalysisUrl(accountId, args.analysis) + '/run' + OpencgaManager.getQuery(queryParams);
+//        console.log(url);
+//
+//        $.ajax({
+//            type: "POST",
+//            url: url,
+//            data: args.paramsWS,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    indexer: function (args) {
+////        accountId, sessionId, bucketId, objectId
+//        var queryParams = {
+//            'sessionid': args.sessionId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/index' + OpencgaManager.getQuery(queryParams);
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
+//            success: function (data, textStatus, jqXHR) {
+//                args.success(data.response);
+//            },
+//            error: function (jqXHR, textStatus, errorThrown) {
+//                if (_.isFunction(args.error)) args.error(jqXHR);
+//            }
+//        });
+//    },
+//    indexerStatus: function (args) {
+////        accountId, sessionId, bucketId, objectId, indexerId
+//        var queryParams = {
+//            'sessionid': args.sessionId,
+//            'indexerid': args.indexerId
+//        };
+//        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/index_status' + OpencgaManager.getQuery(queryParams);
+//        console.log(url);
+//
 //        function success(data) {
 //            args.success(data);
 //        }
@@ -1586,374 +2726,152 @@ var OpencgaManager = {
 //        }
 //
 //        OpencgaManager.doGet(url, success, error);
+//    },
+//
+//    localFileList: function (args) {
+//
+//        var url = OpencgaManager.host + '/getdirs';
 //        console.log(url);
-    },
-    jobResultUrl: function (args) {
-//        accountId, sessionId, jobId, format
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        return OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/result.js' + OpencgaManager.getQuery(queryParams);
-    },
-    jobStatus: function (args) {
-//        accountId, sessionId, jobId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/status' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    table: function (args) {
-//        accountId, sessionId, jobId, filename, colNames, colVisibility
-        var queryParams = {
-            'filename': args.filename,
-            'colNames': args.colNames,
-            'colVisibility': args.colVisibility,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/table' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    tableurl: function (args) {
-//        accountId, sessionId, jobId, filename, colNames, colVisibility
-        var queryParams = {
-            'filename': args.filename,
-            'colNames': args.colNames,
-            'colVisibility': args.colVisibility,
-            'sessionid': args.sessionId
-        };
-        return OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/table' + OpencgaManager.getQuery(queryParams);
-    },
-
-    poll: function (args) {
-//        accountId, sessionId, jobId, filename, zip
-        var queryParams = {
-            'filename': args.filename,
-            'sessionid': args.sessionId
-        };
-        var url;
-        if (args.zip == true) {
-            url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/poll' + OpencgaManager.getQuery(queryParams);
-            open(url);
-        } else {
-            queryParams['zip'] = false;
-            url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/poll' + OpencgaManager.getQuery(queryParams);
-
-            $.ajax({
-                type: "GET",
-                url: url,
-                async: args.async,
-                success: function (data, textStatus, jqXHR) {
-                    args.success(data);
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    if (_.isFunction(args.error)) args.error(jqXHR);
-                }
-            });
-        }
-    },
-
-    jobFileGrep: function (args) {
-//        accountId, sessionId, jobId, filename, zip
-        var queryParams = {
-            'pattern': encodeURIComponent(args.pattern),
-            'ignoreCase': args.ignoreCase,
-            'multi': args.multi,
-            'filename': args.filename,
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/grep' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            async: args.async,
-            success: function (data, textStatus, jqXHR) {
-                args.success(data);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-
-    pollurl: function (args) {
-//        accountId, sessionId, jobId, filename
-        var queryParams = {
-            'filename': args.filename,
-            'sessionid': args.sessionId,
-            'zip': false
-        };
-        return OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/poll' + OpencgaManager.getQuery(queryParams);
-        //debugger
-    },
-
-    deleteJob: function (args) {
-//        accountId, sessionId, jobId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/delete' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    downloadJob: function (args) {
-//        accountId, sessionId, jobId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        open(OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/download' + OpencgaManager.getQuery(queryParams));
-    },
-
-    jobInfo: function (args) {
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/info' + OpencgaManager.getQuery(queryParams);
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-
-    /* ANALYSIS */
-    runAnalysis: function (args) {
-//        analysis, paramsWS
-        var accountId = args.paramsWS.accountid;
-        var queryParams = {
-//            'projectId':'default'
-        };
-        var url = OpencgaManager.getAnalysisUrl(accountId, args.analysis) + '/run' + OpencgaManager.getQuery(queryParams);
-        console.log(url);
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: args.paramsWS,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    indexer: function (args) {
-//        accountId, sessionId, bucketId, objectId
-        var queryParams = {
-            'sessionid': args.sessionId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/index' + OpencgaManager.getQuery(queryParams);
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: 'json',//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: 'json' to your call.
-            success: function (data, textStatus, jqXHR) {
-                args.success(data.response);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (_.isFunction(args.error)) args.error(jqXHR);
-            }
-        });
-    },
-    indexerStatus: function (args) {
-//        accountId, sessionId, bucketId, objectId, indexerId
-        var queryParams = {
-            'sessionid': args.sessionId,
-            'indexerid': args.indexerId
-        };
-        var url = OpencgaManager.getObjectUrl(args.accountId, args.bucketId, args.objectId) + '/index_status' + OpencgaManager.getQuery(queryParams);
-        console.log(url);
-
-        function success(data) {
-            args.success(data);
-        }
-
-        function error(data) {
-            if (_.isFunction(args.error)) args.error(data);
-        }
-
-        OpencgaManager.doGet(url, success, error);
-    },
-
-    localFileList: function (args) {
-
-        var url = OpencgaManager.host + '/getdirs';
-        console.log(url);
-
-        function success(data) {
-            args.success(data);
-        }
-
-        function error(data) {
-            if (_.isFunction(args.error)) args.error(data);
-        }
-
-        OpencgaManager.doGet(url, success, error);
-    },
-
-
-    /********/
-    /********/
-    /********/
-    /********/
-    /********/
-    // variation
-    variantsUrl: function (args) {
-//        accountId, jobId
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variantsMongo'
-        return url
-    },
-    variantInfoMongo: function (args) {
-//        accountId, sessionId, jobId, filename
-        var queryParams = {
-            'sessionid': args.sessionId
+//
+//        function success(data) {
+//            args.success(data);
+//        }
+//
+//        function error(data) {
+//            if (_.isFunction(args.error)) args.error(data);
+//        }
+//
+//        OpencgaManager.doGet(url, success, error);
+//    },
+//
+//
+//    /********/
+//    /********/
+//    /********/
+//    /********/
+//    /********/
+//    // variation
+//    variantsUrl: function (args) {
+////        accountId, jobId
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variantsMongo'
+//        return url
+//    },
+//    variantInfoMongo: function (args) {
+////        accountId, sessionId, jobId, filename
+//        var queryParams = {
+//            'sessionid': args.sessionId
+////            'filename': args.filename
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variantInfoMongo' + OpencgaManager.getQuery(queryParams);
+//
+//        function success(data) {
+//            console.log(data);
+//            args.success(data);
+//        }
+//
+//        function error(data) {
+//            if (_.isFunction(args.error)) args.error(data);
+//        }
+//
+//        $.ajax({
+//            type: "GET",
+//            url: url,
+//            async: args.async,
+//            success: success,
+//            error: error
+//        });
+//        //	console.log(url);
+//    },
+//
+//
+//    variant_effects: function (args) {
+////        accountId, sessionId, jobId, filename
+//        var queryParams = {
+//            'sessionid': args.sessionId,
 //            'filename': args.filename
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variantInfoMongo' + OpencgaManager.getQuery(queryParams);
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variant_effects' + OpencgaManager.getQuery(queryParams);
+//
+//        function success(data) {
+//            args.success(data);
+//        }
+//
+//        function error(data) {
+//            if (_.isFunction(args.error)) args.error(data);
+//        }
+//
+//        $.ajax({
+//            type: "POST",
+//            url: url,
+//            data: args.formData,
+//            dataType: 'json',
+//            success: success,
+//            error: error
+//        });
+//
+////        OpencgaManager.doPost(url, args.formData ,success, error);
+//        //	console.log(url);
+//    },
+//    variantInfo: function (args) {
+////        accountId, sessionId, jobId, filename
+//        var queryParams = {
+//            'sessionid': args.sessionId,
+//            'filename': args.filename
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variant_info' + OpencgaManager.getQuery(queryParams);
+//
+//        function success(data) {
+//            console.log(data);
+//            args.success(data);
+//        }
+//
+//        function error(data) {
+//            if (_.isFunction(args.error)) args.error(data);
+//        }
+//
+//        OpencgaManager.doGet(url, success, error);
+//        //	console.log(url);
+//    },
+//    variantStats: function (args) {
+////        accountId, sessionId, jobId, filename
+//        var queryParams = {
+//            'sessionid': args.sessionId,
+//            'filename': args.fileName
+//        };
+//        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variant_stats' + OpencgaManager.getQuery(queryParams);
+//
+//        function success(data) {
+//            args.success(data);
+//        }
+//
+//        function error(data) {
+//            if (_.isFunction(args.error)) args.error(data);
+//        }
+//
+//        $.ajax({
+//            type: "POST",
+//            url: url,
+//            data: args.formData,
+//            dataType: 'json',
+//            success: success,
+//            error: error
+//        });
+//
+////        OpencgaManager.doPost(url, args.formData ,success, error);
+//        //	console.log(url);
+//    }
+// };
 
-        function success(data) {
-            console.log(data);
-            args.success(data);
-        }
 
-        function error(data) {
-            if (_.isFunction(args.error)) args.error(data);
-        }
-
-        $.ajax({
-            type: "GET",
-            url: url,
-            async: args.async,
-            success: success,
-            error: error
-        });
-        //	console.log(url);
-    },
-
-
-    variant_effects: function (args) {
-//        accountId, sessionId, jobId, filename
-        var queryParams = {
-            'sessionid': args.sessionId,
-            'filename': args.filename
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variant_effects' + OpencgaManager.getQuery(queryParams);
-
-        function success(data) {
-            args.success(data);
-        }
-
-        function error(data) {
-            if (_.isFunction(args.error)) args.error(data);
-        }
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: args.formData,
-            dataType: 'json',
-            success: success,
-            error: error
-        });
-
-//        OpencgaManager.doPost(url, args.formData ,success, error);
-        //	console.log(url);
-    },
-    variantInfo: function (args) {
-//        accountId, sessionId, jobId, filename
-        var queryParams = {
-            'sessionid': args.sessionId,
-            'filename': args.filename
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variant_info' + OpencgaManager.getQuery(queryParams);
-
-        function success(data) {
-            console.log(data);
-            args.success(data);
-        }
-
-        function error(data) {
-            if (_.isFunction(args.error)) args.error(data);
-        }
-
-        OpencgaManager.doGet(url, success, error);
-        //	console.log(url);
-    },
-    variantStats: function (args) {
-//        accountId, sessionId, jobId, filename
-        var queryParams = {
-            'sessionid': args.sessionId,
-            'filename': args.fileName
-        };
-        var url = OpencgaManager.getJobAnalysisUrl(args.accountId, args.jobId) + '/variant_stats' + OpencgaManager.getQuery(queryParams);
-
-        function success(data) {
-            args.success(data);
-        }
-
-        function error(data) {
-            if (_.isFunction(args.error)) args.error(data);
-        }
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: args.formData,
-            dataType: 'json',
-            success: success,
-            error: error
-        });
-
-//        OpencgaManager.doPost(url, args.formData ,success, error);
-        //	console.log(url);
-    }
-};
+// OpencgaManager.httpMethods[OpencgaManager.actions.LOGIN] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.LOGOUT] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.CREATE] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.UPLOAD] = "POST";
+// OpencgaManager.httpMethods[OpencgaManager.actions.INFO] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.LIST] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.FETCH] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.UPDATE] = "GET";
+// OpencgaManager.httpMethods[OpencgaManager.actions.DELETE] = "GET";
 
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
@@ -2224,7 +3142,7 @@ FileWidget.prototype.draw = function(){
 			
 //			browseBar.add(this.btnBrowse);
 			
-			if($.cookie('bioinfo_sid') != null){
+			if(Cookies('bioinfo_sid') != null){
 				this.sessionInitiated();
 			}else{
 				this.sessionFinished();
@@ -6038,6 +6956,7 @@ function FormPanel(args) {
     this.title;
     this.collapsible = false;
     this.titleCollapse = false;
+    this.submitButtonId = 'submit-btn';
     this.submitButtonText = 'Search';
     this.clearButtonText = 'Clear';
     this.barItems = [];
@@ -6121,11 +7040,12 @@ FormPanel.prototype = {
                 tooltip: this.clearButtonText,
                 handler: function () {
                     _this.clear();
-                    Utils.msg('Clear', 'Sucessfully');
+                    Utils.msg('Clear', 'Successful');
                 }
             },
             {
                 xtype: 'button',
+                id:this.submitButtonId,
                 text: this.submitButtonText,
                 tooltip: this.submitButtonText,
                 formBind: true,
@@ -6166,13 +7086,13 @@ FormPanel.prototype = {
                 break;
             case 'vbox':
                 this.filtersPanel = Ext.create('Ext.container.Container', {
-                    margin: '20 0 0 0',
+                    margin: '5 0 0 0',
                     layout: {
                         type: 'vbox',
                         align: 'stretch'
                     },
                     defaults: {
-                        margin: '20 0 0 0'
+                        margin: '5 0 0 0'
                     }
                 });
                 break;
@@ -6613,6 +7533,7 @@ function PositionFilterFormPanel(args) {
     this.titleCollapse = false;
     this.headerConfig;
     this.testRegion = "";
+    this.emptyText = '1:1-1000000,2:1-1000000';
 
     //set instantiation args, must be last
     _.extend(this, args);
@@ -6661,7 +7582,7 @@ PositionFilterFormPanel.prototype = {
         var regionList = Ext.create('Ext.form.field.TextArea', {
             id: this.id + "region",
             name: "region",
-            emptyText: '1:1-1000000,2:1-1000000',
+            emptyText:  this.emptyText,
             margin: '0 0 0 5',
             //allowBlank: true,
             width: '100%',
@@ -7032,14 +7953,19 @@ StudyFilterFormPanel.prototype = {
 
         var grid = Ext.create('Ext.grid.Panel', {
                 store: this.studiesStore,
+            autoScroll:true,
                 border: this.border,
                 loadMask: true,
-                hideHeaders: true,
+                hideHeaders: false,
+                enableColumnHide:false,
                 plugins: 'bufferedrenderer',
                 features: [
                     {ftype: 'summary'}
                 ],
-                height: this.height - 70,
+//                height: this.height - 70,
+//                minHeight: 250,
+//                maxHeight: this.height,
+                height: this.height,
                 viewConfig: {
                     emptyText: 'No studies found',
                     enableTextSelection: true,
@@ -7061,10 +7987,11 @@ StudyFilterFormPanel.prototype = {
                 },
                 columns: [
                     {
-                        text: 'Active',
+//                        text: 'Active',
                         xtype: 'checkcolumn',
                         dataIndex: 'uiactive',
-                        width: 50
+                        width: 50,
+                        sortable : false
                     },
                     {
                         text: "Name",
@@ -7072,7 +7999,10 @@ StudyFilterFormPanel.prototype = {
                         flex: 10,
 //                        width: 500,
                         xtype: 'templatecolumn',
-                        tpl:this.studyFilterTpl
+                        tpl:this.studyFilterTpl,
+                        sortable : true
+
+
                     }
 //                    {
 //                        text: "ID",
@@ -7353,17 +8283,12 @@ VariantBrowserGrid.prototype = {
             listeners: {
                 load: function (store, records, successful, operation, eOpts) {
 
-                    console.log(records);
-
                     if (typeof this.dataParser !== 'undefined') {
                         _this.dataParser(records);
-                    } else {
+                    } else if(!_.isNull(records)){
                         _this._parserFunction(records);
                         _this.grid.getSelectionModel().select(0, true);
-
                     }
-
-                    console.log(records);
 
                     _this.setLoading(false);
                 },
@@ -7981,6 +8906,28 @@ function VariantGenotypeGrid(args) {
     this.gridConfig = {};
     this.height = 500;
     this.target;
+    this.columns = [
+        {
+            text: "Sample",
+            dataIndex: "sample",
+            flex: 1
+        },
+        {
+            text: "Genotype",
+            dataIndex: "genotype",
+            flex: 1
+        },
+        {
+            text: "Sex",
+            dataIndex: "sex",
+            flex: 1
+        },
+        {
+            text: "Phenotype",
+            dataIndex: "phenotype",
+            flex: 1
+        }
+    ];
 
     _.extend(this, args);
 
@@ -8102,28 +9049,7 @@ VariantGenotypeGrid.prototype = {
                     enableTextSelection: true
                 },
                 plugins: ["bufferedrenderer"],
-                columns: [
-                    {
-                        text: "Sample",
-                        dataIndex: "sample",
-                        flex: 1
-                    },
-                    {
-                        text: "Genotype",
-                        dataIndex: "genotype",
-                        flex: 1
-                    },
-                    {
-                        text: "Sex",
-                        dataIndex: "sex",
-                        flex: 1
-                    },
-                    {
-                        text: "Phenotype",
-                        dataIndex: "phenotype",
-                        flex: 1
-                    }
-                ]
+                columns: this.columns
             });
 
             var gts = this._getGenotypeCount(stats.genotypesCount);
@@ -8178,11 +9104,21 @@ VariantGenotypeGrid.prototype = {
         }
 
 
-
+        //TO BE REMOVED
+        var study_title;
+        if(projects){
+            for (var i = 0; i < projects.length; i++) {
+                if (projects[i].studyId === data.studyId) {
+                    study_title = '<a href="?eva-study='+projects[i].studyId+'" target="_blank">'+projects[i].studyName+'</a> ('+ projects[i].studyId +')';
+                }
+            }
+        }else{
+            study_title = '<a href="?eva-study='+data.studyId+'" target="_blank">'+data.studyId+'</a>';
+        }
 
 
         var studyPanel = Ext.create('Ext.panel.Panel', {
-            title: data.studyId,
+            title: study_title,
             border: true,
             layout: {
                 type: 'hbox',
@@ -8350,12 +9286,25 @@ VariantStatsPanel.prototype = {
         var attributesData = {};
         _.extend(attributesData,attributes);
         delete attributesData['src'];
+        delete attributesData['ACC'];
 
+        //TO BE REMOVED
+        var study_title;
+        if(projects){
+            for (var i = 0; i < projects.length; i++) {
+                if (projects[i].studyId === data.studyId) {
+                    study_title = '<a href="?eva-study='+projects[i].studyId+'" target="_blank">'+projects[i].studyName+'</a> ('+ projects[i].studyId +')';
+                }
+            }
+        }else{
+            study_title = '<a href="?eva-study='+data.studyId+'" target="_blank">'+data.studyId+'</a>';
+        }
 
         var studyPanel = Ext.create('Ext.panel.Panel', {
-            title: data.studyId,
+            title: study_title,
             border: false,
             layout: 'vbox',
+            overflowX: true,
             items: [
                 {
                     xtype: 'container',
@@ -9057,3245 +10006,6 @@ VariantWidget.prototype = {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function NetworkFileWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('NetworkFileWidget');
-
-    this.targetId;
-    this.title = 'Network widget abstract class';
-    this.width = 600;
-    this.height = 300;
-    this.layoutSelector = true;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.dataAdapter;
-    this.content;
-
-    this.on(this.handlers);
-};
-
-NetworkFileWidget.prototype.getTitleName = function () {
-    return Ext.getCmp(this.id + "_title").getValue();
-};
-
-NetworkFileWidget.prototype.getFileUpload = function () {
-    /* to implemtent on child class */
-};
-
-NetworkFileWidget.prototype.addCustomComponents = function () {
-    /* to implemtent on child class */
-};
-
-NetworkFileWidget.prototype.draw = function () {
-    var _this = this;
-
-    if (this.panel == null) {
-        /** Bar for the file upload browser **/
-        var browseBar = Ext.create('Ext.toolbar.Toolbar', {dock: 'top'});
-        browseBar.add(this.getFileUpload());
-
-        this.infoLabel = Ext.create('Ext.toolbar.TextItem', {text: 'Please select a network saved file'});
-        this.countLabel = Ext.create('Ext.toolbar.TextItem');
-        this.infobar = Ext.create('Ext.toolbar.Toolbar', {dock: 'bottom'});
-        this.infobar.add(['->', this.infoLabel, this.countLabel]);
-
-//		/** Container for Preview **/
-//		var previewContainer = Ext.create('Ext.container.Container', {
-//			id:this.previewId,
-//			cls:'x-unselectable',
-//			flex:1,
-//			autoScroll:true
-//		});
-
-
-        /** Grid for Preview **/
-        this.gridStore = Ext.create('Ext.data.Store', {
-            pageSize: 50,
-            proxy: {
-                type: 'memory'
-            },
-            fields: ["0", "1", "2"]
-        });
-        this.grid = Ext.create('Ext.grid.Panel', {
-            border: false,
-            flex: 1,
-            store: this.gridStore,
-            loadMask: true,
-            plugins: ['bufferedrenderer'],
-            dockedItems: [
-                this.infobar
-            ],
-            columns: [
-                {"header": "Source node", "dataIndex": "0", flex: 1},
-                {"header": "Relation", "dataIndex": "1", flex: 1, menuDisabled: true},
-                {"header": "Target node", "dataIndex": "2", flex: 1}
-            ]
-        });
-
-        var comboLayout;
-        if (this.layoutSelector) {
-            var comboLayout = Ext.create('Ext.form.field.ComboBox', {
-                margin: "0 0 0 5",
-                width: 240,
-                editable: false,
-                labelWidth: 90,
-                fieldLabel: 'Apply layout',
-                displayField: 'name',
-                valueField: 'name',
-                value: "Force directed",
-                store: new Ext.data.SimpleStore({
-                    fields: ['name'],
-                    data: [
-                        ["Force directed"],
-                        ["Random"],
-                        ["Circle"],
-                        ["none"]
-                    ]
-                })
-            });
-        }
-
-        this.panel = Ext.create('Ext.window.Window', {
-            title: this.title,
-            resizable: false,
-            items: {
-                border: false,
-                width: this.width,
-                height: this.height,
-                layout: { type: 'vbox', align: 'stretch'},
-                items: [
-                    this.grid
-                ],
-                tbar: browseBar,
-                bbar: {
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        comboLayout,
-                        '->',
-                        {text: 'Ok', handler: function () {
-                            var layout;
-                            if (comboLayout) {
-                                layout = comboLayout.getValue()
-                            }
-                            _this.trigger('okButton:click', {content: _this.content, layout: layout, sender: _this});
-                            _this.panel.close();
-                        }
-                        },
-                        {text: 'Cancel', handler: function () {
-                            _this.panel.close();
-                        }}
-                    ]
-
-                }
-            },
-            listeners: {
-                scope: this,
-                minimize: function () {
-                    this.panel.hide();
-                },
-                destroy: function () {
-                    delete this.panel;
-                }
-            }
-        });
-        this.addCustomComponents();
-
-    }
-    this.panel.show();
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeLayoutConfigureWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeLayoutConfigureWidget');
-
-    this.width = 400;
-    this.height = 300;
-    this.networkViewer;
-    this.window;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    this.network = this.networkViewer.network;
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-AttributeLayoutConfigureWidget.prototype = {
-    render: function () {
-        var _this = this;
-
-        this.vertexAttributeManager = this.networkViewer.network.vertexAttributeManager;
-        this.vertexAttributeStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: this.vertexAttributeManager.attributes
-        });
-        this.vertexAttributeManager.on('change:attributes', function () {
-            _this.vertexAttributeStore.loadData(_this.vertexAttributeManager.attributes);
-        });
-
-        this.xAtributeCombo = Ext.create('Ext.form.field.ComboBox', {
-//            labelAlign: 'top',
-            labelWidth: 70,
-            fieldLabel: 'X',
-            store: this.vertexAttributeStore,
-            allowBlank: false,
-            editable: false,
-            displayField: 'name',
-            valueField: 'name',
-            queryMode: 'local',
-            forceSelection: true,
-            listeners: {
-                afterrender: function () {
-                    this.select(this.getStore().getAt(0));
-                },
-                change: function (field, e) {
-                    var value = field.getValue();
-                    if (value != null) {
-                        //
-                    }
-                }
-            }
-        });
-
-        this.yAtributeCombo = Ext.create('Ext.form.field.ComboBox', {
-//            labelAlign: 'top',
-            labelWidth: 70,
-            fieldLabel: 'Y',
-            store: this.vertexAttributeStore,
-            allowBlank: false,
-            editable: false,
-            displayField: 'name',
-            valueField: 'name',
-            queryMode: 'local',
-            forceSelection: true,
-            listeners: {
-                afterrender: function () {
-                    this.select(this.getStore().getAt(0));
-                },
-                change: function (field, e) {
-                    var value = field.getValue();
-                    if (value != null) {
-                        //
-                    }
-                }
-            }
-        });
-
-        this.normalizeCheckBox = Ext.create('Ext.form.field.Checkbox', {
-            fieldLabel: 'Normalize',
-            labelWidth: 70,
-            checked: true
-        });
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: this.id + 'window',
-            title: 'Attribute layout configuration',
-            closable: false,
-            minimizable: true,
-            constrain: true,
-            collapsible: true,
-            items: {
-                bodyPadding: 10,
-                width: this.width,
-                layout: {
-                    type: 'vbox',
-                    align: 'stretch'
-                },
-                items: [
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px'
-                        },
-                        html: 'Select attribute as node position'
-                    },
-                    {
-                        xtype: 'container',
-                        style: {
-                            marginBottom: '20px'
-                        },
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            this.xAtributeCombo,
-                            this.yAtributeCombo,
-                            this.normalizeCheckBox
-                        ]
-                    }
-                ],
-                bbar: {
-                    layout : {
-                        pack : 'end'
-                    },
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        {
-                            text: 'Apply',
-                            handler: function () {
-                                _this.setLayout();
-                            }
-                        }
-                    ]
-                }
-            },
-
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    draw: function () {
-        var _this = this;
-
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    },
-    setLayout: function () {
-        var _this = this;
-        var xAttributeName = this.xAtributeCombo.getValue();
-        var yAttributeName = this.yAtributeCombo.getValue();
-
-        var normalize = this.normalizeCheckBox.getValue();
-
-        if (normalize) {//normalized
-            var xMax, xMin, yMax, yMin;
-            this.vertexAttributeManager.eachRecord(function (record) {
-                var x = parseFloat(record.get(xAttributeName));
-                var y = parseFloat(record.get(yAttributeName));
-
-                if (!isNaN(x)) {
-                    if (typeof xMax === 'undefined') {
-                        xMax = x;
-                        xMin = x;
-                    }
-                    xMax = Math.max(x, xMax);
-                    xMin = Math.min(x, xMin);
-                }
-                if (!isNaN(y)) {
-                    if (typeof yMax === 'undefined') {
-                        yMax = y;
-                        yMin = y;
-                    }
-                    yMax = Math.max(y, yMax);
-                    yMin = Math.min(y, yMin);
-                }
-            });
-            var xRange = (xMax === xMin) ? 1 : xMax - xMin;
-            var yRange = (yMax === yMin) ? 1 : yMax - yMin;
-
-
-            var width = this.networkViewer.getLayoutWidth();
-            var height = this.networkViewer.getLayoutHeight();
-
-            this.vertexAttributeManager.eachRecord(function (record) {
-                var x = parseFloat(record.get(xAttributeName));
-                var y = parseFloat(record.get(yAttributeName));
-
-                //zero based
-                x = (x - xMin) * width / xRange;
-                y = (y - yMin) * height / yRange;
-
-                if (!isNaN(x) && !isNaN(y)) {
-                    _this.network.setVertexCoordsById(record.get("id"), x, y);
-                }
-            });
-
-
-        } else {
-
-            this.vertexAttributeManager.eachRecord(function (record) {
-                var x = parseFloat(record.get(xAttributeName));
-                var y = parseFloat(record.get(yAttributeName));
-                if (!isNaN(x) && !isNaN(y)) {
-                    _this.network.setVertexCoordsById(record.get("id"), x, y);
-                }
-            });
-        }
-
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeNetworkFileWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeNetworkFileWidget');
-
-    this.targetId;
-    this.title = 'Open an attributes file';
-    this.width = 600;
-    this.height = 350;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.dataAdapter;
-
-    this.previewId = this.id + '-preview';
-
-    this.on(this.handlers);
-};
-
-AttributeNetworkFileWidget.prototype.getTitleName = function () {
-    return Ext.getCmp(this.id + "_title").getValue();
-};
-
-AttributeNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'Attributes tabular file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                var file = document.getElementById(f.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                var attributeNetworkDataAdapter = new AttributeNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this.processData(attributeNetworkDataAdapter);
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-AttributeNetworkFileWidget.prototype.processData = function (attributesDataAdapter) {
-    var _this = this;
-    this.content = attributesDataAdapter.getAttributesJSON(); //para el onOK.notify event
-
-    this.gridTbar.removeAll();
-    this.infoLabel.setText("", false);
-
-    var existNameColumn = false;
-    var cbgItems = [];
-    this.columnsGrid = [];
-    this.gridColumnNameFields = [];
-
-    for (var i = 0; i < _this.content.attributes.length; i++) {
-        var name = this.content.attributes[i].name;
-
-        this.columnsGrid.push({
-            "text": name,
-            "dataIndex": name,
-            "flex": 1,
-            "editor": {xtype: 'textfield', allowBlank: true}
-        });
-
-        this.gridColumnNameFields.push({
-            xtype: 'textfield',
-            value: name,
-            index: i,
-            vtype: 'alphanum',
-            "flex": 1,
-            readOnly: (name === "Id") ? true : false,
-            listeners: {
-                change: function (me, newValue) {
-                    var cols = _this.grid.down('headercontainer').getGridColumns();
-                    cols[me.index].setText(newValue);
-                    _this.columnsGrid[me.index].text = newValue;
-                    _this.content.attributes[me.index].name = newValue;
-//                    console.log(cols[me.index]);
-                    cbgItems[me.index].setBoxLabel(newValue);
-                    cbgItems[me.index].updateLayout();
-                }
-            }
-        });
-
-        var disabled = false;
-        if (name == "id") {
-            disabled = true;
-            existNameColumn = true;
-        }
-        cbgItems.push(Ext.create('Ext.form.field.Checkbox', {
-            boxLabel: name,
-            name: 'attr',
-            margin: '0 0 0 5',
-            checked: true,
-            disabled: disabled
-        }));
-    }
-
-    var uniqueNameValues = true;
-    var nameValues = {};
-    for (var i = 0; i < this.content.data.length; i++) {
-        var name = this.content.data[i][0];
-        if (nameValues[name]) {
-            uniqueNameValues = false;
-            break;
-        }
-        else {
-            nameValues[name] = true;
-        }
-    }
-
-    if (!existNameColumn) {
-        this.infoLabel.setText("<span class='err'>Invalid file. The column 'id' is required.</span>", false);
-    }
-    else if (!uniqueNameValues) {
-        this.infoLabel.setText("<span class='err'>Invalid file. The values for 'id' column must be uniques.</span>", false);
-    }
-    else {
-        this.cbgAttributes.add(cbgItems);
-        this.fieldContainer.show();
-        Ext.getCmp(this.id + 'okBtn').setDisabled(false);
-    }
-
-    this.gridTbar.add(this.gridColumnNameFields);
-
-    this.gridStore.setFields(this.content.attributes);
-
-    this.grid.reconfigure(this.gridStore, this.columnsGrid);
-
-    this.gridStore.loadData(this.content.data);
-};
-
-
-AttributeNetworkFileWidget.prototype.filterColumnsToImport = function () {
-    var checkeds = this.cbgAttributes.getChecked();
-
-    var data = {};
-    var newAttrArray = [];
-    var indexToImport = {};
-
-    data.content = {};
-    data.createNodes = this.createNodesCkb.getValue();
-    if (checkeds.length < this.content.attributes.length) {
-        var columnsToImport = {};
-        for (var i = 0; i < checkeds.length; i++) {
-            columnsToImport[checkeds[i].boxLabel] = true;
-        }
-
-        for (var i = 0; i < this.content.attributes.length; i++) {
-            var name = this.content.attributes[i].name;
-            if (columnsToImport[name]) {
-                newAttrArray.push(this.content.attributes[i]);
-                indexToImport[i] = true;
-            }
-        }
-
-        data.content.data = [];
-        for (var i = 0; i < this.content.data.length; i++) {
-            data.content.data.push([]);
-            for (var j = 0; j < this.content.data[i].length; j++) {
-                if (indexToImport[j]) {
-                    data.content.data[i].push(this.content.data[i][j]);
-                }
-            }
-        }
-
-        data.content.attributes = newAttrArray;
-    }
-    else {
-        data.content = this.content;
-    }
-
-    return data;
-};
-
-AttributeNetworkFileWidget.prototype.draw = function () {
-    var _this = this;
-
-    if (this.panel == null) {
-        /** Bar for the file upload browser **/
-        var browseBar = Ext.create('Ext.toolbar.Toolbar', {cls: 'bio-border-false', dock: 'top'});
-        browseBar.add(this.getFileUpload());
-
-
-        this.infoLabel = Ext.create('Ext.toolbar.TextItem', {html: 'Please select a network saved File'});
-        this.countLabel = Ext.create('Ext.toolbar.TextItem');
-        var infobar = Ext.create('Ext.toolbar.Toolbar', {cls: 'bio-border-false', dock: 'bottom'});
-        infobar.add([this.infoLabel, '->', this.countLabel]);
-
-
-        this.cbgAttributes = Ext.create('Ext.form.CheckboxGroup', {
-            fieldLabel: 'Import',
-            labelWidth: 40,
-            layout: 'hbox',
-            autoScroll: true,
-            defaultType: 'checkboxfield'
-        });
-
-        this.createNodesCkb = Ext.create('Ext.form.field.Checkbox', {
-            margin: '2 2 2 2',
-            boxLabel: "Create nodes for unrecognized names."
-        });
-
-
-        this.fieldContainer = Ext.create('Ext.form.FieldContainer', {
-            margin:'0 0 0 10',
-            hidden:true,
-            items: [this.cbgAttributes, this.createNodesCkb]
-        });
-
-
-        /** Grid for Preview **/
-        this.columnsGrid = [];
-
-        this.gridStore = Ext.create('Ext.data.Store', {
-            pageSize: 50,
-            proxy: {
-                type: 'memory'
-            },
-            fields: []
-        });
-
-        this.gridTbar = Ext.create('Ext.toolbar.Toolbar', {
-            items: []
-        });
-
-        this.grid = Ext.create('Ext.grid.Panel', {
-            border: false,
-            flex: 1,
-            tbar: this.gridTbar,
-            store: this.gridStore,
-            columns: this.columnsGrid,
-            loadMask: true,
-            plugins: ['bufferedrenderer'],
-            hideHeaders: true,
-            dockedItems: [infobar]
-        });
-
-        this.panel = Ext.create('Ext.window.Window', {
-            title: this.title,
-            resizable: false,
-            modal: true,
-            items: {
-                layout: { type: 'vbox', align: 'stretch'},
-                width: this.width,
-                height: this.height,
-                border: 0,
-                items: [
-                    this.grid,
-                    this.fieldContainer
-                ],
-                dockedItems: [
-                    browseBar
-                ],
-                bbar: {
-                    layout : {
-                        pack : 'end'
-                    },
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        {
-                            id: _this.id + 'okBtn',
-                            text: 'Ok',
-                            disabled: true,
-                            handler: function () {
-                                _this.trigger('okButton:click', {content: _this.filterColumnsToImport(), sender: _this});
-                                _this.panel.close();
-                            }
-                        },
-                        {
-                            text: 'Cancel',
-                            handler: function () {
-                                _this.panel.close();
-                            }
-                        }
-                    ]
-
-                }
-            },
-            listeners: {
-                scope: this,
-                minimize: function () {
-                    this.panel.hide();
-                },
-                destroy: function () {
-                    delete this.panel;
-                }
-            }
-        });
-    }
-    this.panel.show();
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeEditWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeEditWidget');
-
-    this.window;
-    this.grid;
-    this.accordionPanel;
-
-    this.attrMan;
-    this.type;
-
-    this.selectedFilter = new Ext.util.Filter({
-        filterFn: function (item) {
-            return item.data['Selected'] === true;
-        }
-    });
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-AttributeEditWidget.prototype = {
-    render: function () {
-        var _this = this;
-
-        this.attrMan.on('change:attributes', function () {
-            _this.reconfigureComponents();
-        });
-
-        this.comboStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: this.attrMan.attributes
-        });
-
-        /****** UI ******/
-
-        var modifyRowsFormPanel = Ext.create('Ext.form.Panel', {
-            title: 'Edit multiple values',
-            bodyPadding: 10,
-            layout: 'vbox',
-            border: 0,
-//            flex: 1,
-            defaults: {
-                width: '100%',
-                labelWidth: 55
-            },
-            dockedItems: [
-                {
-                    xtype: 'toolbar',
-                    dock: 'top',
-                    items: [
-                        {
-                            text: 'Select all rows',
-                            handler: function () {
-                                _this.grid.getSelectionModel().selectAll();
-                            }
-                        },
-                        {
-                            text: 'Deselect all rows',
-                            handler: function () {
-                                _this.grid.getSelectionModel().deselectAll();
-                            }
-                        }
-                    ]
-                }
-            ],
-            items: [
-                this.createAttributesCombo(),
-                this.createValueField(),
-                {
-                    xtype: 'button',
-                    text: 'Apply on selected rows',
-                    formBind: true, // only enabled if the form is valid
-                    disabled: true,
-                    handler: function (bt) {
-                        var newValue = bt.prev().getValue();
-                        var selectedAttr = bt.prev().prev().getValue();
-                        var selectedRecords = _this.grid.getSelectionModel().getSelection();
-                        _this.attrMan.setRecordsAttribute(selectedRecords, selectedAttr, newValue);
-                    }
-                }
-            ]
-        });
-        var addAttributeFormPanel = Ext.create('Ext.form.Panel', {
-            title: 'Add attribute',
-            bodyPadding: 10,
-            layout: 'vbox',
-            border: 0,
-//            flex: 1,
-            style: {
-                borderTopColor: 'lightgray',
-                borderTopStyle: 'solid',
-                borderTopWidth: '1px'
-            },
-            defaults: {
-                width: '100%',
-                labelWidth: 55
-            },
-            items: [
-                {
-                    xtype: 'textfield',
-                    fieldLabel: 'Name',
-                    allowBlank: false
-                },
-                {
-                    xtype: 'combo',
-                    hidden: true,
-                    store: ['string', 'int', 'float'],
-                    value: 'string',
-                    fieldLabel: 'Type',
-                    editable: false,
-                    queryMode: 'local',
-                    allowBlank: false
-                },
-//                {
-//                    xtype: 'textfield',
-//                    width: 170,
-//                    value: '',
-//                    fieldLabel: 'Default value',
-//                    labelWidth: 50
-//                },
-                {
-                    xtype: 'button',
-                    text: 'Apply',
-                    formBind: true, // only enabled if the form is valid
-                    disabled: true,
-                    handler: function (bt) {
-                        var name = bt.previousSibling('textfield[fieldLabel=Name]').getValue();
-                        var type = bt.previousSibling('combo[fieldLabel=Type]').getValue();
-//                        var defaultValue = bt.prev().getValue();
-                        var created = _this.attrMan.addAttribute({name: name, type: type, defaultValue: ''});
-                        var msg = (created === false) ? '<span class="err">Name already exists.</span>' : '';
-                        bt.next().update(msg);
-                    }
-                },
-                {
-                    xtype: 'box',
-                    margin: '10 0 0 0',
-                    html: ''
-                }
-            ]
-        });
-
-        var removeAttributeFormPanel = Ext.create('Ext.form.Panel', {
-            title: 'Remove attribute',
-            bodyPadding: 10,
-            layout: 'vbox',
-            border: 0,
-//            flex: 1,
-            style: {
-                borderTopColor: 'lightgray',
-                borderTopStyle: 'solid',
-                borderTopWidth: '1px'
-            },
-            defaults: {
-                width: '100%',
-                labelWidth: 55
-            },
-            items: [
-                this.createAttributesCombo(),
-                {
-                    xtype: 'button',
-                    text: 'Apply',
-                    formBind: true, // only enabled if the form is valid
-                    disabled: true,
-                    handler: function (bt) {
-                        var attributeName = bt.prev().getValue();
-                        var removed = _this.attrMan.removeAttribute(attributeName);
-                        var msg = (removed === false) ? '<span class="err">Impossible to remove.</span>' : '';
-                        bt.next().update(msg);
-                    }
-                },
-                {
-                    xtype: 'box',
-                    margin: "10 0 0 0"
-                }
-            ]
-        });
-
-        var toolbar = Ext.create('Ext.toolbar.Toolbar', {
-            dock: 'top',
-            items: [
-                {
-                    xtype: 'button',
-                    text: '<span style="font-size: 12px">Columns <span class="caret"></span></span>',
-                    handler: function (bt, e) {
-                        var menu = _this.grid.headerCt.getMenu().down('menuitem[text=Columns]').menu;
-                        menu.showBy(bt);
-                    }
-                },
-                '-',
-                {
-//                    toolbar.down('radiogroup').getValue() --> {selection: "all"}
-                    xtype: 'radiogroup',
-                    id: this.id + 'selectMode',
-                    fieldLabel: 'Show',
-                    labelWidth: 30,
-                    width:230,
-                    margin: '0 0 0 10',
-                    defaults: {
-                        margin: '0 0 0 10'
-                    },
-                    layout: 'hbox',
-                    items: [
-                        {
-                            boxLabel: 'All',
-                            checked: true,
-                            name: this.id + 'selection',
-                            inputValue: 'all'
-                        },
-                        {
-                            boxLabel: 'Network selection',
-                            name: this.id + 'selection',
-                            inputValue: 'selected'
-                        }
-                    ],
-                    listeners: {
-                        change: function (radiogroup, newValue, oldValue, eOpts) {
-                            _this.checkSelectedFilter();
-                        }
-                    }
-                },
-                '->',
-                {
-                    xtype: 'tbtext',
-                    text: '<span style="color:gray">Use double-click to edit</span>'
-                },
-                {
-                    xtype: 'button',
-                    text: '<i class="fa fa-download"></i> Download as file',
-                    handler: function (bt, e) {
-                        var a = bt.getEl();
-                        var string = _this.attrMan.getAsFile();
-                        var blob = new Blob([string], {type: "data:text/tsv"});
-                        var url = URL.createObjectURL(blob);
-                        var link = document.createElement('a');
-                        link.href = url;
-                        link.download = _this.type + ".attr"
-                        var event = new MouseEvent('click', {
-                            'view': window,
-                            'bubbles': true,
-                            'cancelable': true
-                        });
-                        link.dispatchEvent(event);
-                    }
-                }
-            ]
-        });
-
-        this.grid = Ext.create('Ext.grid.Panel', {
-            store: this.attrMan.store,
-            columns: this.attrMan.columnsGrid,
-            flex: 1,
-            border: 0,
-            selModel: {
-                selType: 'rowmodel',
-                mode: 'MULTI'
-            },
-            loadMask: true,
-            plugins: ['bufferedrenderer',
-                Ext.create('Ext.grid.plugin.CellEditing', {
-                    // double click to edit cell
-                    clicksToEdit: 2
-                })
-            ],
-            listeners: {
-//                selectionchange: function (model, selected) {
-//                    console.log('selection change')
-//                    var nodeList = [];
-//                    for (var i = 0; i < selected.length; i++) {
-//                        nodeList.push(selected[i].getData().Id);
-//                    }
-//                }
-            },
-            dockedItems: [toolbar]
-
-        });
-
-        this.accordionPanel = Ext.create('Ext.container.Container', {
-            layout: {
-                type: 'vbox',
-                align: 'stretch'
-            },
-            width: 230,
-            border: '0 1 0 0',
-            style: {
-                borderColor: 'lightgray',
-                borderStyle: 'solid',
-                backgroundColor: '#ffffff'
-            },
-            items: [
-                modifyRowsFormPanel,
-                addAttributeFormPanel,
-                removeAttributeFormPanel,
-//                editAttrFormPanel
-            ]
-        });
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: "edit" + this.type + "AttrWindow",
-            title: "Edit " + this.type.toLowerCase() + " attributes",
-            width: 850,
-            height: 600,
-            closable: false,
-            minimizable: true,
-            maximizable: true,
-            constrain: true,
-            collapsible: true,
-            layout: {
-                type: 'hbox',
-                align: 'stretch'
-            },
-            renderTo: Ext.getBody(),
-            items: [this.accordionPanel, this.grid],
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    draw: function () {
-        this.window.show();
-        this.checkSelectedFilter();
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    },
-//    setAttributeManager: function (attrMan) {
-//        var _this = this;
-//        this.attrMan = attrMan;
-//        this.attrMan.on('change:attributes', function () {
-//            _this.reconfigureComponents();
-//        });
-//        this.reconfigureComponents();
-//    },
-    reconfigureComponents: function () {
-        this.grid.reconfigure(this.attrMan.store, this.attrMan.columnsGrid);
-
-        this.reloadComboStore();
-    },
-    reloadComboStore: function () {
-        this.comboStore.loadData(this.attrMan.attributes);
-    },
-    checkSelectedFilter: function () {
-        this.attrMan.store.clearFilter();
-        var value = Ext.getCmp(this.id + 'selectMode').getValue();
-        if (value[this.id + 'selection'] === 'selected') {
-            this.attrMan.store.setFilters(this.selectedFilter);
-        }
-    },
-
-
-    /** Create components **/
-    createAttributesCombo: function () {
-        return {
-            xtype: 'combo',
-            store: this.comboStore,
-            displayField: 'name',
-            valueField: 'name',
-            allowBlank: false,
-            fieldLabel: 'Attribute',
-            editable: false,
-            queryMode: 'local'
-        }
-    },
-    createValueField: function () {
-        return {
-            xtype: 'textfield',
-            fieldLabel: 'Value',
-            allowBlank: false
-        }
-    }
-
-
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeFilterWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeFilterWidget');
-
-    this.attrMan;
-    this.type;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.attrMan.store.on('datachanged', function () {
-        if (Ext.getCmp("filterAttrWindow")) {
-            _this.updateNumRowsLabel();
-        }
-    });
-
-//	this.onSelectNodes = new Event(this);
-//	this.onDeselectNodes = new Event(this);
-//	this.onFilterNodes = new Event(this);
-//	this.onRestoreNodes = new Event(this);
-
-    this.on(this.handlers);
-};
-
-AttributeFilterWidget.prototype.draw = function (selectedNodes) {
-    var _this = this;
-
-    var attrNameStore = Ext.create('Ext.data.Store', {
-        id: this.id + "attrNameStore",
-        fields: ['name'],
-        data: this.getAttributeNames()
-    });
-
-    var addFilterFormPanel = Ext.create('Ext.form.Panel', {
-        title: 'Add new filter',
-        border: false,
-        bodyStyle: 'background: #dedcd8',
-        bodyPadding: "10 5 10 5",
-        layout: 'hbox',
-        items: [
-            {
-                xtype: 'text',
-                margin: "4 0 0 0",
-                text: 'Filter name:'
-            },
-            {
-                xtype: 'textfield',
-                id: this.id + "filterName",
-                width: 105,
-                margin: "0 0 0 4",
-                allowBlank: false
-            },
-            {
-                xtype: 'text',
-                margin: "4 0 0 10",
-                text: 'Attribute:'
-            },
-            {
-                xtype: 'combo',
-                id: this.id + "selectedAttr",
-                margin: "0 0 0 4",
-                width: 105,
-                allowBlank: false,
-                mode: 'local',
-                editable: false,
-                displayField: 'name',
-                valueField: 'name',
-                store: attrNameStore
-            },
-            {
-                xtype: 'text',
-                margin: "4 0 0 10",
-                text: 'Attr. value:'
-            },
-            {
-                xtype: 'textfield',
-                id: this.id + "attrValue",
-                width: 105,
-                margin: "0 0 0 4",
-                allowBlank: false
-            },
-            {
-                xtype: 'button',
-                text: 'Add',
-                iconCls: 'icon-add',
-                margin: "0 15 0 10",
-                formBind: true, // only enabled if the form is valid
-                disabled: true,
-                handler: function () {
-                    var filterName = Ext.getCmp(_this.id + "filterName").getValue();
-                    var selectedAttr = Ext.getCmp(_this.id + "selectedAttr").getValue();
-                    var attrValue = Ext.getCmp(_this.id + "attrValue").getValue();
-
-                    if (_this.attrMan.addFilter(filterName, selectedAttr, attrValue)) {
-                        // Active filters menu
-                        Ext.getCmp(_this.id + "filterMenu").menu.add({
-                            id: filterName,
-                            text: filterName,
-                            checked: true,
-                            handler: function () {
-                                if (this.checked) {
-                                    // apply filter
-                                    _this.attrMan.enableFilter(this.text);
-
-                                    // select nodes of filter
-                                    _this.selectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    Ext.getCmp(this.id + "_main").setChecked(true);
-                                }
-                                else {
-                                    // remove filter
-                                    _this.attrMan.disableFilter(this.text);
-                                    _this.deselectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    Ext.getCmp(this.id + "_main").setChecked(false);
-                                }
-                            }
-                        });
-
-                        //add to main menu
-                        Ext.getCmp("filters" + _this.type + "AttrMenu").add({
-                            id: filterName + "_main",
-                            text: filterName,
-                            checked: true,
-                            handler: function () {
-                                if (this.checked) {
-                                    // apply filter
-                                    _this.attrMan.enableFilter(this.text);
-
-                                    // select nodes of filter
-                                    _this.selectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    if (Ext.getCmp(this.text)) {
-                                        Ext.getCmp(this.text).setChecked(true);
-                                    }
-                                }
-                                else {
-                                    // remove filter
-                                    _this.attrMan.disableFilter(this.text);
-                                    _this.deselectNodesOnGraph();
-
-                                    // check item in the other menu
-                                    if (Ext.getCmp(this.text)) {
-                                        Ext.getCmp(this.text).setChecked(false);
-                                    }
-                                }
-                            }
-                        });
-
-                        // Remove filter menu
-                        Ext.getCmp(_this.id + "rmFilterMenu").menu.add({
-                            text: filterName,
-                            handler: function () {
-                                var item = this;
-                                Ext.Msg.show({
-                                    title: 'Delete',
-                                    msg: 'Confirm delete. Are you sure?',
-                                    buttons: Ext.Msg.YESNO,
-                                    icon: Ext.Msg.QUESTION,
-                                    fn: function (resp) {
-                                        if (resp == "yes") {
-                                            _this.attrMan.removeFilter(item.text);
-                                            Ext.getCmp(_this.id + "rmFilterMenu").menu.remove(item);
-                                            Ext.getCmp(_this.id + "filterMenu").menu.remove(item.text);
-                                            Ext.getCmp("filters" + _this.type + "AttrMenu").remove(Ext.getCmp(item.text + "_main"));
-                                            _this.deselectNodesOnGraph();
-                                        }
-                                    }
-                                });
-                            }
-                        });
-
-                        // select nodes of added filter
-                        _this.selectNodesOnGraph();
-                    }
-                    else {
-                        Ext.Msg.show({
-                            title: "Error",
-                            msg: "Already exists a filter with this name.",
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.Msg.ERROR
-                        });
-                    }
-                }
-            }
-        ]
-    });
-
-    var restoreBtn = Ext.create('Ext.Button', {
-        disabled: true,
-        text: 'Restore original graph',
-        handler: function () {
-            this.setDisabled(true);
-
-            _this.trigger('vertices:restore', {sender: _this});
-        }
-    });
-
-    this.grid = Ext.create('Ext.grid.Panel', {
-        store: this.attrMan.store,
-        columns: this.attrMan.columnsGrid,
-        height: 400,
-        width: 400,
-        selModel: {
-            selType: 'rowmodel',
-            mode: 'MULTI'
-        },
-        border: 0,
-        dockedItems: [
-            {
-                xtype: 'toolbar',
-                dock: 'bottom',
-                items: [
-                    {
-                        xtype: 'tbtext',
-                        id: this.id + "numRowsLabel"
-                    },
-                    '->',
-                    {
-                        xtype: 'button',
-                        text: 'Export...',
-                        handler: function () {
-                            if (!Ext.getCmp("exportWindow")) {
-                                var cbgItems = [];
-                                var attrList = _this.attrMan.getAttrNameList();
-
-                                cbgItems.push({
-                                    boxLabel: attrList[1],
-                                    name: 'attr',
-                                    inputValue: attrList[1],
-                                    checked: true,
-                                    disabled: true
-                                });
-
-                                for (var i = 2; i < attrList.length; i++) {
-                                    cbgItems.push({
-                                        boxLabel: attrList[i],
-                                        name: 'attr',
-                                        inputValue: attrList[i],
-                                        checked: true
-                                    });
-                                }
-
-
-                                Ext.create('Ext.window.Window', {
-                                    id: "exportWindow",
-                                    title: "Export attributes",
-                                    height: 250,
-                                    maxHeight: 250,
-                                    width: 400,
-                                    autoScroll: true,
-                                    layout: "vbox",
-                                    modal: true,
-                                    items: [
-                                        {
-                                            xtype: 'checkboxgroup',
-                                            id: _this.id + "cbgAttributes",
-                                            layout: 'vbox',
-//		            	        				        	   width: 380,
-//		            	        				        	   height: 200,
-//		            	        				        	   maxHeight: 200,
-//		            	        				        	   autoScroll: true,
-//		            	        				        	   defaultType: 'checkboxfield',
-//		            	        				        	   columns: 1,
-//		            	        				        	   vertical: true,
-                                            items: cbgItems
-                                        }
-                                    ],
-                                    buttons: [
-                                        {
-                                            xtype: 'textfield',
-                                            id: _this.id + "fileName",
-                                            emptyText: "enter file name",
-                                            flex: 1
-                                        },
-                                        {
-                                            text: 'Download',
-                                            href: "none",
-                                            handler: function () {
-                                                //Download file
-//		            	        			  	            		 document.location = 'data:Application/octet-stream,'+encodeURIComponent(content);
-                                                var fileName = Ext.getCmp(_this.id + "fileName").getValue();
-                                                if (fileName == "") {
-                                                    fileName = "attributes";
-                                                }
-                                                var columns = Ext.getCmp(_this.id + "cbgAttributes").getChecked();
-                                                var content = _this.attrMan.exportToTab(columns, false);
-                                                this.getEl().child("em").child("a").set({
-                                                    href: 'data:text/csv,' + encodeURIComponent(content),
-                                                    download: fileName + ".txt"
-                                                });
-//		            	        			  	            		 Ext.getCmp("exportWindow").close();
-                                            }
-                                        }
-                                    ]
-                                }).show();
-                            }
-                        }
-                    }
-                ]
-            },
-            {
-                xtype: 'toolbar',
-                dock: 'bottom',
-                items: addFilterFormPanel
-            },
-            {
-                xtype: 'toolbar',
-                dock: 'top',
-                layout: {
-                    pack: 'hbox',
-                    align: 'right'
-                },
-                items: [
-                    {
-                        id: this.id + "filterMenu",
-                        text: 'Active filters',
-                        menu: []
-                    },
-                    {
-                        id: this.id + "rmFilterMenu",
-                        text: 'Remove filter',
-                        menu: []
-                    },
-                    {
-                        xtype: 'button',
-                        text: 'Select on graph',
-                        handler: function () {
-                            _this.selectNodesOnGraph();
-                        }
-                    },
-                    {
-                        xtype: 'button',
-                        text: 'Filter on graph',
-                        handler: function () {
-                            restoreBtn.setDisabled(false);
-                            _this.grid.getSelectionModel().selectAll();
-                            var selection = _this.grid.getSelectionModel().getSelection();
-                            var nodeList = {};
-                            for (var i = 0; i < selection.length; i++) {
-                                nodeList[selection[i].getData().Id] = true;
-                            }
-                            _this.trigger('vertices:filter', {vertices: nodeList, sender: _this});
-                        }
-                    },
-                    restoreBtn
-                ]
-            }
-        ],
-        plugins: [
-            // double click to edit cell
-            Ext.create('Ext.grid.plugin.CellEditing', {
-                clicksToEdit: 2
-            })
-        ],
-        renderTo: Ext.getBody(),
-        listeners: {
-            afterrender: function () {
-                var menu = this.headerCt.getMenu();
-                menu.add([
-                    {
-                        text: 'Reset to default',
-                        handler: function () {
-                            var columnDataIndex = menu.activeHeader.dataIndex;
-                            alert('custom item for column "' + columnDataIndex + '" was pressed');
-                        }
-                    }
-                ]);
-            },
-            selectionchange: function (model, selected) {
-                var nodeList = [];
-                for (var i = 0; i < selected.length; i++) {
-                    nodeList.push(selected[i].getData().Id);
-                }
-                _this.trigger('vertices:select', {vertices: nodeList, sender: _this});
-            }
-        }
-    });
-
-    Ext.create('Ext.window.Window', {
-        id: "filter" + this.type + "AttrWindow",
-        title: "Filter " + this.type.toLowerCase() + " attributes",
-        height: 450,
-        width: 600,
-        layout: "fit",
-        items: this.grid
-    }).show();
-
-    //Add created filters to menus
-    for (var filter in this.attrMan.filters) {
-        // Active filters menu
-        Ext.getCmp(this.id + "filterMenu").menu.add({
-            id: filter,
-            text: filter,
-            checked: this.attrMan.filters[filter].active,
-            handler: function () {
-                if (this.checked) {
-                    // apply filter
-                    _this.attrMan.enableFilter(this.text);
-
-                    // select nodes of filter
-                    _this.selectNodesOnGraph();
-
-                    // check item in the other menu
-                    Ext.getCmp(this.id + "_main").setChecked(true);
-                }
-                else {
-                    // remove filter
-                    _this.attrMan.disableFilter(this.text);
-                    _this.deselectNodesOnGraph();
-
-                    // check item in the other menu
-                    Ext.getCmp(this.id + "_main").setChecked(false);
-                }
-            }
-        });
-
-        // Remove filter menu
-        Ext.getCmp(this.id + "rmFilterMenu").menu.add({
-            text: filter,
-            handler: function () {
-                _this.attrMan.removeFilter(this.text);
-                Ext.getCmp(_this.id + "rmFilterMenu").menu.remove(this);
-                Ext.getCmp(_this.id + "filterMenu").menu.remove(this.text);
-                Ext.getCmp("filters" + _this.type + "AttrMenu").remove(Ext.getCmp(this.text + "_main"));
-                _this.deselectNodesOnGraph();
-            }
-        });
-    }
-
-    this.selectRowsById(selectedNodes);
-    this.updateNumRowsLabel();
-};
-
-AttributeFilterWidget.prototype.getAttributeNames = function () {
-    var names = [];
-    var nameList = this.attrMan.getAttrNameList();
-    for (var i = 0; i < nameList.length; i++) {
-        var attr = nameList[i];
-        if (attr != "Id") {
-            names.push({"name": attr});
-        }
-    }
-    return names;
-};
-
-AttributeFilterWidget.prototype.selectNodesOnGraph = function () {
-    if (Ext.getCmp("filterAttrWindow")) {
-        this.grid.getSelectionModel().selectAll();
-    }
-
-    var nodeList = [];
-    this.attrMan.store.each(function (record) {
-        nodeList.push(record.getData().Id);
-    });
-    this.trigger('vertices:select', {vertices: nodeList, sender: this});
-};
-
-AttributeFilterWidget.prototype.deselectNodesOnGraph = function () {
-    this.trigger('vertices:deselect', {sender: this});
-};
-
-AttributeFilterWidget.prototype.selectRowsById = function (arrayNodes) {
-    this.grid.getSelectionModel().deselectAll();
-    for (var i = 0; i < arrayNodes.length; i++) {
-        var idx = this.attrMan.store.find("Id", arrayNodes[i]);
-        this.grid.getSelectionModel().select(idx, true);
-    }
-};
-
-AttributeFilterWidget.prototype.updateNumRowsLabel = function () {
-    Ext.getCmp(this.id + "numRowsLabel").setText(this.attrMan.getNumberOfRows() + " rows");
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-//DOTNetworkFileWidget.prototype.draw = NetworkFileWidget.prototype.draw;
-
-function DOTNetworkFileWidget(args) {
-    args.title = 'Import a Network DOT file';
-    NetworkFileWidget.prototype.constructor.call(this, args);
-};
-
-
-DOTNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'DOT network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f,v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id='+f.getInputId()+']');
-                node.value = v.replace("C:\\fakepath\\","");
-
-                _this.dataAdapter = new DOTDataAdapter({
-                    dataSource: new FileDataSource({file:file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            try {
-                                var network = event.network;
-                                _this.content = network; //para el onOK.notify event
-                                var verticesLength = network.graph.vertices.length;
-                                var edgesLength = network.graph.edges.length;
-
-                                var edges = network.graph.edges;
-                                for (var i = 0; i < edges.length; i++) {
-                                    var edge = edges[i];
-                                    var edgeConfig = network.getEdgeConfig(edge);
-                                    var link = (edgeConfig.type = "directed") ? "->" : "--";
-
-                                    _this.gridStore.loadData([
-                                        [edge.source.name, link, edge.target.name]
-                                    ], true);
-                                }
-
-                                _this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-                                _this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-                            } catch (e) {
-                                _this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-                            }
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-JSONNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function JSONNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Open a Network JSON file';
-    this.id = Utils.genId('JSONNetworkFileWidget');
-};
-
-JSONNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'JSON network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function () {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-
-                _this.dataAdapter = new JSONNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            try {
-                                var networkJSON = event.jsonObject;
-                                _this.content = networkJSON;
-
-                                var data = [];
-                                for (var i = 0; i < networkJSON.graph.edges.length; i++) {
-                                    var edge = networkJSON.graph.edges[i];
-                                    data.push([edge.source.id, edge.relation, edge.target.id]);
-                                }
-                                _this.gridStore.loadData(data);
-
-
-                                var verticesLength = networkJSON.graph.vertices.length;
-                                var edgesLength = networkJSON.graph.edges.length;
-
-                                _this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-                                _this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span>&nbsp;&nbsp; Edges:<span class="info">' + edgesLength + '</span>', false);
-
-                            } catch (e) {
-                                _this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-                            }
-                            _this.panel.setLoading(false);
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function LayoutConfigureWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('LayoutConfigureWidget');
-
-    this.width = 450;
-    this.height = 300;
-    this.window;
-    this.networkViewer;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    this.network = this.networkViewer.network;
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-LayoutConfigureWidget.prototype = {
-    render: function () {
-        var _this = this;
-
-        this.edgeAttributeManager = this.network.edgeAttributeManager;
-        this.edgeAttributeStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: [
-                {name: 'Non weighted'}
-            ].concat(this.edgeAttributeManager.attributes)
-        });
-        this.edgeAttributeManager.on('change:attributes', function () {
-            _this.edgeAttributeStore.loadData([
-                {name: 'Non weighted'}
-            ].concat(_this.edgeAttributeManager.attributes));
-        });
-
-        this.vertexAttributeManager = this.network.vertexAttributeManager;
-        this.vertexAttributeStore = Ext.create('Ext.data.Store', {
-            fields: ['name'],
-            data: [
-                {name: 'Non weighted'}
-            ].concat(this.vertexAttributeManager.attributes)
-        });
-        this.vertexAttributeManager.on('change:attributes', function () {
-            _this.vertexAttributeStore.loadData([
-                {name: 'Non weighted'}
-            ].concat(_this.vertexAttributeManager.attributes));
-        });
-
-        var nodeChargeAttributeCombo = this.createComponent({
-            text: 'Charge',
-            store: this.vertexAttributeStore,
-            value: -30,
-//            maxValue: 100,
-//            minValue: -100,
-            step: 1,
-            changeNumberField: function () {
-            },
-            changeCombo: function () {
-            }
-
-        });
-
-        var edgeDistanceAttributeCombo = this.createComponent({
-            text: 'Link distance',
-            store: this.edgeAttributeStore,
-            value: 20,
-//            maxValue: 100,
-            minValue: 0,
-            step: 1,
-            changeNumberField: function () {
-            },
-            changeCombo: function () {
-            }
-        });
-
-        var edgeStrengthAttributeCombo = this.createComponent({
-            text: 'Link strength',
-            store: this.edgeAttributeStore,
-            value: 1,
-            maxValue: 1,
-            minValue: 0,
-            step: 0.1,
-            changeNumberField: function () {
-            },
-            changeCombo: function () {
-            }
-        });
-
-        var frictionField = Ext.create('Ext.form.field.Number', {
-            xtype: 'numberfield',
-            fieldLabel: '<span style="font-family: Oxygen">Friction</span>',
-            value: 0.9,
-            maxValue: 1,
-            minValue: 0,
-            step: 0.1,
-            listeners: {
-                change: {
-                    buffer: 100,
-                    fn: function (field, newValue) {
-                        if (newValue != null) {
-                            console.log(newValue);
-                        }
-                    }
-                }
-            }
-        });
-        var gravityField = Ext.create('Ext.form.field.Number', {
-            xtype: 'numberfield',
-            fieldLabel: '<span style="font-family: Oxygen">Gravity</span>',
-            value: 0.1,
-//                            maxValue: ,
-            minValue: 0,
-            step: 0.1,
-            listeners: {
-                change: {
-                    buffer: 100,
-                    fn: function (field, newValue) {
-                        if (newValue != null) {
-                            console.log(newValue);
-                        }
-                    }
-                }
-            }
-        });
-        var chargeDistanceField = Ext.create('Ext.form.field.Number', {
-            xtype: 'numberfield',
-            fieldLabel: '<span style="font-family: Oxygen">Charge distance</span>',
-            value: 500,
-//            maxValue: 100,
-            minValue: 0,
-            step: 1,
-            listeners: {
-                change: {
-                    buffer: 100,
-                    fn: function (field, newValue) {
-                        if (newValue != null) {
-                            console.log(newValue);
-                        }
-                    }
-                }
-            }
-        });
-
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: this.id + 'window',
-            title: 'Force directed layout configuration',
-            closable: false,
-            minimizable: true,
-            constrain: true,
-            collapsible: true,
-            layout: 'fit',
-            items: {
-                layout: {
-                    type: 'vbox',
-                    align: 'stretch'
-                },
-                width: this.width,
-                bodyPadding: 10,
-                border: false,
-                items: [
-                    {
-                        xtype: 'box',
-                        style: {
-                            textAlign: 'right'
-                        },
-                        html: '<a target="_blank" href="https://github.com/mbostock/d3/wiki/Force-Layout">About force directed layout </a>'
-                    },
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px'
-                        },
-                        html: 'Node related settings'
-                    },
-                    {
-                        xtype: 'container',
-                        style: {
-                            marginBottom: '20px'
-                        },
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            nodeChargeAttributeCombo
-                        ]
-                    },
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px'
-                        },
-                        html: 'Edge related settings'
-                    },
-                    {
-                        xtype: 'container',
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            edgeDistanceAttributeCombo,
-                            edgeStrengthAttributeCombo
-                        ]
-                    },
-                    {
-                        xtype: 'box',
-                        style: {
-                            fontSize: '13px',
-                            fontWeight: 'bold',
-                            borderBottom: '1px solid lightgray',
-                            marginBottom: '10px',
-                            marginTop: '20px'
-                        },
-                        html: 'Global settings'
-                    },
-                    {
-                        xtype: 'container',
-                        layout: {
-                            type: 'vbox',
-                            align: 'stretch'
-                        },
-                        defaults: { margin: '1 0 1 0' },
-                        items: [
-                            frictionField,
-                            gravityField,
-                            chargeDistanceField
-
-                        ]
-                    }
-                ],
-                bbar: {
-                    layout: {
-                        pack: 'end'
-                    },
-                    defaults: {
-                        width: 100
-                    },
-                    items: [
-                        {
-                            text: 'Apply',
-                            handler: function () {
-
-                                var linkDistanceValue = edgeDistanceAttributeCombo.down('combo').getValue();
-                                var linkStrengthValue = edgeStrengthAttributeCombo.down('combo').getValue();
-                                var chargeValue = nodeChargeAttributeCombo.down('combo').getValue();
-
-                                var linkDistanceDefaultValue = edgeDistanceAttributeCombo.down('numberfield').getValue();
-                                var linkStrengthDefaultValue = edgeStrengthAttributeCombo.down('numberfield').getValue();
-                                var chargeDefaultValue = nodeChargeAttributeCombo.down('numberfield').getValue();
-
-                                linkDistanceValue = linkDistanceValue === 'Non weighted' ? linkDistanceDefaultValue : linkDistanceValue;
-                                linkStrengthValue = linkStrengthValue === 'Non weighted' ? linkStrengthDefaultValue : linkStrengthValue;
-                                chargeValue = chargeValue === 'Non weighted' ? chargeDefaultValue : chargeValue;
-
-                                GraphLayout.force({
-                                    network: _this.network,
-                                    width: _this.networkViewer.networkSvgLayout.getWidth(),
-                                    height: _this.networkViewer.networkSvgLayout.getHeight(),
-                                    linkDistance: linkDistanceValue,
-                                    linkStrength: linkStrengthValue,
-                                    charge: chargeValue,
-                                    multipliers: {
-                                        linkDistance: linkDistanceDefaultValue,
-                                        linkStrength: linkStrengthDefaultValue,
-                                        charge: chargeDefaultValue
-                                    },
-                                    friction: frictionField.getValue(),
-                                    gravity: gravityField.getValue(),
-                                    chargeDistance: chargeDistanceField.getValue(),
-
-                                    simulation: false,
-                                    end: function (verticesArray) {
-                                        for (var i = 0, l = verticesArray.length; i < l; i++) {
-                                            var v = verticesArray[i];
-                                            _this.networkViewer.setVertexCoords(v.id, v.x, v.y);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    ]
-                }
-            },
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    draw: function () {
-        var _this = this;
-
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    },
-    createComponent: function (args) {
-        var _this = this;
-        return Ext.create('Ext.container.Container', {
-            layout: 'hbox',
-            defaults: {
-                margin: '0 1 0 1'
-            },
-            items: [
-                {
-                    xtype: 'numberfield',
-                    fieldLabel: '<span style="font-family: Oxygen">' + args.text + '</span>',
-                    value: args.value,
-                    maxValue: args.maxValue,
-                    minValue: args.minValue,
-                    step: args.step,
-                    margin: '0 10 0 0',
-                    listeners: {
-                        change: {
-                            buffer: 100,
-                            fn: function (field, newValue) {
-                                if (newValue != null) {
-                                    args.changeNumberField(newValue);
-                                }
-                            }
-                        }
-                    }
-                },
-                {
-                    xtype: 'combo',
-                    store: args.store,
-                    displayField: 'name',
-                    valueField: 'name',
-                    width: 100,
-                    queryMode: 'local',
-                    forceSelection: true,
-                    editable: false,
-                    listeners: {
-                        afterrender: function () {
-                            this.select(this.getStore().getAt(0));
-                        },
-                        change: function (field, e) {
-                            var value = field.getValue();
-                            if (value != null) {
-                                args.changeCombo(value);
-                            }
-                        }
-                    }
-                }
-            ]
-        })
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function NetworkEditWidget(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('NetworkEditWidget');
-
-    this.window;
-    this.grid;
-    this.network;
-    this.networkViewer;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    if (this.autoRender) {
-        this.render();
-    }
-};
-
-NetworkEditWidget.prototype = {
-    render: function () {
-        var _this = this;
-        this.store = Ext.create('Ext.data.Store', {
-            id: this.id + 'store',
-            pageSize: 50,
-            proxy: {
-                type: 'memory'
-            },
-            fields: [
-                {name: 'relation', type: 'string'}
-            ],
-            data: this.getElements()
-        });
-
-        this.network.on('add:vertex add:edge remove:vertex remove:edge remove:vertices load:json clean draw batch:end', function () {
-            _this.store.loadRawData(_this.getElements());
-        });
-    },
-    draw: function () {
-        var _this = this;
-
-
-        this.sourceTextfield = Ext.create('Ext.form.field.Text', {
-            xtype: 'textfield',
-            vtype: 'alphanum',
-            emptyText: 'Source id',
-            flex: 1
-        });
-
-        this.relationTextfield = Ext.create('Ext.form.field.Text', {
-            xtype: 'textfield',
-            vtype: 'alphanum',
-            emptyText: 'Relation',
-            flex: 1
-        });
-
-        this.targetTextfield = Ext.create('Ext.form.field.Text', {
-            xtype: 'textfield',
-            vtype: 'alphanum',
-            emptyText: 'Target id',
-            flex: 1
-        });
-
-        this.grid = Ext.create('Ext.grid.Panel', {
-            id: this.id + 'grid',
-            store: this.store,
-            columns: [
-                {"header": "Source node", xtype: 'templatecolumn', tpl: '{source.id}', flex: 1, editor: {allowBlank: false}},
-                {"header": "Relation", "dataIndex": "relation", flex: 1, editor: {allowBlank: false}},
-                {"header": "Target node", xtype: 'templatecolumn', tpl: '{target.id}', flex: 1, editor: {allowBlank: false}}
-            ],
-            flex: 1,
-            border: 0,
-            loadMask: true,
-            selModel: {
-                selType: 'rowmodel',
-                mode: 'MULTI'
-            },
-            plugins: ['bufferedrenderer',
-//                Ext.create('Ext.grid.plugin.RowEditing', {
-//                    clicksToMoveEditor: 1,
-//                    autoCancel: false
-//                })
-//                Ext.create('Ext.grid.plugin.CellEditing', {
-//                    double click to edit cell
-//                    clicksToEdit: 2
-//                })
-            ],
-
-            listeners: {
-//                selectionchange: function (model, selected) {
-//                    console.log('selection change')
-//                    var vertexList = [];
-//                    for (var i = 0; i < selected.length; i++) {
-//                        vertexList.push(selected[i].getData().Id);
-//                    }
-//                }
-            },
-            dockedItems: [
-                {
-                    xtype: 'toolbar',
-                    dock: 'top',
-                    items: [
-                        {
-                            xtype: 'button',
-                            text: 'Remove selected interactions',
-                            handler: function (bt, e) {
-                                var grid = _this.grid;
-                                var selectedRecords = _this.grid.getSelectionModel().getSelection();
-                                _this.network.batchStart();
-                                for (var i = 0; i < selectedRecords.length; i++) {
-                                    var record = selectedRecords[i];
-                                    var edge = _this.network.getEdgeById(record.get('id'));
-                                    if (typeof edge !== 'undefined') {
-                                        _this.network.removeEdge(edge);
-                                        _this.network.removeVertex(_this.network.getVertexById(record.get('source').id));
-                                        _this.network.removeVertex(_this.network.getVertexById(record.get('target').id));
-                                    } else {
-                                        var vertex = _this.network.getVertexById(record.get('source').id);
-                                        _this.network.removeVertex(vertex);
-                                    }
-                                }
-//                                var vertices = _this.network.graph.vertices;
-//                                for (var i = 0; i < vertices.length; i++) {
-//                                    var vertex = vertices[i];
-//                                    if (typeof vertex !== 'undefined') {
-//                                        if (vertex.edges.length == 0) {
-//                                            _this.network.removeVertex(vertex);
-//                                        }
-//                                    }
-//                                }
-                                _this.network.batchEnd();
-                                _this.network.vertexAttributeManager.trigger('change:data', {sender: this});
-                                _this.network.edgeAttributeManager.trigger('change:data', {sender: this});
-                            }
-                        },
-                        '->',
-                        {
-                            xtype: 'button',
-                            text: 'Download as SIF file',
-                            handler: function (bt, e) {
-                                var a = bt.getEl();
-                                var string = _this.network.graph.getAsSIF();
-                                var blob = new Blob([string], {type: "data:text/tsv"});
-                                var url = URL.createObjectURL(blob);
-                                var link = document.createElement('a');
-                                link.href = url;
-                                link.download = "network.sif";
-                                var event = new MouseEvent('click', {
-                                    'view': window,
-                                    'bubbles': true,
-                                    'cancelable': true
-                                });
-                                link.dispatchEvent(event);
-                            }
-                        }
-                    ]
-                }
-            ]
-        });
-
-        this.window = Ext.create('Ext.window.Window', {
-            id: this.id + 'window',
-            title: "Network editor",
-            width: 800,
-            height: 600,
-            closable: false,
-            minimizable: true,
-            constrain: true,
-            collapsible: true,
-            layout: {
-                type: 'hbox',
-                align: 'stretch'
-            },
-            items: [
-                {
-                    xtype: 'panel',
-                    title: 'Add interaction',
-                    width: 200,
-                    border: 0,
-                    bodyPadding: 10,
-                    style: {
-                        borderRight: '1px solid lightgray'
-                    },
-                    defaults: {
-                        width: '100%',
-                        labelWidth: 55
-                    },
-                    items: [
-                        this.sourceTextfield,
-                        this.relationTextfield,
-                        this.targetTextfield,
-                        {
-                            xtype: 'button',
-                            text: 'Add interaction',
-                            handler: function (bt, e) {
-                                var sourceId = _this.sourceTextfield.getValue();
-                                var targetId = _this.targetTextfield.getValue();
-                                var relation = _this.relationTextfield.getValue();
-                                if (sourceId !== '' && targetId !== '' && relation !== '') {
-                                    var edgeId = sourceId + '_' + relation + '_' + targetId;
-
-                                    var sourceVertex = _this.network.getVertexById(sourceId);
-                                    if (typeof sourceVertex === 'undefined') {
-                                        sourceVertex = new Vertex({
-                                            id: sourceId
-                                        });
-                                        _this.network.addVertex({
-                                            vertex: sourceVertex,
-                                            vertexConfig: new VertexConfig({
-                                                rendererConfig: _this.networkViewer.session.getVertexDefaults()
-                                            })
-                                        }, true);
-                                    }
-                                    var targetVertex = _this.network.getVertexById(targetId);
-                                    if (typeof targetVertex === 'undefined') {
-                                        targetVertex = new Vertex({
-                                            id: targetId
-                                        });
-                                        _this.network.addVertex({
-                                            vertex: targetVertex,
-                                            vertexConfig: new VertexConfig({
-                                                rendererConfig: _this.networkViewer.session.getVertexDefaults()
-                                            })
-                                        }, true);
-                                    }
-                                    var edge = new Edge({
-                                        id: edgeId,
-                                        relation: relation,
-                                        source: sourceVertex,
-                                        target: targetVertex,
-                                        weight: 1,
-                                        directed: true
-                                    });
-                                    _this.network.addEdge({
-                                        edge: edge,
-                                        edgeConfig: new EdgeConfig({
-                                            rendererConfig: _this.networkViewer.session.getEdgeDefaults()
-                                        })
-                                    });
-
-                                    _this.networkViewer.refreshNetwork();
-                                }
-                            }
-                        }
-                    ]
-                },
-                this.grid
-            ],
-            listeners: {
-                minimize: function () {
-                    this.hide();
-                }
-            }
-        });
-    },
-    getElements: function () {
-        var edges = this.network.graph.edges;
-        var vertices = this.network.graph.vertices;
-        var elements = [];
-        var verticesHash = {};
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                elements.push(edge);
-                verticesHash[edge.source.id] = edge.source;
-                verticesHash[edge.target.id] = edge.target;
-            }
-        }
-        for (var i = 0; i < vertices.length; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                if (vertex.edges.length == 0 && typeof verticesHash[vertex.id] === 'undefined') {
-                    elements.push({source: vertex});
-                }
-            }
-        }
-        return elements;
-    },
-    show: function () {
-        this.window.show();
-    },
-    hide: function () {
-        this.window.hide();
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-SIFNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function SIFNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Import a Network SIF file';
-    this.id = Utils.genId('SIFNetworkFileWidget');
-};
-
-
-SIFNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'SIF network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                _this.dataAdapter = new SIFNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this.processData(event.graph);
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-SIFNetworkFileWidget.prototype.processData = function (graph) {
-    var _this = this;
-    try {
-        this.content = graph; //para el onOK.notify event
-        var verticesLength = graph.vertices.length;
-        var edgesLength = graph.edges.length;
-
-        var edges = graph.edges;
-        var storeData = [];
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            storeData.push([edge.source.id, edge.relation, edge.target.id]);
-        }
-        this.gridStore.loadData(storeData);
-
-        this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-        this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-    } catch (e) {
-        this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-    }
-    this.panel.setLoading(false);
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-TextNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function TextNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Import a Network Text file';
-    this.id = Utils.genId('TextNetworkFileWidget');
-
-    this.columnsNumberStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'num'],
-        data: []
-    });
-
-    this.height = 450;
-
-    this.sourceColumnIndex;
-    this.relationColumnIndex;
-    this.targetColumnIndex;
-};
-
-
-TextNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'Text network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                _this.dataAdapter = new TextNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this._processColumns(event.sender);
-                            _this.parsePanel.show();
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-TextNetworkFileWidget.prototype.addCustomComponents = function () {
-    var _this = this;
-
-    this.sourceCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose source column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.sourceColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.relationCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose relation column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        displayField: 'name',
-        allowBlank: false,
-        valueField: 'num',
-        queryMode: 'local',
-        value: 'none',
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                if (value !== null) {
-                    _this.relationColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.targetCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        fieldLabel: 'Choose target column',
-        flex: 1,
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.targetColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-
-    var separatorStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'value'],
-        data: [
-            {name: 'Tab', value: '\t'},
-            {name: 'Comma', value: ','},
-            {name: 'Semicolon', value: ';'}
-        ]
-    });
-    this.separatorCombo = Ext.create('Ext.form.field.ComboBox', {
-        xtype: 'combo',
-        labelAlign: 'top',
-        width: 185,
-        labelWidth: 125,
-        fieldLabel: 'Choose field separator',
-        store: separatorStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'value',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            afterrender: function () {
-                this.select(this.getStore().getAt(0));
-            },
-            change: function (field, e) {
-                var value = field.getValue();
-                if (value != null) {
-                    if (typeof _this.dataAdapter !== 'undefined') {
-                        _this.dataAdapter.separator = value;
-                        _this.dataAdapter.parse();
-                        _this._processColumns(_this.dataAdapter);
-                        _this.grid.store.removeAll();
-                    }
-                }
-            }
-        }
-    });
-
-    this.parsePanel = Ext.create('Ext.panel.Panel', {
-        dock: 'top',
-        hidden: true,
-        border: false,
-//        title: 'Parse options',
-        layout: {
-            type: 'vbox',
-            align: 'stretch'
-        },
-        bodyPadding: 5,
-        items: [
-            {
-                xtype: 'container',
-                margin: 3,
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                items: [
-                    this.separatorCombo,
-                ]
-            },
-            {
-                xtype: 'container',
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                defaults: {
-                    margin: 3
-                },
-                items: [
-                    this.sourceCombo,
-                    this.relationCombo,
-                    this.targetCombo
-                ]
-            }
-        ]
-    });
-
-    this.panel.down().addDocked(this.parsePanel);
-};
-
-
-TextNetworkFileWidget.prototype._processColumns = function (adapter) {
-    var _this = this;
-
-    var columnsNumbers = [];
-    for (var i = 0; i < adapter.columnLength; i++) {
-        columnsNumbers.push({name: 'Column ' + (i + 1), num: i + 1});
-    }
-    this.columnsNumberStore.loadData(columnsNumbers);
-
-    delete this.sourceColumnIndex;
-    delete this.relationColumnIndex;
-    delete this.targetColumnIndex;
-    this.sourceCombo.reset();
-    this.relationCombo.reset();
-    this.targetCombo.reset();
-
-    this.infoLabel.setText('<span class="info">Parse complete using <span class="key">' + this.separatorCombo.getRawValue() + '</span> character.</span>', false);
-
-    this.panel.setLoading(false);
-};
-
-TextNetworkFileWidget.prototype.processColumnNumbers = function () {
-    var _this = this;
-
-    if (typeof this.sourceColumnIndex !== 'undefined' && typeof this.targetColumnIndex !== 'undefined') {
-        this.panel.setLoading(true);
-        var relationDefaultName = this.relationCombo.getValue();
-        if (isNaN(this.relationColumnIndex) || this.relationColumnIndex == '') {
-            this.relationColumnIndex = -1;
-        } else {
-            this.relationColumnIndex -= 1;
-        }
-        if (relationDefaultName === '') {
-            relationDefaultName = 'none';
-        }
-        var graph = this.dataAdapter.parseColumns(this.sourceColumnIndex - 1, this.targetColumnIndex - 1, this.relationColumnIndex, relationDefaultName);
-        this.processData(graph);
-    }
-
-};
-
-TextNetworkFileWidget.prototype.processData = function (graph) {
-    var _this = this;
-    try {
-        this.content = graph; //para el onOK.notify event
-        var verticesLength = graph.vertices.length;
-        var edgesLength = graph.edges.length;
-
-        var edges = graph.edges;
-        var storeData = [];
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            storeData.push([edge.source.id, edge.relation, edge.target.id]);
-        }
-        this.gridStore.loadData(storeData);
-
-        this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-        this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-    } catch (e) {
-        this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-    }
-    this.panel.setLoading(false);
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-XLSXNetworkFileWidget.prototype = new NetworkFileWidget();
-
-function XLSXNetworkFileWidget(args) {
-    NetworkFileWidget.prototype.constructor.call(this, args);
-
-    this.title = 'Import a Network XLSX file';
-    this.id = Utils.genId('XLSXNetworkFileWidget');
-
-    this.sheetStore = Ext.create('Ext.data.Store', {
-        fields: ['name'],
-        data: []
-    });
-    this.columnsNumberStore = Ext.create('Ext.data.Store', {
-        fields: ['name', 'num'],
-        data: []
-    });
-
-    this.height = 450;
-
-    this.textNetworkDataAdapter;
-
-    this.sourceColumnIndex;
-    this.relationColumnIndex;
-    this.targetColumnIndex;
-};
-
-
-XLSXNetworkFileWidget.prototype.getFileUpload = function () {
-    var _this = this;
-    this.fileUpload = Ext.create('Ext.form.field.File', {
-        msgTarget: 'side',
-        allowBlank: false,
-        emptyText: 'XLSX network file',
-        flex: 1,
-        buttonText: 'Browse local',
-        listeners: {
-            change: function (f, v) {
-                _this.panel.setLoading(true);
-                var file = document.getElementById(_this.fileUpload.fileInputEl.id).files[0];
-                var node = Ext.DomQuery.selectNode('input[id=' + f.getInputId() + ']');
-                node.value = v.replace("C:\\fakepath\\", "");
-
-                _this.dataAdapter = new XLSXNetworkDataAdapter({
-                    dataSource: new FileDataSource({file: file, type: 'binary'}),
-                    handlers: {
-                        'data:load': function (event) {
-                            _this.processWorkbook(event.sender);
-                            _this.parsePanel.show();
-                        },
-                        'error:parse': function (event) {
-                            _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                            _this.panel.setLoading(false);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    return this.fileUpload;
-};
-
-
-XLSXNetworkFileWidget.prototype.addCustomComponents = function () {
-    var _this = this;
-
-    this.sheetCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        fieldLabel: 'Select Sheet',
-        labelWidth: 40,
-        store: this.sheetStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'name',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                if (value != null) {
-                    _this.processSheet(value)
-                }
-            }
-        }
-    });
-
-    this.sourceCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose source column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.sourceColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.relationCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        flex: 1,
-        fieldLabel: 'Choose relation column',
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.relationColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-    this.targetCombo = Ext.create('Ext.form.field.ComboBox', {
-        labelAlign: 'top',
-        fieldLabel: 'Choose target column',
-        flex: 1,
-        emptyText: 'Choose column',
-        store: this.columnsNumberStore,
-        allowBlank: false,
-        editable: false,
-        displayField: 'name',
-        valueField: 'num',
-        queryMode: 'local',
-        forceSelection: true,
-        listeners: {
-            change: function (field, e) {
-                var value = field.getValue();
-                console.log(value);
-                if (value != null) {
-                    _this.targetColumnIndex = value;
-                    _this.processColumnNumbers();
-                }
-            }
-        }
-    });
-
-    this.parsePanel = Ext.create('Ext.panel.Panel', {
-        dock: 'top',
-        hidden: true,
-        layout: {
-            type: 'vbox',
-            align: 'stretch'
-        },
-        bodyPadding: 5,
-        items: [
-            {
-                xtype: 'container',
-                margin: 3,
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                items: [
-                    this.sheetCombo,
-                ]
-            },
-            {
-                xtype: 'container',
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                defaults: {
-                    margin: 3
-                },
-                items: [
-                    this.sourceCombo,
-                    this.relationCombo,
-                    this.targetCombo
-                ]
-            }
-        ]
-    });
-
-    this.panel.addDocked(this.parsePanel);
-
-}
-
-XLSXNetworkFileWidget.prototype.processWorkbook = function (adapter) {
-    var _this = this;
-
-    var sheets = [];
-    for (var sheet in  adapter.xlsx.Sheets) {
-        sheets.push({name: sheet});
-    }
-    this.sheetStore.loadData(sheets);
-
-    this.panel.setLoading(false);
-};
-
-XLSXNetworkFileWidget.prototype.processSheet = function (sheetName) {
-    var _this = this;
-
-    this.panel.setLoading(true);
-
-    delete this.sourceColumnIndex;
-    delete this.relationColumnIndex;
-    delete this.targetColumnIndex;
-    this.sourceCombo.reset();
-    this.relationCombo.reset();
-    this.targetCombo.reset();
-
-    this.grid.store.removeAll();
-
-    var csv = this.dataAdapter.parseSheet(sheetName);
-
-    this.textNetworkDataAdapter = new TextNetworkDataAdapter({
-        dataSource: new StringDataSource(csv),
-        separator: ',',
-        handlers: {
-            'data:load': function (event) {
-                _this._processColumns(event.sender);
-            },
-            'error:parse': function (event) {
-                _this.infoLabel.setText('<span class="err">' + event.errorMsg + '</span>', false);
-                _this.panel.setLoading(false);
-            }
-        }
-    });
-
-
-//    var sifNetworkDataAdapter = new SIFNetworkDataAdapter({
-//        dataSource: new StringDataSource(csv),
-//        separator: ',',
-//        handlers: {
-//            'data:load': function (event) {
-//                _this.processData(event.graph);
-//            }
-//        }
-//    });
-
-};
-
-
-XLSXNetworkFileWidget.prototype._processColumns = function (adapter) {
-    var _this = this;
-
-    var columnsNumbers = [];
-    for (var i = 0; i < adapter.columnLength; i++) {
-        columnsNumbers.push({name: 'Column ' + (i + 1), num: i + 1});
-    }
-    this.columnsNumberStore.loadData(columnsNumbers);
-
-    delete this.sourceColumnIndex;
-    delete this.relationColumnIndex;
-    delete this.targetColumnIndex;
-    this.sourceCombo.reset();
-    this.relationCombo.reset();
-    this.targetCombo.reset();
-
-    this.infoLabel.setText('<span class="info">Parse complete', false);
-
-    this.panel.setLoading(false);
-};
-
-XLSXNetworkFileWidget.prototype.processColumnNumbers = function () {
-    var _this = this;
-
-    if (typeof this.sourceColumnIndex !== 'undefined' && typeof this.relationColumnIndex !== 'undefined' && typeof this.targetColumnIndex !== 'undefined') {
-        this.panel.setLoading(true);
-        var graph = this.textNetworkDataAdapter.parseColumns(this.sourceColumnIndex - 1, this.relationColumnIndex - 1, this.targetColumnIndex - 1);
-        this.processData(graph);
-    }
-
-};
-
-
-XLSXNetworkFileWidget.prototype.processData = function (graph) {
-    var _this = this;
-    try {
-        this.content = graph; //para el onOK.notify event
-        var verticesLength = graph.vertices.length;
-        var edgesLength = graph.edges.length;
-
-        var edges = graph.edges;
-        var storeData = [];
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            storeData.push([edge.source.id, edge.relation, edge.target.id]);
-        }
-        this.gridStore.loadData(storeData);
-
-        this.infoLabel.setText('<span class="ok">File loaded sucessfully</span>', false);
-        this.countLabel.setText('Vertices:<span class="info">' + verticesLength + '</span> edges:<span class="info">' + edgesLength + '</span>', false);
-
-    } catch (e) {
-        this.infoLabel.setText('<span class="err">File not valid </span>' + e, false);
-    }
-    this.panel.setLoading(false);
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
 function CheckBrowser(appName){
 
     if(Ext.isIE){
@@ -12351,15 +10061,18 @@ function CheckBrowser(appName){
 		}
 		break;
 	default:
-		if(Ext.chromeVersion>=14){
+		if(Ext.chromeVersion>=40){
 			browserOk = true;
 		}
 		if(Ext.safariVersion>=5){
 			browserOk = true;
 		}
-        if(Ext.isIE10>=5){
-            browserOk = true;
-        }
+		if(Ext.firefoxVersion>=37){
+			browserOk = true;
+		}
+		if(Ext.operaVersion>=29){
+			browserOk = true;
+		}
 	}
 //if(Ext.operaVersion<=0){
 //	browserOk = true;
@@ -12443,7 +10156,7 @@ function GenericFormPanel(args) {
     this.title;
     this.resizable;
     this.width = 500;
-    this.height;
+    this.height = 600;
     this.border = true;
     this.formBorder = true;
     this.taskbar;
@@ -12554,8 +10267,10 @@ GenericFormPanel.prototype.getForm = function () {
         this.form = Ext.create('Ext.form.Panel', {
             border: 0,
             width: this.width,
+            height: this.height,
+            autoScroll:true,
             trackResetOnLoad: true,
-            padding: 5,
+            bodyPadding: 5,
             layout: {
                 type: 'vbox',
                 align: 'stretch'
@@ -12836,17 +10551,17 @@ function HeaderWidget(args) {
     var _this = this;
     this.id = Utils.genId("HeaderWidget");
 
-
     this.target;
     this.autoRender = true;
-    this.accountData;
+    this.userData;
 
     this.appname = "My new App";
     this.description = '';
     this.suiteId = -1;
-    this.checkTimeInterval = 4000;
+    this.checkTimeInterval = 5000;
     this.version = '';
     this.allowLogin = true;
+    this.allowJobs = true;
     this.width;
     this.height = 60;
     this.chunkedUpload = false;
@@ -12882,6 +10597,11 @@ HeaderWidget.prototype = {
 //            appLi = '<li id="appMenu" class="menu"> &#9776; </li>';
             appLi = '<li id="appMenu" class="menu">&nbsp;<i class="fa fa-chevron-right"></i>&nbsp; <span class="">Menu</span></li>';
         }
+        var jobsLi = '';
+        if (this.allowJobs) {
+            jobsLi = '<li id="jobs" class="right hidden"><i class="fa fa-tasks"></i> &nbsp;jobs</li>';
+        }
+
         var navgationHtml = '' +
             '   <ul class="ocb-header">' +
             appLi +
@@ -12893,12 +10613,13 @@ HeaderWidget.prototype = {
             '       </li>' +
             '       <li id="signin" class="right"><i class="fa fa-sign-in"></i> &nbsp;sign in' +
             '       </li>' +
-            '       <li id="jobs" class="right hidden"><i class="fa fa-tasks"></i> &nbsp;jobs' +
-            '       </li>' +
+            appLi +
             '       <li id="profile" class="right hidden"><i class="fa fa-user"></i> &nbsp;profile' +
             '       </li>' +
             '       <li id="upload" class="right hidden"><i class="fa fa-cloud-upload"></i> &nbsp;upload & manage' +
             '       </li>' +
+            //'       <li id="projects" class="right hidden"><i class="fa fa-folder"></i> &nbsp;projects' +
+            //'       </li>' +
             '       <li id="logout" class="right hidden"><i class="fa fa-sign-out"></i> &nbsp;logout' +
             '       </li>' +
             '       <li id="user" class="right hidden text">' +
@@ -12995,12 +10716,23 @@ HeaderWidget.prototype = {
             _this.loginWidget.show();
         });
         $(this.els.logout).click(function () {
-            OpencgaManager.logout({
-                accountId: $.cookie('bioinfo_account'),
-                sessionId: $.cookie('bioinfo_sid'),
-                success: _this.logoutSuccess,
-                error: _this.logoutSuccess
+            OpencgaManager.users.logout({
+                id: Cookies('bioinfo_user'),
+                query: {
+                    sid: Cookies('bioinfo_sid')
+                },
+                request: {
+                    success: _this.logoutSuccess,
+                    error: _this.logoutSuccess
+                }
             });
+
+            //Delete all cookies
+            Cookies.expire('bioinfo_sid');
+            Cookies.expire('bioinfo_user');
+            _this.sessionFinished();
+            _this.trigger('logout', {sender: this});
+
         });
         $(this.els.profile).click(function () {
             _this.profileWidget.show();
@@ -13012,23 +10744,22 @@ HeaderWidget.prototype = {
             _this.trigger('jobs:click', {sender: _this});
 //            $(_this.els.jobs).toggleClass('active');
         });
+        $(this.els.projects).click(function () {
+            _this.trigger('projects:click', {sender: _this});
+//            $(_this.els.jobs).toggleClass('active');
+        });
         /****************************************/
-        this.logoutSuccess = function (data) {
-            console.log(data);
-            //Se borran todas las cookies por si acaso
-            $.cookie('bioinfo_sid', null);
-            $.cookie('bioinfo_sid', null, {path: '/'});
-            $.cookie('bioinfo_account', null);
-            $.cookie('bioinfo_account', null, {path: '/'});
-            _this.sessionFinished();
-            _this.trigger('logout', {sender: this});
+        this.logoutSuccess = function (response) {
+            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                console.log(response);
+            }
         };
 
-        this.getAccountInfoSuccess = function (response) {
-            if (response.accountId != null) {
-                _this.setAccountData(response);
-                _this.trigger('account:change', {sender: this, response: response});
-                console.log("accountData has been modified since last call");
+        this.getUserInfoSuccess = function (response) {
+            if ((response.response[0].errorMsg === '' || response.response[0].errorMsg == null) && response.response[0].result.length > 0) {
+                _this.setUserData(response.response[0].result[0]);
+                _this.trigger('user:change', {sender: this, response: response.response[0].result[0]});
+                console.log("userData has been modified since last call");
             }
         };
         /****************************************/
@@ -13041,6 +10772,8 @@ HeaderWidget.prototype = {
 
         /* Opencga Browser Widget */
         this.opencgaBrowserWidget = this._createOpencgaBrowserWidget();
+
+        this.projectBrowser = this._createProjectBrowser();
 
         this.rendered = true;
     },
@@ -13058,7 +10791,7 @@ HeaderWidget.prototype = {
         this.profileWidget.draw();
         this.opencgaBrowserWidget.draw();
 
-        if ($.cookie('bioinfo_sid') != null) {
+        if (Cookies('bioinfo_sid') != null) {
             this.sessionInitiated();
         } else {
             this.sessionFinished();
@@ -13127,12 +10860,17 @@ HeaderWidget.prototype = {
             autoRender: true,
             handlers: {
                 'need:refresh': function () {
-                    _this.getAccountInfo();
+                    _this.getUserInfo();
                 }
             }
         });
         return opencgaBrowserWidget;
     },
+    _createProjectBrowser: function () {
+        var projectBrowser = document.createElement('jso-project-browser');
+        return projectBrowser;
+    },
+
 
 //    _createPanel: function (targetId) {
 //        var _this = this;
@@ -13337,7 +11075,7 @@ HeaderWidget.prototype = {
 ////                    text: '<span class="emph">logout</span>',
 ////                    handler: function () {
 ////                        OpencgaManager.logout({
-////                            accountId: $.cookie('bioinfo_account'),
+////                            userId: $.cookie('bioinfo_user'),
 ////                            sessionId: $.cookie('bioinfo_sid'),
 ////                            success: _this.logoutSuccess,
 ////                            error: _this.logoutSuccess
@@ -13395,33 +11133,38 @@ HeaderWidget.prototype = {
 //        return panel;
 //    },
 
-    setAccountData: function (data) {
-        this.accountData = data;
-        this.opencgaBrowserWidget.setAccountData(data);
-        $(this.els.user).html(this._getAccountText());
+    setUserData: function (data) {
+        this.userData = data;
+        this.opencgaBrowserWidget.setUserData(data);
+        console.log(data)
+        this.projectBrowser.projectList = data.projects;
     },
-    getAccountInfo: function () {
+    getUserInfo: function () {
         var lastActivity = null;
-        if (this.accountData != null) {
-            lastActivity = this.accountData.lastActivity;
+        if (this.userData != null) {
+            lastActivity = this.userData.lastActivity;
         }
-        if (!$.cookie('bioinfo_account')) {
-            console.log('cookie: bioinfo_account, is not set, session will be finished...');
+        var user = Cookies('bioinfo_user');
+        if (!user) {
+            console.log('cookie: bioinfo_user, is not set, session will be finished...');
             this.sessionFinished();
         } else {
-
-            OpencgaManager.getAccountInfo({
-                accountId: $.cookie('bioinfo_account'),
-                sessionId: $.cookie('bioinfo_sid'),
-                lastActivity: lastActivity,
-                success: this.getAccountInfoSuccess,
-                error: this.logoutSuccess
+            OpencgaManager.users.read({
+                id: user,
+                query: {
+                    sid: Cookies('bioinfo_sid'),
+                    lastActivity: lastActivity
+                },
+                request: {
+                    success: this.getUserInfoSuccess,
+                    error: this.logoutSuccess
+                }
             });
         }
 
     },
-    _getAccountText: function () {
-        var nameToShow = this.accountData.accountId;
+    _getUserText: function () {
+        var nameToShow = Cookies('bioinfo_user');
         if (nameToShow.indexOf('anonymous_') != -1) {
             nameToShow = 'anonymous';
         }
@@ -13429,6 +11172,7 @@ HeaderWidget.prototype = {
     },
     sessionInitiated: function () {
         var _this = this;
+        this.els.user.innerHTML = this._getUserText();
 //        /**HIDE**/
         this.loginWidget.hide();
         $(this.els.signin).addClass('hidden');
@@ -13436,14 +11180,16 @@ HeaderWidget.prototype = {
         $(this.els.logout).removeClass('hidden');
         $(this.els.profile).removeClass('hidden');
         $(this.els.upload).removeClass('hidden');
+        $(this.els.projects).removeClass('hidden');
         $(this.els.user).removeClass('hidden');
         $(this.els.jobs).removeClass('hidden');
 
+
         /**START OPENCGA CHECK**/
-        if (!this.accountInfoInterval) {
-            this.getAccountInfo();//first call
-            this.accountInfoInterval = setInterval(function () {
-                _this.getAccountInfo();
+        if (!this.userInfoInterval) {
+            this.getUserInfo();//first call
+            this.userInfoInterval = setInterval(function () {
+                _this.getUserInfo();
             }, this.checkTimeInterval);
         }
     },
@@ -13452,6 +11198,7 @@ HeaderWidget.prototype = {
         $(this.els.logout).addClass('hidden');
         $(this.els.profile).addClass('hidden');
         $(this.els.upload).addClass('hidden');
+        $(this.els.projects).addClass('hidden');
         $(this.els.user).addClass('hidden');
         $(this.els.jobs).addClass('hidden');
 //        /**SHOW**/
@@ -13459,12 +11206,12 @@ HeaderWidget.prototype = {
         $(this.els.user).html('');
         $(this.els.user).removeClass('hidden');
 //        /**CLEAR OPENCGA**/
-        clearInterval(this.accountInfoInterval);
-        delete this.accountInfoInterval;
+        clearInterval(this.userInfoInterval);
+        delete this.userInfoInterval;
 
         this.profileWidget.hide();
         this.opencgaBrowserWidget.hide();
-        this.opencgaBrowserWidget.removeAccountData();
+        this.opencgaBrowserWidget.removeUserData();
     },
     setDescription: function (text) {
         $(this.els.description).html(text);
@@ -14076,43 +11823,38 @@ LoginWidget.prototype = {
                 _this.panel.setLoading(false);
             }
             console.log(response);
-            if (response.errorMsg === '') {
-                var data = response.result[0];
-                $.cookie('bioinfo_sid', data.sessionId /*,{path: '/'}*/);//TODO ATENCION si se indica el path el 'bioinfo_sid' es comun entre dominios
-                $.cookie('bioinfo_account', data.accountId);
-                $.cookie('bioinfo_bucket', data.bucketId);
+            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                Cookies.set('bioinfo_sid', response.response[0].result[0].sessionId);
+                Cookies.set('bioinfo_user', response.response[0].result[0].userId);
                 _this.trigger('session:initiated', {sender: _this});
             } else {
-                Ext.getCmp(_this.labelEmailId).setText('<span class="err">' + response.errorMsg + '</span>', false);
+                Ext.getCmp(_this.labelEmailId).setText('<span class="err">' + response.response[0].errorMsg + '</span>', false);
                 //Delete all cookies
-                $.cookie('bioinfo_sid', null);
-                $.cookie('bioinfo_sid', null, {path: '/'});
-                $.cookie('bioinfo_account', null);
-                $.cookie('bioinfo_account', null, {path: '/'});
+                Cookies.expire('bioinfo_sid');
+                Cookies.expire('bioinfo_user');
             }
         };
 
-        this.createAccountSuccess = function (data) {
+        this.createUserSuccess = function (response) {
             _this.panel.setLoading(false);
-            if (data.errorMsg === '') {
-                var accountId = data.result[0].accountId;
-                Ext.getCmp(_this.labelEmailId).setText('<span class="ok">'+accountId+' account created</span>', false);
+
+            if (response.response[0].errorMsg === '') {
+                var userId = response.response[0].result[0].id;
+                Ext.getCmp(_this.labelEmailId).setText('<span class="ok">' + userId + ' created</span>', false);
             } else {
-//                Ext.getCmp(_this.labelEmailId).setText('<span class="err">Account already exists</span>', false);
-                Ext.getCmp(_this.labelEmailId).setText('<span class="err">'+data.errorMsg+'</span>', false);
-                //Delete cookies
-                $.cookie('bioinfo_sid', null);
-                $.cookie('bioinfo_sid', null, {path: '/'});
-                $.cookie('bioinfo_account', null);
-                $.cookie('bioinfo_account', null, {path: '/'});
+                Ext.getCmp(_this.labelEmailId).setText('<span class="err">' + response.response[0].errorMsg + '</span>', false);
+                //Delete all cookies
+                Cookies.expire('bioinfo_sid');
+                Cookies.expire('bioinfo_user');
             }
         };
-        this.resetPasswordSuccess = function (data) {
+
+        this.resetPasswordSuccess = function (response) {
             _this.panel.setLoading(false);
-            if (data.errorMsg === '') {
-                Ext.getCmp(_this.labelEmailId).setText('<span class="emph">' + data.result[0].msg + '</span>', false);
+            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                Ext.getCmp(_this.labelEmailId).setText('<span class="emph">' + 'OK' + '</span>', false);
             } else {
-                Ext.getCmp(_this.labelEmailId).setText('<span class="err">' + data.errorMsg + '</span>', false);
+                Ext.getCmp(_this.labelEmailId).setText('<span class="err">' + response.response[0].errorMsg + '</span>', false);
             }
         };
 
@@ -14157,26 +11899,26 @@ LoginWidget.prototype = {
         var labelEmail = Ext.create('Ext.toolbar.TextItem', {
             id: this.labelEmailId,
             padding: 3,
-            text: '<span class="info">Type your account ID and password</span>'
+            text: '<span class="info">Type your user ID and password</span>'
         });
         var pan = Ext.create('Ext.form.Panel', {
             id: this.id + "formPanel",
             bodyPadding: 20,
-            height:225,
-            width:350,
+            height: 225,
+            width: 350,
             border: 0,
             bbar: {items: [labelEmail]},
             items: [
                 {
-                    id: this.id + "accountId",
+                    id: this.id + "userId",
                     xtype: 'textfield',
-                    value: $.cookie('bioinfo_user'),
-                    fieldLabel: 'account ID',
+                    value: Cookies('bioinfo_user'),
+                    fieldLabel: 'user ID',
                     hidden: false,
 //		        enableKeyEvents: true,
                     listeners: {
                         scope: this,
-                        change: this.checkAccountId
+                        change: this.checkUserId
                     }
                 },
                 {
@@ -14212,7 +11954,7 @@ LoginWidget.prototype = {
                     }
                 },
                 {
-                    id: this.id + "accountName",
+                    id: this.id + "userName",
                     xtype: 'textfield',
                     fieldLabel: 'name',
                     hidden: true,
@@ -14255,10 +11997,10 @@ LoginWidget.prototype = {
                     listeners: {
                         change: function (me, newValue, oldValue, eOpts) {
                             if (newValue) {
-                                Ext.getCmp(_this.id + "accountId").disable();
+                                Ext.getCmp(_this.id + "userId").disable();
                                 Ext.getCmp(_this.fldPasswordId).disable();
                             } else {
-                                Ext.getCmp(_this.id + "accountId").enable();
+                                Ext.getCmp(_this.id + "userId").enable();
                                 Ext.getCmp(_this.fldPasswordId).enable();
                             }
                         }
@@ -14275,15 +12017,15 @@ LoginWidget.prototype = {
             constrain: true,
             closable: false,
             modal: true,
-            items:{
-                border:0,
+            items: {
+                border: 0,
                 layout: { type: 'vbox', align: 'stretch'},
-                items:[pan],
-                bbar:{
-                    layout : {
-                        pack : 'center'
+                items: [pan],
+                bbar: {
+                    layout: {
+                        pack: 'center'
                     },
-                    items:[
+                    items: [
                         {
                             id: this.btnSignId,
                             text: 'Sign in'
@@ -14294,7 +12036,7 @@ LoginWidget.prototype = {
                         },
                         {
                             id: this.btnNewaccId,
-                            text: 'New account'
+                            text: 'New user'
                         },
                         {
                             id: this.btnSendId,
@@ -14340,38 +12082,45 @@ LoginWidget.prototype.sign = function () {
         this.anonymousSign();
         this.panel.setLoading('Waiting server...');
     } else {
-        if (this.checkAccountId()) {
-            OpencgaManager.login({
-                accountId: this.getLogin(),
-                password: this.getPassword(),
-                suiteId: this.suiteId,
-                success: this.loginSuccess
+        if (this.checkUserId()) {
+            OpencgaManager.users.login({
+                id: this.getLogin(),
+                query: {
+                    password: this.getPassword()
+                },
+                request: {
+                    success: this.loginSuccess
+                }
             });
             this.panel.setLoading('Waiting server...');
-            $.cookie('bioinfo_user', null, {path: '/'});
-            $.cookie('bioinfo_user', this.getLogin(), {expires: 7});
+
+            Cookies.set('bioinfo_user', this.getLogin());
         }
     }
 };
 
 LoginWidget.prototype.anonymousSign = function () {
-    OpencgaManager.login({
-        accountId: "anonymous",
-        password: "",
-        suiteId: this.suiteId,
-        success: this.loginSuccess
-    });
+    //TODO new opencga
+    //OpencgaManager.login({
+    //    userId: "anonymous",
+    //    password: "",
+    //    suiteId: this.suiteId,
+    //    success: this.loginSuccess
+    //});
 };
 
 LoginWidget.prototype.register = function () {
-    if (this.checkAccountId() && this.checkemail() && this.checkName() && this.checkpass()) {
-        OpencgaManager.createAccount({
-            accountId: this.getLogin(),
-            email: this.getEmail(),
-            name: this.getAccountName(),
-            password: this.getPasswordReg(),
-            suiteId: this.suiteId,
-            success: this.createAccountSuccess
+    if (this.checkUserId() && this.checkemail() && this.checkName() && this.checkpass()) {
+        OpencgaManager.users.create({
+            query: {
+                userId: this.getLogin(),
+                name: this.getUserName(),
+                email: this.getEmail(),
+                password: this.getPasswordReg()
+            },
+            request: {
+                success: this.createUserSuccess
+            }
         });
     } else {
         Ext.getCmp(this.labelEmailId).setText('<span class="info">Fill all fields</span>', false);
@@ -14379,32 +12128,36 @@ LoginWidget.prototype.register = function () {
 };
 
 LoginWidget.prototype.sendRecover = function () {
-    if (this.checkAccountId() && this.checkemail()) {
-        OpencgaManager.resetPassword({
-            accountId: this.getLogin(),
-            email: this.getEmail(),
-            success: this.resetPasswordSuccess
+    if (this.checkUserId() && this.checkemail()) {
+        OpencgaManager.users.resetPassword({
+            id: this.getLogin(),
+            query: {
+                email: this.getEmail()
+            },
+            request: {
+                success: this.resetPasswordSuccess
+            }
         });
         this.panel.setLoading('Waiting server...');
     }
 };
 
 LoginWidget.prototype.getLogin = function () {
-    return Ext.getCmp(this.id + "accountId").getValue();
+    return Ext.getCmp(this.id + "userId").getValue();
 };
-LoginWidget.prototype.getAccountName = function () {
-    return Ext.getCmp(this.id + "accountName").getValue();
+LoginWidget.prototype.getUserName = function () {
+    return Ext.getCmp(this.id + "userName").getValue();
 };
 LoginWidget.prototype.getEmail = function () {
     return Ext.getCmp(this.fldEmailId).getValue();
 };
 
 LoginWidget.prototype.getPassword = function () {
-    return $.sha1(Ext.getCmp(this.fldPasswordId).getValue());
+    return CryptoJS.SHA1(Ext.getCmp(this.fldPasswordId).getValue()).toString();
 };
 
 LoginWidget.prototype.getPasswordReg = function () {
-    return $.sha1(Ext.getCmp(this.fldNpass1Id).getValue());
+    return CryptoJS.SHA1(Ext.getCmp(this.fldNpass1Id).getValue()).toString();
 };
 
 //LoginWidget.prototype.draw = function () {
@@ -14432,12 +12185,12 @@ LoginWidget.prototype.ShowForgot = function () {
     Ext.getCmp(this.btnBackId).show();
     Ext.getCmp(this.btnRegisterId).hide();
 
-    Ext.getCmp(this.id + "accountId").reset();
-    Ext.getCmp(this.id + "accountName").hide();
+    Ext.getCmp(this.id + "userId").reset();
+    Ext.getCmp(this.id + "userName").hide();
 
-    Ext.getCmp(this.labelEmailId).setText('<span class="info">Type your account ID and email to send a new password</span>', false);
+    Ext.getCmp(this.labelEmailId).setText('<span class="info">Type your user ID and email to send a new password</span>', false);
 
-    Ext.getCmp(this.id + "accountId").setFieldLabel('account ID', false);
+    Ext.getCmp(this.id + "userId").setFieldLabel('user ID', false);
     Ext.getCmp(this.fldEmailId).setFieldLabel('e-mail', false);
 };
 LoginWidget.prototype.ShowBack = function () {
@@ -14460,12 +12213,12 @@ LoginWidget.prototype.ShowBack = function () {
     Ext.getCmp(this.btnBackId).hide();
     Ext.getCmp(this.btnRegisterId).hide();
 
-    Ext.getCmp(this.id + "accountId").reset();
-    Ext.getCmp(this.id + "accountName").hide();
+    Ext.getCmp(this.id + "userId").reset();
+    Ext.getCmp(this.id + "userName").hide();
 
-    Ext.getCmp(this.labelEmailId).setText('<span class="info">Type your account ID and password</span>', false);
+    Ext.getCmp(this.labelEmailId).setText('<span class="info">Type your user ID and password</span>', false);
 
-    Ext.getCmp(this.id + "accountId").setFieldLabel('account ID', false);
+    Ext.getCmp(this.id + "userId").setFieldLabel('user ID', false);
 };
 LoginWidget.prototype.ShowNewacc = function () {
 
@@ -14489,18 +12242,18 @@ LoginWidget.prototype.ShowNewacc = function () {
     Ext.getCmp(this.btnBackId).show();
     Ext.getCmp(this.btnRegisterId).show();
 
-    Ext.getCmp(this.id + "accountId").reset();
-    Ext.getCmp(this.id + "accountName").reset();
-    Ext.getCmp(this.id + "accountName").show();
+    Ext.getCmp(this.id + "userId").reset();
+    Ext.getCmp(this.id + "userName").reset();
+    Ext.getCmp(this.id + "userName").show();
 
     Ext.getCmp(this.labelEmailId).setText('&nbsp;', false);
 
-    Ext.getCmp(this.id + "accountName").setFieldLabel('name', false);
-    Ext.getCmp(this.id + "accountId").setFieldLabel('account ID', false);
+    Ext.getCmp(this.id + "userName").setFieldLabel('name', false);
+    Ext.getCmp(this.id + "userId").setFieldLabel('user ID', false);
     Ext.getCmp(this.fldEmailId).setFieldLabel('e-mail', false);
     Ext.getCmp(this.fldNpass1Id).setFieldLabel('password', false);
     Ext.getCmp(this.fldNpass2Id).setFieldLabel('re-password', false);
-    Ext.getCmp(this.id + "accountId").setValue("");
+    Ext.getCmp(this.id + "userId").setValue("");
 };
 
 LoginWidget.prototype.checkpass = function () {
@@ -14532,7 +12285,7 @@ LoginWidget.prototype.anonymousSelected = function (este, value) {
     if (value) {
         Ext.getCmp(this.labelEmailId).setText('<span class="ok">Anonymous selected</span>', false);
     } else {
-        Ext.getCmp(this.labelEmailId).setText('<span class="info">Type your account ID and password</span>', false);
+        Ext.getCmp(this.labelEmailId).setText('<span class="info">Type your user ID and password</span>', false);
     }
 
 };
@@ -14551,22 +12304,22 @@ LoginWidget.prototype.checkemail = function (a, b, c) {
     }
 };
 LoginWidget.prototype.checkName = function (a, b, c) {
-    var name = Ext.getCmp(this.id + "accountName").getValue();
+    var name = Ext.getCmp(this.id + "userName").getValue();
     if (name != "" && name != null) {
-        Ext.getCmp(this.id + "accountName").setFieldLabel('<span class="ok">name</span>', false);
+        Ext.getCmp(this.id + "userName").setFieldLabel('<span class="ok">name</span>', false);
         return true;
     } else {
-        Ext.getCmp(this.id + "accountName").setFieldLabel('<span class="err">name</span>', false);
+        Ext.getCmp(this.id + "userName").setFieldLabel('<span class="err">name</span>', false);
         return false;
     }
 };
-LoginWidget.prototype.checkAccountId = function (a, b, c) {
-    var accountId = Ext.getCmp(this.id + "accountId").getValue();
-    if (accountId != "" && accountId != null) {
-        Ext.getCmp(this.id + "accountId").setFieldLabel('<span class="ok">account ID</span>', false);
+LoginWidget.prototype.checkUserId = function (a, b, c) {
+    var userId = Ext.getCmp(this.id + "userId").getValue();
+    if (userId != "" && userId != null) {
+        Ext.getCmp(this.id + "userId").setFieldLabel('<span class="ok">user ID</span>', false);
         return true;
     } else {
-        Ext.getCmp(this.id + "accountId").setFieldLabel('<span class="err">account ID</span>', false);
+        Ext.getCmp(this.id + "userId").setFieldLabel('<span class="err">user ID</span>', false);
         return false;
     }
 };
@@ -15075,14 +12828,14 @@ OpencgaBrowserWidget.prototype = {
         return panel;
     },
 
-    setAccountData: function (data) {
+    setUserData: function (data) {
         this.accountData = data;
         if (this.rendered) {
             this._updateFolderTree();
         }
     },
 
-    removeAccountData: function () {
+    removeUserData: function () {
         this.folderStore.getRootNode().removeAll();
         this.allStore.getRootNode().removeAll();
         this.filesStore.removeAll();
@@ -15642,25 +13395,25 @@ ProfileWidget.prototype = {
         var _this = this;
 
         /**************/
-        this.changePasswordSuccess = function (data) {
+        this.changePasswordSuccess = function (response) {
             _this.panel.setLoading(false);
-            if (data.errorMsg === '') {
+            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
                 Ext.getCmp(_this.id + 'fldOld').setValue(null);
                 Ext.getCmp(_this.id + 'fldNew1').setValue(null);
                 Ext.getCmp(_this.id + 'fldNew2').setValue(null);
-                Ext.getCmp(_this.id + 'labelPass').update('<span class="info">' + data.result[0].msg + '</span>', false);
+                Ext.getCmp(_this.id + 'labelPass').update('<span class="info">' + 'OK' + '</span>', false);
             } else {
-                Ext.getCmp(_this.id + 'labelPass').update('<span class="err">' + data.errorMsg + '</span>', false);
+                Ext.getCmp(_this.id + 'labelPass').update('<span class="err">' + response.response[0].errorMsg + '</span>', false);
             }
         };
-        this.changeEmailSuccess = function (data) {
+        this.changeEmailSuccess = function (response) {
             _this.panel.setLoading(false);
-            if (data.errorMsg === '') {
+            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
                 Ext.getCmp(_this.id + 'fldEmail').setValue(null);
                 Ext.getCmp(_this.id + 'fldEmail').setFieldLabel('e-mail', false);
-                Ext.getCmp(_this.id + 'labelPass').update('<span class="info">' + data.result[0].msg + '</span>', false);
+                Ext.getCmp(_this.id + 'labelPass').update('<span class="info">' + 'OK' + '</span>', false);
             } else {
-                Ext.getCmp(_this.id + 'labelPass').update('<span class="err">' + data.errorMsg + '</span>', false);
+                Ext.getCmp(_this.id + 'labelPass').update('<span class="err">' + response.response[0].errorMsg + '</span>', false);
             }
         };
         /**************/
@@ -15683,8 +13436,8 @@ ProfileWidget.prototype = {
 //        console.log(this.id + ' CREATING PANEL');
 
         var labelPass = Ext.create('Ext.Component', {
+            width: 200,
             id: this.id + 'labelPass',
-            margin: '10 0 10 105',
             html: 'Modify your password or email.'
         });
         var changePasswordForm = Ext.create('Ext.form.Panel', {
@@ -15724,7 +13477,6 @@ ProfileWidget.prototype = {
                         change: this.checkpass
                     }
                 },
-                labelPass,
                 {
                     xtype: 'button',
                     text: 'Change', margin: '0 0 0 105',
@@ -15766,7 +13518,7 @@ ProfileWidget.prototype = {
             width: 350,
             border: false,
             layout: 'accordion',
-            items: [ changePasswordForm, changeEmailForm],
+            items: [changePasswordForm, changeEmailForm],
             listeners: {
                 tabchange: function () {
                     _this.clearAllFields();
@@ -15788,9 +13540,11 @@ ProfileWidget.prototype = {
                 items: [profilePanel],
                 bbar: {
                     layout: {
-                        pack: 'center'
+                        pack: 'start'
                     },
                     items: [
+                        labelPass,
+                        '->',
                         {
                             text: 'Close',
                             handler: function () {
@@ -15810,12 +13564,12 @@ ProfileWidget.prototype = {
     },
 
     getOldPassword: function () {
-        return $.sha1(Ext.getCmp(this.id + 'fldOld').getValue());
+        return CryptoJS.SHA1(Ext.getCmp(this.id + 'fldOld').getValue()).toString();
     },
     getNewPassword: function () {
-        return $.sha1(Ext.getCmp(this.id + 'fldNew1').getValue());
+        return CryptoJS.SHA1(Ext.getCmp(this.id + 'fldNew1').getValue()).toString();
     },
-    getLogin: function () {
+    getEmail: function () {
         return Ext.getCmp(this.id + 'fldEmail').getValue();
     },
     clearAllFields: function () {
@@ -15827,24 +13581,37 @@ ProfileWidget.prototype = {
     },
     changeEmail: function () {
         if (this.checkemail()) {
-            OpencgaManager.changeEmail({
-                accountId: $.cookie('bioinfo_account'),
-                sessionId: $.cookie('bioinfo_sid'),
-                new_email: this.getLogin(),
-                success: this.changeEmailSuccess
+            OpencgaManager.users.req({
+                path: {
+                    id: Cookies('bioinfo_user'),
+                    action: 'change-email'
+                },
+                query: {
+                    nemail: this.getEmail(),
+                    sid: Cookies('bioinfo_sid')
+                },
+                request: {
+                    success: this.changeEmailSuccess
+                }
             });
             this.panel.setLoading('Waiting for the server to respond...');
         }
     },
     changePassword: function () {
         if (this.checkpass()) {
-            OpencgaManager.changePassword({
-                accountId: $.cookie('bioinfo_account'),
-                sessionId: $.cookie('bioinfo_sid'),
-                old_password: this.getOldPassword(),
-                new_password1: this.getNewPassword(),
-                new_password2: this.getNewPassword(),
-                success: this.changePasswordSuccess
+            OpencgaManager.users.req({
+                path: {
+                    id: Cookies('bioinfo_user'),
+                    action: 'change-password'
+                },
+                query: {
+                    password: this.getOldPassword(),
+                    npassword: this.getNewPassword(),
+                    sid: Cookies('bioinfo_sid')
+                },
+                request: {
+                    success: this.changePasswordSuccess
+                }
             });
             this.panel.setLoading('Waiting for the server to respond...');
         }
@@ -17233,7 +15000,7 @@ ResultWidget.prototype = {
     _createGenomeViewer: function (target) {
         var _this = this;
         var genomeViewer = new GenomeViewer({
-            cellBaseHost: 'https://www.ebi.ac.uk/cellbase/webservices/rest',
+            cellBaseHost: 'http://bioinfo.hpc.cam.ac.uk/cellbase/webservices/rest',
             cellBaseVersion: 'v3',
             target: target,
             width: $(target).width(),
@@ -17505,7 +15272,6 @@ ResultWidget.prototype = {
                 }
             });
         }
-
         return div;
     },
 
@@ -18182,939 +15948,32 @@ UploadWidget.prototype.uploadFailed = function (response) {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function AttributeManagerIDB(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeManager');
-    this.dbName = 'AttributeManager';
-
-    this._deleteDatabase();
-    this._createDatabase();
-};
-
-AttributeManagerIDB.prototype = {
-    _createDatabase: function () {
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event)
-        };
-        openRequest.onsuccess = function (event) {
-            console.log(event)
-        };
-
-        openRequest.onupgradeneeded = function (event) {
-            var db = event.target.result;
-
-            // Create an objectStore to hold information about our customers. We're
-            // going to use "ssn" as our key path because it's guaranteed to be
-            // unique.
-            var attributesObjectStore = db.createObjectStore("attribute", { autoIncrement: true });
-            var attributeNameIdObjectStore = db.createObjectStore("attributeNameId", { autoIncrement: true });
-
-            // Create an index to search customers by name. We may have duplicates
-            // so we can't use a unique index.
-            attributesObjectStore.createIndex("name", "name", { unique: false });
-            attributesObjectStore.createIndex("attrId", "attrId", { unique: false });
-            attributeNameIdObjectStore.createIndex("name", "name", { unique: true });
-        };
-    },
-    _deleteDatabase: function () {
-        // delete database
-        var deleteRequest = indexedDB.deleteDatabase(this.dbName);
-        deleteRequest.onsuccess = function (event) {
-            console.log(event)
-        };
-        deleteRequest.onerror = function (event) {
-            console.log(event)
-        };
-    },
-
-    addAttribute: function (vertices, name, type, defaultValue) {
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event)
-        };
-        openRequest.onsuccess = function (event) {
-            var db = openRequest.result;
-            var transaction = db.transaction(["attribute", "attributeNameId"], "readwrite");
-            var attributesObjectStore = transaction.objectStore("attribute");
-            var attributeNameIdObjectStore = transaction.objectStore("attributeNameId");
-
-            var addAttribute = attributeNameIdObjectStore.add({
-                name: name,
-                type: type
-            });
-
-            addAttribute.onsuccess = function (event) {
-                var attributeKey = event.target.result;
-                for (var i = 0; i < vertices.length; i++) {
-                    var vertex = vertices[i];
-                    attributesObjectStore.add({
-                        name: vertex.name,
-                        attrId: attributeKey,
-                        value: defaultValue
-                    });
-                }
-            };
-        };
-    },
-    removeAttribute: function (name) {
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event);
-        };
-        openRequest.onsuccess = function (event) {
-
-            var db = openRequest.result;
-            var transaction = db.transaction(["attribute", "attributeNameId"], "readwrite");
-
-
-            var attributesObjectStore = transaction.objectStore("attribute");
-            var attributeNameIdObjectStore = transaction.objectStore("attributeNameId");
-
-
-            var index = attributeNameIdObjectStore.index("name");
-            index.getKey(name).onsuccess = function (event) {
-                var attributeKey = event.target.result
-                attributeNameIdObjectStore.delete(attributeKey);
-
-
-                var attrIdIndex = attributesObjectStore.index("attrId");
-                var singleKeyRange = IDBKeyRange.only(attributeKey);
-                attrIdIndex.openKeyCursor(singleKeyRange).onsuccess = function (event) {
-                    var cursor = event.target.result;
-                    console.log(cursor)
-                    if (cursor) {
-                        attributesObjectStore.delete(cursor.primaryKey);
-                        cursor.continue();
-                    }
-                };
-            };
-
-        };
-    },
-    getVertexAttributes: function (vertex,success) {
-        var attributes = {};
-
-        var openRequest = indexedDB.open(this.dbName);
-        openRequest.onerror = function (event) {
-            console.log(event);
-        };
-        openRequest.onsuccess = function (event) {
-
-            var db = openRequest.result;
-            var transaction = db.transaction(["attribute", "attributeNameId"]);//read
-
-            var attributesObjectStore = transaction.objectStore("attribute");
-            var attributeNameIdObjectStore = transaction.objectStore("attributeNameId");
-
-
-            var index = attributesObjectStore.index("name");
-            var singleKeyRange = IDBKeyRange.only(vertex.name);
-            index.openCursor(singleKeyRange).onsuccess = function (event) {
-                var cursor = event.target.result;
-                if (cursor) {
-                    var attrId = event.target.result.value.attrId;
-                    var value = event.target.result.value.value;
-                    attributeNameIdObjectStore.get(attrId).onsuccess = function (event) {
-                        var attr = event.target.result.name;
-                        attributes[attr] = value;
-                    };
-                    cursor.continue();
-                } else {
-                    success(attributes);
-                }
-
-            }
-        };
-
-    }
-
-}
-
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function AttributeManagerStore(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('AttributeManagerStore');
-
-    this.store = Ext.create('Ext.data.Store', {
-//        groupField: 'selected',
-        pageSize: 50,
-        proxy: {
-            type: 'memory'
-        },
-        fields: [],
-//        model: this.model,
-        listeners: {
-            update: function (st, record, operation, modifiedFieldNames) {
-                if (modifiedFieldNames && modifiedFieldNames[0] != 'Selected') {
-                    console.log("AttributeManagerStore - update")
-                    _this.trigger('change:recordsAttribute', {records: [record], attributeName: modifiedFieldNames[0], sender: this});
-                }
-            }
-//            remove: function () {
-//                console.log("AttributeManagerStore - remove")
-//                _this.trigger('change:data', {sender: this});
-//            },
-//            add: function () {
-//                console.log("AttributeManagerStore - add")
-//                _this.trigger('change:data', {sender: this});
-//            }
-        }
-    });
-
-    this.columnsGrid = [];
-    this.attributes = [];
-    this.filters = {};
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.on(this.handlers);
-
-    this._processAttribute({name: "Selected", type: "boolean", defaultValue: false});
-    for (var i = 0; i < this.attributes.length; i++) {
-        this._processAttribute(this.attributes[i]);
-    }
-};
-
-AttributeManagerStore.prototype = {
-    containsAttribute: function (attribute) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name == attribute.name) return true; //if exists one with the same name
-        }
-        return false;
-    },
-    isAttributeLocked: function (attributeName) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name == attributeName && this.attributes[i].locked === true) {
-                return true;
-            }
-        }
-        return false;
-    },
-    addAttribute: function (attribute, fireChangeEvent) {
-        if (this.containsAttribute(attribute)) {
-            return false;
-        }
-        this.attributes.push(attribute);
-        this._processAttribute(attribute);
-        if (fireChangeEvent !== false) {
-            console.log('addAttribute - change:attributes');
-            this.trigger('change:attributes', {sender: this});
-        }
-        return true;
-    },
-    _processAttribute: function (attribute) {
-        attribute.id = attribute.name;
-        /** Id column is not editable **/
-        var editor;
-        if (attribute.name !== 'id') {
-            editor = {xtype: 'textfield', allowBlank: true};
-        }
-
-        var columnConfig = {
-            "text": attribute.name,
-            "dataIndex": attribute.name,
-            "editor": editor
-        };
-
-        if (attribute.name !== 'Selected') {
-            this.columnsGrid.push(columnConfig);
-        }
-
-        // set model fields
-        this.store.setFields(this.attributes);
-    },
-    addAttributes: function (attributes) {
-        for (var i = 0; i < attributes.length; i++) {
-            this.addAttribute(attributes[i], false);
-        }
-        console.log('addAttributes - change:attributes');
-        this.trigger('change:attributes', {sender: this});
-    },
-    removeAttribute: function (attributeName) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name === attributeName &&
-                this.attributes[i].locked !== true &&
-                this.attributes[i].name !== 'Selected') {
-                this.columnsGrid.splice(i, 1);
-                this.attributes.splice(i, 1);
-
-                this.store.setFields(this.attributes);
-                console.log('removeAttribute - change:attributes');
-                this.trigger('change:attributes', {sender: this});
-                return true;
-            }
-        }
-        return false;
-    },
-    updateAttribute: function () {
-        console.log('TODO');
-    },
-    getAttribute: function (attributeName) {
-        for (var i = 0; i < this.attributes.length; i++) {
-            if (this.attributes[i].name == attributeName) {
-                return this.attributes[i];
-            }
-        }
-    },
-    getAttributeNames: function () {
-        var nameList = [];
-        for (var i = 0; i < this.attributes.length; i++) {
-            nameList.push(this.attributes[i].name);
-        }
-        return nameList;
-    },
-    // END attribute methods
-
-
-    setRecordAttributeById: function (id, attributeName, value) {
-        if (this.isAttributeLocked(attributeName)) {
-            return false;
-        }
-        var record = this.store.getById(id);
-        if (record) {
-            record.set(attributeName, value);
-//            record.commit();
-        }
-    },
-    setRecordAttributeByIds: function (records) {
-        this.store.suspendEvents();
-//        console.time('AttributeManagerStore.setRecordAttributeByIds');
-        for (var i = 0; i < records.length; i++) {
-            var recordObject = records[i];
-            if (!this.isAttributeLocked(recordObject.attributeName)) {
-                var record = this.store.getById(recordObject.id);
-                if (record) { // if exists a row with this name
-                    record.beginEdit();
-                    for (var attributeName in recordObject) {
-                        if (attributeName !== 'id') {
-                            record.set(attributeName, recordObject[attributeName]);
-                        }
-                    }
-//                    record.commit();
-                    record.endEdit();
-                }
-            }
-        }
-//        console.timeEnd('AttributeManagerStore.setRecordAttributeByIds');
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-        for (var attributeName in recordObject) {
-            this.trigger('change:recordsAttribute', {records: records, attributeName: attributeName, sender: this});
-        }
-    },
-    setRecordsAttribute: function (records, attributeName, value) {
-        if (this.isAttributeLocked(attributeName)) {
-            return false;
-        }
-        this.store.suspendEvents();
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            record.set(attributeName, value);
-//            record.commit();
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-        this.trigger('change:recordsAttribute', {records: records, attributeName: attributeName, sender: this});
-    },
-//    addRecord: function (data, append) {
-//        this.store.loadData(data, append);
-//    },
-    addRecord: function (data) {
-        this.store.add(data);
-    },
-    removeRecordById: function (id) {
-        var record = this.store.getById(id);
-        if (record) {
-            this.store.remove(record);
-        }
-    },
-    getValueByAttributeAndId: function (id, attribute) {
-        var record = this.store.getById(id);
-        if (record) {
-            var value = record.get(attribute);
-            if (value) {
-                return value;
-            } else {
-                return '';
-            }
-        }
-    },
-    getOrderedIdsByAttribute: function (attributeName) {
-        var records = this.store.query().items;
-        var values = [];
-
-        var type = 'float';
-        var checkType = true;
-
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            var id = record.get('id');
-            var value = record.get(attributeName);
-            if (!value) {
-                value = '';
-            }
-
-            /* detect number or string */
-            if (checkType) {
-                var parseResult = parseFloat(value);
-                if (isNaN(parseResult)) {
-                    var type = 'string';
-                    checkType = false;
-                }
-            }
-            /* - - - - - - - - - - - - */
-
-            values.push({id: id, value: value});
-        }
-        switch (type) {
-            case 'float':
-                values.sort(function (a, b) {
-                    return a.value - b.value;
-                });
-                break;
-            /* string */
-            default:
-                values.sort(function (a, b) {
-                    return a.value.localeCompare(b.value);
-                });
-        }
-
-        return values;
-    },
-    getIdsByAttributeValue: function (attribute, value) {
-        var dupHash = {};
-        var ids = [];
-        var mixedCollection = this.store.query(attribute, value, false, false, true);
-        for (var i = 0; i < mixedCollection.items.length; i++) {
-            var item = mixedCollection.items[i];
-            var id = item.data["id"];
-            if (dupHash[id] !== true) {
-                ids.push(item.data["id"]);
-            }
-            dupHash[id] = true;
-        }
-        return ids;
-    },
-    eachRecord: function (eachFunction) {
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            eachFunction(record);
-        }
-    },
-    getRecords: function () {
-        var records = this.store.query().items;
-        return records;
-    },
-    getValuesByAttribute: function (attributeName) {
-        var records = this.store.query().items;
-        var values = [];
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            var value = record.get(attributeName);
-            var id = record.get('id');
-            if (value != null && value !== '') {
-                values.push({value: value, id: id});
-            }
-        }
-        return values;
-    },
-    getSelectedValuesByAttribute: function (attributeName) {
-        var records = this.store.query().items;
-        var values = [];
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            var value = record.get(attributeName);
-            var id = record.get('id');
-            var selected = record.get('Selected');
-            if (selected === true && value != null && value !== '') {
-                values.push({value: value, id: id})
-            }
-        }
-        return values;
-    },
-//    getRecordsByItem: function (items) {
-//        var records = [];
-//        for (var i = 0; i < items.length; i++) {
-//            var item = items[i];
-//            var record = this.store.findRecord('id', item.id);
-//            records.push(record);
-//        }
-//        return records;
-//    },
-    selectByItems: function (items) {
-        this.store.suspendEvents();
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var record = this.store.getById(item.id);
-            if (record) {
-                record.set('Selected', true);
-//                record.commit();
-            }
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    deselectByItems: function (items) {
-        this.store.suspendEvents();
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var record = this.store.getById(item.id);
-            if (record) {
-                record.set('Selected', false);
-//                record.commit();
-            }
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    selectAll: function () {
-        this.store.suspendEvents();
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            record.set('Selected', true);
-//            record.commit();
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    deselectAll: function () {
-        this.store.suspendEvents();
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            record.set('Selected', false);
-//            record.commit();
-        }
-        this.store.resumeEvents();
-        this.store.fireEvent('refresh');
-    },
-    clean: function () {
-        this.attributes = [];
-        this.columnsGrid = [];
-        this.attributes = [];
-        this.filters = {};
-
-        this.store.removeAll();
-        this._processAttribute({name: "Selected", type: "boolean", defaultValue: false});
-        this.store.setFields(this.attributes);
-
-        console.log('clean - change:attributes');
-        this.trigger('change:attributes', {sender: this});
-    },
-    getAsFile: function (separator) {
-        if (typeof separator === 'undefined') {
-            separator = '\t';
-        }
-        // Attribute names
-        var text = '';
-
-        text += '#';
-        for (var i = 0; i < this.attributes.length; i++) {
-            var attrName = this.attributes[i].name;
-            if (attrName !== 'Selected') {
-                text += attrName;
-            }
-            if ((i + 1) >= this.attributes.length) {
-                break;
-            }
-            text += separator;
-        }
-        text += '\n';
-
-        var records = this.store.query().items;
-        for (var i = 0; i < records.length; i++) {
-            var record = records[i];
-            for (var j = 0; j < this.attributes.length; j++) {
-                var attrName = this.attributes[j].name;
-                if (attrName !== 'Selected') {
-                    text += record.get(attrName);
-                }
-                if ((j + 1) >= this.attributes.length) {
-                    break;
-                }
-                text += separator;
-            }
-            text += '\n';
-        }
-        return text;
-    },
-    //save
-    toJSON: function () {
-        var json = {};
-        json.attributes = this.attributes;
-        json.filters = this.filters;
-        json.data = [];
-
-        // add row values to data matrix
-        var records = this.store.query().items;
-        for (var j = 0; j < records.length; j++) {
-            json.data.push([]);
-            for (var i = 0; i < this.attributes.length; i++) {
-                json.data[j].push(records[j].getData()[this.attributes[i].name]);
-            }
-        }
-        return json;
-    },
-    loadJSON: function () {
-
-    }
-}
-
-// TODO CHECK
-AttributeManagerStore.prototype.updateAttribute = function (oldName, newName, type, defaultValue) {
-    for (var i = 0; i < this.attributes.length; i++) {
-        if (oldName != newName && this.attributes[i].name == newName) return false;
-    }
-
-    for (var i = 0; i < this.attributes.length; i++) {
-        if (this.attributes[i].name == oldName) {
-            if (oldName != newName) {
-                this.columnsGrid[i].text = newName;
-                this.columnsGrid[i].dataIndex = newName;
-                this.attributes[i].name = newName;
-            }
-            this.attributes[i].type = type;
-            this.attributes[i].defaultValue = defaultValue;
-
-            this.store.setFields(this.attributes);
-
-            return true;
-        }
-    }
-    return false;
-};
-
-
-//-------------------------------modifyAttributeOfRows---------------------------//
-//Descripcion:
-//Modifica un atributo del conjunto de filas seleccionadas, poniendole el mismo 
-//valor en todas. 
-//Parametros: 
-//selectRows: (array de objetos) informacion de las filas seleccionadas
-//attributeModify: (string) atributo que se desea modificar
-//value: (string) valor nuevo de ese atributo
-//-------------------------------------------------------------------------------//
-
-
-//-----------------------removeRow----------------------------------------------//
-//Descripcion:
-//Borra una fila identificada a partir del valor de un campo
-//Parametros:
-//attribute: (string) campo en el que buscar
-//value: (string) nombre del campo que buscar
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.removeRow = function (attribute, value) {
-    //obtenemos la posicion del dato y lo borramos
-    this.store.removeAt(this.store.find(attribute, value));
-};
-
-
-//-----------------------removeRows----------------------------------------------//
-//Descripcion:
-//Borra todas las filas que tengan el valor indicado en el atributo indicado
-//Parametros:
-//attribute: (string) campo en el que buscar
-//value: (string) nombre del campo que buscar
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.removeRows = function (attribute, value) {
-    //obtenemos la posicion del dato y lo borramos
-    this.store.removeAt(this.store.find(attribute, value));
-
-    var i = -1;
-
-    while (this.store.find(attribute, value) != -1) {
-        //cada vez busca a partir de donde se quedó la ultima vez
-        i = this.store.find(attribute, value, i + 1);
-        this.store.removeAt(i);
-
-        console.log(i);
-    }
-};
-
-/**
- * Remove all stored attributes.
- */
-AttributeManagerStore.prototype.removeAll = function () {
-    this.store.removeAll(true);
-};
-
-
-//-----------------------getNumberOfRows----------------------------------------//
-//Descripcion:
-//Cuenta cuantos datos tenemos
-//Parametros: (ninguno)
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getNumberOfRows = function () {
-    return this.store.count();
-};
-
-
-//-----------------------getUniqueByAttribute-----------------------------//
-//Descripcion:
-//Devuelve los diferentes datos que hay en un atributo
-//Parametros:
-//attribute: (string) nombre del atributo 
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getUniqueByAttribute = function (attribute) {
-    return this.store.collect(attribute, false, true);
-};
-
-
-//-----------------------getPositionOfRow---------------------------------------//
-//Descripcion:
-//Devuelve la posicion de un dato identificado un atributo y su valor
-//Parametros:
-//attribute: (string) atributo por la que queremos buscar
-//value: (string) valor del atributo por la que queremos buscar
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getPositionOfRow = function (attribute, value) {
-    var aux = this.store.find(attribute, value);
-    return(aux);
-};
-
-
-//-----------------------getRowByIndex------------------------------------------//
-//Descripcion:
-//Muestra el dato que se encuentran en el indice indicado
-//Parametros:
-//index:(number) index del dato del que queremos obtener informacion
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getRowByIndex = function (index) {
-    var aux = this.store.getAt(index);
-    console.log(aux.data);
-};
-
-
-//-----------------------getRowRangeIndex---------------------------------------//
-//Descripcion:
-//Muestra los datos que se encuentran entre los dos indices que le pasamos
-//Parametros:
-//startIndex: (number) index por el cual empezamos
-//endIndex: (number) index por el cual acabamos
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.getRowRangeIndex = function (startIndex, endIndex) {
-    var aux = this.store.getRange(startIndex, endIndex);
-
-    for (var i = 0; i < aux.length; i++) {
-        console.log(aux[i].data);
-    }
-};
-
-
-AttributeManagerStore.prototype.addFilter = function (filterName, attribute, value) {
-    if (!this.filters[filterName] && attribute != null && value != null) {
-        this.filters[filterName] = {"active": false, "attribute": attribute, "value": value};
-        this.enableFilter(filterName);
-        return true;
-    }
-    return false;
-};
-
-AttributeManagerStore.prototype.removeFilter = function (filterName) {
-    if (this.filters[filterName]) {
-        this.disableFilter(filterName);
-        delete this.filters[filterName];
-        return true;
-    }
-    return false;
-};
-
-AttributeManagerStore.prototype.enableFilter = function (filterName) {
-    this.filters[filterName].active = true;
-
-    //this.store.filter(this.filters[filterName].attribute, this.filters[filterName].value); //filter for exactly match
-    var reg = new RegExp("" + this.filters[filterName].value);
-    this.store.filter(Ext.create('Ext.util.Filter', {property: this.filters[filterName].attribute, value: reg, root: 'data'}));
-};
-
-AttributeManagerStore.prototype.disableFilter = function (filterName) {
-    this.filters[filterName].active = false;
-
-    this.store.clearFilter(false);
-    for (var filter in this.filters) {
-        if (this.filters[filter].active) {
-            //this.store.filter(this.filters[filterName].attribute, this.filters[filterName].value); //para filtrar cuando este escrito el nombre entero bien
-            var reg = new RegExp("" + this.filters[filter].value);
-            this.store.filter(Ext.create('Ext.util.Filter', {property: this.filters[filter].attribute, value: reg, root: 'data'}));
-        }
-    }
-};
-
-//-----------------------checkFilters-------------------------------------------//
-//Descripcion:
-//Comprueba si hay aplicado algun filtro
-//Parametros: (ninguno)
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.checkFilters = function () {
-    console.log(this.store.isFiltered());
-    return this.store.isFiltered();
-};
-
-
-//-----------------------clearFilters-------------------------------------------//
-//Descripcion:
-//Quita los filtros aplicados a los datos
-//Parametros: (ninguno)
-//------------------------------------------------------------------------------//
-AttributeManagerStore.prototype.clearFilters = function () {
-    this.store.clearFilter(false);
-};
-
-
-AttributeManagerStore.prototype.loadJSON = function (json) {
-    this.attributes = [];
-    this.columnsGrid = [];
-    console.log(json);
-    this.filters = json.filters;
-
-    // add attributes
-    for (var i = 0; i < json.attributes.length; i++) {
-        this.addAttribute(json.attributes[i].name, json.attributes[i].type, json.attributes[i].defaultValue);
-    }
-
-    // add rows
-    this.addRows(json.data, false);
-};
-
-AttributeManagerStore.prototype.setName = function (vertexId, newName) {
-    var register = this.store.getAt(this.store.find("id", vertexId));
-    register.set("Name", newName);
-    register.commit();
-};
-
-AttributeManagerStore.prototype.setAttributeByName = function (name, attribute, value) {
-    var register = this.store.getAt(this.store.find("Name", name));
-    if (register) { // if exists a row with this name
-        register.set(attribute, value);
-        register.commit();
-    }
-};
-
-
-AttributeManagerStore.prototype.exportToTab = function (columns, clearFilter) {
-    if (clearFilter) {
-        this.store.clearFilter(false);
-    }
-
-    var colNames = [];
-    var headerLine = "", typeLine = "", defValLine = "";
-    for (var i = 0; i < columns.length; i++) {
-        headerLine += columns[i].inputValue + "\t";
-        colNames.push(columns[i].inputValue);
-    }
-
-    for (var i = 0; i < colNames.length; i++) {
-        for (var j = 0; j < this.attributes.length; j++) {
-            if (colNames[i] == this.attributes[j].name) {
-                typeLine += this.attributes[j].type + "\t";
-                defValLine += this.attributes[j].defaultValue + "\t";
-                break;
-            }
-        }
-    }
-
-    var output = "";
-    output += "#" + typeLine + "\n";
-    output += "#" + defValLine + "\n";
-    output += "#" + headerLine + "\n";
-
-    var lines = this.store.getRange();
-    for (var j = 0; j < lines.length; j++) {
-        for (var i = 0; i < colNames.length; i++) {
-            output += lines[j].getData()[colNames[i]] + "\t";
-        }
-        output += "\n";
-    }
-
-    if (clearFilter) {
-        for (var filter in this.filters) {
-            if (this.filters[filter].active) {
-                //this.store.filter(this.filters[filterName].attribute, this.filters[filterName].value); //para filtrar cuando este escrito el nombre entero bien
-                var reg = new RegExp("" + this.filters[filter].value);
-                this.store.filter(Ext.create('Ext.util.Filter', {property: this.filters[filter].attribute, value: reg, root: 'data'}));
-            }
-        }
-    }
-
-    return output;
-};
-
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
 function CircosVertexRenderer(args) {
     var _this = this;
-    _.extend(this, Backbone.Events);
-
-
-    this.complex = false;
 
     //defaults
     this.shape = 'circle';
     this.size = 30;
-    this.color = '#9fc6e7';
-    this.strokeSize = 1;
-    this.strokeColor = '#9fc6e7';
+    this.color = '#FAFAFA';
+    this.strokeSize = 2;
+    this.strokeColor = '#888888';
     this.opacity = 0.8;
     this.labelSize = 12;
     this.labelColor = '#111111';
     this.labelPositionX = 0;
     this.labelPositionY = 0;
     this.labelText = '';
+    this.area = 1;
+    this.strokeArea = 1;
+    this.xAttribute = 'x';
+    this.yAttribute = 'y';
 
-    this.sliceArea = 1;
 
     this.pieSlices = [
-//        {size: this.size, area: this.sliceArea, color: this.color, labelSize: this.labelSize, labelOffset: 0}
+        //        {size: this.size, area: this.sliceArea, color: this.color, labelSize: this.labelSize, labelOffset: 0}
     ];
     this.donutSlices = [
-//        {size: this.strokeSize, area: this.sliceArea, color: this.strokeColor, labelSize: this.labelSize, labelOffset: 0}
+        //        {size: this.strokeSize, area: this.sliceArea, color: this.strokeColor, labelSize: this.labelSize, labelOffset: 0}
     ];
 
     this.shapeEl;
@@ -19135,112 +15994,271 @@ function CircosVertexRenderer(args) {
     this.labelY = 0;
 
     //set instantiation args, must be last
-    _.extend(this, args);
-
-
+    for (var prop in args) {
+        if (hasOwnProperty.call(args, prop)) {
+            if (args[prop] != null) {
+                if (!isNaN(args[prop])) {
+                    this[prop] = parseFloat(args[prop]);
+                } else {
+                    this[prop] = args[prop];
+                }
+            }
+        }
+    }
 }
 
 
 CircosVertexRenderer.prototype = {
-    get: function (attr) {
+    get: function(attr) {
         return this[attr];
     },
-    set: function (attr, value, update) {
+    set: function(attr, value, update) {
+        if (!isNaN(value)) {
+            value = parseFloat(value);
+        }
         this[attr] = value;
-        switch (attr) {
-            case 'opacity':
-                this.groupEl.setAttribute('opacity', this.opacity);
-                break;
-            case "labelSize":
-            case "labelPositionY":
-            case "labelPositionX":
-                this.labelEl.setAttribute('font-size', this.labelSize);
-                this._updateLabelElPosition();
-                this.labelEl.setAttribute('x', this.labelX);
-                this.labelEl.setAttribute('y', this.labelY);
-                break;
-            case "shape":
-            case 'size':
-            case 'color':
-            case 'strokeSize':
-            case 'strokeColor':
-            default:
-                if (update !== false) {
-                    this.update();
-                }
+
+        if (this._checkListProperties()) {
+            this.complex = true;
+            this.update();
+        } else {
+            this.complex = false;
+            switch (attr) {
+                case 'opacity':
+                    this.opacity = parseFloat(this.opacity);
+                    this.groupEl.setAttribute('opacity', this.opacity);
+                    break;
+                case "labelSize":
+                case "labelPositionY":
+                case "labelPositionX":
+                    this.labelPositionX = parseFloat(this.labelPositionX);
+                    this.labelPositionY = parseFloat(this.labelPositionY);
+                    this.labelSize = parseFloat(this.labelSize);
+                    this._renderLabelEl();
+                    break;
+                case "shape":
+                case 'color':
+                case 'strokeSize':
+                case 'size':
+                case 'strokeColor':
+                case 'area':
+                case 'strokeArea':
+                default:
+                    this.size = parseInt(this.size);
+                    this.strokeSize = parseInt(this.strokeSize);
+                    this.area = parseInt(this.area);
+                    this.strokeArea = parseInt(this.strokeArea);
+                    if (update !== false) {
+                        this.update();
+                    }
+            }
         }
 
     },
-    setConfig: function (args) {
-        _.extend(this, args);
+    _checkListProperties: function() {
+        /** Detect array values **/
+        var minPieLength = 0;
+        var minDonutLength = 0;
+        if (Array.isArray(this.color)) {
+            if (minPieLength == 0) {
+                minPieLength = this.color.length;
+            }
+        }
+        if (Array.isArray(this.size)) {
+            if (minPieLength == 0 || minPieLength == 1) {
+                minPieLength = this.size.length;
+            }
+            if (this.size.length != 1 && this.size.length < minPieLength) {
+                minPieLength = this.size.length;
+            }
+        }
+        if (Array.isArray(this.area)) {
+            if (minPieLength == 0 || minPieLength == 1) {
+                minPieLength = this.area.length;
+            }
+            if (this.area.length != 1 && this.area.length < minPieLength) {
+                minPieLength = this.area.length;
+            }
+        }
+        if (Array.isArray(this.strokeColor)) {
+            if (minDonutLength == 0) {
+                minDonutLength = this.strokeColor.length;
+            }
+        }
+        if (Array.isArray(this.strokeSize)) {
+            if (minPieLength == 0 || minPieLength == 1) {
+                minPieLength = this.strokeSize.length;
+            }
+            if (this.strokeSize.length != 1 && this.strokeSize.length < minPieLength) {
+                minPieLength = this.strokeSize.length;
+            }
+        }
+        if (Array.isArray(this.strokeArea)) {
+            if (minPieLength == 0 || minPieLength == 1) {
+                minPieLength = this.strokeArea.length;
+            }
+            if (this.strokeArea.length != 1 && this.strokeArea.length < minPieLength) {
+                minPieLength = this.strokeArea.length;
+            }
+        }
+        this.pieSlices = [];
+        var slice;
+        if (minPieLength > 0) {
+            for (var i = 0; i < minPieLength; i++) {
+                slice = {};
+                if (Array.isArray(this.color)) {
+                    if (this.color.length == 1) {
+                        slice.color = this.color[0];
+                    } else {
+                        slice.color = this.color[i];
+                    }
+                } else {
+                    slice.color = this.color;
+                }
+                if (Array.isArray(this.size)) {
+                    if (this.size.length == 1) {
+                        slice.size = this.size[0];
+                    } else {
+                        slice.size = this.size[i];
+                    }
+                } else {
+                    slice.size = this.size;
+                }
+                if (Array.isArray(this.area)) {
+                    if (this.area.length == 1) {
+                        slice.area = this.area[0];
+                    } else {
+                        slice.area = this.area[i];
+                    }
+                } else {
+                    slice.area = this.area;
+                }
+                slice.labelSize = this.labelSize;
+                slice.labelOffset = 0;
+                this.pieSlices.push(slice);
+            }
+        }
+        this.donutSlices = [];
+        if (minDonutLength > 0) {
+            for (var i = 0; i < minDonutLength; i++) {
+                slice = {};
+                if (Array.isArray(this.strokeColor)) {
+                    if (this.strokeColor.length == 1) {
+                        slice.color = this.strokeColor[0];
+                    } else {
+                        slice.color = this.strokeColor[i];
+                    }
+                } else {
+                    slice.color = this.strokeColor;
+                }
+                if (Array.isArray(this.strokeSize)) {
+                    if (this.strokeSize.length == 1) {
+                        slice.size = this.strokeSize[0];
+                    } else {
+                        slice.size = this.strokeSize[i];
+                    }
+                } else {
+                    slice.size = this.strokeSize;
+                }
+                if (Array.isArray(this.strokeArea)) {
+                    if (this.strokeArea.length == 1) {
+                        slice.size = this.strokeArea[0];
+                    } else {
+                        slice.area = this.strokeArea[i];
+                    }
+                } else {
+                    slice.area = this.strokeArea;
+                }
+                slice.labelSize = this.labelSize;
+                slice.labelOffset = 0;
+                this.donutSlices.push(slice);
+            }
+        }
+        if (this.pieSlices.length != 0 || this.donutSlices.length != 0) {
+            if (this.pieSlices.length == 0) {
+                this.pieSlices.push({
+                    color: this.color,
+                    size: this.size,
+                    area: this.area,
+                    labelSize: this.labelSize,
+                    labelOffset: 0
+                });
+            }
+            if (this.donutSlices.length == 0) {
+                this.donutSlices.push({
+                    color: this.strokeColor,
+                    size: this.strokeSize,
+                    area: this.strokeArea,
+                    labelSize: this.labelSize,
+                    labelOffset: 0
+                });
+            }
+            return true;
+        } else {
+            return false;
+        }
+        /** **/
     },
-    render: function (args) {
+    render: function(args) {
+
         this.targetEl = args.target;
-        this.vertex = args.vertex;
-        this.coords = args.coords;
-        this.labelText = this.vertex.id;
-        this._render();
+        //this.vertex = args.vertex;
+        //this.coords = args.coords;
+        this._setLabelText(this.vertex.id);
+
+        if (this._checkListProperties()) {
+            this.complex = true;
+            this._render();
+        } else {
+            this._render();
+        }
+
     },
-    remove: function () {
-        $(this.groupEl).remove();
+    remove: function() {
+        if (this.groupEl && this.groupEl.parentNode) {
+            this.groupEl.parentNode.removeChild(this.groupEl);
+        }
     },
-    update: function () {
+    update: function() {
         this.remove();
         this._render();
         console.log("update")
     },
-    updateComplex: function (slicesMap, defaults) {
-        this.shape = 'circle';
-        this.color = defaults['pieSlices'].color;
-        this.size = defaults['pieSlices'].size;
-        this.strokeColor = defaults['donutSlices'].color;
-        this.strokeSize = defaults['donutSlices'].size;
-
-        this.pieSlices = slicesMap['pieSlices'];
-        this.donutSlices = slicesMap['donutSlices'];
-        if (typeof this.pieSlices === 'undefined') {
-            this.pieSlices = [
-                {size: defaults['pieSlices'].size, area: defaults['pieSlices'].area, color: defaults['pieSlices'].color, labelSize: this.labelSize, labelOffset: 0}
-            ];
+    select: function(color) {
+        if (color) {
+            this.selectEl.setAttribute('fill', color);
         }
-        if (typeof this.donutSlices === 'undefined') {
-            this.donutSlices = [
-                {size: defaults['donutSlices'].size, area: defaults['donutSlices'].area, color: defaults['donutSlices'].color, labelSize: this.labelSize, labelOffset: 0}
-            ];
+        this.groupEl.insertBefore(this.selectEl, this.groupEl.firstChild);
+        if (this.groupEl && this.groupEl.parentNode) {
+            this.groupEl.parentNode.appendChild(this.groupEl);
         }
-        if (typeof slicesMap['pieSlices'] === 'undefined' && typeof slicesMap['donutSlices'] === 'undefined') {
-            this.update();
-        } else {
-            this.complex = true;
-            this.update();
-            this.complex = false;
-        }
-    },
-    select: function () {
-        $(this.groupEl).prepend(this.selectEl);
         this.selected = true;
     },
-    deselect: function () {
+    deselect: function() {
         this._removeSelect();
         this.selected = false;
     },
-    move: function (dispX, dispY) {
+    move: function() {
         this.groupEl.setAttribute('transform', "translate(" + [this.coords.x - this.mid, this.coords.y - this.mid].join(',') + ")");
     },
-    setLabelContent: function (text) {
-        this.labelText = text;
+    setLabelContent: function(text) {
+        if (text == null) {
+            text = '';
+        }
+        this._setLabelText(text);
         if (this.labelEl) {
-            this._updateLabelElPosition();
-            this.labelEl.setAttribute('x', this.labelX);
-            this.labelEl.setAttribute('y', this.labelY);
-            this.labelEl.textContent = this.labelText;
+            this._renderLabelEl();
         }
     },
-    getSize: function () {
-        this._updateDrawParameters();
+    getSize: function() {
+        if (this.complex) {
+            this._updateComplexDrawParameters();
+        } else {
+            this._updateDrawParameters();
+        }
         return this.figureSize;
     },
-    toJSON: function () {
+    toJSON: function() {
         return {
             shape: this.shape,
             size: this.size,
@@ -19253,37 +16271,62 @@ CircosVertexRenderer.prototype = {
             labelPositionX: this.labelPositionX,
             labelPositionY: this.labelPositionY,
             labelText: this.labelText,
+            area: this.area,
+            strokeArea: this.strokeArea,
             pieSlices: this.pieSlices,
-            donutSlices: this.donutSlices,
             donutSlices: this.donutSlices
         };
     },
 
     /* Private methods */
-    _updateDrawParameters: function () {
+    _setLabelText: function(text) {
+        this.labelText = text.toString();
+        this.labelLines = this.labelText.split(/\\n/);
+    },
+    _updateDrawParameters: function() {
         var midSize = (this.size + (this.strokeSize));
         this.mid = midSize / 2;
         this.figureSize = (this.size + (this.strokeSize * 2));
-        this._updateLabelElPosition();
     },
-    _updateComplexDrawParameters: function () {
-        var midSize = (this.size + (this.strokeSize));
-        this.mid = midSize / 2;
+    _updateComplexDrawParameters: function() {
+        //var midSize = (this.size + (this.strokeSize));
+        //this.mid = midSize / 2;
         this.maxPieSize = this._slicesMax(this.pieSlices);
         this.maxDonutSize = this._slicesMax(this.donutSlices);
         this.figureSize = (this.maxPieSize + (this.maxDonutSize * 2));
-        this._updateLabelElPosition();
+        this.mid = this.figureSize / 2;
     },
-    _updateLabelElPosition: function () {
-        var labelSize = this._textWidthBySize(this.labelText, this.labelSize);
-        this.labelX = this.labelPositionX + this.mid - (labelSize / 2);
-        this.labelY = this.labelPositionY + this.mid + this.labelSize / 3;
+    _textWidthBySize: function(text, pixelFontSize) {
+        return ((text.length * pixelFontSize / 2) + (text.length * pixelFontSize / 10)); //round up
     },
-    _textWidthBySize: function (text, pixelFontSize) {
-        return ((text.length * pixelFontSize / 2) + 0.5) | 0;//round up
+    _renderLabelEl: function() {
+        if (this.labelEl == null) {
+            this.labelEl = SVG.create("text", {
+                'network-type': 'vertex-label'
+            });
+        } else if (this.groupEl.contains(this.labelEl)) {
+            this.groupEl.removeChild(this.labelEl);
+        }
+        this.labelEl.setAttribute('font-size', this.labelSize);
+        this.labelEl.setAttribute('fill', this.labelColor);
+
+        this.labelEl.textContent = "";
+        var linesCount = this.labelLines.length;
+        var yStart = this.labelPositionY + this.mid + (this.labelSize / 3) - ((linesCount - 1) * this.labelSize / 2);
+        for (var i = 0; i < linesCount; i++) {
+            var line = this.labelLines[i];
+            var tspan = SVG.addChild(this.labelEl, "tspan", {
+                'network-type': 'vertex-label',
+                x: this.labelPositionX + this.mid - (this._textWidthBySize(line, this.labelSize) / 2),
+                y: yStart + (i * this.labelSize)
+            });
+            tspan.textContent = line;
+        }
+
+        this.groupEl.appendChild(this.labelEl);
     },
 
-    _drawSelectShape: function () {
+    _drawSelectShape: function() {
         if (this.complex === true) {
             this._drawSelectCircleShape();
         } else {
@@ -19303,7 +16346,7 @@ CircosVertexRenderer.prototype = {
             }
         }
     },
-    _drawSelectCircleShape: function () {
+    _drawSelectCircleShape: function() {
         this.selectEl = SVG.create("circle", {
             r: this.figureSize / 2 * 1.30,
             cx: this.mid,
@@ -19313,7 +16356,7 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _drawSelectEllipseShape: function () {
+    _drawSelectEllipseShape: function() {
         this.selectEl = SVG.create("ellipse", {
             cx: this.mid,
             cy: this.mid,
@@ -19324,7 +16367,7 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _drawSelectSquareShape: function () {
+    _drawSelectSquareShape: function() {
         this.selectEl = SVG.create("rect", {
             x: -this.mid * 0.3,
             y: -this.mid * 0.3,
@@ -19337,7 +16380,7 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _drawSelectRectangleShape: function () {
+    _drawSelectRectangleShape: function() {
         this.selectEl = SVG.create("rect", {
             x: -this.mid * 0.8,
             y: -this.mid * 0.3,
@@ -19350,10 +16393,12 @@ CircosVertexRenderer.prototype = {
             'network-type': 'select-vertex'
         });
     },
-    _removeSelect: function () {
-        $(this.groupEl).find('[network-type="select-vertex"]').remove();
+    _removeSelect: function() {
+        if (this.selectEl && this.selectEl.parentNode) {
+            this.selectEl.parentNode.removeChild(this.selectEl);
+        }
     },
-    _render: function () {
+    _render: function() {
         if (this.complex === true) {
             this._renderSlices();
             this._drawSelectShape();
@@ -19365,7 +16410,7 @@ CircosVertexRenderer.prototype = {
                 "transform": "translate(" + [this.coords.x - this.mid, this.coords.y - this.mid].join(',') + ")",
                 "cursor": "pointer",
                 opacity: this.opacity,
-                'network-type': 'vertex-svg'
+                'network-type': 'vertex-g'
             });
             switch (this.shape) {
                 case "circle":
@@ -19417,27 +16462,20 @@ CircosVertexRenderer.prototype = {
                     break;
             }
         }
-        this.labelEl = SVG.addChild(this.groupEl, "text", {
-            "x": this.labelX,
-            "y": this.labelY,
-            "font-size": this.labelSize,
-            "fill": this.labelColor,
-            'network-type': 'vertex-label'
-        });
-        this.labelEl.textContent = this.labelText;
+        this._renderLabelEl();
         this.targetEl.appendChild(this.groupEl);
         if (this.selected) {
             this.select();
         }
     },
-    _renderSlices: function () {
+    _renderSlices: function() {
         this._updateComplexDrawParameters();
         this.groupEl = SVG.create('g', {
             "id": this.vertex.id,
             "transform": "translate(" + [this.coords.x - this.mid, this.coords.y - this.mid].join(',') + ")",
             "cursor": "pointer",
             opacity: this.opacity,
-            'network-type': 'vertex-svg'
+            'network-type': 'vertex-g'
         });
 
         var totalAreas = this._sumAreas(this.pieSlices);
@@ -19572,18 +16610,18 @@ CircosVertexRenderer.prototype = {
             }
         }
     },
-    _sumAreas: function (items) {
+    _sumAreas: function(items) {
         var total = 0;
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
-            total += item.area;
+            total += parseFloat(item.area);
         }
         return total;
     },
-    _slicesMax: function (items) {
+    _slicesMax: function(items) {
         var max = 0;
         for (var i = 0; i < items.length; i++) {
-            max = Math.max(max, items[i].size);
+            max = Math.max(max, parseFloat(items[i].size));
         }
         return max;
     },
@@ -19591,11 +16629,11 @@ CircosVertexRenderer.prototype = {
     /*********/
     /*********/
     /*********/
-    drawLink: function (args) {
-//        var angleStart1 = args.angleStart1;
-//        var angleEnd1 = args.angleEnd1;
-//        var angleStart2 = args.angleStart2;
-//        var angleEnd2 = args.angleEnd2;
+    drawLink: function(args) {
+        //        var angleStart1 = args.angleStart1;
+        //        var angleEnd1 = args.angleEnd1;
+        //        var angleStart2 = args.angleStart2;
+        //        var angleEnd2 = args.angleEnd2;
 
         var angleStart1 = 30;
         var angleEnd1 = 60;
@@ -19619,7 +16657,7 @@ CircosVertexRenderer.prototype = {
         d += SVG.describeArc(coords.x, coords.y, r, angleStart1, angleEnd1) + ' ';
         d += ['Q', coords.x, coords.y, coordsEnd2.x, coordsEnd2.y, ' '].join(' ');
         d += SVG.describeArc(coords.x, coords.y, r, angleStart2, angleEnd2) + ' ';
-        d += [ 'Q', coords.x, coords.y, coordsEnd1.x, coordsEnd1.y, ' '].join(' ');
+        d += ['Q', coords.x, coords.y, coordsEnd1.x, coordsEnd1.y, ' '].join(' ');
 
         var curve = SVG.addChild(targetSvg, 'path', {
             d: d,
@@ -19634,7 +16672,7 @@ CircosVertexRenderer.prototype = {
         });
 
     },
-    drawSectors: function (args) {
+    drawSectors: function(args) {
         var coords = args.coords;
         var color = args.color;
         var targetSvg = args.target;
@@ -19660,8 +16698,8 @@ CircosVertexRenderer.prototype = {
         for (var i = 0; i < genome_d.length; i++) {
             var curve = SVG.addChild(targetSvg, "path", {
                 "d": genome_d[i],
-//                "stroke": 'lightblue',
-//                "stroke": Utils.colorLuminance(color, i/5),
+                //                "stroke": 'lightblue',
+                //                "stroke": Utils.colorLuminance(color, i/5),
                 "stroke": this.sectors[i].color,
                 "stroke-width": 10,
                 "fill": "none",
@@ -19670,6 +16708,7 @@ CircosVertexRenderer.prototype = {
         }
     }
 }
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -19696,7 +16735,9 @@ function DefaultEdgeRenderer(args) {
     _.extend(this, Backbone.Events);
 
     //defaults
-    this.shape = 'undirected';
+    this.shape = 'directed';
+    this.shaft = 'line';
+    this.bidirectional = 'false';
     this.size = 1;
     this.color = '#cccccc';
     this.strokeSize = 2;
@@ -19705,8 +16746,8 @@ function DefaultEdgeRenderer(args) {
     this.labelSize = 0;
     this.labelColor = '#111111';
     this.labelText = '';
-//    this.labelPositionX = 5;
-//    this.labelPositionY = 45;
+    //    this.labelPositionX = 5;
+    //    this.labelPositionY = 45;
 
     this.el;
     this.edgeEl;
@@ -19721,15 +16762,29 @@ function DefaultEdgeRenderer(args) {
     this.targetRenderer;
 
     //set instantiation args, must be last
-    _.extend(this, args);
+    for (var prop in args) {
+        if (hasOwnProperty.call(args, prop)) {
+            if (args[prop] != null) {
+                this[prop] = args[prop];
+            }
+        }
+    }
+
+    this.size = parseFloat(this.size);
+    this.strokeSize = parseFloat(this.strokeSize);
+    this.opacity = parseFloat(this.opacity);
+    this.labelSize = parseFloat(this.labelSize);
 
 }
 
 DefaultEdgeRenderer.prototype = {
-    get: function (attr) {
+    get: function(attr) {
         return this[attr];
     },
-    set: function (attr, value) {
+    set: function(attr, value) {
+        if(!isNaN(value)){
+            value = parseFloat(value);
+        }
         this[attr] = value;
         switch (attr) {
             case "color":
@@ -19737,14 +16792,20 @@ DefaultEdgeRenderer.prototype = {
                 this.updateShape();
                 break;
             case "size":
-                this.edgeEl.setAttribute('stroke-width', this.size);
+                this.size = parseInt(this.size);
+                this.edgeEl.setAttribute('stroke-width', this._getStrokeWidth());
                 this.updateShape();
                 break;
+            case "bidirectional":
             case "shape":
                 this.updateShape();
                 break;
+            case "shaft":
+                this.updateShaft();
+                break;
             case "labelSize":
-                this.labelEl.setAttribute('font-size', this.labelSize);
+                this.labelSize = parseInt(this.labelSize);
+                this.setLabelContent(this.labelText);
                 break;
             case "opacity":
                 this.edgeEl.setAttribute('opacity', this.opacity);
@@ -19753,97 +16814,147 @@ DefaultEdgeRenderer.prototype = {
                 this.update();
         }
     },
-    setConfig: function (args) {
-        _.extend(this, args);
+    _getStrokeWidth: function() {
+        return 1 + (this.size / 2);
     },
-    render: function (args) {
-        this.edge = args.edge;
+    //setConfig: function (args) {
+    //    if (args.size) {
+    //        args.size = parseInt(args.size);
+    //    }
+    //    if (args.opacity) {
+    //        args.opacity = parseFloat(args.opacity);
+    //    }
+    //    if (args.labelSize) {
+    //        args.labelSize = parseInt(args.labelSize);
+    //    }
+    //    if (args.labelPositionX) {
+    //        args.labelPositionX = parseInt(args.labelPositionX);
+    //    }
+    //    if (args.labelPositionY) {
+    //        args.labelPositionY = parseInt(args.labelPositionY);
+    //    }
+    //    _.extend(this, args);
+    //    this.edgeEl.setAttribute('opacity', this.opacity);
+    //},
+    render: function(args) {
+        //this.edge = args.edge;
         this.targetEl = args.target;
-        this.sourceCoords = args.sourceCoords;
-        this.targetCoords = args.targetCoords;
-        this.sourceRenderer = args.sourceRenderer;
-        this.targetRenderer = args.targetRenderer;
+        this.sourceCoords = this.edge.source.position;
+        this.targetCoords = this.edge.target.position;
+        this.sourceRenderer = this.edge.source.renderer;
+        this.targetRenderer = this.edge.target.renderer;
         this._render();
     },
-    remove: function () {
-        $(this.el).remove();
+    remove: function() {
+        if (this.el && this.el.parentNode) {
+            this.el.parentNode.removeChild(this.el);
+        }
     },
-    update: function () {
+    update: function() {
         this.edgeEl.setAttribute('stroke', this.color);
-        this.edgeEl.setAttribute('stroke-width', this.size);
+        this.edgeEl.setAttribute('stroke-width', this._getStrokeWidth());
         this.labelEl.setAttribute('font-size', this.labelSize);
+        this.updateShaft();
         this.updateShape();
     },
-    updateShape: function () {
+    updateShape: function() {
+        if (!this.edgeEl) {
+            debugger
+        }
         if (this.shape === 'undirected') {
             this.edgeEl.removeAttribute('marker-end');
+            this.edgeEl.removeAttribute('marker-start');
         } else {
-            this.edgeEl.setAttribute('marker-end', "url(" + this._getMarkerArrowId() + ")");
+            if (this.bidirectional == 'true') {
+                this.edgeEl.setAttribute('marker-end', "url(" + this._getMarkerArrowId("end") + ")");
+                this.edgeEl.setAttribute('marker-start', "url(" + this._getMarkerArrowId("start") + ")");
+            } else {
+                this.edgeEl.setAttribute('marker-end', "url(" + this._getMarkerArrowId("end") + ")");
+                this.edgeEl.removeAttribute('marker-start');
+            }
         }
+
         this.move();
     },
-    select: function () {
+    updateShaft: function() {
+        if (!this.edgeEl) {
+            debugger
+        }
+        if (this.selected) {
+            this._renderSelect();
+        }
+        if (!this.selected) {
+            this._removeSelect();
+        }
+    },
+    select: function() {
         if (!this.selected) {
             this._renderSelect();
         }
     },
-    deselect: function () {
+    deselect: function() {
         if (this.selected) {
             this._removeSelect();
         }
     },
-    setLabelContent: function (text) {
-        this.labelText = text;
-        var textSvg = $(this.el).find('text[network-type="edge-label"]')[0];
-        var label = '';
-        if ($.type(this.labelText) === 'string' && this.labelText.length > 0) {
-            label = this.labelText;
+    setLabelContent: function(text) {
+        if (text == null) {
+            text = '';
         }
-        textSvg.textContent = label;
+        this._setLabelText(text);
+        this._renderLabelEl();
+        //var splitted = text.split("\\n");
+        //var line, lineEl;
+        //for (var i = 0; i < splitted.length; i++) {
+        //    line = splitted[i];
+        //    lineEl = SVG.addChild(this.labelEl, "tspan", {
+        //        "dy": this.labelSize,
+        //        "x": this.labelEl.getAttribute("x")
+        //    });
+        //    lineEl.textContent = line;
+        //}
     },
-//    moveSourceOff: function (coords) {
-//        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
-//        linkLine.setAttribute('x1', coords.x);
-//        linkLine.setAttribute('y1', coords.y);
-//
-//        var x1 = parseFloat(linkLine.getAttribute('x1'));
-//        var y1 = parseFloat(linkLine.getAttribute('y1'));
-//        var x2 = parseFloat(linkLine.getAttribute('x2'));
-//        var y2 = parseFloat(linkLine.getAttribute('y2'));
-//
-//        var x = (x1 + x2) / 2;
-//        var y = (y1 + y2) / 2;
-//
-//        var text = $(this.el).find('text[network-type="edge-label"]')[0];
-//        text.setAttribute('x', x);
-//        text.setAttribute('y', y);
-//    },
-//    moveTargetOff: function (coords) {
-//        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
-//        linkLine.setAttribute('x2', coords.x);
-//        linkLine.setAttribute('y2', coords.y);
-//
-//        var x1 = parseFloat(linkLine.getAttribute('x1'));
-//        var y1 = parseFloat(linkLine.getAttribute('y1'));
-//        var x2 = parseFloat(linkLine.getAttribute('x2'));
-//        var y2 = parseFloat(linkLine.getAttribute('y2'));
-//
-//        var x = (x1 + x2) / 2;
-//        var y = (y1 + y2) / 2;
-//
-//        var text = $(this.el).find('text[network-type="edge-label"]')[0];
-//        text.setAttribute('x', x);
-//        text.setAttribute('y', y);
-//
-//    },
-    move: function (coords) {
+    //    moveSourceOff: function (coords) {
+    //        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
+    //        linkLine.setAttribute('x1', coords.x);
+    //        linkLine.setAttribute('y1', coords.y);
+    //
+    //        var x1 = parseFloat(linkLine.getAttribute('x1'));
+    //        var y1 = parseFloat(linkLine.getAttribute('y1'));
+    //        var x2 = parseFloat(linkLine.getAttribute('x2'));
+    //        var y2 = parseFloat(linkLine.getAttribute('y2'));
+    //
+    //        var x = (x1 + x2) / 2;
+    //        var y = (y1 + y2) / 2;
+    //
+    //        var text = $(this.el).find('text[network-type="edge-label"]')[0];
+    //        text.setAttribute('x', x);
+    //        text.setAttribute('y', y);
+    //    },
+    //    moveTargetOff: function (coords) {
+    //        var linkLine = $(this.el).find('line[network-type="edge"]')[0];
+    //        linkLine.setAttribute('x2', coords.x);
+    //        linkLine.setAttribute('y2', coords.y);
+    //
+    //        var x1 = parseFloat(linkLine.getAttribute('x1'));
+    //        var y1 = parseFloat(linkLine.getAttribute('y1'));
+    //        var x2 = parseFloat(linkLine.getAttribute('x2'));
+    //        var y2 = parseFloat(linkLine.getAttribute('y2'));
+    //
+    //        var x = (x1 + x2) / 2;
+    //        var y = (y1 + y2) / 2;
+    //
+    //        var text = $(this.el).find('text[network-type="edge-label"]')[0];
+    //        text.setAttribute('x', x);
+    //        text.setAttribute('y', y);
+    //
+    //    },
+    move: function() {
         var val = this._calculateEdgePath();
         this.edgeEl.setAttribute('d', val.d);
-        this.labelEl.setAttribute('x', val.xl);
-        this.labelEl.setAttribute('y', val.yl);
-
+        this._renderLabelEl(val);
     },
-    _calculateEdgePath: function () {
+    _calculateEdgePath: function() {
         var d, labelX, labelY;
         if (this.edge.source === this.edge.target) {
             //calculate self edge
@@ -19855,11 +16966,12 @@ DefaultEdgeRenderer.prototype = {
 
             var rSize = this.sourceRenderer.getSize() / 2;
 
-            d = ['M', this.sourceCoords.x - rSize, this.sourceCoords.y ,
+            d = ['M', this.sourceCoords.x - rSize, this.sourceCoords.y,
                 'L', this.sourceCoords.x - length1, this.sourceCoords.y,
                 'C', this.sourceCoords.x - length2, this.sourceCoords.y, this.sourceCoords.x, this.sourceCoords.y - length2,
-                this.sourceCoords.x , this.sourceCoords.y - length1,
-                'L', this.targetCoords.x, this.targetCoords.y - rSize].join(' ');
+                this.sourceCoords.x, this.sourceCoords.y - length1,
+                'L', this.targetCoords.x, this.targetCoords.y - rSize
+            ].join(' ');
         } else {
             //calculate bezier line
             var deltaX = this.targetCoords.x - this.sourceCoords.x;
@@ -19895,21 +17007,28 @@ DefaultEdgeRenderer.prototype = {
             }
             var pp = this._getPerimeterPositions(angle);
 
-//            d = ['M', this.sourceCoords.x, this.sourceCoords.y, 'C', controlX, controlY, controlX, controlY, this.targetCoords.x, this.targetCoords.y].join(' ');
+            //            d = ['M', this.sourceCoords.x, this.sourceCoords.y, 'C', controlX, controlY, controlX, controlY, this.targetCoords.x, this.targetCoords.y].join(' ');
+
+
             d = ['M', pp.sx, pp.sy, controlPath, pp.tx, pp.ty].join(' ');
         }
-        return {d: d, xl: labelX, yl: labelY};
+        return {
+            d: d,
+            xl: labelX,
+            yl: labelY
+        };
     },
-    _getPerimeterPositions: function (angle) {
-        // Calculate source and target points of the perimeter - TODO ellipse, square, rectangle
-        var sign = this.targetCoords.x > this.sourceCoords.x ? 1 : -1;
+    _getPerimeterPositions: function(angle) {
+        // Calculate source and target points of the perimeter
+        var sign = this.targetCoords.x >= this.sourceCoords.x ? 1 : -1;
         var srHalfSize = this.sourceRenderer.getSize() / 2;
 
-        var offset = 0;
-        if (this.shape !== 'undirected') {
-            offset = this.size * 2;
-        }
-        var trHalfSize = offset + (this.targetRenderer.getSize() / 2);
+        //var offset = 0;
+        //if (this.shape !== 'undirected') {
+        //    offset = this.size * 2;
+        //}
+        //var trHalfSize = offset + (this.targetRenderer.getSize() / 2);
+        var trHalfSize = this.targetRenderer.getSize() / 2;
 
         var cosAngle = Math.cos(angle);
         var sinAngle = Math.sin(angle);
@@ -19925,60 +17044,75 @@ DefaultEdgeRenderer.prototype = {
         // center + (cos(angle), sin(angle))*magnitude
 
         //Source
-        switch (this.sourceRenderer.shape) {
-            case 'square':
-                magnitudeCos = srHalfSize / absCosAngle;
-                magnitudeSin = srHalfSize / absSinAngle;
-                magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
-                sx = this.sourceCoords.x + (sign * cosAngle * magnitude);
-                sy = this.sourceCoords.y + (sign * sinAngle * magnitude);
-                break;
-            case 'rectangle':
-                magnitudeCos = srHalfSize * 1.4 / absCosAngle;
-                magnitudeSin = srHalfSize / absSinAngle;
-                magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
-                sx = this.sourceCoords.x + (sign * cosAngle * magnitude);
-                sy = this.sourceCoords.y + (sign * sinAngle * magnitude);
-                break;
-            case 'ellipse':
-                sx = this.sourceCoords.x + (sign * cosAngle * srHalfSize * 1.4);
-                sy = this.sourceCoords.y + (sign * sinAngle * srHalfSize);
-                break;
-            case 'circle':
-            default:
-                sx = this.sourceCoords.x + (sign * cosAngle * srHalfSize);
-                sy = this.sourceCoords.y + (sign * sinAngle * srHalfSize);
+        if (this.sourceRenderer.complex == true) {
+            sx = this.sourceCoords.x + (sign * cosAngle * srHalfSize);
+            sy = this.sourceCoords.y + (sign * sinAngle * srHalfSize);
+        } else {
+            switch (this.sourceRenderer.shape) {
+                case 'square':
+                    magnitudeCos = srHalfSize / absCosAngle;
+                    magnitudeSin = srHalfSize / absSinAngle;
+                    magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
+                    sx = this.sourceCoords.x + (sign * cosAngle * magnitude);
+                    sy = this.sourceCoords.y + (sign * sinAngle * magnitude);
+                    break;
+                case 'rectangle':
+                    magnitudeCos = srHalfSize * 1.5 / absCosAngle;
+                    magnitudeSin = srHalfSize / absSinAngle;
+                    magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
+                    sx = this.sourceCoords.x + (sign * cosAngle * magnitude);
+                    sy = this.sourceCoords.y + (sign * sinAngle * magnitude);
+                    break;
+                case 'ellipse':
+                    sx = this.sourceCoords.x + (sign * cosAngle * srHalfSize * 1.5);
+                    sy = this.sourceCoords.y + (sign * sinAngle * srHalfSize);
+                    break;
+                case 'circle':
+                default:
+                    sx = this.sourceCoords.x + (sign * cosAngle * srHalfSize);
+                    sy = this.sourceCoords.y + (sign * sinAngle * srHalfSize);
+            }
         }
         //Target
-        switch (this.targetRenderer.shape) {
-            case 'square':
-                magnitudeCos = trHalfSize / absCosAngle;
-                magnitudeSin = trHalfSize / absSinAngle;
-                magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
-                tx = this.targetCoords.x - (sign * cosAngle * magnitude);
-                ty = this.targetCoords.y - (sign * sinAngle * magnitude);
-                break;
-            case 'rectangle':
-                magnitudeCos = trHalfSize * 1.4 / absCosAngle;
-                magnitudeSin = trHalfSize / absSinAngle;
-                magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
-                tx = this.targetCoords.x - (sign * cosAngle * magnitude);
-                ty = this.targetCoords.y - (sign * sinAngle * magnitude);
-                break;
-            case 'ellipse':
-                tx = this.targetCoords.x - (sign * cosAngle * trHalfSize * 1.4);
-                ty = this.targetCoords.y - (sign * sinAngle * trHalfSize);
-                break;
-            case 'circle':
-            default:
-                tx = this.targetCoords.x - (sign * cosAngle * trHalfSize);
-                ty = this.targetCoords.y - (sign * sinAngle * trHalfSize);
+        if (this.targetRenderer.complex == true) {
+            tx = this.targetCoords.x - (sign * cosAngle * trHalfSize);
+            ty = this.targetCoords.y - (sign * sinAngle * trHalfSize);
+        } else {
+            switch (this.targetRenderer.shape) {
+                case 'square':
+                    magnitudeCos = trHalfSize / absCosAngle;
+                    magnitudeSin = trHalfSize / absSinAngle;
+                    magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
+                    tx = this.targetCoords.x - (sign * cosAngle * magnitude);
+                    ty = this.targetCoords.y - (sign * sinAngle * magnitude);
+                    break;
+                case 'rectangle':
+                    magnitudeCos = trHalfSize * 1.5 / absCosAngle;
+                    magnitudeSin = trHalfSize / absSinAngle;
+                    magnitude = (magnitudeCos <= magnitudeSin) ? magnitudeCos : magnitudeSin;
+                    tx = this.targetCoords.x - (sign * cosAngle * magnitude);
+                    ty = this.targetCoords.y - (sign * sinAngle * magnitude);
+                    break;
+                case 'ellipse':
+                    tx = this.targetCoords.x - (sign * cosAngle * trHalfSize * 1.5);
+                    ty = this.targetCoords.y - (sign * sinAngle * trHalfSize);
+                    break;
+                case 'circle':
+                default:
+                    tx = this.targetCoords.x - (sign * cosAngle * trHalfSize);
+                    ty = this.targetCoords.y - (sign * sinAngle * trHalfSize);
+            }
         }
-        return {sx: sx, sy: sy, tx: tx, ty: ty};
+        return {
+            sx: sx,
+            sy: sy,
+            tx: tx,
+            ty: ty
+        };
     },
     /* Private */
-    _render: function () {
-        var groupSvg = SVG.create('g', {
+    _render: function() {
+        this.el = SVG.create('g', {
             "cursor": "pointer",
             "id": this.edge.id,
             opacity: this.opacity,
@@ -19987,160 +17121,173 @@ DefaultEdgeRenderer.prototype = {
 
         var val = this._calculateEdgePath();
 
-        var linkSvg = SVG.addChild(groupSvg, "path", {
+        this.edgeEl = SVG.addChild(this.el, "path", {
             "d": val.d,
             opacity: this.opacity,
             "stroke": this.color,
-            "stroke-width": this.size,
+            "stroke-width": this._getStrokeWidth(),
+            //"stroke-linecap": "round",
+            //"stroke-linejoin": "miter",
             "cursor": "pointer",
             fill: 'none',
             'network-type': 'edge'
-        }, 0);
-        if (this.shape !== 'undirected') {
-            linkSvg.setAttribute('marker-end', "url(" + this._getMarkerArrowId() + ")");
+        }, 1);
+
+        if (this.shape === 'undirected') {
+            this.edgeEl.removeAttribute('marker-end');
+            this.edgeEl.removeAttribute('marker-start');
+        } else {
+            if (this.bidirectional == 'true') {
+                this.edgeEl.setAttribute('marker-end', "url(" + this._getMarkerArrowId("end") + ")");
+                this.edgeEl.setAttribute('marker-start', "url(" + this._getMarkerArrowId("start") + ")");
+            } else {
+                this.edgeEl.setAttribute('marker-end', "url(" + this._getMarkerArrowId("end") + ")");
+                this.edgeEl.removeAttribute('marker-start');
+            }
         }
 
-        var textOffset = this.sourceRenderer.getSize();
-        var text = SVG.addChild(groupSvg, "text", {
-            "x": val.xl,
-            "y": val.yl,
-            "font-size": this.labelSize,
-            "fill": this.labelColor,
-            'network-type': 'edge-label'
-        });
-        text.textContent = this.edge.id;
+        this._setLabelText(this.edge.id);
+        this._renderLabelEl(val);
 
-        this.el = groupSvg;
-        this.edgeEl = linkSvg;
-        this.labelEl = text;
-        SVG._insert(this.targetEl, groupSvg, 0);
+        SVG._insert(this.targetEl, this.el, 1);
 
         if (this.selected) {
             this._renderSelect();
         }
+        if (!this.selected) {
+            this._removeSelect();
+        }
+    },
+    _setLabelText: function(text) {
+        this.labelText = text;
+        this.labelLines = this.labelText.split(/\\n/);
+    },
+    _renderLabelEl: function(val) {
+        if (val == null) {
+            val = this._calculateEdgePath();
+        }
+        if (this.labelEl == null) {
+            this.labelEl = SVG.create("text", {
+                'network-type': 'edge-label'
+            });
+        } else if(this.el.contains(this.labelEl)) {
+            this.el.removeChild(this.labelEl);
+        }
+        this.labelEl.setAttribute('font-size', this.labelSize);
+        this.labelEl.setAttribute('fill', this.labelColor);
+
+        this.labelEl.textContent = "";
+        var linesCount = this.labelLines.length;
+        var yStart = val.yl - ((linesCount - 1) * this.labelSize / 2);
+        for (var i = 0; i < linesCount; i++) {
+            var line = this.labelLines[i];
+            var tspan = SVG.addChild(this.labelEl, "tspan", {
+                'network-type': 'edge-label',
+                x: val.xl,
+                y: yStart + (i * this.labelSize)
+            });
+            tspan.textContent = line;
+        }
+
+        this.el.appendChild(this.labelEl);
     },
 
-    _renderSelect: function () {
-        this.edgeEl.setAttribute('stroke-dasharray', '5, 2');
-//        this.edgeEl.setAttribute('stroke-width', this.size + 1);
+    _renderSelect: function() {
+        this.edgeEl.setAttribute('stroke-dasharray', '10, 5');
 
         this.selected = true;
     },
-    _removeSelect: function () {
-        this.edgeEl.removeAttribute('stroke-dasharray');
-//        this.edgeEl.removeAttribute('stroke-width', this.size);
-
+    _removeSelect: function() {
+        if (this.shaft !== 'dashed') {
+            this.edgeEl.removeAttribute('stroke-dasharray');
+        } else {
+            this.edgeEl.setAttribute('stroke-dasharray', '3, 2');
+        }
         this.selected = false;
     },
     /**/
-    _getMarkerArrowId: function () {
+    _getMarkerArrowId: function(markerLocation) {
         var offset = (this.size * -2) - 1;
         // if not exists this marker, add new one to defs
-        var markerArrowId = "arrow-" + this.shape + "-" + offset.toString().replace(".", "_") + '-' + this.size.toString().replace(".", "_") + '-' + this.color.replace('#', '');
+        var markerArrowId = "arrow-" + this.shape + "-" + offset.toString().replace(".", "_") + '-' + this.size.toString().replace(".", "_") + '-' + this.color.replace('#', '') + markerLocation;
         var markerArrowIdSel = '#' + markerArrowId;
-        if ($(markerArrowIdSel).length == 0) {
-            this._addArrowShape(this.shape, offset, this.color, this.size, this.targetEl, markerArrowId);
+        if (!this.targetEl.querySelector(markerArrowIdSel)) {
+            this._addArrowShape(this.shape, offset, this.color, this.size, this.targetEl, markerArrowId, markerLocation);
         }
         return markerArrowIdSel;
     },
-    _addArrowShape: function (type, offset, color, edgeSize, targetSvg, markerArrowId) {
-        if (edgeSize === 0) {
-            var scale = 0;
-        } else {
-            var scale = 1 / edgeSize;
-        }
-
-        var mult = scale * (1 + edgeSize / 2);
-
-        var headWidth = 4 * mult;
-        var headHeight = 5 * mult;
-        var headRadius = 3 * mult;
-
-        offset = scale * offset;
-
-        var halfSize = edgeSize / 2;
-
-        var defs = $(targetSvg).find('defs');
-        var defsEl = defs[0]
-        if (defs.length == 0) {
+    _addArrowShape: function(type, offset, color, edgeSize, targetSvg, markerArrowId, markerLocation) {
+        var defsEl = targetSvg.querySelector('defs');
+        if (!defsEl) {
             defsEl = SVG.addChild(targetSvg, "defs", {}, 0);
         }
         if (typeof color === 'undefined') {
             color = '#000000';
         }
+        var sign = 1;
+        if (markerLocation == "start") {
+            sign = -1;
+        }
+        var sw = this._getStrokeWidth();
+        var swh = sw / 2;
+        var w = 8 + edgeSize;
+        var h = 3 + edgeSize;
         var marker = SVG.addChild(defsEl, "marker", {
             "id": markerArrowId,
             "orient": "auto",
-            "refX": offset + headHeight,
-            "refY": headWidth / 2,
-            "angle": 10,
+            "refX": (w) * sign,
+            "refY": h,
+            'markerUnits': "userSpaceOnUse",
             "style": "overflow:visible;"
         });
-
         switch (type) {
             case "directed":
+                var d = ['M0,0', 'L', 1 * sign, h, 'L', 0, h * 2, 'L', w * sign, h + swh, 'L', w * sign, h - swh, 'Z'].join(' ') //"M0,0 V10 L5,5 Z"
+                    //var d = ['M0,0', 'L', 1 * sign, h, 'L', 0, h * 2, 'L', w * sign, h, 'Z'].join(' ')//"M0,0 V10 L5,5 Z"
                 var arrow = SVG.addChild(marker, "path", {
-//                    "transform": "scale(" + scale + ") rotate(0) translate(0,0)",
                     "fill": color,
-                    "d": ['M0,0', 'V', headWidth, 'L', headHeight, headWidth / 2, 'Z'].join(' ')//"M0,0 V10 L5,5 Z"
-//                    "points": [-offset, -halfSize, -offset - headHeight, -headWidth, -offset - headHeight, headWidth, -offset, halfSize].join(' ')
+                    "d": d
                 });
                 break;
-//            case "odirected":
-//                var arrow = SVG.addChild(marker, "polyline", {
-//                    "transform": "scale(0.5) rotate(0) translate(0,0)",
-//                    "fill": color,
-//                    "points": "-" + offset + ",0 " + (-offset - 18) + ",-8 " + (-offset - 18) + ",8 -" + offset + ",0"
-//                });
-//                offset += 6;
-//                var arrow = SVG.addChild(marker, "polyline", {
-//                    "transform": "scale(0.5) rotate(0) translate(0,0)",
-//                    "fill": 'white',
-//                    "opacity": "1",
-//                    "points": "-" + offset + ",0 " + (-offset - 9) + ",-4 " + (-offset - 9) + ",4 -" + offset + ",0"
-//                });
-//                break;
             case "inhibited":
+                var x = w / 2;
+                var y = h + swh;
+                var x2 = w;
+                var y2 = h * 3 + swh;
                 var arrow = SVG.addChild(marker, "path", {
-//                    "transform": "scale(" + scale + ") rotate(0) translate(0,0)",
                     "fill": color,
-                    "d": ['M', headHeight , 0, 'V', headHeight, 'L', headHeight / 2, headHeight, 'L', headHeight / 2, 0, 'Z'].join(' ')
-//                    "x":0,
-//                    "y": 0,
-//                    "width": headWidth,
-//                    "height": headWidth * 2
+                    "d": ['M', sign * x, -y, 'L', sign * x, y2, 'L', sign * x2, y2, 'L', sign * x2, -y, 'Z'].join(' ')
                 });
                 break;
             case "dot":
                 var arrow = SVG.addChild(marker, "circle", {
-//                    "transform": "scale(" + scale + ") rotate(0) translate(0,0)",
                     "fill": color,
-                    "cx": headWidth / 2,
-                    "cy": headHeight / 2,
-                    "r": headRadius
+                    "cx": sign * w / 2,
+                    "cy": h,
+                    "r": w / 2
                 });
                 break;
             case "odot":
                 var arrow = SVG.addChild(marker, "circle", {
-//                    "transform": "scale(" + scale + ") rotate(0) translate(0,0)",
                     "fill": color,
-                    "cx": headWidth / 2,
-                    "cy": headHeight / 2,
-                    "r": headRadius
+                    "cx": sign * w / 2,
+                    "cy": h,
+                    "r": w / 2
                 });
                 var arrow = SVG.addChild(marker, "circle", {
-//                    "transform": "scale(" + scale + ") rotate(0) translate(0,0)",
                     "fill": 'white',
-                    "cx": headWidth / 2,
-                    "cy": headHeight / 2,
-                    "r": headRadius - 2
+                    "cx": sign * w / 2,
+                    "cy": h,
+                    "r": (w / 2) - sw
                 });
                 break;
         }
     },
-    toJSON: function () {
+    toJSON: function() {
         return {
             shape: this.shape,
+            shaft: this.shaft,
+            bidirectional: this.bidirectional,
             size: this.size,
             color: this.color,
             strokeSize: this.strokeSize,
@@ -20152,6 +17299,7 @@ DefaultEdgeRenderer.prototype = {
         };
     }
 }
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -20677,68 +17825,30 @@ DefaultVertexRenderer.prototype = {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function EdgeConfig(args) {
-
-    this.id;
-    this.rendererConfig = {};
-    this.renderer = new DefaultEdgeRenderer(this.rendererConfig);
-    this.type;
-    this.visible;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.renderer.setConfig(this.rendererConfig);
-}
-
-EdgeConfig.prototype = {
-    render:function(args){
-        this.renderer.render(args);
-    },
-    toJSON: function () {
-        return {
-            id: this.id,
-            renderer:this.renderer,
-            type: this.type,
-            visible: this.visible
-        };
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
 function Edge(args) {
 
-    this.id = 'e'+Utils.genId();
+    this.id = 'e' + Utils.genId();
 
-    this.relation='';
+    this.relation = '';
     this.source;
     this.target;
     this.weight;
     this.directed;
     this.overlapCount;
 
-    //set instantiation args, must be last
-    _.extend(this, args);
+    this.attributes = {};
 
+    this.renderer = new DefaultEdgeRenderer();
+    //set instantiation args, must be last
+    for (var prop in args) {
+        if (hasOwnProperty.call(args, prop)) {
+            this[prop] = args[prop];
+        }
+    }
+
+    if (this.renderer) {
+        this.renderer.edge = this;
+    }
 }
 
 Edge.prototype = {
@@ -20754,14 +17864,25 @@ Edge.prototype = {
     setTarget: function (vertex) {
         this.target = vertex;
     },
-    toJSON:function(){
+    render: function (args) {
+        this.renderer.render(args)
+    },
+    setRenderer: function (renderer) {
+        if (renderer) {
+            this.renderer = renderer;
+            this.renderer.edge = this;
+        }
+    },
+    toJSON: function () {
         return {
-            id:this.id,
-            source:this.source,
-            target:this.target,
-            weight:this.weight,
-            directed:this.directed,
-            relation:this.relation
+            id: this.id,
+            source: this.source,
+            target: this.target,
+            weight: this.weight,
+            directed: this.directed,
+            relation: this.relation,
+            renderer: this.renderer,
+            attributes: this.attributes
         }
     }
 }
@@ -20810,6 +17931,7 @@ GraphLayout = {
                 vertex.x = 0;
             }
             if (typeof vertex.y === 'undefined') {
+                defda
                 vertex.y = 0;
             }
             if (typeof vertex.z === 'undefined') {
@@ -20852,11 +17974,12 @@ GraphLayout = {
         var x, y;
         for (var i = 0, l = vertices.length; i < l; i++) {
             var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                x = this.getRandomArbitrary(0, width);
-                y = this.getRandomArbitrary(0, height);
-                network.setVertexCoords(vertex, x, y);
-            }
+            x = this.getRandomArbitrary(0, width);
+            y = this.getRandomArbitrary(0, height);
+            vertex.position.x = x;
+            vertex.position.y = y;
+            vertex.renderer.move();
+            network._updateEdgeCoords(vertex);
         }
     },
     circle: function (network, width, height, orderedVertices) {
@@ -20864,22 +17987,26 @@ GraphLayout = {
         if (typeof orderedVertices !== 'undefined') {
             vertices = orderedVertices;
         }
-        var radius = height / 2;
+
+        var radius = (height - 100) / 2;
         var centerX = width / 2;
         var centerY = height / 2;
-        var x, y;
+        var x, y, vertex;
         for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                x = centerX + radius * Math.sin(i * 2 * Math.PI / vertices.length);
-                y = centerY + radius * Math.cos(i * 2 * Math.PI / vertices.length);
-                network.setVertexCoords(vertex, x, y);
-            }
+            var vertex = network.graph.getVertexById(vertices[i].id);
+            x = centerX + radius * Math.sin(i * 2 * Math.PI / vertices.length);
+            y = centerY + radius * Math.cos(i * 2 * Math.PI / vertices.length);
+            vertex.position.x = x;
+            vertex.position.y = y;
+            vertex.renderer.move();
+            network._updateEdgeCoords(vertex);
         }
     },
     force: function (args) {
-
         var network = args.network;
+        var graph = args.network.graph;
+        var vAttr = args.network.vAttr;
+        var eAttr = args.network.eAttr;
         var width = args.width;
         var height = args.height;
         var friction = args.friction;
@@ -20890,7 +18017,7 @@ GraphLayout = {
         var linkDistance = args.linkDistance;
         var charge = args.charge;
 
-        var multipliers = args.multipliers;
+        var attributes = args.attributes;
 
         var endFunction = args.end;
         var simulation = args.simulation;
@@ -20934,23 +18061,21 @@ GraphLayout = {
         //set node and edge arrays for D3
         for (var i = 0, l = vertices.length; i < l; i++) {
             var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = network.config.getVertexConfig(vertex);
-                var v = {
-                    id: vertex.id,
-                    index: i,
-                    x: vertexConfig.coords.x,
-                    y: vertexConfig.coords.y
-                };
-                verticesArray.push(v);
-                verticesMap[vertex.id] = v;
-            }
+            var v = {
+                id: vertex.id,
+                index: i,
+                x: vertex.position.x,
+                y: vertex.position.y
+            };
+            verticesArray.push(v);
+            verticesMap[vertex.id] = v;
         }
         force.nodes(verticesArray);
         for (var i = 0, l = edges.length; i < l; i++) {
             var edge = edges[i];
             if (typeof edge !== 'undefined') {
                 edgesArray.push({
+                    id: edge.id,
                     source: verticesMap[edge.source.id],
                     target: verticesMap[edge.target.id]
                 });
@@ -20961,55 +18086,52 @@ GraphLayout = {
         /* Node and Edge specific parameters */
         //Link Distance
         if (typeof linkDistance !== 'undefined') {
-            if (!isNaN(linkDistance)) {
+            if (!attributes || attributes.linkDistance == 'none') {
                 force.linkDistance(linkDistance);
             } else {
-                //is and attributName
-                force.linkDistance(function (edge) {
-                    var sourceConfig = network.config.getVertexConfig(edge.source);
-                    var targetConfig = network.config.getVertexConfig(edge.target);
-                    var value = network.edgeAttributeManager.getValueByAttributeAndId(edge.id, linkDistance);
-                    var ld = isNaN(value) ? (sourceConfig.renderer.size + targetConfig.renderer.size) * 1.5 : value * multipliers.linkDistance;
+                force.linkDistance(function (e) {
+                    var edge = graph.getEdgeById(e.id);
+                    var value = vAttr.getRow(edge.id)[attributes.linkDistance];
+                    var ld = isNaN(value) ? (edge.source.renderer.getSize() + edge.target.renderer.getSize()) * 1.7 : value * linkDistance;
                     return ld;
                 });
             }
         } else {
-            force.linkDistance(function (edge) {
-                var sourceConfig = network.config.getVertexConfig(edge.source);
-                var targetConfig = network.config.getVertexConfig(edge.target);
-                return sourceConfig.renderer.size + targetConfig.renderer.size * 1.5;
+            force.linkDistance(function (e) {
+                var edge = graph.getEdgeById(e.id);
+                return edge.source.renderer.getSize() + edge.target.renderer.getSize() * 1.7;
             })
         }
         //Link Strength
         if (typeof linkStrength !== 'undefined') {
-            if (!isNaN(linkStrength)) {
+            if (!attributes || attributes.linkStrength == 'none') {
                 force.linkStrength(linkStrength);
             } else {
                 //is and attributName
-                force.linkStrength(function (edge) {
-                    var value = network.edgeAttributeManager.getValueByAttributeAndId(edge.id, linkStrength);
-                    var ls = isNaN(value) ? 1 : value * multipliers.linkStrength;
+                force.linkStrength(function (e) {
+                    var value = vAttr.getRow(e.id)[attributes.linkStrength];
+                    var ls = isNaN(value) ? 1 : value * linkStrength;
                     return ls;
                 });
             }
         }
         //Node Charge
         if (typeof charge !== 'undefined') {
-            if (!isNaN(charge)) {
+            if (!attributes || attributes.charge == 'none') {
                 force.charge(charge);
             } else {
                 //is and attributName
-                force.charge(function (node) {
-                    var vertexConfig = network.config.getVertexConfig(node);
-                    var value = parseFloat(network.vertexAttributeManager.getValueByAttributeAndId(vertex.id, charge));
-                    var c = isNaN(value) ? vertexConfig.renderer.getSize() * -10 : value * multipliers.charge;
-                    return  c;
+                force.charge(function (v) {
+                    var vertex = graph.getVertexById(v.id);
+                    var value = eAttr.getRow(vertex.id)[attributes.charge];
+                    var c = isNaN(value) ? vertex.renderer.getSize() * -13 : value * charge;
+                    return c;
                 });
             }
         } else {
-            force.charge(function (node) {
-                var vertexConfig = network.config.getVertexConfig(node);
-                return  vertexConfig.renderer.getSize() * -10;
+            force.charge(function (v) {
+                var vertex = graph.getVertexById(v.id);
+                return vertex.renderer.getSize() * -13;
             });
         }
         console.timeEnd('Force directed preload');
@@ -21046,1577 +18168,316 @@ GraphLayout = {
             console.timeEnd('D3 Force directed layout');
         }
 
-    }
-
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function Graph(args) {
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('Graph');
-
-    this.vertices = [];
-    this.edges = [];
-
-    this.display = {
-        style: {
-
-        },
-        layouts: {
-
-        }
-    };
-
-    this.numberOfVertices = 0;
-    this.numberOfEdges = 0;
-
-    this.graphType = '';
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.verticesIndex = {};
-    this.edgesIndex = {};
-
-    this.edgeDraw = {};
-
-
-    this.on(this.handlers);
-}
-
-Graph.prototype = {
-    setType: function (type) {
-        this.graphType = type;
     },
-    clean: function () {
-        this.numberOfVertices = 0;
-        this.numberOfEdges = 0;
-        this.vertices = [];
-        this.edges = [];
-        this.verticesIndex = {};
-        this.edgesIndex = {};
-
-        this.edgeDraw = {};
-    },
-    addEdge: function (edge) {
-        var _this = this;
-        if (edge.source == null || edge.target == null) {
-            return false
-        }
-        // Check if already exists
-        if (this.containsEdge(edge)) {
-            return false;
-        }
-
-        this.addVertex(edge.source);
-        this.addVertex(edge.target);
-        var length = this.edges.push(edge);
-        var insertPosition = length - 1;
-        this.edgesIndex[edge.id] = insertPosition;
-
-        //update source edges
-        edge.source.addEdge(edge);
-        //update target edges
-        if (edge.source !== edge.target) {
-            edge.target.addEdge(edge);
-        }
-        this.trigger('edge:add', {edge: edge, graph: this});
-
-        /* count edges between same vertices */
-        var stId = edge.source.id + edge.target.id;
-        var tsId = edge.target.id + edge.source.id;
-        if (typeof this.edgeDraw[stId] === 'undefined') {
-            this.edgeDraw[stId] = -1;
-        }
-        if (typeof this.edgeDraw[tsId] === 'undefined') {
-            this.edgeDraw[tsId] = -1;
-        }
-        this.edgeDraw[stId]++;
-        this.edgeDraw[tsId]++;
-        edge.overlapCount = this.edgeDraw[stId];
-//        edge.overlapCount = function () {
-//            return _this.edgeDraw[stId];
-//        };
-
-        this.numberOfEdges++;
-        return true;
-    },
-    addVertex: function (vertex) {
-        if (vertex == null) {
-            return false
-        }
-        // Check if already exists
-        if (this.containsVertex(vertex)) {
-            return false;
-        }
-        // Add the vertex
-        var length = this.vertices.push(vertex);
-        var insertPosition = length - 1;
-        this.verticesIndex[vertex.id] = insertPosition;
-
-        this.trigger('vertex:add', {vertex: vertex, graph: this});
-        this.numberOfVertices++;
-        return true;
-    },
-    removeEdge: function (edge) {
-        if (edge == null) {
-            return false
-        }
-        // Check if already exists
-        if (!this.containsEdge(edge)) {
-            return false;
-        }
-
-        //remove edge from vertex
-        edge.source.removeEdge(edge);
-        edge.target.removeEdge(edge);
-
-//        /* count edges between same vertices */
-//        var stId = edge.source.id + edge.target.id;
-//        var tsId = edge.target.id + edge.source.id;
-//        this.edgeDraw[stId]--;
-//        this.edgeDraw[tsId]--;
-
-
-        var position = this.edgesIndex[edge.id];
-        delete this.edgesIndex[edge.id];
-        delete this.edges[position];
-//        this.edges.splice(position, 1);
-
-        this.trigger('edge:remove', {edge: edge, graph: this});
-        this.numberOfEdges--;
-
-
-        return true;
-    },
-    removeVertex: function (vertex) {
-        if (vertex == null) {
-            return false
-        }
-        // Check if already exists
-        if (!this.containsVertex(vertex)) {
-            return false;
-        }
-
-        for (var i = 0; i < vertex.edges.length; i++) {
-            var edge = vertex.edges[i];
-            // remove edges from source or target
-            if (edge.source !== vertex) {
-                edge.source.removeEdge(edge);
-            }
-            if (edge.target !== vertex) {
-                edge.target.removeEdge(edge);
-            }
-
-            var position = this.edgesIndex[edge.id];
-            delete this.edgesIndex[edge.id];
-            delete this.edges[position];
-//            this.edges.splice(position, 1);
-
-
-            this.trigger('edge:remove', {edge: edge, graph: this});
-            this.numberOfEdges--;
-        }
-        vertex.removeEdges();
-
-        var position = this.verticesIndex[vertex.id];
-        delete this.verticesIndex[vertex.id];
-        delete this.vertices[position];
-//        this.vertices.splice(position, 1);
-
-        this.trigger('vertex:remove', {vertex: vertex, graph: this});
-        this.numberOfVertices--;
-        return true;
-    },
-    containsEdge: function (edge) {
-        if (typeof this.edgesIndex[edge.id] !== 'undefined') {
-            return true;
-        } else {
-            return false;
-        }
-    },
-    containsVertex: function (vertex) {
-        if (typeof this.verticesIndex[vertex.id] !== 'undefined') {
-            return true;
-        } else {
-            return false;
-        }
-    },
-    /**/
-    getVertexById: function (vertexId) {
-        return this.vertices[this.verticesIndex[vertexId]];
-    },
-    getEdgeById: function (edgeId) {
-        return this.edges[this.edgesIndex[edgeId]];
-    },
-    /**/
-    addLayout: function (layout) {
-        this.display.layouts[layout.id] = layout;
-    },
-
-    /**/
-    getAsSIF: function (separator) {
-        if (typeof separator === 'undefined') {
-            separator = '\t';
-        }
-        var sifText = "";
-        for (var i = 0; i < this.edges.length; i++) {
-            var edge = this.edges[i];
-            if (typeof edge !== 'undefined') {
-                var line = "";
-                line = edge.source.id + separator + edge.relation + separator + edge.target.id + "\n";
-                sifText += line;
-            }
-        }
-        for (var i = 0; i < this.vertices.length; i++) {
-            var vertex = this.vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var line = "";
-                if (vertex.edges.length == 0) {
-                    line = vertex.id + separator + separator + "\n";
-                }
-                sifText += line;
-            }
-        }
-        return sifText;
-    },
-    getAsDOT: function () {
-        var dotText = "graph network {\n" + this.getAsSIF(' ') + "}";
-        return dotText;
-    },
-
-    toJSON: function () {
-        var vertices = [];
-        for (var i = 0; i < this.vertices.length; i++) {
-            if (typeof this.vertices[i] !== 'undefined') {
-                vertices.push(this.vertices[i]);
-            }
-        }
-        var edges = [];
-        for (var i = 0; i < this.edges.length; i++) {
-            if (typeof this.edges[i] !== 'undefined') {
-                edges.push(this.edges[i]);
-            }
-        }
-        return {vertices: vertices, edges: edges};
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function NetworkConfig(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('NetworkConfig');
-
-    this.session;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.vertices = {}; // [{id:"one",color:red,...},...]
-    this.edges = {};  // [{id:"one",color:red,...},...]
-
-    this.on(this.handlers);
-}
-
-NetworkConfig.prototype = {
-    clean: function () {
-        this.vertices = {};
-        this.edges = {};
-        this.general = {};
-    },
-    setVertexConfig: function (vertexConfig) {
-        this.vertices[vertexConfig.id] = vertexConfig;
-    },
-    getVertexConfig: function (vertex) {
-        var vertexConfig = this.vertices[vertex.id];
-        if (typeof vertexConfig === 'undefined') {
-            this.setVertexConfig(new VertexConfig({id: vertex.id}));
-        }
-        return this.vertices[vertex.id];
-    },
-    setEdgeConfig: function (edgeConfig) {
-        this.edges[edgeConfig.id] = edgeConfig;
-    },
-    getEdgeConfig: function (edge) {
-        var edgeConfig = this.edges[edge.id];
-        if (typeof edgeConfig === 'undefined') {
-            this.setEdgeConfig(new EdgeConfig({id: edge.id}));
-        }
-        return this.edges[edge.id];
-    },
-    removeVertex: function (vertex) {
-        delete this.vertices[vertex.id];
-    },
-    removeEdge: function (edge) {
-        delete this.edges[edge.id];
-    },
-
-    toJSON: function () {
-        return {
-            vertices: this.vertices,
-            edges: this.edges
-        }
-    }
-}
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function NetworkSession() {
-
-    this.version = 1;
-
-    this.general = {
-        vertexDefaults: {
-            shape: 'circle',
-            size: 40,
-//            color: '#9fc6e7',
-            color: '#fff',
-            strokeSize: 2,
-//            strokeColor: '#9fc6e7',
-            strokeColor: '#888888',
-            opacity: 0.8,
-            labelSize: 12,
-            labelColor: '#111111'
-        },
-        edgeDefaults: {
-            shape: 'undirected',
-            size: 1,
-            color: '#888888',
-//            color: '#cccccc',
-            opacity: 1,
-            labelSize: 0,
-            labelColor: '#111111'
-        },
-        visualSets: {},
-        zoom: 25,
-        backgroundImages: [],
-        backgroundColor: '#FFF',
-        center: {
-            x: 0,
-            y: 0
-        }
-    };
-    this.config = {
-        vertices: {},
-        edges: {}
-    };
-    this.graph = {
-        vertices: {},
-        edges: {}
-    };
-    this.attributes = {
-        vertices: {},
-        edges: {}
-    }
-}
-
-NetworkSession.prototype = {
-    loadGraph: function (graph) {
-        this.graph = graph.toJSON();
-    },
-    loadConfig: function (config) {
-        this.config = config;
-    },
-    loadVertexAttributes: function (attributeManager) {
-        this.attributes.vertices = attributeManager.toJSON();
-    },
-    loadEdgeAttributes: function (attributeManager) {
-        this.attributes.edges = attributeManager.toJSON();
-    },
-    getBackgroundImages: function () {
-        return this.general.backgroundImages;
-    },
-    setBackgroundImages: function (images) {
-        this.general.backgroundImages = images;
-    },
-    getBackgroundColor: function () {
-        return this.general.backgroundColor;
-    },
-    setBackgroundColor: function (color) {
-        this.general.backgroundColor = color;
-    },
-    setVertexDefault: function (key, value) {
-        this.general.vertexDefaults[key] = value;
-    },
-    setEdgeDefault: function (key, value) {
-        this.general.edgeDefaults[key] = value;
-    },
-    getVertexDefault: function (key) {
-        return this.general.vertexDefaults[key];
-    },
-    getEdgeDefault: function (key) {
-        return this.general.edgeDefaults[key];
-    },
-    getVertexDefaults: function () {
-        return this.general.vertexDefaults;
-    },
-    getEdgeDefaults: function () {
-        return this.general.edgeDefaults;
-    },
-    getVisualSets: function () {
-        return this.general.visualSets;
-    },
-    loadVisualSets: function (visualSets) {
-        this.general.visualSets = visualSets;
-    },
-    setVisualSet: function (key, value) {
-        this.general.visualSets[key] = value;
-    },
-    setCenter: function (center) {
-        this.general.center = center;
-    },
-    getCenter: function () {
-        return this.general.center;
-    },
-    getZoom: function () {
-        return this.general.zoom;
-    },
-    setZoom: function (zoom) {
-        this.general.zoom = zoom;
-    },
-    loadJSON: function (o) {
-        if (o.version === this.version) {
-            _.extend(this, o)
-        } else {
-            console.log('Could not load session, does not match with current version');
-            localStorage.removeItem('CELLMAPS_SESSION');
-        }
-//        this.config = o.config;
-//        this.graph = o.graph;
-//        this.attributes = o.attributes;
-//        this.general = o.general;
-    },
-    toJSON: function () {
-        return {
-            general: this.general,
-            config: this.config,
-            graph: this.graph,
-            attributes: this.attributes,
-            version: this.version
-        };
-    }
-};
-
-
-
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function Network(args) {
-    var _this = this;
-    _.extend(this, Backbone.Events);
-    this.id = Utils.genId('Network');
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.graph = new Graph();
-    this.config = new NetworkConfig();
-
-    // Default attributes for vertices and edges.
-    // They cannot be deleted.
-    var vertexAttributes = [
-        {name: "id", type: "string", defaultValue: "none", locked: true},
-        {name: "Name", type: "string", defaultValue: "none"}
-    ];
-    var edgeAttributes = [
-        {name: "id", type: "string", defaultValue: "none", locked: true},
-        {name: "Name", type: "string", defaultValue: "none"},
-        {name: "Relation", type: "string", defaultValue: "none"}
-    ];
-
-    this.vertexAttributeManager = new AttributeManagerStore({
-        attributes: vertexAttributes,
-        handlers: {
-            'change:attributes': function (e) {
-                _this.trigger('change:vertexAttributes', e);
-            }
-        }
-    });
-    this.edgeAttributeManager = new AttributeManagerStore({
-        attributes: edgeAttributes,
-        handlers: {
-            'change:attributes': function (e) {
-                _this.trigger('change:edgeAttributes', e);
-            }
-        }
-    });
-
-
-    this.batchFlag = false;
-
-    this.on(this.handlers);
-}
-
-Network.prototype = {
-    setGraph: function (graph) {
-        console.time('Network.setGraph');
-        this.batchStart();
-        this.clean();
-        var edges = graph.edges;
+    tree: function (args) {
+        var network = args.network;
+        var graph = network.graph;
+        var vAttr = network.vAttr;
+        var eAttr = network.eAttr;
+        var width = args.width;
+        var height = args.height;
         var vertices = graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.addVertex({
-                    vertex: vertex,
-                    vertexConfig: new VertexConfig({
-                        rendererConfig: this.session.getVertexDefaults()
-                    })
-                });
+        var edges = graph.edges;
+
+
+        var rootNode = {
+            name: args.root.id,
+            vertex: args.root,
+            children: null
+        };
+        var visited = {};
+        //visited[args.root.id] = true;
+        this._getTreeNode(rootNode, visited);
+
+        var tree = d3.layout.tree()
+            .sort(null)
+            .size([width, height]);
+        var nodes = tree.nodes(rootNode);
+
+        args.end(nodes);
+
+        //var links = tree.links(nodes);
+
+
+    },
+    _getTreeNode: function (node, visited) {
+        //if (node.vertex.id == "GO:0042802") {
+        //    debugger
+        //}
+        visited[node.vertex.id] = true;
+        for (var i = 0; i < node.vertex.edges.length; i++) {
+            var edge = node.vertex.edges[i];
+            if (edge.target !== node.vertex && visited[edge.target.id] != true) {
+                var childVertex = edge.target;
+                if (node.children == null) {
+                    node.children = [];
+                }
+                //var childVertexParents = [];
+                var notVisitedParentsCount = 0;
+                for (var j = 0; j < childVertex.edges.length; j++) {
+                    var childEdge = childVertex.edges[j];
+                    if (childEdge.target === childVertex) {
+                        if (visited[childEdge.source.id] != true) {
+                            notVisitedParentsCount++;
+                        }
+                    }
+                }
+                if (notVisitedParentsCount == 0) {
+                    node.children.push({
+                        name: childVertex.id,
+                        size: childVertex.renderer.size,
+                        vertex: childVertex,
+                        children: null
+                    });
+                }
+            }
+
+            //
+            //if (edge.target !== vertex && visited[edge.target.id] != true) {
+            //    children.push(this._getTreeNode(edge.target, visited));
+            //}
+            //if (edge.source !== vertex && visited[edge.source.id] != true) {
+            //    children.push(this._getTreeNode(edge.source, visited));
+            //}
+        }
+        if (node.children != null) {
+            for (var i = 0; i < node.children.length; i++) {
+                var childNode = node.children[i];
+                this._getTreeNode(childNode, visited)
             }
         }
+    },
+
+
+
+    /**/
+    /**/
+    /**/
+
+    forceTree: function (args) {
+        /*TODO not ready*/
+        var network = args.network;
+        var graph = network.graph;
+        var vAttr = network.vAttr;
+        var eAttr = network.eAttr;
+        var width = args.width;
+        var height = args.height;
+        var vertices = graph.vertices;
+        var edges = graph.edges;
+        var endFunction = args.end;
+
+        var force = d3.layout.force();
+        force.size([width, height]);
+        force.charge(-320)
+        force.linkDistance(50)
+
+        /* set node and edge arrays for D3 */
+        var verticesMap = [];
+        var edgesArray = [];
+        var verticesArray = [];
+        for (var i = 0, l = vertices.length; i < l; i++) {
+            var vertex = vertices[i];
+            var v = {
+                id: vertex.id,
+                index: i,
+                x: vertex.position.x,
+                y: vertex.position.y
+            };
+            verticesArray.push(v);
+            verticesMap[vertex.id] = v;
+        }
+        force.nodes(verticesArray);
         for (var i = 0, l = edges.length; i < l; i++) {
             var edge = edges[i];
             if (typeof edge !== 'undefined') {
-                this.addEdge({
-                    edge: edge,
-                    edgeConfig: new EdgeConfig({
-                        rendererConfig: this.session.getEdgeDefaults()
-                    })
+                edgesArray.push({
+                    id: edge.id,
+                    source: verticesMap[edge.source.id],
+                    target: verticesMap[edge.target.id]
                 });
             }
         }
-        this.batchEnd();
-        console.timeEnd('Network.setGraph');
-    },
-    getGraph: function () {
-        return this.graph;
-    },
-    draw: function (target) {
-        console.time('Network.draw');
-        var parent = target.parentNode;
-        parent.removeChild(target);
-        this.batchStart();
-        var edges = this.graph.edges;
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.renderVertex(vertex, target);
-            }
-        }
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                this.renderEdge(edge, target);
-            }
-        }
-        this.batchEnd();
-        console.timeEnd('Network.draw');
-        parent.appendChild(target);
-        this.trigger('draw');
-    },
-    addVertex: function (args) {
-        var vertex = args.vertex;
-        var vertexConfig = args.vertexConfig;
-        var target = args.target;
-        var name = args.name;
+        force.links(edgesArray);
 
-        var added = this.graph.addVertex(vertex);
-        if (added) {
-
-            /* vertex config */
-            if (typeof vertexConfig === 'undefined') {
-                vertexConfig = new VertexConfig({
-                    rendererConfig: this.session.getVertexDefaults()
-                });
-            }
-            vertexConfig.id = vertex.id;
-            this.setVertexConfig(vertexConfig);
-
-            if (typeof target !== 'undefined') {
-                this.renderVertex(vertex, target);
-            }
-
-            var n = vertex.id;
-            //attributes
-            if (typeof name !== 'undefined') {
-                n = name;
-            }
-
-            this.vertexAttributeManager.addRecord({
-                'id': vertex.id,
-                'Name': n
-            });
-
-            if (this.batchFlag == false) {
-                this.vertexAttributeManager.trigger('change:data', {sender: this});
-                this.trigger('add:vertex');
-            }
-        }
-        return added;
-    },
-    addEdge: function (args) {
-        var edge = args.edge;
-        var edgeConfig = args.edgeConfig;
-        var target = args.target;
-
-
-        var added = this.graph.addEdge(edge);
-        if (added) {
-
-            /* edge config */
-            if (typeof edgeConfig === 'undefined') {
-                edgeConfig = new EdgeConfig({
-                    rendererConfig: this.session.getEdgeDefaults()
-                });
-            }
-            edgeConfig.id = edge.id;
-            this.setEdgeConfig(edgeConfig);
-
-
-            if (typeof target !== 'undefined') {
-                this.renderEdge(edge, target);
-            }
-
-            //attributes
-            this.edgeAttributeManager.addRecord({
-                'id': edge.id,
-                'Name': edge.id,
-                'Relation': edge.relation
-            });
-
-            if (this.batchFlag == false) {
-                this.edgeAttributeManager.trigger('change:data', {sender: this});
-                this.trigger('add:edge');
-            }
-        }
-        return added;
-    },
-    setVertexConfig: function (vertexConfig) {
-        this.config.setVertexConfig(vertexConfig);
-    },
-    setEdgeConfig: function (edgeConfig) {
-        this.config.setEdgeConfig(edgeConfig);
-    },
-    getVertexConfig: function (vertex) {
-        return this.config.getVertexConfig(vertex);
-    },
-    getEdgeConfig: function (edge) {
-        return this.config.getEdgeConfig(edge);
-    },
-    getVertexById: function (vertexId) {
-        return this.graph.getVertexById(vertexId);
-    },
-    getEdgeById: function (edgeId) {
-        return this.graph.getEdgeById(edgeId);
-    },
-    removeVertex: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.remove();
-        for (var i = 0; i < vertex.edges.length; i++) {
-            var edge = vertex.edges[i];
-            var edgeConfig = this.config.getEdgeConfig(edge);
-            edgeConfig.renderer.remove();
-            this.config.removeEdge(edge);
-            this.edgeAttributeManager.removeRecordById(edge.id);
-        }
-        this.graph.removeVertex(vertex);
-        this.config.removeVertex(vertex);
-        this.vertexAttributeManager.removeRecordById(vertex.id);
-
-        if (this.batchFlag == false) {
-            this.trigger('remove:vertex');
-        }
-
-    },
-    removeEdge: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.remove();
-        this.graph.removeEdge(edge);
-        this.config.removeEdge(edge);
-        this.edgeAttributeManager.removeRecordById(edge.id);
-        if (this.batchFlag == false) {
-            this.trigger('remove:edge');
-        }
-    },
-    removeVertices: function (vertices) {
-        this.batchStart();
-        for (var i = 0, li = vertices.length; i < li; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.removeVertex(vertex);
-            }
-        }
-        this.batchEnd();
-        this.trigger('remove:vertices');
-    },
-    renderVertex: function (vertex, target) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.render({
-            coords: vertexConfig.coords,
-            vertex: vertex,
-            target: target
+        force.on('end', function (o) {
+            console.log(o)
+            endFunction(verticesArray);
         });
+        console.time('D3 Force directed layout');
+        force.start();
+        var safety = 0;
+        while (force.alpha() > 0.025) { // You'll want to try out different, "small" values for this
+            force.tick();
+            var k = 8 * force.alpha();
+            edgesArray.forEach(function (d, i) {
+                d.source.y -= k;
+                d.target.y += k;
+            });
+            if (safety++ > 1000) {
+                break;// Avoids infinite looping in case this solution was a bad idea
+            }
+        }
+//            console.log(safety);
+        force.stop();
+        console.timeEnd('D3 Force directed layout');
+
     },
-    renderEdge: function (edge, target) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        var sourceConfig = this.config.getVertexConfig(edge.source);
-        var targetConfig = this.config.getVertexConfig(edge.target);
-        edgeConfig.render({
-            sourceCoords: sourceConfig.coords,
-            targetCoords: targetConfig.coords,
-            sourceRenderer: sourceConfig.renderer,
-            targetRenderer: targetConfig.renderer,
-            edge: edge,
-            target: target
+
+    tree2: function (args) {
+        /* TODO not ready */
+        var network = args.network;
+        var graph = network.graph;
+        var vAttr = network.vAttr;
+        var eAttr = network.eAttr;
+        var width = args.width;
+        var height = args.height;
+        var vertices = graph.vertices;
+        var edges = graph.edges;
+        var endFunction = args.end;
+
+
+        var force = d3.layout.force()
+            .charge(function (d) {
+                return d._children ? -d.size / 100 : d.children ? -100 : -30;
+            })
+            .linkDistance(function (d) {
+                return d.target._children ? 50 : 30;
+            })
+            .size([width, height]);
+
+
+        var rootNode = {
+            name: args.root.id,
+            vertex: args.root,
+            fixed: true,
+            size: args.root.renderer.size,
+            px: 0,
+            py: 0,
+            children: null
+        };
+        var visited = {};
+        //visited[args.root.id] = true;
+        this._getTreeNode(rootNode, visited);
+
+        var nodes = this._flatten(rootNode, width, height);
+        //var links = d3.layout.hierarchy().links(nodes);
+        var links = d3.layout.tree().links(nodes);
+        // make sure we set .px/.py as well as node.fixed will use those .px/.py to 'stick' the node to:
+        if (!rootNode.px) {
+            // root have not be set / dragged / moved: set initial root position
+            rootNode.px = rootNode.x = width / 2;
+            rootNode.py = rootNode.y = (rootNode.children ? 4.5 : Math.sqrt(rootNode.size) / 10) + 2;
+        }
+        force
+            .nodes(nodes)
+            .links(links);
+
+
+        force.on('end', function (o) {
+            console.log(o)
+            debugger
+            endFunction(nodes);
         });
-    },
-    setVertexLabel: function (vertex, label) {
-        this.vertexAttributeManager.setRecordAttributeById(vertex.id, 'Name', label);
-    },
-    setVertexLabelByAttribute: function (attributeName) {
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.getVertexConfig(vertex);
-                var id = vertex.id;
+        console.time('D3 Force directed layout');
+        force.start();
+        var safety = 0;
+        while (force.alpha() > 0.025) { // You'll want to try out different, "small" values for this
+            force.tick();
 
-//              /* Name attribute is unique */
-                var label = this.vertexAttributeManager.getValueByAttributeAndId(id, attributeName);
-                vertexConfig.renderer.setLabelContent(label);
-            }
-        }
-    },
-    setEdgeLabel: function (edge, label) {
-        this.edgeAttributeManager.setRecordAttributeById(edge.id, 'Name', label);
-    },
-    setEdgeLabelByAttribute: function (attributeName) {
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.getEdgeConfig(edge);
-                var id = edge.id;
+            // Apply the constraints:
+            force.nodes().forEach(function(d) {
+                if (!d.fixed) {
+                    var r = (d.children ? 4.5 : Math.sqrt(d.size) / 10) + 4, dx, dy, ly = 30;
 
-                /* Name attribute is unique */
-                var label = this.edgeAttributeManager.getValueByAttributeAndId(id, attributeName);
-                edgeConfig.renderer.setLabelContent(label);
-            }
-        }
-    },
+                    // #1: constraint all nodes to the visible screen:
+                    //d.x = Math.min(width - r, Math.max(r, d.x));
+                    //d.y = Math.min(height - r, Math.max(r, d.y));
 
-    selectVertex: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.select();
-        this.vertexAttributeManager.setRecordAttributeById(vertex.id, 'Selected', true);
-    },
-    selectEdge: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.select();
-        this.edgeAttributeManager.setRecordAttributeById(edge.id, 'Selected', true);
-    },
-    selectVerticesByIds: function (vertexIds) {
-        var selectedVertices = []
-        for (var i = 0, l = vertexIds.length; i < l; i++) {
-            var vertexId = vertexIds[i];
-            var vertex = this.getVertexById(vertexId);
-            var vertexConfig = this.config.getVertexConfig(vertex);
-            vertexConfig.renderer.select();
-            selectedVertices.push(vertex);
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectByArea: function (x, y, width, height) {
-        var selectedVertices = [];
-        var selectedEdges = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.getVertexConfig(vertex);
-                if (vertexConfig.coords.x >= x && vertexConfig.coords.x <= x + width && vertexConfig.coords.y >= y && vertexConfig.coords.y <= y + height) {
-                    vertexConfig.renderer.select();
-                    selectedVertices.push(vertex);
-
-                    for (var j = 0; j < vertex.edges.length; j++) {
-                        var edge = vertex.edges[j];
-                        var edgeConfig = this.config.getEdgeConfig(edge);
-                        if (edgeConfig.renderer.selected === false) {
-                            edgeConfig.renderer.select();
-                            selectedEdges.push(edge);
+                    // #1.0: hierarchy: same level nodes have to remain with a 1 LY band vertically:
+                    if (d.children || d._children) {
+                        var py = 0;
+                        if (d.parent) {
+                            py = d.parent.y;
                         }
+                        d.py = d.y = py + d.depth * ly + r;
                     }
 
-                }
-            }
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        this.edgeAttributeManager.selectByItems(selectedEdges);
-        return {vertices: selectedVertices, edges: selectedEdges};
-    },
-    deselectVertex: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.deselect();
-        this.vertexAttributeManager.setRecordAttributeById(vertex.id, 'Selected', false);
-    },
-    deselectEdge: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.deselect();
-        this.edgeAttributeManager.setRecordAttributeById(edge.id, 'Selected', false);
-    },
-    deselectAllVertices: function () {
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                vertexConfig.renderer.deselect();
-            }
-        }
-        this.vertexAttributeManager.deselectAll();
-    },
-    deselectAllEdges: function () {
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.config.getEdgeConfig(edge);
-                edgeConfig.renderer.deselect();
-            }
-        }
-        this.edgeAttributeManager.deselectAll();
-    },
-    selectAllVertices: function () {
-        var selectedVertices = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                vertexConfig.renderer.select();
-                selectedVertices.push(vertex);
-            }
-        }
-        this.vertexAttributeManager.selectAll();
-        return selectedVertices;
-    },
-    selectVerticesNeighbour: function (vertices) {
-        var selectedVertices = [];
-        var selectedVerticesMap = {};
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                selectedVerticesMap[vertex.id] = vertex;
-                selectedVertices.push(vertex);
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                vertexConfig.renderer.select();
+                    // #1a: constraint all nodes to the visible screen: links
+                    dx = Math.min(0, width - r - d.x) + Math.max(0, r - d.x);
+                    dy = Math.min(0, height - r - d.y) + Math.max(0, r - d.y);
+                    d.x += 2 * Math.max(-ly, Math.min(ly, dx));
+                    d.y += 2 * Math.max(-ly, Math.min(ly, dy));
+                    // #1b: constraint all nodes to the visible screen: charges ('repulse')
+                    dx = Math.min(0, width - r - d.px) + Math.max(0, r - d.px);
+                    dy = Math.min(0, height - r - d.py) + Math.max(0, r - d.py);
+                    d.px += 2 * Math.max(-ly, Math.min(ly, dx));
+                    d.py += 2 * Math.max(-ly, Math.min(ly, dy));
 
-                for (var j = 0; j < vertex.edges.length; j++) {
-                    var edge = vertex.edges[j];
-                    if (typeof selectedVerticesMap[edge.source.id] === 'undefined') {
-                        selectedVerticesMap[edge.source.id] = edge.source;
-                        selectedVertices.push(edge.source);
-                        var vertexConfig = this.config.getVertexConfig(edge.source);
-                        vertexConfig.renderer.select();
-                    }
-                    if (typeof selectedVerticesMap[edge.target.id] === 'undefined') {
-                        selectedVerticesMap[edge.target.id] = edge.target;
-                        selectedVertices.push(edge.target);
-                        var vertexConfig = this.config.getVertexConfig(edge.target);
-                        vertexConfig.renderer.select();
+                    // #2: hierarchy means childs must be BELOW parents in Y direction:
+                    if (d.parent) {
+                        d.y = Math.max(d.y, d.parent.y + ly);
+                        d.py = Math.max(d.py, d.parent.py + ly);
                     }
                 }
-            }
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectEdgesNeighbour: function (vertices) {
-        var selectedEdges = [];
-        var selectedEdgesMap = {};
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                for (var j = 0; j < vertex.edges.length; j++) {
-                    var edge = vertex.edges[j];
-                    if (typeof selectedEdgesMap[edge.id] === 'undefined') {
-                        selectedEdgesMap[edge.id] = edge;
-                        selectedEdges.push(edge);
-                        var edgeConfig = this.config.getEdgeConfig(edge);
-                        edgeConfig.renderer.select();
-                    }
-                }
-            }
-        }
-        this.edgeAttributeManager.selectByItems(selectedEdges);
-        return selectedEdges;
-    },
-    selectVerticesInvert: function () {
-        var selectedVertices = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var vertexConfig = this.config.getVertexConfig(vertex);
-                if (vertexConfig.renderer.selected) {
-                    vertexConfig.renderer.deselect();
-                } else {
-                    selectedVertices.push(vertex);
-                    vertexConfig.renderer.select();
-                }
-            }
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectAllEdges: function () {
-        var selectedEdges = [];
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.config.getEdgeConfig(edge);
-                edgeConfig.renderer.select();
-                selectedEdges.push(edge);
-            }
-        }
-        this.edgeAttributeManager.selectAll();
-        return selectedEdges;
-    },
-    selectVerticesByAttribute: function (attributeName, attributeValue) {
-        var selectedVertices = [];
-        var ids = this.vertexAttributeManager.getIdsByAttributeValue(attributeName, attributeValue);
-        for (var i = 0, l = ids.length; i < l; i++) {
-            var id = ids[i];
-            var vertex = this.graph.getVertexById(id);
-            var vertexConfig = this.config.getVertexConfig(vertex);
-            vertexConfig.renderer.select();
-            selectedVertices.push(vertex);
-        }
-        this.vertexAttributeManager.selectByItems(selectedVertices);
-        return selectedVertices;
-    },
-    selectEdgesByAttribute: function (attributeName, attributeValue) {
-        var selectedEdges = [];
-        var ids = this.edgeAttributeManager.getIdsByAttributeValue(attributeName, attributeValue);
-        for (var i = 0, l = ids.length; i < l; i++) {
-            var id = ids[i];
-            var edge = this.graph.getEdgeById(id);
-            var edgeConfig = this.config.getEdgeConfig(edge);
-            edgeConfig.renderer.select();
-            selectedEdges.push(edge);
-        }
-        this.vertexAttributeManager.selectByItems(selectedEdges);
-        return selectedEdges;
-    },
-
-
-    moveVertex: function (vertex, dispX, dispY, dispZ) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.move(dispX, dispY, dispZ);
-
-        this._updateEdgeCoords(vertex);
-    },
-    _updateEdgeCoords: function (vertex) {
-        for (var i = 0; i < vertex.edges.length; i++) {
-            var edge = vertex.edges[i];
-            var edgeConfig = this.getEdgeConfig(edge);
-            var sourceConfig = this.getVertexConfig(edge.source);
-            var targetConfig = this.getVertexConfig(edge.target);
-
-            if (vertex === edge.source) {
-//                edgeConfig.renderer.moveSource(sourceConfig.coords);
-                edgeConfig.renderer.move(sourceConfig.coords);
-            }
-            if (vertex === edge.target) {
-//                edgeConfig.renderer.moveTarget(targetConfig.coords);
-                edgeConfig.renderer.move(targetConfig.coords);
-            }
-        }
-    },
-    setVertexCoords: function (vertex, x, y, z) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.setCoords(x, y, z);
-
-        this._updateEdgeCoords(vertex);
-    },
-    setVertexCoordsById: function (vertexId, x, y, z) {
-        var vertex = this.getVertexById(vertexId);
-        this.setVertexCoords(vertex, x, y, z);
-    },
-    getVertexCoords: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        return vertexConfig.getCoords();
-    },
-
-    isVertexSelected: function (vertex) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        return vertexConfig.renderer.selected;
-    },
-    isEdgeSelected: function (edge) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        return edgeConfig.renderer.selected;
-    },
-
-
-    /* Config Renderer Attributes */
-    setVertexRendererAttribute: function (vertex, rendererAttr, value, updateEdges) {
-        var vertexConfig = this.config.getVertexConfig(vertex);
-        vertexConfig.renderer.set(rendererAttr, value);
-
-        //By default not update edges
-        if (updateEdges === true) {
-            this._updateVertexEdgesRenderer(vertex);
-        }
-    },
-    _updateVertexEdgesRenderer: function (vertex) {
-        for (var j = 0; j < vertex.edges.length; j++) {
-            var edge = vertex.edges[j];
-            if (typeof edge !== 'undefined') {
-                var edgeConfig = this.getEdgeConfig(edge);
-                edgeConfig.renderer.updateShape();
-            }
-        }
-    },
-    setVerticesRendererAttribute: function (rendererAttr, value, updateEdges) {
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                this.setVertexRendererAttribute(vertex, rendererAttr, value, updateEdges);
-            }
-        }
-    },
-    setVerticesRendererAttributeMap: function (rendererAttr, vertexAttribute, uniqueMap) {
-        for (var uniqueAttrValue in uniqueMap) {
-            var rendererValue = uniqueMap[uniqueAttrValue];
-            var ids = this.vertexAttributeManager.getIdsByAttributeValue(vertexAttribute, uniqueAttrValue);
-            for (var i = 0, l = ids.length; i < l; i++) {
-                var id = ids[i];
-                var vertex = this.graph.getVertexById(id);
-                this.setVertexRendererAttribute(vertex, rendererAttr, rendererValue);
-            }
-        }
-    },
-    setVerticesRendererAttributeListMap: function (args) {
-        var _this = this;
-
-        var settings = args.settings;
-        var defaults = args.defaults;
-
-        if (settings.length > 0) {
-            var sortFunction = function (a, b) {
-                return b.values.length - a.values.length;
-            };
-
-            var checkEqualValuesLength = function (list) {
-                if (list.length == 1) {
-                    return true;
-                } else {
-                    var l = list[0].values.length;
-                    for (var i = 1; i < list.length; i++) {
-                        if (list[i].values.length !== l) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            };
-            var checkNotEqualValuesLength = function (list) {
-                if (list.length > 1) {
-//                var l0 = list[0].values.length;
-                    for (var i = 1; i < list.length; i++) {
-                        var li = list[i].values.length;
-                        if (li > 1) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            };
-
-            this.vertexAttributeManager.eachRecord(function (record) {
-
-
-                var slicesMap = {};
-
-                var id = record.get('id');
-
-//                if(id === 'c'){
-//                    debugger
-//                }
-
-                var vertex = _this.graph.getVertexById(id);
-                var vertexConfig = _this.config.getVertexConfig(vertex);
-
-                for (var s = 0; s < settings.length; s++) {
-                    var configs = settings[s].configs;
-                    var label = settings[s].label;
-                    var slicesName = settings[s].slicesName;
-                    var sliceDefault = defaults[slicesName];
-
-                    if (configs.length > 0) {
-
-                        var valuesAndConfigList = [];
-                        for (var i = 0; i < configs.length; i++) {
-                            var config = configs[i];
-                            if (typeof config !== 'undefined') {
-                                var value = record.get(config.attribute);
-                                if (value) {
-                                    var valueSplit = value.split(',');
-                                    valuesAndConfigList.push({values: valueSplit, config: config});
-                                }
-                            }
-                        }
-
-                        valuesAndConfigList.sort(sortFunction);
-
-                        var slices = [];
-                        if (valuesAndConfigList.length > 0) {
-                            if (checkEqualValuesLength(valuesAndConfigList)) {
-                                var valuesLength = valuesAndConfigList[0].values.length;
-                                for (var i = 0; i < valuesLength; i++) {
-                                    var slice = {};
-                                    for (var displayAttribute in sliceDefault) {
-                                        slice[displayAttribute] = sliceDefault[displayAttribute];
-                                    }
-
-                                    for (var j = 0; j < valuesAndConfigList.length; j++) {
-                                        var valuesAndConfig = valuesAndConfigList[j];
-                                        var val = valuesAndConfig.values[i];
-                                        var renderValue = valuesAndConfig.config.map[val];
-                                        if (label.enable && valuesAndConfig.config.attribute === label.attribute) {
-                                            slice['text'] = val;
-                                            slice['labelSize'] = label.size;
-                                            slice['labelOffset'] = label.offset;
-                                        }
-                                        if (typeof renderValue !== 'undefined') {
-                                            slice[valuesAndConfig.config.displayAttribute] = renderValue;
-                                        }
-                                    }
-                                    slices.push(slice);
-                                }
-                            } else if (checkNotEqualValuesLength(valuesAndConfigList)) {
-                                var valuesLength = valuesAndConfigList[0].values.length;
-                                for (var i = 0; i < valuesLength; i++) {
-                                    var slice = {};
-                                    for (var displayAttribute in sliceDefault) {
-                                        slice[displayAttribute] = sliceDefault[displayAttribute];
-                                    }
-
-                                    var valuesAndConfig = valuesAndConfigList[0];
-                                    var val = valuesAndConfig.values[i];
-                                    var renderValue = valuesAndConfig.config.map[val];
-                                    if (label.enable && valuesAndConfig.config.attribute === label.attribute) {
-                                        slice['text'] = val;
-                                        slice['labelSize'] = label.size;
-                                        slice['labelOffset'] = label.offset;
-                                    }
-                                    if (typeof renderValue !== 'undefined') {
-                                        slice[valuesAndConfig.config.displayAttribute] = renderValue;
-                                    }
-
-                                    for (var j = 1; j < valuesAndConfigList.length; j++) {
-                                        valuesAndConfig = valuesAndConfigList[j];
-                                        val = valuesAndConfig.values[0];
-                                        if (label.enable && valuesAndConfig.config.attribute === label.attribute) {
-                                            slice['text'] = val;
-                                            slice['labelSize'] = label.size;
-                                            slice['labelOffset'] = label.offset;
-                                        }
-                                        renderValue = valuesAndConfig.config.map[val];
-                                        if (typeof renderValue !== 'undefined') {
-                                            slice[valuesAndConfig.config.displayAttribute] = renderValue;
-                                        }
-                                    }
-                                    slices.push(slice);
-                                }
-                            } else {
-                                console.log(record.get('id'));
-                            }
-                        }
-                        if (slices.length > 0) {
-                            slicesMap[slicesName] = slices;
-                        }
-                    }
-                }
-                vertexConfig.renderer.updateComplex(slicesMap, defaults);
-                _this._updateEdgeCoords(vertex);
-            });
-        }
-    },
-    setEdgeRendererAttribute: function (edge, attr, value) {
-        var edgeConfig = this.config.getEdgeConfig(edge);
-        edgeConfig.renderer.set(attr, value);
-    },
-    setEdgesRendererAttribute: function (attr, value) {
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                this.setEdgeRendererAttribute(edge, attr, value);
-            }
-        }
-    },
-    setEdgesRendererAttributeMap: function (rendererAttr, vertexAttribute, uniqueMap) {
-        for (var uniqueAttrValue in uniqueMap) {
-            var rendererValue = uniqueMap[uniqueAttrValue];
-            var ids = this.edgeAttributeManager.getIdsByAttributeValue(vertexAttribute, uniqueAttrValue);
-            for (var i = 0, l = ids.length; i < l; i++) {
-                var id = ids[i];
-                var edge = this.graph.getEdgeById(id);
-                this.setEdgeRendererAttribute(edge, rendererAttr, rendererValue);
-            }
-        }
-    },
-
-
-    getVerticesLength: function () {
-        return this.graph.numberOfVertices;
-    },
-    getEdgesLength: function () {
-        return this.graph.numberOfEdges;
-    },
-    getVertices: function () {
-        var items = [];
-        var vertices = this.graph.vertices;
-        for (var i = 0, l = vertices.length; i < l; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                items.push(vertex);
-            }
-        }
-        return items;
-    },
-    getEdges: function () {
-        var items = [];
-        var edges = this.graph.edges;
-        for (var i = 0, l = edges.length; i < l; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                items.push(edge);
-            }
-        }
-        return items;
-    },
-    getVerticesOrdered: function (attributeName) {
-        var vertices = [];
-        var item = this.vertexAttributeManager.getOrderedIdsByAttribute(attributeName);
-        for (var i = 0, l = item.length; i < l; i++) {
-            var id = item[i].id;
-            var vertex = this.graph.getVertexById(id);
-            if (typeof vertex !== 'undefined') {
-                vertices.push(vertex);
-            }
-        }
-        return vertices;
-    },
-
-
-//    /* Attribute Manager */
-//    addAttribute: function (name, type, defaultValue) {
-//        //TODO test
-//    },
-//    removeAttribute: function (name) {
-//        //TODO test
-////        this.attributeManager.removeAttribute(name);
-//    },
-//    getVertexAttributes: function (vertex, success) {
-//        //TODO test
-////        this.attributeManager.getVertexAttributes(vertex, success);
-//    },
-
-    clean: function () {
-        console.time('Network.clean')
-        /*  graph */
-        this.graph.clean();
-        this.config.clean();
-
-        //Attributes
-        this.vertexAttributeManager.clean();
-        this.edgeAttributeManager.clean();
-
-        var vertexAttributes = [
-            {name: "id", type: "string", defaultValue: "none", locked: true},
-            {name: "Name", type: "string", defaultValue: "none"}
-        ];
-        var edgeAttributes = [
-            {name: "id", type: "string", defaultValue: "none", locked: true},
-            {name: "Name", type: "string", defaultValue: "none"},
-            {name: "Relation", type: "string", defaultValue: "none"}
-        ];
-        this.vertexAttributeManager.addAttributes(vertexAttributes);
-        this.edgeAttributeManager.addAttributes(edgeAttributes);
-
-        this.trigger('clean');
-        console.timeEnd('Network.clean')
-    },
-
-    getAsSIF: function (separator) {
-        return this.graph.getAsSIF(separator);
-    },
-    getAsSIFCustomRelation: function (separator, relationColumn) {
-        if (typeof separator === 'undefined') {
-            separator = '\t';
-        }
-
-        var vertices = this.graph.vertices;
-        var edges = this.graph.edges;
-
-        var sifText = "";
-        for (var i = 0; i < edges.length; i++) {
-            var edge = edges[i];
-            if (typeof edge !== 'undefined') {
-                var line = "";
-
-                var attrValue = this.edgeAttributeManager.getValueByAttributeAndId(edge.id, relationColumn);
-
-                line = edge.source.id + separator + attrValue + separator + edge.target.id + "\n";
-                sifText += line;
-            }
-        }
-        for (var i = 0; i < vertices.length; i++) {
-            var vertex = vertices[i];
-            if (typeof vertex !== 'undefined') {
-                var line = "";
-                if (vertex.edges.length == 0) {
-                    line = vertex.id + separator + separator + "\n";
-                }
-                sifText += line;
-            }
-        }
-        return sifText;
-    },
-
-    /** JSON import/export **/
-    /* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify */
-    saveSession: function () {
-        this.session.loadGraph(this.graph);
-        this.session.loadConfig(this.config);
-        this.session.loadVertexAttributes(this.vertexAttributeManager);
-        this.session.loadEdgeAttributes(this.edgeAttributeManager);
-//        return {
-//            graph: this.graph,
-//            config: this.config,
-//            vertexAttributes: this.vertexAttributeManager,
-//            edgeAttributes: this.edgeAttributeManager
-//        };
-    },
-    loadSession: function () {
-        this.clean();
-
-        this.batchStart();
-        console.time('Network.loadJSON');
-
-//        console.time('Network.loadJSON-Vertices');
-        for (var i = 0; i < this.session.graph.vertices.length; i++) {
-            var v = this.session.graph.vertices[i];
-            var vertex = new Vertex({
-                id: v.id
             });
 
-            /* vertex config */
-            var config = this.session.config.vertices[v.id];
-//            console.time('Network.loadJSON-vertex');
-            if (typeof config === 'undefined') {
-                var vertexConfig = new VertexConfig({
-                    rendererConfig: this.session.getVertexDefaults()
-                });
-            } else {
-                var vertexConfig = new VertexConfig({
-                    id: v.id,
-                    coords: this.session.config.vertices[v.id].coords,
-                    rendererConfig: config.renderer
-                });
-            }
-//            console.timeEnd('Network.loadJSON-vertex');
 
-            this.addVertex({
-                vertex: vertex,
-                vertexConfig: vertexConfig
-            });
-        }
-//        console.timeEnd('Network.loadJSON-Vertices');
-//        console.time('Network.loadJSON-Edges');
-        for (var i = 0; i < this.session.graph.edges.length; i++) {
-            var e = this.session.graph.edges[i];
-
-            var source = this.getVertexById(e.source.id);
-            var target = this.getVertexById(e.target.id);
-
-            var edge = new Edge({
-                id: e.id,
-                relation: e.relation,
-                source: source,
-                target: target
-            });
-
-            /* edge config */
-            var config = this.session.config.edges[e.id];
-            if (typeof config === 'undefined') {
-                var edgeConfig = new EdgeConfig({
-                    rendererConfig: this.session.getEdgeDefaults()
-                });
-            } else {
-                var edgeConfig = new EdgeConfig({
-                    id: e.id,
-                    coords: this.session.config.edges[e.id].coords,
-                    rendererConfig: config.renderer
-                });
-            }
-
-            this.addEdge({
-                edge: edge,
-                edgeConfig: edgeConfig
-            });
-        }
-//        console.timeEnd('Network.loadJSON-Edges');
-
-        this._importAttributes(this.session.attributes.vertices, this.vertexAttributeManager);
-        this._importAttributes(this.session.attributes.edges, this.edgeAttributeManager);
-
-        this.batchEnd();
-        this.trigger('load:json');
-        console.timeEnd('Network.loadJSON');
-    },
-    importVertexWithAttributes: function (data) {
-        console.time('Network.importVertexWithAttributes');
-        this.batchStart();
-        if (data.createVertices) {
-            for (var i = 0; i < data.content.data.length; i++) {
-                var id = data.content.data[i][0];
-
-                var vertex = new Vertex({
-                    id: id
-                });
-
-                this.addVertex({
-                    vertex: vertex
-                });
+            if (safety++ > 1000) {
+                break;// Avoids infinite looping in case this solution was a bad idea
             }
         }
-        // add attributes
-        this._importAttributes(data.content, this.vertexAttributeManager);
-        this.batchEnd();
-        this.trigger('import:attributes');
-        console.timeEnd('Network.importVertexWithAttributes');
+//            console.log(safety);
+        force.stop();
+        console.timeEnd('D3 Force directed layout');
+
+
     },
-    _importAttributes: function (data, attributeManager) {
-        if (data.attributes && data.attributes.length > 1) {
-            var attributes = data.attributes;
-            attributeManager.addAttributes(attributes);
-            // add values for attributes
-//            console.time('Network._importAttributes');
-            var values = [], recordObject, attr, value;
-            for (var i = 0; i < data.data.length; i++) {
-                recordObject = {
-                    id: data.data[i][0]
-                };
-                for (var j = 1; j < data.data[i].length; j++) {
-                    attr = attributes[j].name;
-                    value = data.data[i][j];
-                    recordObject[attr] = value;
-                }
-                values.push(recordObject);
+    _flatten: function (root, width, height) {
+        var nodes = [], i = 0, depth = 0, level_widths = [1], max_width, max_depth = 1, kx, ky;
+
+        function recurse(node, parent, depth, x) {
+            if (node.children) {
+                var w = level_widths[depth + 1] || 0;
+                level_widths[depth + 1] = w + node.children.length;
+                max_depth = Math.max(max_depth, depth + 1);
+                node.size = node.children.reduce(function (p, v, i) {
+                    return p + recurse(v, node, depth + 1, w + i);
+                }, 0);
             }
-//            console.timeEnd('Network._importAttributes');
-            attributeManager.setRecordAttributeByIds(values);
+            if (!node.id) node.id = ++i;
+            node.parent = parent;
+            node.depth = depth;
+            if (!node.px) {
+                node.y = depth;
+                node.x = x;
+            }
+            nodes.push(node);
+            return node.size;
         }
-    },
-    importEdgesWithAttributes: function (data) {
-        console.time('Network.importEdgesWithAttributes');
-        this.batchStart();
-        // add attributes
-        this._importAttributes(data.content, this.edgeAttributeManager);
-        this.batchEnd();
-        this.trigger('import:attributes');
-        console.timeEnd('Network.importEdgesWithAttributes');
-    },
-    batchStart: function () {
-        this.batchFlag = true;
-        this.vertexAttributeManager.store.suspendEvents();
-        this.edgeAttributeManager.store.suspendEvents();
-    },
-    batchEnd: function () {
-        this.vertexAttributeManager.store.resumeEvents();
-        this.edgeAttributeManager.store.resumeEvents();
-        this.vertexAttributeManager.store.fireEvent('refresh');
-        this.edgeAttributeManager.store.fireEvent('refresh');
-        this.vertexAttributeManager.trigger('change:data', {sender: this});
-        this.edgeAttributeManager.trigger('change:data', {sender: this});
-        this.batchFlag = false;
-        this.trigger('batch:end');
+
+        root.size = recurse(root, null, 0);
+
+        // now correct/balance the x positions:
+        max_width = 1;
+        for (i = level_widths.length; --i > 0;) {
+            max_width = Math.max(max_width, level_widths[i]);
+        }
+        kx = (width - 20) / max_width;
+        ky = (height - 20) / max_depth;
+        for (i = nodes.length; --i >= 0;) {
+            var node = nodes[i];
+            if (!node.px) {
+                node.y *= ky;
+                node.y += 10 + ky / 2;
+                node.x *= kx;
+                node.x += 10 + kx / 2;
+            }
+        }
+
+        return nodes;
     }
+
+
 }
 Point = function (x, y, z) {
 
@@ -22659,85 +18520,11 @@ Point.prototype = {
 
         return this;
 
-    }
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
-
-function VertexConfig(args) {
-
-
-    var x = Math.floor((Math.random() * 500) + 30);
-    var y = Math.floor((Math.random() * 500) + 30);
-    var z = Math.floor((Math.random() * 500) + 30);
-
-    this.id;
-    this.coords = {x: x, y: y, z: z};
-    this.rendererConfig = {};
-    this.renderer = new CircosVertexRenderer(this.rendererConfig);
-    this.type;
-    this.visible;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.renderer.setConfig(this.rendererConfig);
-}
-
-VertexConfig.prototype = {
-    setCoords: function (x, y, z) {
-        var dx = x - this.coords.x;
-        var dy = y - this.coords.y;
-        var dz = z - this.coords.z;
-
-        this.coords.x = x;
-        this.coords.y = y;
-        this.coords.z = z;
-
-        this.renderer.move(dx, dy, dz);
-    },
-    move: function (dx, dy, dz) {
-        this.coords.x += dx;
-        this.coords.y += dy;
-        if (typeof dz !== 'undefined') {
-            this.coords.z += dz;
-        }
-        this.renderer.move(dx, dy, dz);
-    },
-    getCoords: function () {
-        return this.coords;
-    },
-    render: function (args) {
-        this.renderer.render(args);
     },
     toJSON: function () {
-        return {
-            id: this.id,
-            coords: this.coords,
-            renderer: this.renderer,
-            type: this.type,
-            visible: this.visible
-        };
+        return {x: this.x, y: this.y, z: this.z}
     }
-}
+};
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -22766,9 +18553,20 @@ function Vertex(args) {
     this.edgesIndex = {};
 
     this.position = new Point();
+    this.renderer = new CircosVertexRenderer();
+    this.attributes = {};
 
     //set instantiation args, must be last
-    _.extend(this, args);
+    for (var prop in args) {
+        if (hasOwnProperty.call(args, prop)) {
+            this[prop] = args[prop];
+        }
+    }
+
+    if (this.renderer) {
+        this.renderer.coords = this.position;
+        this.renderer.vertex = this;
+    }
 }
 
 Vertex.prototype = {
@@ -22798,9 +18596,22 @@ Vertex.prototype = {
             return false;
         }
     },
+    render: function (args) {
+        this.renderer.render(args)
+    },
+    setRenderer: function (renderer) {
+        if (renderer) {
+            this.renderer = renderer;
+            this.renderer.coords = this.position;
+            this.renderer.vertex = this;
+        }
+    },
     toJSON: function () {
         return {
-            id: this.id
+            id: this.id,
+            position: this.position,
+            renderer: this.renderer,
+            attributes: this.attributes
         }
     }
 }
@@ -23543,24 +19354,47 @@ function CellBaseAdapter(args) {
 
     _.extend(this, Backbone.Events);
 
-    this.host;
-    this.version;
-
     _.extend(this, args);
 
     this.on(this.handlers);
 
-    this.cache = {};
+    this.configureCache();
+
+    this.debug = false;
 }
 
 CellBaseAdapter.prototype = {
+    setSpecies: function(species) {
+        this.species = species;
+        this.configureCache();
+    },
+    setHost: function(host) {
+        this.configureCache();
+        this.host = host;
+    },
+    configureCache: function() {
+        var host = this.host || CellBaseManager.host;
+        var speciesString = this.species.id + this.species.assembly.name.replace(/[/_().\ -]/g, '');
+        var cacheId = host + speciesString;
+        if (!this.cacheConfig) {
+            this.cacheConfig = {
+                //    //subCacheId: this.resource + this.params.keys(),
+                chunkSize: 3000
+            }
+        }
+        this.cacheConfig.cacheId = cacheId;
+        this.cache = new FeatureChunkCache(this.cacheConfig);
+    },
 
-    getData: function (args) {
+    getData: function(args) {
         var _this = this;
 
-        args.webServiceCallCount = 0;
+        var params = {};
+        //histogram: (dataType == 'histogram')
+        _.extend(params, this.params);
+        _.extend(params, args.params);
 
-        /** Check region and parameters **/
+        /** 1 region check **/
         var region = args.region;
         if (region.start > 300000000 || region.end < 1) {
             return;
@@ -23568,172 +19402,131 @@ CellBaseAdapter.prototype = {
         region.start = (region.start < 1) ? 1 : region.start;
         region.end = (region.end > 300000000) ? 300000000 : region.end;
 
+        /** 2 category check **/
+        var categories = [this.category + this.subCategory + this.resource + Utils.queryString(params)];
 
-        var params = {};
-        _.extend(params, this.params);
-        _.extend(params, args.params);
-
+        /** 3 dataType check **/
         var dataType = args.dataType;
         if (_.isUndefined(dataType)) {
             console.log("dataType must be provided!!!");
         }
-        var chunkSize;
 
+        /** 4 chunkSize check **/
+        var chunkSize = params.interval ? params.interval : this.cacheConfig.chunkSize; // this.cache.defaultChunkSize should be the same
+        if (this.debug) {
+            console.log(chunkSize);
+        }
 
-        /** Check dataType histogram  **/
-        if (dataType == 'histogram') {
-            // Histogram chunks will be saved in different caches by interval size
-            // The chunkSize will be the histogram interval
-            var histogramId = dataType + '_' + params.interval;
-            if (_.isUndefined(this.cache[histogramId])) {
-                this.cache[histogramId] = new FeatureChunkCache({chunkSize: params.interval});
+        /**
+         * Get the uncached regions (uncachedRegions) and cached chunks (cachedChunks).
+         * Uncached regions will be used to query cellbase. The response data will be converted in chunks
+         * by the Cache TODO????
+         * Cached chunks will be returned by the args.dataReady Callback.
+         */
+        this.cache.get(region, categories, dataType, chunkSize, function(cachedChunks, uncachedRegions) {
+
+            var category = categories[0];
+            var categoriesName = "";
+            for (var j = 0; j < categories.length; j++) {
+                categoriesName += "," + categories[j];
             }
-            chunkSize = this.cache[histogramId].chunkSize;
+            categoriesName = categoriesName.slice(1);   // to remove first ','
 
-            // Extend region to be adjusted with the chunks
-            //        --------------------             -> Region needed
-            // |----|----|----|----|----|----|----|    -> Logical chunk division
-            //      |----|----|----|----|----|         -> Chunks covered by needed region
-            //      |------------------------|         -> Adjusted region
-            var adjustedRegions = this.cache[histogramId].getAdjustedRegions(region);
-            if (adjustedRegions.length > 0) {
-                args.webServiceCallCount++;
-                // Get CellBase data
-                CellBaseManager.get({
-                    host: this.host,
-                    version: this.version,
-                    species: this.species,
-                    category: this.category,
-                    subCategory: this.subCategory,
-                    query: adjustedRegions,
-                    resource: this.resource,
-                    params: params,
-                    success: function (data) {
-                        _this._cellbaseHistogramSuccess(data, dataType, histogramId, args);
-                    }
-                });
-            }
-            // Get chunks from cache
-            var chunksByRegion = this.cache[histogramId].getCachedByRegion(region);
-            var chunksCached = this.cache[histogramId].getByRegions(chunksByRegion.cached);
-            this.trigger('data:ready', {items: chunksCached, dataType: dataType, chunkSize: chunkSize, sender: this});
+            var chunks = cachedChunks[category];
+            // TODO check how to manage multiple regions
+            var queriesList = _this._groupQueries(uncachedRegions[category]);
 
-
-            /** Features: genes, snps ... **/
-        } else {
-            // Features will be saved using the dataType features
-            if (_.isUndefined(this.cache[dataType])) {
-                this.cache[dataType] = new FeatureChunkCache(this.cacheConfig);
-            }
-            chunkSize = this.cache[dataType].chunkSize;
-
-            // Get cached chunks and not cached chunk regions
-            //        --------------------             -> Region needed
-            // |----|----|----|----|----|----|----|    -> Logical chunk division
-            //      |----|----|----|----|----|         -> Chunks covered by needed region
-            //      |----|++++|++++|----|----|         -> + means the chunk is cached so its region will not be retrieved
-            var chunksByRegion = this.cache[dataType].getCachedByRegion(region);
-
-            if (chunksByRegion.notCached.length > 0) {
-                var queryRegionStrings = _.map(chunksByRegion.notCached, function (region) {
-                    return new Region(region).toString();
-                });
-
-                // Multiple CellBase calls will be performed, each one will
-                // query 50 or less chunk regions
-                var n = 50;
-                var lists = _.groupBy(queryRegionStrings, function (a, b) {
-                    return Math.floor(b / n);
-                });
-                // Each element on queriesList contains and array of 50 or less regions
-                var queriesList = _.toArray(lists); //Added this to convert the returned object to an array.
-
+            /** Uncached regions found **/
+            if (queriesList.length > 0) {
+                args.webServiceCallCount = 0;
                 for (var i = 0; i < queriesList.length; i++) {
                     args.webServiceCallCount++;
+                    var queryRegion = queriesList[i];
+
+                    // Get CellBase data
                     CellBaseManager.get({
-                        host: this.host,
-                        version: this.version,
-                        species: this.species,
-                        category: this.category,
-                        subCategory: this.subCategory,
-                        query: queriesList[i],
-                        resource: this.resource,
+                        host: _this.host,
+                        version: _this.version,
+                        species: _this.species,
+                        category: _this.category,
+                        subCategory: _this.subCategory,
+                        query: queryRegion.toString(),
+                        resource: _this.resource,
                         params: params,
-                        success: function (data) {
-                            _this._cellbaseSuccess(data, dataType, args);
+                        success: function(response) {
+                            var responseChunks = _this._cellbaseSuccess(response, categories, dataType, chunkSize);
+                            args.webServiceCallCount--;
+
+                            chunks = chunks.concat(responseChunks);
+                            if (args.webServiceCallCount === 0) {
+                                chunks.sort(function(a, b) {
+                                    return a.chunkKey.localeCompare(b.chunkKey)
+                                });
+                                args.done({
+                                    items: chunks, dataType: dataType, chunkSize: chunkSize, sender: _this
+                                });
+                            }
+                        },
+                        error: function() {
+                            console.log('Server error');
+                            args.done();
                         }
                     });
                 }
+            } else
+            /** All regions are cached **/
+            {
+                args.done({
+                    items: chunks, dataType: dataType, chunkSize: chunkSize, sender: _this
+                });
             }
-            // Get chunks from cache
-            if (chunksByRegion.cached.length > 0) {
-                var chunksCached = this.cache[dataType].getByRegions(chunksByRegion.cached);
-                this.trigger('data:ready', {items: chunksCached, dataType: dataType, chunkSize: chunkSize, sender: this});
-            }
-        }
-        if (args.webServiceCallCount === 0) {
-            args.done();
-        }
+        });
     },
 
-    _cellbaseSuccess: function (data, dataType, args) {
-        args.webServiceCallCount--;
-        var timeId = this.resource + " save " + Utils.randomString(4);
+    _cellbaseSuccess: function(data, categories, dataType, chunkSize) {
+        var timeId = Utils.randomString(4) + this.resource + " save";
         console.time(timeId);
         /** time log **/
 
-        var chunkSize = this.cache[dataType].chunkSize;
-
+        var regions = [];
         var chunks = [];
-        for (var i = 0; i < data.response.length; i++) {
+        for (var i = 0; i < data.response.length; i++) {    // TODO test what do several responses mean
             var queryResult = data.response[i];
-
-            var region = new Region(queryResult.id);
-            var features = queryResult.result;
-            var chunk = this.cache[dataType].putByRegion(region, features);
-            chunks.push(chunk);
+            if (dataType == "histogram") {
+                for (var j = 0; j < queryResult.result.length; j++) {
+                    var interval = queryResult.result[j];
+                    var region = new Region(interval);
+                    regions.push(region);
+                    chunks.push(interval);
+                }
+            } else {
+                regions.push(new Region(queryResult.id));
+                chunks.push(queryResult.result);
+            }
         }
+        var items = this.cache.putByRegions(regions, chunks, categories, dataType, chunkSize);
 
         /** time log **/
         console.timeEnd(timeId);
 
-
-        if (chunks.length > 0) {
-            this.trigger('data:ready', {items: chunks, dataType: dataType, chunkSize: chunkSize, sender: this});
-        }
-        if (args.webServiceCallCount === 0) {
-            args.done();
-        }
-
-
+        return items;
     },
-    _cellbaseHistogramSuccess: function (data, dataType, histogramId, args) {
-        args.webServiceCallCount--;
-        var timeId = Utils.randomString(4);
-        console.time(this.resource + " save " + timeId);
-        /** time log **/
 
-        var chunkSize = this.cache[histogramId].chunkSize;
-
-        var chunks = [];
-        for (var i = 0; i < data.response.length; i++) {
-            var queryResult = data.response[i];
-            for (var j = 0; j < queryResult.result.length; j++) {
-                var interval = queryResult.result[j];
-                var region = new Region(queryResult.id);
-                region.load(interval);
-                chunks.push(this.cache[histogramId].putByRegion(region, interval));
-            }
+    /**
+     * Transform the list on a list of lists, to limit the queries
+     * [ r1,r2,r3,r4,r5,r6,r7,r8 ]
+     * [ [r1,r2,r3,r4], [r5,r6,r7,r8] ]
+     */
+    _groupQueries: function(uncachedRegions) {
+        var groupSize = 50;
+        var queriesLists = [];
+        while (uncachedRegions.length > 0) {
+            queriesLists.push(uncachedRegions.splice(0, groupSize).toString());
         }
+        return queriesLists;
+    },
 
-        this.trigger('data:ready', {items: chunks, dataType: dataType, chunkSize: chunkSize, sender: this});
-        if (args.webServiceCallCount === 0) {
-            args.done();
-        }
 
-        /** time log **/
-        console.timeEnd(this.resource + " get and save " + timeId);
-    }
 };
 
 
@@ -23961,15 +19754,21 @@ function EnsemblAdapter(args) {
 
     this.on(this.handlers);
 
-    this.cache = {};
+    this.cache = new FeatureChunkCache(this.cacheConfig);
 }
 
 EnsemblAdapter.prototype = {
 
     getData: function (args) {
         var _this = this;
+        args.webServiceCallCount = 0;
 
-        /** Check region and parameters **/
+        var params = {};
+//                    histogram: (dataType == 'histogram')
+        _.extend(params, this.params);
+        _.extend(params, args.params);
+
+        /** 1 region check **/
         var region = args.region;
         if (region.start > 300000000 || region.end < 1) {
             return;
@@ -23977,96 +19776,89 @@ EnsemblAdapter.prototype = {
         region.start = (region.start < 1) ? 1 : region.start;
         region.end = (region.end > 300000000) ? 300000000 : region.end;
 
-
-        var params = {};
-        _.extend(params, this.params);
-        _.extend(params, args.params);
-
+        /** 3 dataType check **/
         var dataType = args.dataType;
         if (_.isUndefined(dataType)) {
             console.log("dataType must be provided!!!");
         }
-        var chunkSize;
 
+        /** 2 category check **/
+        var categories = [dataType];
 
-        /** Check dataType histogram  **/
-        if (dataType == 'histogram') {
+        /** 4 chunkSize check **/
+        var chunkSize = args.params.interval? args.params.interval : this.cacheConfig.chunkSize; // this.cache.defaultChunkSize should be the same
+        if (this.debug) {
+            console.log(chunkSize);
+        }
 
-            /** Features: genes, snps ... **/
-        } else {
-            // Features will be saved using the dataType features
-            if (_.isUndefined(this.cache[dataType])) {
-                this.cache[dataType] = new FeatureChunkCache(this.cacheConfig);
-            }
-            chunkSize = this.cache[dataType].chunkSize;
+        /**
+         * Get the uncached regions (uncachedRegions) and cached chunks (cachedChunks).
+         * Uncached regions will be used to query cellbase. The response data will be converted in chunks
+         * by the Cache TODO????
+         * Cached chunks will be returned by the args.dataReady Callback.
+         */
+        this.cache.get(region, categories, dataType, chunkSize, function (cachedChunks, uncachedRegions) {
 
-            // Get cached chunks and not cached chunk regions
-            //        --------------------             -> Region needed
-            // |----|----|----|----|----|----|----|    -> Logical chunk division
-            //      |----|----|----|----|----|         -> Chunks covered by needed region
-            //      |----|++++|++++|----|----|         -> + means the chunk is cached so its region will not be retrieved
-            var chunksByRegion = this.cache[dataType].getCachedByRegion(region);
-
-            if (chunksByRegion.notCached.length > 0) {
-                var queryRegionStrings = _.map(chunksByRegion.notCached, function (region) {
-                    return new Region(region).toString();
-                });
-
+            if (uncachedRegions.length > 0) {
+                var queryRegionStrings = uncachedRegions;
                 for (var i = 0; i < queryRegionStrings.length; i++) {
-                    this._get(queryRegionStrings[i], params, dataType);
+                    args.webServiceCallCount++;
+                    _this._get(queryRegionStrings[i], params, categories, chunkSize, args);
                 }
             }
             // Get chunks from cache
-            if (chunksByRegion.cached.length > 0) {
-                var chunksCached = this.cache[dataType].getByRegions(chunksByRegion.cached);
-                this.trigger('data:ready', {items: chunksCached, dataType: dataType, chunkSize: chunkSize, sender: this});
-            }
-        }
-
-    },
-    _get: function (query, params, dataType) {
-        var _this = this;
-        EnsemblManager.get({
-            host: this.host,
-            species: this.species,
-            category: this.category,
-            subCategory: this.subCategory,
-            query: query,
-            params: params,
-            success: function (data) {
-                var data = _this._transformResponse(data, query);
-                _this._success(data, dataType);
+            if (cachedChunks.length > 0) {
+                if (args.webServiceCallCount === 0) {
+                    args.done();
+                }
+                _this.trigger('data:ready', {items: cachedChunks[categories[0]], dataType: dataType, chunkSize: chunkSize, sender: _this});
             }
         });
     },
 
-    _success: function (data, dataType) {
-        var timeId = this.resource + " save " + Utils.randomString(4);
+    _get: function (query, params, categories, chunkSize, args) {
+        var _this = this;
+        EnsemblManager.get({
+            host: _this.host,
+            species: _this.species,
+            category: _this.category,
+            subCategory: _this.subCategory,
+            query: query,
+            params: params,
+            success: function (data) {
+                var transformedData = _this._transformResponse(data, query);
+                _this._success(transformedData, categories, undefined, chunkSize, args);
+            }
+        });
+    },
+
+    _success: function (data, categories, dataType, chunkSize, args) {
+        args.webServiceCallCount--;
+        var timeId = Utils.randomString(4) + this.resource + " save";
         console.time(timeId);
         /** time log **/
 
-        var chunkSize = this.cache[dataType].chunkSize;
-
+        var regions = [];
         var chunks = [];
         for (var i = 0; i < data.response.length; i++) {
             var queryResult = data.response[i];
-
-            var region = new Region(queryResult.id);
-            var features = queryResult.result;
-            var chunk = this.cache[dataType].putByRegion(region, features);
-            chunks.push(chunk);
+            regions.push(new Region(queryResult.id));
+            chunks.push(queryResult.result);
         }
+        var items = this.cache.putByRegions(regions, chunks, categories, dataType, chunkSize);
 
         /** time log **/
         console.timeEnd(timeId);
 
-
-        if (chunks.length > 0) {
-            this.trigger('data:ready', {items: chunks, dataType: dataType, chunkSize: chunkSize, sender: this});
+        if (args.webServiceCallCount === 0) {
+            args.done();
         }
 
-
+        if (items.length > 0) {
+            this.trigger('data:ready', {items: items, dataType: dataType, chunkSize: chunkSize, sender: _this});
+        }
     },
+
     _transformResponse: function (data, query) {
 //        id: "ENSG00000189167"
 //        source: "Ensembl"
@@ -24108,12 +19900,356 @@ EnsemblAdapter.prototype = {
         var result = {
             id: query,
             result: data
-        }
+        };
         r.response.push(result);
         return  r;
     }
 };
 
+
+/*
+ * Copyright (c) 2015 Francisco Salavert (DCG-CIPF)
+ *
+ * This file is part of JS Common Libs.
+ *
+ * JS Common Libs is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * JS Common Libs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * ** Generic adapter to any uri
+
+ new FeatureTemplateAdapter({
+    uriTemplate: 'http://host/webserver/{customVar}/{species}/{region}',
+    templateVariables: {
+        customVar: 'info',
+    },
+    species: genomeViewer.species,
+    parse: function (response) {
+        var itemsArray = [];
+        for (var i = 0; i < response.response.length; i++) {
+            var r = response.response[i];
+            itemsArray.push(r.result);
+        }
+        return itemsArray;
+    }
+ })
+
+ * ** templateVariables is used for custom variables in the uri. region and species will be ignored
+ * ** as will be configured automatically
+
+ * ** The species config is the current species should not appear in templateVariables
+ * ** The region in the uriTemplate is provided by the track so should not appear in templateVariables
+ * ** The parse function is used to adapt de features from the response
+
+ */
+
+function FeatureTemplateAdapter(args) {
+
+    _.extend(this, Backbone.Events);
+
+    this.templateVariables = {};
+    this.multiRegions = true;
+    this.histogramMultiRegions = true;
+    this.chromosomeSizes;
+
+    _.extend(this, args);
+
+    this.configureCache();
+
+    this.debug = false;
+}
+
+FeatureTemplateAdapter.prototype = {
+    setSpecies: function (species) {
+        this.species = species;
+        this.configureCache();
+    },
+    setHost: function (host) {
+        this.configureCache();
+        this.host = host;
+    },
+    configureCache: function () {
+        var speciesString = '';
+        if (this.species != null) {
+            var speciesString = this.species.id + this.species.assembly.name.replace(/[/_().\ -]/g, '');
+        }
+        var cacheId = this.uriTemplate + speciesString;
+        if (!this.cacheConfig) {
+            this.cacheConfig = {
+                //    //subCacheId: this.resource + this.params.keys(),
+                chunkSize: 3000
+            }
+        }
+        this.cacheConfig.cacheId = cacheId;
+        this.cache = new FeatureChunkCache(this.cacheConfig);
+    },
+
+    getData: function (args) {
+        var _this = this;
+
+        var params = {};
+        //histogram: (dataType == 'histogram')
+        _.extend(params, this.params);
+        _.extend(params, args.params);
+
+        /** 1 region check **/
+        var region = args.region;
+        var limitedRegion = this._computeLimitedRegion(region.chromosome);
+        if (region.start > limitedRegion || region.end < 1) {
+            return;
+        }
+        region.start = (region.start < 1) ? 1 : region.start;
+        region.end = (region.end > limitedRegion) ? limitedRegion : region.end;
+
+        /** 2 category check **/
+        var categories = ["cat_" + Utils.queryString(this.templateVariables) + Utils.queryString(params)];
+
+        /** 3 dataType check **/
+        var dataType = args.dataType;
+        if (_.isUndefined(dataType)) {
+            console.log("dataType must be provided!!!");
+        }
+
+        /** 4 chunkSize check **/
+        var chunkSize = params.interval ? params.interval : this.cacheConfig.chunkSize; // this.cache.defaultChunkSize should be the same
+        if (this.debug) {
+            console.log(chunkSize);
+        }
+
+        /**
+         * Get the uncached regions (uncachedRegions) and cached chunks (cachedChunks).
+         * Uncached regions will be used to query cellbase. The response data will be converted in chunks
+         * by the Cache TODO????
+         * Cached chunks will be returned by the args.dataReady Callback.
+         */
+        this.cache.get(region, categories, dataType, chunkSize, function (cachedChunks, uncachedRegions) {
+
+            var category = categories[0];
+            var categoriesName = "";
+            for (var j = 0; j < categories.length; j++) {
+                categoriesName += "," + categories[j];
+            }
+            categoriesName = categoriesName.slice(1); // to remove first ','
+
+            var chunks = cachedChunks[category];
+            // TODO check how to manage multiple regions
+
+            var queriesList;
+            if (dataType !== 'histogram') {
+                if (_this.multiRegions === false) {
+                    queriesList = _this._singleQueries(uncachedRegions[category]);
+                } else {
+                    queriesList = _this._groupQueries(uncachedRegions[category]);
+                }
+            } else {
+                if (_this.histogramMultiRegions === false) {
+                    queriesList = _this._singleQueries(uncachedRegions[category]);
+                } else {
+                    queriesList = _this._groupQueries(uncachedRegions[category]);
+                }
+            }
+
+            /** Uncached regions found **/
+            if (queriesList.length > 0) {
+                args.webServiceCallCount = 0;
+                for (var i = 0; i < queriesList.length; i++) {
+                    args.webServiceCallCount++;
+                    var queryRegion = queriesList[i];
+
+                    var request = new XMLHttpRequest();
+
+                    /** Temporal fix save queried region **/
+                    request._queryRegion = queryRegion;
+                    request._originalRegion = region;
+
+                    request.onload = function () {
+                        args.webServiceCallCount--;
+                        if (request.status !== 400) {
+                            var response;
+                            try {
+                                response = JSON.parse(this.response);
+                            } catch (e) {
+                                console.log('Warning: Response is not JSON');
+                                response = this.response;
+                            }
+
+                            /** Process response **/
+                            var responseChunks = _this._success(response, categories, dataType, this._queryRegion, this._originalRegion, chunkSize);
+                            chunks = chunks.concat(responseChunks);
+                        } else {
+                            console.log("request.status: " + request.status);
+                        }
+                        if (args.webServiceCallCount === 0) {
+                            chunks.sort(function (a, b) {
+                                return a.chunkKey.localeCompare(b.chunkKey)
+                            });
+                            args.done({
+                                items: chunks,
+                                dataType: dataType,
+                                chunkSize: chunkSize,
+                                sender: _this
+                            });
+                        }
+                    };
+                    request.onerror = function () {
+                        console.log('Server error');
+                        args.done();
+                    };
+                    var uriTemplate = new URITemplate(_this.uriTemplate);
+                    _this.templateVariables['region'] = queryRegion.toString();
+                    _this.templateVariables['species'] = _this._getSpeciesQueryString(_this.species);
+
+                    var url = uriTemplate.expand(_this.templateVariables);
+                    url = Utils.addQueryParamtersToUrl(params, url);
+                    request.open('GET', url, true);
+                    console.log(url);
+                    request.send();
+
+                }
+            } else
+            /** All regions are cached **/
+            {
+                args.done({
+                    items: chunks,
+                    dataType: dataType,
+                    chunkSize: chunkSize,
+                    sender: _this
+                });
+            }
+        });
+    },
+
+    _success: function (response, categories, dataType, queryRegion, originalRegion, chunkSize) {
+        //var timeId = Utils.randomString(4) + this.resource + " save";
+        //console.time(timeId);
+        /** time log **/
+
+        var regions = [];
+        var chunks = [];
+        if (dataType !== 'histogram') {
+            if (typeof this.parse === 'function') {
+                chunks = this.parse(response, dataType);
+            } else {
+                chunks = response;
+            }
+            regions = this._getRegionsFromQueryRegions(queryRegion);
+        } else {
+            if (typeof this.parseHistogram === 'function') {
+                chunks = this.parseHistogram(response);
+            } else {
+                chunks = response;
+            }
+            regions = this._getRegionsFromHistogramChunks(chunks, originalRegion.chromosome);
+        }
+
+        var items = this.cache.putByRegions(regions, chunks, categories, dataType, chunkSize);
+
+        /** time log **/
+        //console.timeEnd(timeId);
+
+        return items;
+    },
+
+    /**
+     * Transform the list on a list of lists, to limit the queries
+     * [ r1,r2,r3,r4,r5,r6,r7,r8 ]
+     * [ [r1,r2,r3,r4], [r5,r6,r7,r8] ]
+     */
+    _groupQueries: function (uncachedRegions) {
+        // modify region end to chromosome length.
+        for (var i = 0; i < uncachedRegions.length; i++) {
+            var r = uncachedRegions[i];
+            this._computeRegionSize(r);
+        }
+
+        var groupSize = 50;
+        var queriesLists = [];
+        while (uncachedRegions.length > 0) {
+            queriesLists.push(uncachedRegions.splice(0, groupSize).toString());
+        }
+        return queriesLists;
+    },
+    _singleQueries: function (uncachedRegions) {
+        // modify region end to chromosome length.
+        for (var i = 0; i < uncachedRegions.length; i++) {
+            var r = uncachedRegions[i];
+            this._computeRegionSize(r);
+        }
+
+        var queriesLists = [];
+        for (var i = 0; i < uncachedRegions.length; i++) {
+            var region = uncachedRegions[i];
+            queriesLists.push(region.toString());
+        }
+        return queriesLists;
+    },
+
+    _getSpeciesQueryString: function (species) {
+        if (species == null) {
+            return '';
+        }
+        if (this.speciesParse != null) {
+            return this.speciesParse(species);
+        } else {
+            return Utils.getSpeciesCode(species.scientificName)
+        }
+    },
+
+    _getRegionsFromQueryRegions: function (queryRegion) {
+        var regions = [];
+        var regionSplit = queryRegion.split(',');
+        for (var i = 0; i < regionSplit.length; i++) {
+            var regionStr = regionSplit[i];
+            regions.push(new Region(regionStr));
+        }
+        return regions;
+    },
+
+    _getRegionsFromHistogramChunks: function (intervals, chromosome) {
+        var regions = [];
+        for (var i = 0; i < intervals.length; i++) {
+            var interval = intervals[i];
+            var region = new Region(interval);
+            region.chromosome = chromosome;
+            regions.push(region);
+        }
+        return regions;
+    },
+
+    _computeLimitedRegion: function (chromosome) {
+        var regionLimit = 300000000;
+
+        if (this.species != null && this.species.chromosomes[chromosome] != null) {
+            regionLimit = this.species.chromosomes[chromosome].end;
+        }
+
+        if (this.chromosomeSizes != null &&
+            this.chromosomeSizes[chromosome] != null &&
+            !isNaN(this.chromosomeSizes[chromosome])
+        ) {
+            regionLimit = this.chromosomeSizes[chromosome];
+        }
+
+        return regionLimit;
+    },
+    _computeRegionSize: function (region) {
+        var limitedRegion = this._computeLimitedRegion(region.chromosome);
+        if (region.end > limitedRegion) {
+            region.end = limitedRegion;
+        }
+    }
+};
 
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
@@ -24402,14 +20538,36 @@ function OpencgaAdapter(args) {
 
     this.on(this.handlers);
 
-    this.cache = {};
+    this.configureCache();
+
+    this.debug = false;
 }
 
 OpencgaAdapter.prototype = {
+    setSpecies: function (species) {
+        this.species = species;
+    },
+    configureCache: function () {
+        var host = this.host || OpencgaManager.host;
+        if (!this.cacheConfig) {
+            this.cacheConfig = {
+                // subCacheId: this.resource + this.params.keys(),
+                chunkSize: 3000
+            }
+        }
+        this.cacheConfig.cacheId = 'opencga' + this.resource.id;
+        this.cache = new FeatureChunkCache(this.cacheConfig);
+    },
+
     getData: function (args) {
         var _this = this;
-        /********/
 
+        var params = {};
+//                    histogram: (dataType == 'histogram')
+        _.extend(params, this.params);
+        _.extend(params, args.params);
+
+        /** 1 region check **/
         var region = args.region;
         if (region.start > 300000000 || region.end < 1) {
             return;
@@ -24417,458 +20575,193 @@ OpencgaAdapter.prototype = {
         region.start = (region.start < 1) ? 1 : region.start;
         region.end = (region.end > 300000000) ? 300000000 : region.end;
 
-        var params = {species: Utils.getSpeciesCode(this.species.text)};
-        _.extend(params, this.params);
-        _.extend(params, args.params);
 
+        /** 2 category check **/
+        var categories = this.resource.id.toString().split(',');   // in this adapter each category is each file
+
+        /** 3 dataType check **/
         var dataType = args.dataType;
         if (_.isUndefined(dataType)) {
             console.log("dataType must be provided!!!");
         }
-        var chunkSize;
-        /********/
 
-        if (dataType == 'histogram') {
-
-        } else {
-            //Create one FeatureChunkCache by datatype
-            if (_.isUndefined(this.cache[dataType])) {
-                this.cache[dataType] = new FeatureChunkCache(this.cacheConfig);
-            }
-            chunkSize = this.cache[dataType].chunkSize;
-
-            var chunksByRegion = this.cache[dataType].getCachedByRegion(region);
-
-            if (chunksByRegion.notCached.length > 0) {
-                var queryRegionStrings = _.map(chunksByRegion.notCached, function (region) {
-                    return new Region(region).toString();
-                });
-
-                //limit queries
-                var n = 50;
-                var lists = _.groupBy(queryRegionStrings, function (a, b) {
-                    return Math.floor(b / n);
-                });
-                var queriesList = _.toArray(lists); //Added this to convert the returned object to an array.
-
-                for (var i = 0; i < queriesList.length; i++) {
-                    var cookie = $.cookie("bioinfo_sid");
-                    cookie = ( cookie != '' && cookie != null ) ? cookie : 'dummycookie';
-                    OpencgaManager.region({
-                        accountId: this.resource.account,
-                        sessionId: cookie,
-                        bucketId: this.resource.bucketId,
-                        objectId: this.resource.oid,
-                        region: queriesList[i],
-                        queryParams: params,
-                        success: function (data) {
-                            _this._opencgaSuccess(data, dataType);
-                        }
-                    });
-//                    CellBaseManager.get({
-//                        host: this.host,
-//                        species: this.species,
-//                        category: this.category,
-//                        subCategory: this.subCategory,
-//                        query: queriesList[i],
-//                        resource: this.resource,
-//                        params: params,
-//                        success: function (data) {
-//                            _this._cellbaseSuccess(data, dataType);
-//                        }
-//                    });
-                }
-            }
-            if (chunksByRegion.cached.length > 0) {
-                var chunksCached = this.cache[dataType].getByRegions(chunksByRegion.cached);
-                this.trigger('data:ready', {items: chunksCached, dataType: dataType, chunkSize: chunkSize, sender: this});
-            }
+        /** 4 chunkSize check **/
+        var chunkSize = params.interval ? params.interval : this.cacheConfig.chunkSize; // this.cache.defaultChunkSize should be the same
+        if (this.debug) {
+            console.log(chunkSize);
         }
 
+        /**
+         * Get the uncached regions (uncachedRegions) and cached chunks (cachedChunks).
+         * Uncached regions will be used to query OpenCGA. The response data will be converted in chunks
+         * by the Cache TODO????
+         * Cached chunks will be returned by the args.dataReady Callback.
+         */
+        this.cache.get(region, categories, dataType, chunkSize, function (cachedChunks, uncachedRegions) {
+
+            var category = categories[0];
+            var categoriesName = "";
+            for (var j = 0; j < categories.length; j++) {
+                categoriesName += "," + categories[j];
+            }
+            categoriesName = categoriesName.slice(1);   // to remove first ','
+
+            var chunks = cachedChunks[category];
+            // TODO check if OpenCGA allows multiple regions
+            var queriesList = _this._groupQueries(uncachedRegions[category]);
+
+            /** Uncached regions found **/
+            if (queriesList.length > 0) {
+                args.webServiceCallCount = 0;
+
+                // TODO check how to manage multiple regions and multiple files ids
+                for (var i = 0; i < queriesList.length; i++) {
+                    args.webServiceCallCount++;
+                    var queryRegion = queriesList[i];
+
+                    params['region'] = queryRegion.toString();
+                    params['interval'] = chunkSize;
+                    params['histogram'] = (dataType == 'histogram');
+                    params['process_differences'] = false;
+
+                    OpencgaManager.files['fetch']({
+                        id: categoriesName,
+                        query: params,
+                        request: {
+                            success: function (response) {
+                                var responseChunks = _this._opencgaSuccess(response, categories, dataType, chunkSize, args);
+                                args.webServiceCallCount--;
+
+                                chunks = chunks.concat(responseChunks);
+                                if (args.webServiceCallCount === 0) {
+                                    args.done({
+                                        items: chunks, dataType: dataType, chunkSize: chunkSize, sender: _this
+                                    });
+                                }
+                            },
+                            error: function () {
+                                console.log('Server error');
+                                args.done();
+                            }
+                        }
+                    });
+                }
+
+            }
+            /** All regions are cached **/
+            else {
+                args.done({
+                    items: chunks, dataType: dataType, chunkSize: chunkSize, sender: _this
+                });
+            }
+        });
     },
-    _opencgaSuccess: function (data, dataType) {
-        var timeId = this.resource + " save " + Utils.randomString(4);
+
+    _opencgaSuccess: function (data, categories, dataType, chunkSize) {
+        var timeId = this.cacheConfig.cacheId + " save " + data.response.length + " samples";
         console.time(timeId);
         /** time log **/
 
-        var chunkSize = this.cache[dataType].chunkSize;
+        if (categories.length != data.response.length) {
+            console.log("ERROR: requested " + categories.length + "samples, but response has " + data.response.length);
+            console.log(data);
+//            debugger;
+        }
 
-        var chunks = [];
-        for (var i = 0; i < data.response.length; i++) {
+        if (data.response[0] && data.response[0].result[0]) {
+            var inferredChunkSize = data.response[0].result[0].end - data.response[0].result[0].start + 1;
+            if (inferredChunkSize != chunkSize) {
+                console.log("code smell: chunkSize requested: " + chunkSize + ", but obtained: " + inferredChunkSize);
+//                chunkSize = inferredChunkSize;
+            }
+        }
+
+        var responseItems = [];
+        for (var i = 0; i < data.response.length; i++) {    // FIXME each response is a sample? in variant too?
             var queryResult = data.response[i];
-
-            var region = new Region(queryResult.id);
-            var features = queryResult.result;
-            var chunk = this.cache[dataType].putByRegion(region, features);
-            chunks.push(chunk);
+            var items = this._adaptChunks(queryResult, categories[i], dataType, chunkSize);
+            responseItems = responseItems.concat(items);
+            //if (items.length > 0) {
+            //    // if (data.encoded) {decrypt }
+            //    args.dataReady({items: items, dataType: dataType, chunkSize: chunkSize, sender: this, category: categories[i]});
+            //}
+            //var decryptedChunks = this._decryptChunks(items, "mypassword");
         }
 
         /** time log **/
         console.timeEnd(timeId);
 
-        if (chunks.length > 0) {
-            this.trigger('data:ready', {items: chunks, dataType: dataType, chunkSize: chunkSize, sender: this});
+        return responseItems;
+
+    },
+
+    /**
+     * Transform the list on a list of lists, to limit the queries
+     * [ r1,r2,r3,r4,r5,r6,r7,r8 ]
+     * [ [r1,r2,r3,r4], [r5,r6,r7,r8] ]
+     */
+    _groupQueries: function (uncachedRegions) {
+        var groupSize = 50;
+        var queriesLists = [];
+        while (uncachedRegions.length > 0) {
+            queriesLists.push(uncachedRegions.splice(0, groupSize).toString());
         }
-    }
-}
+        return queriesLists;
+    },
 
-
-OpencgaAdapter.prototype.getDataOld = function (args) {
-    debugger
-    var _this = this;
-    //region check
-
-    this.params["histogram"] = args.histogram;
-    this.params["histogramLogarithm"] = args.histogramLogarithm;
-    this.params["histogramMax"] = args.histogramMax;
-    this.params["interval"] = args.interval;
-    this.params["transcript"] = args.transcript;
-
-
-    if (args.start < 1) {
-        args.start = 1;
-    }
-    if (args.end > 300000000) {
-        args.end = 300000000;
-    }
-
-    var type = "data";
-    if (args.histogram) {
-        type = "histogram" + args.interval;
-    }
-
-    var firstChunk = this.featureCache._getChunk(args.start);
-    var lastChunk = this.featureCache._getChunk(args.end);
-
-    var chunks = [];
-    var itemList = [];
-    for (var i = firstChunk; i <= lastChunk; i++) {
-        var key = args.chromosome + ":" + i;
-        if (this.featureCache.cache[key] == null || this.featureCache.cache[key][type] == null) {
-            chunks.push(i);
-        } else {
-            var items = this.featureCache.getFeatureChunk(key, type);
-            itemList = itemList.concat(items);
-        }
-    }
-////	//notify all chunks
-//	if(itemList.length>0){
-//		this.onGetData.notify({data:itemList, params:this.params, cached:true});
-//	}
-
-
-    //CellBase data process
-    //TODO check host
-    var calls = 0;
-    var querys = [];
-    regionSuccess = function (data) {
-        console.timeEnd("dqs");
-        console.time("dqs-cache");
-        var type = "data";
-        if (data.params.histogram) {
-            type = "histogram" + data.params.interval;
-        }
-        _this.params["dataType"] = type;
-
-        var splitDots = data.query.split(":");
-        var splitDash = splitDots[1].split("-");
-        var query = {chromosome: splitDots[0], start: splitDash[0], end: splitDash[1]};
-
-        //check if features contains positon or start-end
-        if (data.result[0] != null && data.result[0]['position'] != null) {
-            for (var i = 0; i < data.result.length; i++) {
-                data.result[i]['start'] = data.result[i].position;
-                data.result[i]['end'] = data.result[i].position;
-            }
-        }
-
-        _this.featureCache.putFeaturesByRegion(data.result, query, _this.category, type);
-        var items = _this.featureCache.getFeatureChunksByRegion(query, type);
-        console.timeEnd("dqs-cache");
-        if (items != null) {
-            itemList = itemList.concat(items);
-        }
-        if (calls == querys.length) {
-//			_this.onGetData.notify({items:itemList, params:_this.params, cached:false});
-            _this.trigger('data:ready', {items: itemList, params: _this.params, cached: false, sender: _this});
-        }
-    };
-
-    var updateStart = true;
-    var updateEnd = true;
-    if (chunks.length > 0) {
-//		console.log(chunks);
-
+    _decryptChunks: function (chunks, password) {
+        var decryptedChunks = [];
         for (var i = 0; i < chunks.length; i++) {
-
-            if (updateStart) {
-                var chunkStart = parseInt(chunks[i] * this.featureCache.chunkSize);
-                updateStart = false;
+            if (chunks[i].enc == true) {
+                decryptedChunks.push(CryptoJS.AES.decrypt(chunks[i], password));
+            } else {
+                decryptedChunks.push(chunks[i]);
             }
-            if (updateEnd) {
-                var chunkEnd = parseInt((chunks[i] * this.featureCache.chunkSize) + this.featureCache.chunkSize - 1);
-                updateEnd = false;
-            }
+        }
+        return decryptedChunks;
+    },
 
-            if (chunks[i + 1] != null) {
-                if (chunks[i] + 1 == chunks[i + 1]) {
-                    updateEnd = true;
-                } else {
-                    var query = args.chromosome + ":" + chunkStart + "-" + chunkEnd;
-                    querys.push(query);
-                    updateStart = true;
-                    updateEnd = true;
+    _adaptChunks: function (queryResult, category, dataType, chunkSize) {
+        var chunks;
+        var regions;
+        var items = [];
+//        debugger
+        if (queryResult.resultType == "org.opencb.biodata.models.variant.Variant") {
+            chunks = [];
+            regions = [];
+            var keyToPair = {};
+            for (var i = 0; i < queryResult.result.length; i++) {
+                var variation = queryResult.result[i];
+                var chunkId = this.cache.getChunkId(variation.start, chunkSize);
+                var key = this.cache.getChunkKey(variation.chromosome,
+                    chunkId,
+                    dataType,
+                    chunkSize);
+
+                if (keyToPair[key] == undefined) {
+                    keyToPair[key] = chunks.length;
+                    regions.push(new Region({chromosome: variation.chromosome, start: chunkId * chunkSize, end: (chunkId + 1) * chunkSize - 1}));
+                    chunks.push([]);
                 }
-            } else {
-                var query = args.chromosome + ":" + chunkStart + "-" + chunkEnd;
-
-                querys.push(query);
-                updateStart = true;
-                updateEnd = true;
+                chunks[keyToPair[key]].push(variation);
             }
-        }
-//		console.log(querys)
-        for (var i = 0, li = querys.length; i < li; i++) {
-            console.time("dqs");
-            calls++;
-//			opencgaManager.region(this.category, this.resource, querys[i], this.params);
-            var cookie = $.cookie("bioinfo_sid");
-            cookie = ( cookie != '' && cookie != null ) ? cookie : 'dummycookie';
-            OpencgaManager.region({
-                accountId: this.resource.account,
-                sessionId: cookie,
-                bucketId: this.resource.bucketId,
-                objectId: this.resource.oid,
-                region: querys[i],
-                queryParams: this.params,
-                success: regionSuccess
-            });
-        }
-    } else {
-        if (itemList.length > 0) {
-            this.trigger('data:ready', {items: itemList, params: this.params, cached: false, sender: this});
-//			this.onGetData.notify({items:itemList, params:this.params});
-        }
-    }
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
 
-function SequenceAdapter(args) {
-
-    _.extend(this, Backbone.Events);
-
-    this.id = Utils.genId("TrackListPanel");
-
-    //set default args
-    this.host;
-    this.version;
-    this.gzip = true;
-
-    //set instantiation args, must be last
-    _.extend(this, args);
-
-    this.sequence = {};
-    this.start = {};
-    this.end = {};
-
-    this.on(this.handlers);
-}
-
-SequenceAdapter.prototype.clearData = function () {
-    this.sequence = {};
-    this.start = {};
-    this.end = {};
-};
-
-SequenceAdapter.prototype.getData = function (args) {
-    var _this = this;
-
-    this.sender = args.sender;
-    var region = args.region;
-    var chromosome = region.chromosome;
-
-    region.start = (region.start < 1) ? 1 : region.start;
-    region.end = (region.end > 300000000) ? 300000000 : region.end;
-
-    //clean when the new position is too far from current
-    if (region.start < this.start[chromosome] - 5000 || region.end > this.end[chromosome] + 5000) {
-        this.clearData();
-    }
-
-    var params = {};
-    _.extend(params, this.params);
-
-
-    var queryString = this._getSequenceQuery(region);
-
-    if (queryString != "") {
-
-        CellBaseManager.get({
-            host: this.host,
-            version: this.version,
-            species: this.species,
-            category: this.category,
-            subCategory: this.subCategory,
-            query: queryString,
-            resource: this.resource,
-            params: params,
-            success: function (data) {
-                _this._processSequenceQuery(data, true);
+//            debugger
+            items = this.cache.putByRegions(regions, chunks, category, dataType, chunkSize);
+        } else { //if(queryResult.resultType == "org.opencb.biodata.models.alignment.AlignmentRegion") {
+            regions = [];
+            for (var j = 0; j < queryResult.result.length; j++) {
+                regions.push(new Region(queryResult.result[j]));
             }
-        });
+            chunks = queryResult.result;
 
-
-    } else {
-        if (this.sender != "move") {
-            this.trigger('data:ready', {
-                items: {
-                    sequence: this.sequence[chromosome],
-                    start: this.start[chromosome],
-                    end: this.end[chromosome]
-                },
-                params: params,
-                sender: this
-            });
+//            if (data.response[i].result.length == 1) {
+//            } else {
+//                console.log("unexpected data structure");
+//            }
+            items = this.cache.putByRegions(regions, chunks, category, dataType, chunkSize);
         }
-    }
-
-};
-
-SequenceAdapter.prototype._getSequenceQuery = function (region) {
-    var _this = this;
-    var chromosome = region.chromosome;
-
-    var s, e, query, querys = [];
-    if (_this.start[chromosome] == null && _this.end[chromosome] == null) {
-        //args.start -= 100;
-        //args.end += 100;
-        _this.start[chromosome] = region.start;
-        _this.end[chromosome] = region.end;
-        s = region.start;
-        e = region.end;
-        query = chromosome + ":" + s + "-" + e;
-        querys.push(query);
-    } else {
-        if (region.start < _this.start[chromosome]) {
-            s = region.start;
-            e = _this.start[chromosome] - 1;
-            e = (e < 1) ? region.end = 1 : e;
-            _this.start[chromosome] = s;
-            query = region.chromosome + ":" + s + "-" + e;
-            querys.push(query);
-        }
-        if (region.end > _this.end[chromosome]) {
-            e = region.end;
-            s = _this.end[chromosome] + 1;
-            _this.end[chromosome] = e;
-            query = region.chromosome + ":" + s + "-" + e;
-            querys.push(query);
-        }
-    }
-    return querys.toString();
-};
-
-SequenceAdapter.prototype._processSequenceQuery = function (data, throwNotify) {
-    var _this = this;
-    var params = data.params;
-
-
-    for (var i = 0; i < data.response.length; i++) {
-        var queryResponse = data.response[i];
-        var splitDots = queryResponse.id.split(":");
-        var splitDash = splitDots[1].split("-");
-        var queryStart = parseInt(splitDash[0]);
-        var queryEnd = parseInt(splitDash[1]);
-
-        var queryId = queryResponse.id;
-        var seqResponse = queryResponse.result;
-
-        var chromosome = seqResponse[0].sequenceName;
-
-        if (this.sequence[chromosome] == null) {
-            this.sequence[chromosome] = seqResponse[0].sequence;
-        } else {
-            if (queryStart == this.start[chromosome]) {
-                this.sequence[chromosome] = seqResponse[0].sequence + this.sequence[chromosome];
-            } else {
-                this.sequence[chromosome] = this.sequence[chromosome] + seqResponse[0].sequence;
-            }
-        }
-
-        if (this.sender == "move" && throwNotify == true) {
-            this.trigger('data:ready', {
-                items: {
-                    sequence: seqResponse[0].sequence,
-                    start: queryStart,
-                    end: queryEnd
-                },
-                params: params,
-                sender: this
-            });
-        }
-    }
-
-    if (this.sender != "move" && throwNotify == true) {
-        this.trigger('data:ready', {
-            items: {
-                sequence: this.sequence[chromosome],
-                start: this.start[chromosome],
-                end: this.end[chromosome]
-            },
-            params: params,
-            sender: this
-        });
-    }
-};
-
-//Used by bam to get the mutations
-SequenceAdapter.prototype.getNucleotidByPosition = function (args) {
-    var _this = this;
-    if (args.start > 0 && args.end > 0) {
-        var queryString = this._getSequenceQuery(args);
-
-        var chromosome = args.chromosome;
-
-        if (queryString != "") {
-            var data = CellBaseManager.get({
-                host: this.host,
-                version: this.version,
-                species: this.species,
-                category: this.category,
-                subCategory: this.subCategory,
-                query: queryString,
-                resource: this.resource,
-                params: this.params,
-                async: false
-            });
-            _this._processSequenceQuery(data);
-        }
-        if (this.sequence[chromosome] != null) {
-            var referenceSubStr = this.sequence[chromosome].substr((args.start - this.start[chromosome]), 1);
-            return referenceSubStr;
-        } else {
-            console.log("SequenceRender: this.sequence[chromosome] is undefined");
-            return "";
-        }
+        return items;
     }
 };
 
@@ -24923,21 +20816,29 @@ VCFDataAdapter.prototype.parse = function (data, region) {
 //    debugger
 //	console.log("creating objects");
     for (var i = 0; i < lines.length; i++) {
-//        debugger
         var line = lines[i].replace(/^\s+|\s+$/g, "");
         if ((line != null) && (line.length > 0)) {
-            var fields = line.split("\t");
-            var chrom = fields[0].replace(/chr/gi, "");
-            if (chrom == region.chromosome) {// load only one chromosome on the cache
 
-                if (line.substr(0, 1) === "#") {
-                    if (line.substr(1, 1) === "#") {
-                        this.header += line.replace(/</gi, "&#60;").replace(/>/gi, "&#62;") + "<br>";
-                    } else {
-                        this.samples = fields.slice(9);
-                    }
+            var fields = line.split("\t");
+
+            if (line.substr(0, 1) === "#") {
+                if (line.substr(1, 1) === "#") {
+                    this.header += line.replace(/</gi, "&#60;").replace(/>/gi, "&#62;") + "<br>";
                 } else {
+                    this.samples = fields.slice(9);
+                }
+            } else {
+
+                var chrom = fields[0].replace(/chr/gi, "");
+                if (chrom == region.chromosome) {// load only one chromosome on the cache
+
                     //				_this.addQualityControl(fields[5]);
+
+                    var samples = [];
+                    if(fields[9]){
+                        samples = fields.slice(9);
+                    }
+
                     var feature = {
                         "chromosome": chrom,
                         "position": parseInt(fields[1]),
@@ -24951,6 +20852,7 @@ VCFDataAdapter.prototype.parse = function (data, region) {
                         "info": fields[7].replace(/;/gi, "<br>"),
                         "format": fields[8],
                         "sampleData": line,
+                        "samples": samples,
                         //						"record":		fields,
                         //						"label": 		fields[2] + " " +fields[3] + "/" + fields[4] + " Q:" + fields[5],
                         "featureType": "vcf"
@@ -24996,14 +20898,17 @@ function AttributeNetworkDataAdapter(args) {
 
     this.dataSource;
     this.async = true;
-    this.jsonObject;
     this.ignoreColumns = {};
+    this.renameColumns = {};
+
+    this.useFirstLineAsColumnNames = false;
 
     //set instantiation args, must be last
     _.extend(this, args);
 
+
     this.attributes = [];
-    this.data = [];
+    this.columns = [];
 
     this.on(this.handlers);
 
@@ -25049,34 +20954,59 @@ AttributeNetworkDataAdapter.prototype.parse = function (data) {
 //    }
 
     try {
-        var lines = data.split("\n");
-        var firstLine = lines[0].replace(/^\s+|\s+$/g, "");
+        data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        var lines = data.split(/\n/);
+
+
+        var firstLine = lines[0].trim();
         var columnNames = [];
         if (firstLine.substr(0, 1) === "#") {
-            columnNames = firstLine.split("\t");
+            columnNames = firstLine.split(/\t/);
 
             //search for first non header line "#"
             for (var i = 0; i < lines.length; i++) {
-                var line = lines[i].replace(/^\s+|\s+$/g, "");
-                if(line.substr(0, 1) !== "#"){
+                var line = lines[i].trim();
+                if (line.substr(0, 1) !== "#") {
                     firstLine = line;
                     break;
                 }
             }
+
+        }
+        if (this.useFirstLineAsColumnNames) {
+            columnNames = firstLine.split(/\t/);
+            //first non header line
+            firstLine = lines[1];
+
         }
 
-        var numColumns = firstLine.split("\t").length;
+        var finalColumnNames = [];
+        var numColumns = firstLine.split(/\t/).length;
         for (var i = 0; i < numColumns; i++) {
-            var name = (columnNames[i]) ? columnNames[i] : "Column" + i;
+
+            if (this.renameColumns[i]) {
+                finalColumnNames[i] = this.renameColumns[i];
+            } else {
+                if (columnNames[i]) {
+                    finalColumnNames[i] = columnNames[i];
+                } else {
+                    finalColumnNames[i] = "Column" + i;
+                }
+            }
+
             if (i == 0) {
-                name = "id";
+                finalColumnNames[i] = "id";
             }
             if (this.ignoreColumns[i] !== true) {
-                this.attributes.push({
-                    "name": name,
-                    "type": "string",
-                    "defaultValue": ""
-                });
+                var column = {
+                    name: finalColumnNames[i].toString(),
+                    title: finalColumnNames[i].toString(),
+                    type: "text",
+                    formula: function(row) {
+                        return row.attributes[this.name];
+                    }
+                };
+                this.columns.push(column);
             }
         }
 
@@ -25084,31 +21014,45 @@ AttributeNetworkDataAdapter.prototype.parse = function (data) {
         //ignore attributes
         if (Object.keys(this.ignoreColumns).length > 0) {
             for (var i = 0; i < lines.length; i++) {
-                var line = lines[i].replace(/^\s+|\s+$/g, "");
-                if ((line != null) && (line.length > 0) && line.substr(0, 1) != "#") {
+                var line = lines[i].trim();
+                if ((line != null) &&
+                    (line.length > 0) &&
+                    line.substr(0, 1) != "#"
+                ) {
+                    if (i == 0 && this.useFirstLineAsColumnNames == true) continue;
+
                     var fields = line.split("\t");
 
-                    var filteredFields = [];
+                    var row = {};
                     for (var j = 0; j < fields.length; j++) {
                         if (this.ignoreColumns[j] !== true) {
-                            filteredFields.push(fields[j])
+                            row[finalColumnNames[j]] = fields[j].trim();
                         }
                     }
-
-                    this.data.push(filteredFields);
+                    this.attributes.push(row);
                 }
             }
         } else {
             for (var i = 0; i < lines.length; i++) {
-                var line = lines[i].replace(/^\s+|\s+$/g, "");
-                if ((line != null) && (line.length > 0) && line.substr(0, 1) != "#") {
+                var line = lines[i].trim();
+                if ((line != null) &&
+                    (line.length > 0) &&
+                    line.substr(0, 1) != "#"
+                ) {
+                    if (i == 0 && this.useFirstLineAsColumnNames == true) continue;
+
                     var fields = line.split("\t");
-                    this.data.push(fields);
+
+                    var row = {};
+                    for (var j = 0; j < fields.length; j++) {
+                        row[finalColumnNames[j]] = fields[j].trim();
+                    }
+                    this.attributes.push(row);
                 }
             }
         }
 
-        this.trigger('data:load', {sender: this});
+        this.trigger('data:load', {columns: this.columns, attributes: this.attributes, sender: this});
     } catch (e) {
         console.log(e);
         console.log(e.stack);
@@ -25116,13 +21060,6 @@ AttributeNetworkDataAdapter.prototype.parse = function (data) {
     }
 
 
-};
-
-AttributeNetworkDataAdapter.prototype.getAttributesJSON = function () {
-    var json = {};
-    json.attributes = this.attributes;
-    json.data = this.data;
-    return json;
 };
 
 /*
@@ -25431,7 +21368,7 @@ function SIFNetworkDataAdapter(args) {
     this.async = true;
 
     this.separator = "\t";
-    this.graph = new Graph();
+    this.graph = new JsoGraph();
 
 
     //set instantiation args, must be last
@@ -25464,15 +21401,20 @@ SIFNetworkDataAdapter.prototype.parse = function (data) {
 
     try {
         console.time("SIFParse");
+        data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        var lines = data.split(/\n/);
         this.addedVertex = {};
         this.addedEdges = {};
-        var lines = data.split("\n");
 //        console.log('SIFParse number lines: ' + lines.length);
 //        console.log(lines);
         for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].replace(/^\s+|\s+$/g, "");
+            var line = lines[i];
             if ((line != null) && (line.length > 0)) {
                 var fields = line.split(this.separator);
+                for (var j = 0; j < fields.length; j++) {
+                    fields[j] = fields[j].trim();
+                }
+
                 if (fields[0].substr(0, 1) != "#") {
 
                     var sourceName = fields[0];
@@ -25555,8 +21497,8 @@ function TextNetworkDataAdapter(args) {
     this.dataSource;
     this.async = true;
 
-    this.separator = "\t";
-    this.graph = new Graph();
+    this.separator = /\t/;
+    this.graph = new JsoGraph();
 
 
     //set instantiation args, must be last
@@ -25567,7 +21509,7 @@ function TextNetworkDataAdapter(args) {
     this.rawData;
 
     if (this.async) {
-        this.dataSource.on('success', function (data) {
+        this.dataSource.on('success', function(data) {
             _this.rawData = data;
             _this.parse(data);
         });
@@ -25585,23 +21527,22 @@ function TextNetworkDataAdapter(args) {
 
 };
 
-TextNetworkDataAdapter.prototype.getGraph = function () {
+TextNetworkDataAdapter.prototype.getGraph = function() {
     return this.graph;
 };
 
-TextNetworkDataAdapter.prototype.parse = function (data) {
-
+TextNetworkDataAdapter.prototype.parse = function(data) {
     try {
         if (typeof data === 'undefined') {
             data = this.rawData;
         }
-
-        var lines = data.split("\n");
+        data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        var lines = data.split(/\n/);
         this.lines = [];
         this.columnLength = 0;
         var firstLineColumnLength = 0;
         for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].replace(/^\s+|\s+$/g, "");
+            var line = lines[i];
             if ((line != null) && (line.length > 0)) {
                 var fields = line.split(this.separator);
                 if (fields[0].substr(0, 1) != "#") {
@@ -25613,32 +21554,45 @@ TextNetworkDataAdapter.prototype.parse = function (data) {
                     }
 
                     if (fields.length !== firstLineColumnLength) {
-                        this.trigger('error:parse', {errorMsg: 'Different number of columns.', sender: this});
+                        this.trigger('error:parse', {
+                            errorMsg: 'Different number of columns.',
+                            sender: this
+                        });
                     }
                 }
             }
         }
-        this.trigger('data:load', {graph: this.lines, sender: this});
+        this.trigger('data:load', {
+            lines: this.lines,
+            sender: this
+        });
     } catch (e) {
         console.log(e);
-        this.trigger('error:parse', {errorMsg: 'Parse error', sender: this});
+        this.trigger('error:parse', {
+            errorMsg: 'Parse error',
+            sender: this
+        });
     }
 };
 
-TextNetworkDataAdapter.prototype.parseColumns = function (sourceIndex, targetIndex, relationIndex, relationDefaultName) {
-    this.graph = new Graph();
+TextNetworkDataAdapter.prototype.parseColumns = function(sourceIndex, targetIndex, relationIndex, relationDefaultName) {
+    this.graph = new JsoGraph();
     this.addedVertex = {};
     this.addedEdges = {};
 
     for (var i = 0; i < this.lines.length; i++) {
         var fields = this.lines[i];
+        for (var j = 0; j < fields.length; j++) {
+            fields[j] = fields[j].trim();
+        }
+
 
         var sourceName = fields[sourceIndex];
         var targetName = fields[targetIndex];
         var edgeName;
-        if(relationIndex < 0){
+        if (relationIndex < 0) {
             edgeName = relationDefaultName;
-        }else{
+        } else {
             edgeName = fields[relationIndex];
         }
 
@@ -25651,35 +21605,40 @@ TextNetworkDataAdapter.prototype.parseColumns = function (sourceIndex, targetInd
             this.addedVertex[sourceName] = sourceVertex;
         }
 
-        /** create target vertex **/
-        if (typeof this.addedVertex[targetName] === 'undefined') {
-            var targetVertex = new Vertex({
-                id: targetName
-            });
-            this.graph.addVertex(targetVertex);
-            this.addedVertex[targetName] = targetVertex;
+        /** Check if target column is not defined, so only the source will be added**/
+        if (targetIndex > -1) {
+
+            /** create target vertex **/
+            if (typeof this.addedVertex[targetName] === 'undefined') {
+                var targetVertex = new Vertex({
+                    id: targetName
+                });
+                this.graph.addVertex(targetVertex);
+                this.addedVertex[targetName] = targetVertex;
+            }
+            var edgeId = sourceName + '_' + edgeName + '_' + targetName;
+
+            /** create edge **/
+            if (typeof this.addedEdges[edgeId] === 'undefined') {
+                var edge = new Edge({
+                    id: edgeId,
+                    relation: edgeName,
+                    source: this.addedVertex[sourceName],
+                    target: this.addedVertex[targetName],
+                    weight: 1,
+                    directed: true
+                });
+                this.graph.addEdge(edge);
+                this.addedEdges[edgeId] = edge;
+            }
         }
 
-        var edgeId = sourceName + '_' + edgeName + '_' + targetName;
-
-        /** create edge **/
-        if (typeof this.addedEdges[edgeId] === 'undefined') {
-            var edge = new Edge({
-                id: edgeId,
-                relation: edgeName,
-                source: this.addedVertex[sourceName],
-                target: this.addedVertex[targetName],
-                weight: 1,
-                directed: true
-            });
-            this.graph.addEdge(edge);
-            this.addedEdges[edgeId] = edge;
-        }
 
     }
 
     return this.graph;
 };
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -25707,7 +21666,7 @@ function XLSXNetworkDataAdapter(args) {
     this.dataSource;
     this.async = true;
 
-    this.graph = new Graph();
+    this.graph = new JsoGraph();
     this.xlsx;
 
     //set instantiation args, must be last
@@ -25747,10 +21706,492 @@ XLSXNetworkDataAdapter.prototype.parseSheet = function (sheetName) {
  * Created with IntelliJ IDEA.
  * User: imedina
  * Date: 10/8/13
+ * Time: 12:42 AM
+ *
+ * This API is asynchronous. When a return value is expected, you must provide a callback function.
+ *
+ * This class works this way:
+ *
+ * before executing any request ( get, put, ...),
+ * make sure the DataBase connection is alive (this.db) // TODO not yet
+ * if the connection is dead: reconnect.
+ * make the request to indexedDB.
+ */
+
+
+var iDBInstances = [];
+var iDBVersion = 1;
+function IndexedDBStore(args) {
+    var _this = this;
+    this.debug = false;
+    this.profile = false;
+//debugger
+    // Using Underscore 'extend' function to extend and add Backbone Events
+    _.extend(this, Backbone.Events);
+
+    this.lru = [];
+
+    this.cacheId = "DataBase";
+//    this.objectStore = "ObjectStore";
+    this.opening = false;
+    this.timeout = 30;  // time to wait if the DB connection is being already opened
+    // Now we set the args parameters
+    // must be the last instruction in order to overwrite default attributes
+    _.extend(this, args);
+
+    window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+//    this.db = null;
+    this.version = iDBVersion;
+
+    if (!this.cacheId) {
+        console.log("IndexedDBStore: not supplied cacheId to constructor. Using default DataBase...");
+    }
+
+    iDBInstances.push(this);
+//        if (!window.indexedDB) {
+//            window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
+//        }
+    /*
+     this._getConnection(function (db) {
+     console.log("obtained initial IndexedDB connection for " + _this.cacheId);
+     console.log(db);
+     });
+     */
+}
+
+IndexedDBStore.prototype = {
+    _getConnection: function (objectStoreName, callback, version) {
+        var _this = this;
+        if (_this.debug) {
+            console.log(_this.cacheId + " opening? " + _this.opening);
+            if (objectStoreName == undefined) {
+                console.log("WARNING: requested to create objectStore 'undefined'");
+                debugger
+            }
+//        debugger
+        }
+        if (_this.opening == true) {
+            if (_this.debug) {
+                console.log("Database " + _this.cacheId + " is already opening. To avoid block: waiting...");
+            }
+            setTimeout(_this._getConnection.bind(_this), _this.timeout * (1 + Math.random()*0.25), objectStoreName, callback, version);
+            /*} else if (dbConnection && !dbConnection.closed && dbConnection.objectStoreNames.contains(objectStoreName)) { // recycle connections
+             if (_this.debug) {
+             console.log("Database already opened:", dbConnection);
+             }
+             callback(dbConnection);*/
+        } else {
+            try {
+                if (_this.debug) {
+                    console.log("trying opening Database:" + _this.cacheId);
+                }
+                var dbOpenRequest;
+                _this.opening = true;
+                if (_this.debug) {
+                    console.log("lock:"+_this.cacheId + ", " + objectStoreName + " opening = "+ _this.opening + " version: " + version);
+                }
+                if (!_.isUndefined(version)) {
+                    dbOpenRequest = window.indexedDB.open(_this.cacheId, version); // second parameter is the version. increase to modify tables.
+                } else {
+                    dbOpenRequest = window.indexedDB.open(_this.cacheId);
+                }
+                dbOpenRequest.onsuccess = function (event) {
+                    _this.opening = false;
+                    if (_this.debug) {
+                        console.log("unlock:" + _this.cacheId + ", " + objectStoreName + " opening = " + _this.opening);
+                    }
+//                    if (dbConnection) {
+//                        console.log("overwriting DB", dbConnection, " with", event.target.result);
+//                        debugger;
+//                        dbConnection.close();
+//                        dbConnection.closed = true;
+//                        dbConnection = undefined;
+//                    }
+                    var dbConnection = event.target.result;
+
+                    dbConnection.onversionchange = function (e) {
+                        if (_this.debug) {
+                            console.log("Version change triggered, so closing database connection " + _this.cacheId + ", " + objectStoreName + " (old version, new version, db, event)", e.oldVersion, e.newVersion, dbConnection, e);
+                        }
+                        if (dbConnection) {
+                            dbConnection.close();
+                            dbConnection.closed = true;
+                            dbConnection = undefined;
+                        }
+                    };
+
+                    if (objectStoreName != "" && !dbConnection.objectStoreNames.contains(objectStoreName)) {
+                        iDBVersion = Math.max(iDBVersion, dbConnection.version) + 1;
+                        dbConnection.close();
+                        dbConnection.closed = true;
+                        dbConnection = undefined;
+                        _this.version = iDBVersion;
+                        if (_this.debug) {
+                            console.log("needed ObjectStore " + objectStoreName + " in " + _this.cacheId + " creating version " + iDBVersion);
+                        }
+                        _this._getConnection(objectStoreName, callback, _this.version);
+                    } else {
+                        if (_this.debug) {
+                            console.log("connection obtained for " + _this.cacheId + " and " + objectStoreName, dbConnection);
+                        }
+                        callback(dbConnection);
+                    }
+                };
+                dbOpenRequest.onupgradeneeded = function (e) {
+                    if (_this.debug) {
+                        console.log("Database upgrade needed in " + _this.cacheId + ", " + objectStoreName);
+                    }
+                    dbConnection = e.target.result;
+
+                    if (!dbConnection.objectStoreNames.contains(objectStoreName)) {
+                        if (_this.debug) {
+                            console.log("creating " + objectStoreName + " in Database " + _this.cacheId );
+                        }
+                        var objectStore = dbConnection.createObjectStore(objectStoreName);
+                    }
+                };
+                dbOpenRequest.onerror = function (e) {
+                    console.log("DB Open Request Error in " + _this.cacheId + ", " + objectStoreName);
+                    console.log(e);
+                };
+                dbOpenRequest.onblocked = function (e) {
+                    console.log("DB Open Request Blocked in " + _this.cacheId + ", " + objectStoreName, e);
+//                    if (dbConnection) {
+//                        dbConnection.close();
+//                    }
+                    _this._getConnection(objectStoreName, callback)
+                };
+            } catch (e) {
+                console.log("catch error:");
+                console.error(e);
+            }
+        }
+    },
+
+    clear: function (objectStoreName) {
+//        this.db.deleteObjectStore(this.cacheId);
+
+        var _this = this;
+        _this._getConnection(objectStoreName, function(dbConnection){
+            var transaction = dbConnection.transaction([objectStoreName], "readwrite");
+            transaction.oncomplete = function(event) {
+                console.log("IndexedDB " + _this.cacheId + ", " + objectStoreName + " clear success!");
+            };
+            var objectStore = transaction.objectStore(objectStoreName);
+            var req = objectStore.clear();
+            req.onerror = function (evt) {
+                console.log("IndexedDB Error trying to clear the object store " + objectStoreName + " in " + _this.cacheId);
+            }
+        });
+    },
+
+    count: function (objectStoreName, callback) {
+        var _this = this;
+        _this._getConnection(objectStoreName, function(dbConnection){
+            var transaction = dbConnection.transaction([objectStoreName], "readwrite");
+            var objectStore = transaction.objectStore(objectStoreName);
+            var req = objectStore.count();
+            req.onerror = function (evt) {
+                console.log("IndexedDB Error trying to count the object store " + objectStoreName + " in " + _this.cacheId);
+            };
+            req.onsuccess = function (event) {
+                callback(event.target.result);
+            }
+        });
+    },
+
+    getObjectStoreNames: function (callback) {
+        var _this = this;
+        _this._getConnection("", function(dbConnection){
+            callback(dbConnection.objectStoreNames);
+        });
+    },
+
+    close: function () {
+        var _this = this;
+        _this._getConnection(objectStoreName, function(dbConnection){
+            dbConnection.close();
+            console.log("Database " + _this.cacheId + " closed");
+            dbConnection.closed=true;
+            dbConnection = undefined;
+        });
+    },
+
+    destroyDB: function() {
+        var _this = this;
+        try {
+            var dbDeleteRequest = window.indexedDB.deleteDatabase(_this.cacheId);
+            dbDeleteRequest.onsuccess = function (e) {
+                console.log("Database " + _this.cacheId + " successfully deleted");
+            };
+            dbDeleteRequest.onupgradeneeded = function (e) {
+                var db = dbOpenRequest.result;
+                console.log("Deleting Database upgrade needed");
+                /* Code for ${db.upgrade} */
+            };
+            dbDeleteRequest.onerror = function (e) {
+                console.log("Error deleting DB" + _this.cacheId);
+                console.log(e);
+            };
+            dbDeleteRequest.onblocked = function (e) {
+                console.log("Deleting DB Blocked. Try closing the database " + _this.cacheId + " and then deleting it");
+            };
+        } catch (e) {
+            console.log(e);
+        }
+
+    },
+
+    destroyDBs: function() {
+        for (var i = 0; i < iDBInstances.length; i++){
+            iDBInstances[i].close();
+            iDBInstances[i].destroyDB();
+        }
+    },
+
+
+    get: function(objectStoreName, key, callback) {
+        var timeId;
+        var _this = this;
+        if (_this.debug) {
+            timeId = "IndexedDBStore.get " + objectStoreName + key;
+            console.time(timeId);
+        }
+        var result = null;
+        _this._getConnection(objectStoreName, function (dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readonly");
+            transaction.oncomplete = function(event) {
+                if (_this.debug) {
+                    console.timeEnd(timeId);
+                }
+                dbConnection.close();
+                callback(result);
+            };
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction get (" + key + ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+            var request = objectStore.get(key);
+            request.onsuccess = function (event) {
+                result = event.target.result;
+            };
+        });
+    },
+
+
+    /**
+     * Calls the callback ONCE. As a parameter there is an Array with all the values.
+     * @param keyArray
+     * @param callback (valuesArray) The order is the same as in the keyArray.
+     */
+    getAll: function(objectStoreName, keyArray, callback) {
+        var _this = this;
+        var timeId;
+        if (_this.profile || _this.debug) {
+            timeId = "IndexedDBStore.getAll " + objectStoreName + ", with " + keyArray.length + " keys.";
+            console.time(timeId);
+        }
+        if (!(keyArray instanceof Array) || !callback) {
+            console.error("Bad use of IndexedDBStore: getAll must receive an ObjectStoreName, an Array of keys and a callback function.");
+            return;
+        }
+        var results = new Array(keyArray.length);
+
+        _this._getConnection(objectStoreName, function (dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readonly");
+            transaction.oncomplete = function(event) {
+                if (_this.profile || _this.debug) {
+                    console.timeEnd(timeId);
+                }
+                dbConnection.close();
+                callback(results);
+            };
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction get (" + keyArray + ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+
+            for (var i = 0; i < keyArray.length; i++) {
+                var request = objectStore.get(keyArray[i]);
+
+                request.onsuccess = function (iteration) {
+                    return function (event) {
+                        results[iteration] = event.target.result;
+                    };
+                } (i);     // to force the closure to have each value of i, and not just the last one
+            }
+        });
+    },
+
+    /**
+     * Calls the callback with the value of each key. The callback is called keyArray.length times.
+     * @param callback (value, key, i) Receives as parameters the value, its key, and the position of the key in the keyArray.
+     * @param whenCompletedCallback Optional. Receives no arguments. it is called when all callbacks have finished.
+     */
+    foreach: function(objectStoreName, keyArray, callback, whenCompletedCallback) {
+        if (!(keyArray instanceof Array) || !callback) {
+            console.error("Bad use of IndexedDBStore: foreach must receive an ObjectStoreName, an Array of keys and a callback function.");
+            return;
+        }
+        var _this = this;
+        var timeId;
+        if (_this.profile || _this.debug) {
+            timeId = "IndexedDBStore.getAll " + objectStoreName + ", with " + keyArray.length + " keys.";
+            console.time(timeId);
+        }
+
+        _this._getConnection(objectStoreName, function (dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readonly");
+            transaction.oncomplete = function(event) {
+                dbConnection.close();
+                if (_this.profile || _this.debug) {
+                    console.timeEnd(timeId);
+                }
+                if (whenCompletedCallback) {
+                    whenCompletedCallback();
+                }
+            };
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction foreach (" + keyArray + ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+
+            for (var i = 0; i < keyArray.length; i++) {
+                var request = objectStore.get(keyArray[i]);
+
+                request.onsuccess = function (iteration) {
+                    return function (event) {
+                        callback(event.target.result, keyArray[iteration], iteration);
+                    };
+                } (i);     // to force the closure to have each value of i, and not just the last one
+            }
+        });
+    },
+
+    add: function(objectStoreName, key, value) {
+        var _this = this;
+
+        _this._getConnection(objectStoreName, function(dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readwrite");
+
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction add (" + key + ", " + value + ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+            var request = objectStore.add(value, key);    // as the key is optional depending on the database scheme, it is the 2nd parameter
+        });
+    },
+
+    put: function(objectStoreName, key, value) {
+        var _this = this;
+        var timeId;
+        if (_this.debug) {
+            timeId = "IndexedDBStore.put " + objectStoreName + key;
+            console.time(timeId);
+        }
+
+        _this._getConnection(objectStoreName, function(dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readwrite");
+            transaction.oncomplete = function(event) {
+                if (_this.debug) {
+                    console.timeEnd(timeId);
+                }
+                dbConnection.close();
+                dbConnection.close = true;
+            };
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction put(" + key + ", ", value, ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+            var request = objectStore.put(value, key);    // as the key is optional depending on the database scheme, it is the 2nd parameter
+        });
+    },
+
+    putAll: function(objectStoreName, keyArray, valueArray) {
+        var _this = this;
+        var timeId;
+        if (_this.profile || _this.debug) {
+            timeId = "IndexedDBStore.putAll " + objectStoreName + ", with " + keyArray.length;
+            console.time(timeId);
+        }
+
+        if (!(keyArray instanceof Array) || !(valueArray instanceof Array) || (keyArray.length != valueArray.length)) {
+            console.error("Bad use of IndexedDBStore: putAll must receive two Arrays of the same length.");
+            return;
+        }
+
+        _this._getConnection(objectStoreName, function(dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readwrite");
+            transaction.oncomplete = function(event) {
+                if (_this.profile || _this.debug) {
+                    console.timeEnd(timeId);
+                }
+                dbConnection.close();
+                dbConnection.close = true;
+            };
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction put(" + key + ", ", value, ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+
+            for (var i = 0; i < keyArray.length; i++) {
+                objectStore.put(valueArray[i], keyArray[i]);    // as the key is optional depending on the database scheme, it is the 2nd parameter
+            }
+        });
+    },
+
+
+    delete: function(objectStoreName, key) {
+        var _this = this;
+
+        _this._getConnection(objectStoreName, function(dbConnection) {
+            var transaction = dbConnection.transaction([objectStoreName], "readwrite");
+            transaction.onerror = function (event) {
+                console.log("There was an error in the transaction delete (" + key + ")");
+                console.log(event);
+            };
+
+            var objectStore = transaction.objectStore(objectStoreName);
+            var request = objectStore.delete(key);    // as the key is optional depending on the database scheme, it is the 2nd parameter
+
+        });
+    }
+};
+
+IndexedDBTest = function () {
+    var idb = new IndexedDBStore({cacheId: "test"});
+    idb.put("os-a", "key-a", "value-a");
+    idb.put("os-b", "key-b", "value-b");
+};
+
+IndexedDBTest();
+//debugger
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: imedina
+ * Date: 10/8/13
  * Time: 12:40 AM
  * To change this template use File | Settings | File Templates.
  */
 
+/**
+ * MemoryStore is a cache with items ordered with "least recently used" criterion (LRU). This allows to remove old data with the "shift" method.
+ * The parameter "category" should be a string, and it is used as another level of classification.
+ * "get", "getAll" and "foreach" methods can be used with callbacks or with return values.
+ */
 function MemoryStore(args) {
 
     // Using Underscore 'extend' function to extend and add Backbone Events
@@ -25762,31 +22203,29 @@ function MemoryStore(args) {
     // Now we set the args parameters
     _.extend(this, args);
 
-    // internal parameters
-    this.size = 0;
-    this.store = {};
+    this.init();
 };
 
 MemoryStore.prototype = {
-    add: function (key, value) {
-        if (typeof this.store === 'undefined') {
-            this.store = {};
+    put: function (category, key, value) {
+        if (typeof this.stores[category] === 'undefined') {
+            this.init(category);
         }
         var item = {key: key, value: value};
 
         // a item can be overwritten
-        this.store[key] = item;
+        this.stores[category][key] = item;
 
-        if (this.tail) {
-            this.tail.newer = item;
-            item.older = this.tail;
+        if (this.tails[category]) {
+            this.tails[category].newer = item;
+            item.older = this.tails[category];
         } else {
             // the item is the first one
-            this.head = item;
+            this.heads[category] = item;
         }
 
         // add new item to the end of the linked list, it's now the freshest item.
-        this.tail = item;
+        this.tails[category] = item;
 
 //        if (this.size === this.limit) {
 //            // we hit the limit, remove the head
@@ -25795,33 +22234,53 @@ MemoryStore.prototype = {
 //            // increase the size counter
 //            this.size++;
 //        }
-        this.size++;
+        this.sizes[category]++;
 
     },
-    shift: function () {
+    putAll: function (category, keyArray, valueArray) {
+        for (var i = 0; i < keyArray.length; i++) {
+            this.put(category, keyArray[i], valueArray[i]);
+        }
+    },
+
+    shift: function (category) {
+        if (typeof this.stores[category] === 'undefined') {
+            this.init(category);
+        }
         // todo: handle special case when limit == 1
-        var item = this.head;
+        var item = this.heads[category];
         if (item) {
-            if (this.head.newer) {
-                this.head = this.head.newer;
-                this.head.older = undefined;
+            if (this.heads[category].newer) {
+                this.heads[category] = this.heads[category].newer;
+                this.heads[category].older = undefined;
             } else {
-                this.head = undefined;
+                this.heads[category] = undefined;
             }
             // Remove last strong reference to <item> and remove links from the purged
             // item being returned:
             item.newer = item.older = undefined;
             // delete is slow, but we need to do this to avoid uncontrollable growth:
-            delete this.store[item.key];
+            delete this.stores[category][item.key];
         }
     },
-    get : function(key) {
+    get : function(category, key, callback) {
+        if (typeof this.stores[category] === 'undefined') {
+            this.init(category);
+        }
         // First, find our cache item
-        var item = this.store[key];
-        if (item === undefined) return; // Not cached. Sorry.
+        var item = this.stores[category][key];
+        if (item === undefined) {
+            if (callback) {
+                callback();
+            }
+            return; // Not cached. Sorry.
+        }
         // As <key> was found in the cache, register it as being requested recently
-        if (item === this.tail) {
+        if (item === this.tails[category]) {
             // Already the most recenlty used item, so no need to update the list
+            if (callback) {
+                callback(item.value);
+            }
             return item.value;
         }
         // HEAD--------------TAIL
@@ -25829,8 +22288,8 @@ MemoryStore.prototype = {
         //  <--- add direction --
         //   A  B  C  <D>  E
         if (item.newer) {
-            if (item === this.head){
-                this.head = item.newer;
+            if (item === this.heads[category]){
+                this.heads[category] = item.newer;
             }
             item.newer.older = item.older; // C <-- E.
         }
@@ -25838,21 +22297,45 @@ MemoryStore.prototype = {
             item.older.newer = item.newer; // C. --> E
         }
         item.newer = undefined; // D --x
-        item.older = this.tail; // D. --> E
-        if (this.tail)
-            this.tail.newer = item; // E. <-- D
-        this.tail = item;
+        item.older = this.tails[category]; // D. --> E
+        if (this.tails[category])
+            this.tails[category].newer = item; // E. <-- D
+        this.tails[category] = item;
+        if (callback) {
+            callback(item.value);
+        }
         return item.value;
     },
 
-    init: function () {
-        this.size = 0;
-        this.store = {};
-        this.head = undefined;
-        this.tail = undefined;
+    getAll: function (category, keyArray, callback) {
+        var valueArray = [];
+        for (var i = 0; i < keyArray.length; i++) {
+            valueArray[i] = this.get(category, keyArray[i]);
+        }
+        callback(valueArray);
+    },
+
+    foreach: function (category, keyArray, callback) {
+        for (var i = 0; i < keyArray.length; i++) {
+            callback(this.get(category, keyArray[i]), keyArray[i]);
+        }
+    },
+
+    init: function (category) {
+        if (category != undefined) {
+            this.sizes[category] = 0;
+            this.stores[category] = {};
+            this.heads[category] = undefined;
+            this.tails[category] = undefined;
+        } else {
+            this.sizes = {};
+            this.stores = {};
+            this.heads = {};
+            this.tails = {};
+        }
     },
     clear: function () {
-        this.store = null;
+        this.stores = null; // TODO delete?
         this.init();
     }
 
@@ -25921,134 +22404,205 @@ function FeatureChunkCache(args) {
     // Default values
     this.id = Utils.genId("FeatureChunkCache");
 
-    this.chunkSize = 50000;
+    this.defaultChunkSize = 50000;
+    this.defaultCategory = "defaultCategory";
     this.limit;
 
     _.extend(this, args);
 
-    this.store = new MemoryStore({});
+    if (this.storeType == "MemoryStore") {
+        this.store = new MemoryStore({});
+    } else {
+        this.store = new IndexedDBStore({cacheId: this.cacheId});
+    }
 
     this.verbose = false;
 }
 
 
 FeatureChunkCache.prototype = {
+    /**
+     *
+     * @param region an object Region
+     * @param categories approximately the table in the DB. May be an array
+     * @param dataType another level of classification
+     * @param chunkSize
+     * @param callback receives two arguments: (cachedChunks, uncachedRegions) with this structure:
+     * cachedChunks: {
+     *     categories[0]: [chunk, chunk, chunk],
+     *     categories[1]: [chunk, chunk, chunk],
+     *     ...
+     * }
+     * uncachedRegions: {
+     *     categories[0]: [region, region],
+     *     categories[1]: [region, region],
+     *     ...
+     * }
+     */
+    get: function (region, categories, dataType, chunkSize, callback) {
+        var _this = this;
+        var temporalChunkSize = chunkSize? chunkSize : this.defaultChunkSize;
 
-    getChunk: function (chunkId) {
-        return this.store.get(chunkId);
-    },
-
-    getAdjustedRegion: function (region) {
-        var start = this.getChunkId(region.start) * this.chunkSize;
-        var end = (this.getChunkId(region.end) * this.chunkSize) + this.chunkSize - 1;
-
-        return new Region({chromosome: region.chromosome, start: start, end: end});
-    },
-
-
-    getAdjustedRegions: function (region) {
-        var firstChunkId = this.getChunkId(region.start);
-        var lastChunkId = this.getChunkId(region.end);
-
-        var regions = [], updateStart = true, updateEnd = true, chunkStart, chunkEnd;
-        for (var chunkId = firstChunkId; chunkId <= lastChunkId; chunkId++) {
-            var chunkKey = this.getChunkKey(region.chromosome, chunkId);
-            var nextChunkKey = this.getChunkKey(region.chromosome, chunkId + 1);
-            var chunk = this.getChunk(chunkKey);
-            var nextChunk = this.getChunk(nextChunkKey);
-            if (updateStart) {
-                chunkStart = parseInt(chunkId * this.chunkSize);
-                updateStart = false;
-            }
-            if (updateEnd) {
-                chunkEnd = parseInt((chunkId * this.chunkSize) + this.chunkSize - 1);
-                updateEnd = false;
-            }
-
-            if (!chunk) {
-                updateEnd = true;
-                if (nextChunk && chunkId < lastChunkId) {
-                    var r = new Region({chromosome: region.chromosome, start: chunkStart, end: chunkEnd})
-                    regions.push(r);
-                    updateStart = true;
-                }
-                if (chunkId == lastChunkId) {
-                    var r = new Region({chromosome: region.chromosome, start: chunkStart, end: chunkEnd})
-                    regions.push(r);
-                }
-            } else {
-                updateStart = true;
-                updateEnd = true;
-            }
-        }
-        return regions;
-    },
-
-    getByRegions: function (regions) {
-        var chunks = [];
-        for (var i in regions) {
-            var chunkId = this.getChunkId(regions[i].start);
-            var chunkKey = this.getChunkKey(regions[i].chromosome, chunkId);
-            chunks.push(this.getChunk(chunkKey));
-        }
-        return chunks;
-    },
-
-
-    getCachedByRegion: function (region) {
-        var chunkRegions = {cached: [], notCached: []};
-
-        var firstChunkId = this.getChunkId(region.start);
-        var lastChunkId = this.getChunkId(region.end);
+        var firstChunkId = this.getChunkId(region.start, temporalChunkSize);
+        var lastChunkId = this.getChunkId(region.end, temporalChunkSize);
+        var keys = [];
+        var chunksAndRegions = {cachedChunks: {}, uncachedRegions: {}};
 
         for (var chunkId = firstChunkId; chunkId <= lastChunkId; chunkId++) {
-            var chunkKey = this.getChunkKey(region.chromosome, chunkId);
-            var chunk = this.getChunk(chunkKey);
+            keys.push(this.getChunkKey(region.chromosome, chunkId, dataType, temporalChunkSize));
+        }
 
-            var chunkRegionStart = parseInt(chunkId * this.chunkSize) || 1;
-            var chunkRegionEnd = parseInt(chunkId * this.chunkSize + this.chunkSize - 1);
-            var chunkRegion = new Region({chromosome: region.chromosome, start: chunkRegionStart, end: chunkRegionEnd});
+        if (!_.isArray(categories)) {
+            categories = [categories];
+        }
+        var callbackCount = 0;
+        for (var cat = 0; cat < categories.length; cat++) {
+            callbackCount++;
+            chunksAndRegions.cachedChunks[categories[cat]] = [];
+            chunksAndRegions.uncachedRegions[categories[cat]] = [];
+            this.getChunks(categories[cat], keys, function (iterCat) {
+                return function(chunks) {
+                    for (var i = 0; i < chunks.length; i++) {
+                        var chunkRegionEnd = parseInt(((firstChunkId + i) * temporalChunkSize) + temporalChunkSize - 1);
+                        var chunkRegionStart = parseInt((firstChunkId + i) * temporalChunkSize);
+                        var chunkRegion = new Region({chromosome: region.chromosome, start: chunkRegionStart, end: chunkRegionEnd});
 
-            if (_.isUndefined(chunk)) {
-                chunkRegions.notCached.push(chunkRegion);
+                        if (_.isUndefined(chunks[i])) {
+                            chunksAndRegions.uncachedRegions[categories[iterCat]].push(chunkRegion);
+                        } else {
+                            chunksAndRegions.cachedChunks[categories[iterCat]].push(chunks[i]);
+                        }
+                    }
+                    if (this.verbose) {
+                        console.log(chunksAndRegions);
+                    }
+                    callbackCount--;
+                    if  (callbackCount == 0 && callback) {
+                        callback(chunksAndRegions.cachedChunks, chunksAndRegions.uncachedRegions);
+                    }
+                }
+            } (cat));     // to force the closure to have each value of cat, and not just the last one
+        }
+    },
+
+    /*
+     getChunk: function (chunkId) {
+     return this.store.get(chunkId);
+     },*/
+
+    getChunk: function (category, chunkKey, callback) {
+        if (!callback) {
+            console.log("bad FeatureChunkCache usage: undefined callback");
+        }
+        if (!category) {
+            category = this.defaultCategory;
+        }
+        this.store.get(category, chunkKey, callback);
+    },
+
+    getChunks: function (category, chunkKeysArray, callback) {
+        if (!callback) {
+            console.log("bad FeatureChunkCache usage: undefined callback");
+        }
+        if (!category) {
+            category = this.defaultCategory;
+        }
+        this.store.getAll(category, chunkKeysArray, callback);
+    },
+
+    joinRegions: function(regions) {
+        if (regions.length <= 1) {
+            return regions;
+        }
+        // assert(regions.length >= 2)
+
+        var joinedRegions = [];
+        var regionStart = regions[0].start;
+        var regionEnd = region[0].end;
+        var regionChromosome = regions[0].chromosome;
+
+        for (var i = 1; i < regions.length; i++) {
+            if (regions[i].chromosome == regionChromosome && regions[i].start - 1 <= regionEnd) { // CAUTION: assuming inclusive intervals
+                if (regions[i].end > regionEnd) {
+                    regionEnd = regions[i].end;
+                }
             } else {
-                chunkRegions.cached.push(chunkRegion);
-            }
-
-            if (this.verbose) {
-                console.log(chunkRegions);
+                joinedRegions.push(new Region({chromosome: regionChromosome, start: regionStart, end: regionEnd}));
+                regionChromosome = regions[i].chromosome;
+                regionStart = regions[i].start;
+                regionEnd = regions[i].end;
             }
         }
-        return chunkRegions;
+
+        joinedRegions.push(new Region({chromosome: regionChromosome, start: regionStart, end: regionEnd}));
+
+        return joinedRegions;
     },
 
-    putChunk: function (chunkKey, value) {
-        var value = {value: value, chunkKey: chunkKey};
-        this.store.add(chunkKey, value);
-        return value;
+    /**
+     * TODO: the regions must be equally long to the chunksize
+     */
+    putByRegions: function (regionArray, valueArray, category, dataType, chunkSize) { // encoded
+        var temporalChunkSize = chunkSize? chunkSize : this.defaultChunkSize;
+        var chunkKeyArray = [];
+        for (var i = 0; i < regionArray.length; i++) {
+            var chunkId = this.getChunkId(regionArray[i].start, temporalChunkSize);
+            var chunkKey = this.getChunkKey(regionArray[i].chromosome, chunkId,  dataType, chunkSize);
+            chunkKeyArray.push(chunkKey);
+        }
+        return this.putChunks(chunkKeyArray, valueArray, category, false);
     },
 
-    putByRegion: function (region, value) {
-        var chunkId = this.getChunkId(region.start);
-        var chunkKey = this.getChunkKey(region.chromosome, chunkId);
-        return this.putChunk(chunkKey, value);
+    /** several chunks in one transaction. this is a fast put */
+    putChunks: function (chunkKeyArray, valueArray, category, encoded) {
+        var valueStoredArray = [];
+        for (var i = 0; i < valueArray.length; i++) {
+            valueStoredArray.push(this.createEntryValue(chunkKeyArray[i], valueArray[i], encoded));   // TODO add timestamp, last usage time, size, etc.
+        }
+        if (!category) {
+            category = this.defaultCategory;
+        }
+        this.store.putAll(category, chunkKeyArray, valueStoredArray);
+        return valueStoredArray;
     },
 
-    getChunkKey: function (chromosome, chunkId) {
-        return chromosome + ":" + chunkId;
+    createEntryValue: function (chunkKey, value, encoded) {
+        var valueStored;
+        if (encoded) {
+            valueStored = {value: value, chunkKey: chunkKey, enc: encoded}; // TODO add timestamp, last usage time, size, etc.
+        } else {
+            valueStored = {value: value, chunkKey: chunkKey}; // TODO add timestamp, last usage time, size, etc.
+        }
+        return valueStored;
     },
 
-    getChunkId: function (position) {
-        return Math.floor(position / this.chunkSize);
+    getChunkKey: function (chromosome, chunkId, dataType, chunkSize) {
+        var keySuffix = dataType? "_" + dataType : "";
+        keySuffix += "_" + chunkSize;       // e.g. "_hist_1000"
+        return chromosome + ":" + chunkId + keySuffix;
+    },
+
+    getChunkId: function (position, chunkSize) {
+        return Math.floor(position / chunkSize);
     },
 
 
-    getChunkSize: function () {
-        return this.chunkSize;
+    getDefaultChunkSize: function () {
+        return this.defaultChunkSize;
     }
 
+    /* TODO:
+     visit: function (chunkKey) {
+     var _this = this;
+     this.getChunk(chunkKey, function(value){
+     //            value.lastUsed = ...
+     _this.putChunk(chunkKey, value);
+     });
+     },*/
+};
 
-}
+
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -26788,7 +23342,7 @@ function NavigationBar(args) {
     this.target;
     this.autoRender = true;
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'http://bioinfo.hpc.cam.ac.uk/cellbase';
     this.cellBaseVersion = 'v3';
 
     this.species = 'Homo sapiens';
@@ -26800,9 +23354,9 @@ function NavigationBar(args) {
         regionHistoryButton: true,
         speciesButton: true,
         chromosomesButton: true,
-        karyotypeButton: true,
-        chromosomeButton: true,
-        regionButton: true,
+        karyotypeButtonLabel: true,
+        chromosomeButtonLabel: true,
+        regionButtonLabel: true,
         zoomControl: true,
         windowSizeControl: true,
         positionControl: true,
@@ -26812,6 +23366,8 @@ function NavigationBar(args) {
         searchControl: true
     };
     this.zoom = 100;
+
+    this.quickSearchDisplayKey = 'name';
 
 
     _.extend(this.componentsConfig, args.componentsConfig);
@@ -26841,53 +23397,57 @@ function NavigationBar(args) {
 
 NavigationBar.prototype = {
 
-    render: function () {
+    render: function() {
         var _this = this;
 
 
         var HTML = '' +
-            '<div style="margin-right: 5px;" id="leftSideButton" class="ocb-ctrl"><i class="fa fa-navicon"></i></div>' +
+            '<div title="Restore previous region" style="margin-right: 5px;" id="leftSideButton" class="ocb-ctrl"><i class="fa fa-navicon"></i></div>' +
             '<div id="restoreDefaultRegionButton" class="ocb-ctrl"><i class="fa fa-repeat"></i></div>' +
 
-            '<div class="ocb-dropdown" style="margin-left: 5px">' +
+            '<div title="Region history" class="ocb-dropdown" style="margin-left: 5px">' +
             '   <div tabindex="-1" id="regionHistoryButton" class="ocb-ctrl"><i class="fa fa-history"></i> <i class="fa fa-caret-down"></i></div>' +
             '   <ul id="regionHistoryMenu"></ul>' +
             '</div>' +
 
-            '<div class="ocb-dropdown" style="margin-left: 5px">' +
+            '<div title="Species menu" class="ocb-dropdown" style="margin-left: 5px">' +
             '   <div tabindex="-1" id="speciesButton" class="ocb-ctrl"><span id="speciesText"></span> <i class="fa fa-caret-down"></i></div>' +
             '   <ul id="speciesMenu"></ul>' +
             '</div>' +
 
-            '<div class="ocb-dropdown" style="margin-left: 5px">' +
+            '<div title="Chromosomes menu" class="ocb-dropdown" style="margin-left: 5px">' +
             '   <div tabindex="-1" id="chromosomesButton" class="ocb-ctrl"><span id="chromosomesText"></span> <i class="fa fa-caret-down"></i></div>' +
-            '   <ul id="chromosomesMenu"></ul>' +
+            '   <ul id="chromosomesMenu" style="height: 200px; overflow-y: auto;"></ul>' +
             '</div>' +
 
-            '<label style="margin-left: 5px;" class="ocb-ctrl"><input type="checkbox" id="karyotypeButton"><span style="border-right: none"><span class="ocb-icon ocb-icon-karyotype"></span></span></label>' +
-            '<label class="ocb-ctrl"><input type="checkbox" id="chromosomeButton"><span style="border-right: none"><span class="ocb-icon ocb-icon-chromosome"></span></span></label>' +
-            '<label class="ocb-ctrl"><input type="checkbox" id="regionButton"><span><span class="ocb-icon ocb-icon-region"></span></span></label>' +
+            '<div style="margin-left: 5px; float: left; " >' +
+            '   <label title="Toggle karyotype panel" class="ocb-ctrl" id="karyotypeButtonLabel"><input id="karyotypeButton" type="checkbox"><span style="border-right: none"><span class="ocb-icon ocb-icon-karyotype"></span></span></label>' +
+            '   <label title="Toggle chromosome panel" class="ocb-ctrl" id="chromosomeButtonLabel"><input id="chromosomeButton" type="checkbox"><span style="border-right: none"><span class="ocb-icon ocb-icon-chromosome"></span></span></label>' +
+            '   <label title="Toggle overview panel" class="ocb-ctrl" id="regionButtonLabel"><input id="regionButton" type="checkbox"><span><span class="ocb-icon ocb-icon-region"></span></span></label>' +
+            '</div>' +
 
 
             '<div id="zoomControl" style="float:left;">' +
-            '<div id="zoomMinButton" class="ocb-ctrl" style="margin-left: 5px;border-right: none;">0</div>' +
-            '<div id="zoomOutButton" class="ocb-ctrl"><span class="fa fa-minus"></span></div>' +
+            '<div title="Minimum window size" id="zoomMinButton" class="ocb-ctrl" style="margin-left: 5px;border-right: none;">Min</div>' +
+            '<div title="Decrease window size" id="zoomOutButton" class="ocb-ctrl"><span class="fa fa-minus"></span></div>' +
             '<div id="progressBarCont" class="ocb-zoom-bar">' +
-            '   <div id="progressBar" style="width: ' + this.zoom + '%"></div>' +
+            '   <div id="progressBar" class="back"></div>' +
+            '   <div id="progressBar" class="rect" style="width: ' + this.zoom + '%"></div>' +
+            '   <div id="progressBarBall" class="ball" style="left: ' + this.zoom + '%"></div>' +
             '</div>' +
-            '<div id="zoomInButton" class="ocb-ctrl" style="border-right: none;"><span class="fa fa-plus"></span></div>' +
-            '<div id="zoomMaxButton" class="ocb-ctrl">100</div>' +
-            '</div>' +
-
-
-            '<div id="windowSizeControl" style="float:left;">' +
-            '<div class="ocb-ctrl-label" style="border-right: none;margin-left: 5px;">Window size:</div>' +
-            '<input id="windowSizeField" class="ocb-ctrl"  type="text" style="width: 60px;">' +
+            '<div title="Increase window size" id="zoomInButton" class="ocb-ctrl" style="border-right: none;"><span class="fa fa-plus"></span></div>' +
+            '<div title="Maximum window size" id="zoomMaxButton" class="ocb-ctrl">Max</div>' +
             '</div>' +
 
 
-            '<div id="positionControl" style="float:left;">' +
-            '<div class="ocb-ctrl-label" id="regionLabel" style="border-right: none;margin-left: 5px;transition:all 0.5s">Position:</div>' +
+            '<div title="Window size (Nucleotides)" id="windowSizeControl" style="float:left;margin-left: 5px;">' +
+                //'<div class="ocb-ctrl-label" style="border-right: none;">Window size:</div>' +
+            '<input id="windowSizeField" class="ocb-ctrl"  type="text" style="width: 70px;">' +
+            '</div>' +
+
+
+            '<div title="Position" id="positionControl" style="float:left;margin-left: 5px">' +
+                //'<div class="ocb-ctrl-label" id="regionLabel" style="border-right: none;margin-left: 5px;transition:all 0.5s">Position:</div>' +
             '<input id="regionField" class="ocb-ctrl" placeholder="1:10000-20000" type="text" style="width: 170px;">' +
             '<div id="goButton" class="ocb-ctrl" style="border-left: none;">Go!</div>' +
             '</div>' +
@@ -26901,13 +23461,14 @@ NavigationBar.prototype = {
             '</div>' +
 
 
-            '<div id="autoheightButton" class="ocb-ctrl" style="margin-left: 5px;font-size:18px;"><i class="fa fa-compress"></i></div>' +
+//            '<div id="autoheightButton" class="ocb-ctrl" style="margin-left: 5px;font-size:18px;"><i class="fa fa-compress"></i></div>' +
+            '<label class="ocb-ctrl"><input type="checkbox" id="autoheightButton"><span style="margin-left: 5px;font-size:18px;"><i class="fa fa-compress"></i></span></label>' +
 //            '<div id="compactButton" class="ocb-ctrl" style="margin-left: 5px;font-size:18px;"><i class="fa fa-expand"></i></div>' +
 
 
             '<div id="searchControl" style="float:left;">' +
-            '<div class="ocb-ctrl-label" style="border-right: none;margin-left: 5px;">Search:</div>' +
-            '<input id="searchField" class="ocb-ctrl"  list="searchDataList"  placeholder="gene, snp..." type="text" style="width: 90px;">' +
+            //'<div class="ocb-ctrl-label" style="border-right: none;margin-left: 5px;"></div>' +
+            '<input id="searchField" class="ocb-ctrl"  list="searchDataList"  placeholder="gene" type="text" style="width: 90px;margin-left: 5px;">' +
             '       <datalist id="searchDataList">' +
             '       </datalist>' +
             '<div id="quickSearchButton" class="ocb-ctrl" style="border-left: none;"><i class="fa fa-search"></i></div>' +
@@ -26947,15 +23508,15 @@ NavigationBar.prototype = {
 
         /*** ***/
 
-        this.els.menuButton.addEventListener('click', function (e) {
+        this.els.menuButton.addEventListener('click', function(e) {
             _this.trigger('menuButton:click', {clickEvent: e, sender: {}})
         });
 
-        this.els.leftSideButton.addEventListener('click', function (e) {
+        this.els.leftSideButton.addEventListener('click', function(e) {
             _this.trigger('leftSideButton:click', {clickEvent: e, sender: {}})
         });
 
-        this.els.restoreDefaultRegionButton.addEventListener('click', function (e) {
+        this.els.restoreDefaultRegionButton.addEventListener('click', function(e) {
             _this.trigger('restoreDefaultRegion:click', {clickEvent: e, sender: {}})
         });
 
@@ -26964,68 +23525,93 @@ NavigationBar.prototype = {
         this._setChromosomeMenu();
         this._setSpeciesMenu();
         this.els.chromosomesText.textContent = this.region.chromosome;
-        this.els.speciesText.textContent = this.species.text;
+        this.els.speciesText.textContent = this.species.scientificName;
 
 
-        this.els.karyotypeButton.addEventListener('click', function () {
+        this.els.karyotypeButton.addEventListener('click', function() {
             _this.trigger('karyotype-button:change', {selected: this.checked, sender: _this});
         });
-        this.els.chromosomeButton.addEventListener('click', function () {
+        this.els.chromosomeButton.addEventListener('click', function() {
             _this.trigger('chromosome-button:change', {selected: this.checked, sender: _this});
         });
-        this.els.regionButton.addEventListener('click', function () {
+        this.els.regionButton.addEventListener('click', function() {
             _this.trigger('region-button:change', {selected: this.checked, sender: _this});
         });
 
 
-        this.els.zoomOutButton.addEventListener('click', function () {
+        this.els.zoomOutButton.addEventListener('click', function() {
             _this._handleZoomOutButton();
         });
-        this.els.zoomInButton.addEventListener('click', function () {
+        this.els.zoomInButton.addEventListener('click', function() {
             _this._handleZoomInButton();
         });
-        this.els.zoomMaxButton.addEventListener('click', function () {
+        this.els.zoomMaxButton.addEventListener('click', function() {
             _this._handleZoomSlider(100);
         });
-        this.els.zoomMinButton.addEventListener('click', function () {
+        this.els.zoomMinButton.addEventListener('click', function() {
             _this._handleZoomSlider(0);
         });
-        this.els.progressBarCont.addEventListener('click', function (e) {
-            var zoom = 100 / parseInt(getComputedStyle(this).width) * e.offsetX;
+
+
+        var zoomBarMove = function(e) {
+            var progressBarCont = _this.els.progressBarCont;
+            var br = progressBarCont.getBoundingClientRect();
+            var offsetX = e.clientX - br.left;
+            var zoom = 100 / parseInt(getComputedStyle(progressBarCont).width) * offsetX;
+            if (zoom > 0 && zoom < 100) {
+                _this.els.progressBarBall.style.left = zoom + '%';
+            }
+        };
+        this.els.progressBarCont.addEventListener('click', function(e) {
+            var br = this.getBoundingClientRect();
+            var offsetX = e.clientX - br.left;
+            var zoom = 100 / parseInt(getComputedStyle(this).width) * offsetX;
             _this._handleZoomSlider(zoom);
+
+            this.removeEventListener('mousemove', zoomBarMove);
+        });
+        this.els.progressBarBall.addEventListener('mousedown', function(e) {
+            _this.els.progressBarCont.addEventListener('mousemove', zoomBarMove);
+        });
+        this.els.progressBarBall.addEventListener('mouseleave', function(e) {
+            _this.els.progressBarCont.removeEventListener('mousemove', zoomBarMove);
+            _this.els.progressBarBall.style.left = _this.zoom + '%';
         });
 
         this.els.regionField.value = this.region.toString();
-        this.els.regionField.addEventListener('keyup', function (event) {
+        this.els.regionField.addEventListener('keyup', function(event) {
             if (_this._checkRegion(this.value) && event.which === 13) {
                 _this._triggerRegionChange({region: new Region(this.value), sender: this});
             }
         });
-        this.els.goButton.addEventListener('click', function () {
+        this.els.goButton.addEventListener('click', function() {
             var value = _this.els.regionField.value;
             if (_this._checkRegion(value)) {
                 _this._triggerRegionChange({region: new Region(value), sender: this});
             }
         });
 
-        this.els.moveFurtherLeftButton.addEventListener('click', function () {
+        this.els.moveFurtherLeftButton.addEventListener('click', function() {
             _this._handleMoveRegion(10);
         });
 
-        this.els.moveFurtherRightButton.addEventListener('click', function () {
+        this.els.moveFurtherRightButton.addEventListener('click', function() {
             _this._handleMoveRegion(-10);
         });
 
-        this.els.moveLeftButton.addEventListener('click', function () {
+        this.els.moveLeftButton.addEventListener('click', function() {
             _this._handleMoveRegion(1);
         });
 
-        this.els.moveRightButton.addEventListener('click', function () {
+        this.els.moveRightButton.addEventListener('click', function() {
             _this._handleMoveRegion(-1);
         });
 
-        this.els.autoheightButton.addEventListener('click', function (e) {
-            _this.trigger('autoHeight-button:click', {clickEvent: e, sender: _this});
+//        this.els.autoheightButton.addEventListener('click', function (e) {
+//            _this.trigger('autoHeight-button:click', {clickEvent: e, sender: _this});
+//        });
+        this.els.autoheightButton.addEventListener('click', function() {
+            _this.trigger('autoHeight-button:change', {selected: this.checked, sender: _this});
         });
 
 //        this.els.compactButton.addEventListener('click', function (e) {
@@ -27033,7 +23619,8 @@ NavigationBar.prototype = {
 
 
         var lastQuery = '';
-        this.els.searchField.addEventListener('keyup', function (event) {
+        this.els.searchField.addEventListener('keyup', function(event) {
+            this.classList.remove('error');
             var query = this.value;
             if (query.length > 2 && lastQuery !== query && event.which !== 13) {
                 _this._setQuickSearchMenu(query);
@@ -27041,18 +23628,27 @@ NavigationBar.prototype = {
             }
             if (event.which === 13) {
                 var item = _this.quickSearchDataset[query];
-                _this.trigger('quickSearch:select', {item: item, sender: _this});
+                if (item) {
+                    _this.trigger('quickSearch:select', {item: item, sender: _this});
+                } else {
+                    this.classList.add('error');
+                }
             }
         });
 
-        this.els.quickSearchButton.addEventListener('click', function () {
+        this.els.quickSearchButton.addEventListener('click', function() {
+            _this.els.searchField.classList.remove('error');
             var query = _this.els.searchField.value;
             var item = _this.quickSearchDataset[query];
-            _this.trigger('quickSearch:go', {item: item, sender: _this});
+            if (item) {
+                _this.trigger('quickSearch:go', {item: item, sender: _this});
+            } else {
+                _this.els.searchField.classList.add('error');
+            }
         });
 
         this.els.windowSizeField.value = this.region.length();
-        this.els.windowSizeField.addEventListener('keyup', function (event) {
+        this.els.windowSizeField.addEventListener('keyup', function(event) {
             var value = this.value;
             var pattern = /^([0-9])+$/;
             if (pattern.test(value)) {
@@ -27073,7 +23669,7 @@ NavigationBar.prototype = {
         });
         this.rendered = true;
     },
-    draw: function () {
+    draw: function() {
         this.targetDiv = (this.target instanceof HTMLElement ) ? this.target : document.querySelector('#' + this.target);
         if (!this.targetDiv) {
             console.log('target not found');
@@ -27082,32 +23678,30 @@ NavigationBar.prototype = {
         this.targetDiv.appendChild(this.div);
     },
 
-    _addRegionHistoryMenuItem: function (region) {
+    _addRegionHistoryMenuItem: function(region) {
         var _this = this;
         var menuEntry = document.createElement('li');
         menuEntry.textContent = region.toString();
         this.els.regionHistoryMenu.appendChild(menuEntry);
-        menuEntry.addEventListener('click', function () {
+        menuEntry.addEventListener('click', function() {
             _this._triggerRegionChange({region: new Region(this.textContent), sender: _this})
         });
     },
 
-    _setQuickSearchMenu: function (query) {
+    _setQuickSearchMenu: function(query) {
         if (typeof this.quickSearchResultFn === 'function') {
             while (this.els.searchDataList.firstChild) {
                 this.els.searchDataList.removeChild(this.els.searchDataList.firstChild);
             }
             this.quickSearchDataset = {};
             var items = this.quickSearchResultFn(query);
+//            for (var i = 0; i < items.length; i++) {
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
-                var itemKey = item;
-                if (typeof this.quickSearchDisplayKey === "string") {
-                    itemKey = item[this.quickSearchDisplayKey];
-                }
-                this.quickSearchDataset[itemKey] = item;
+                var value = item[this.quickSearchDisplayKey];
+                this.quickSearchDataset[value] = item;
                 var menuEntry = document.createElement('option');
-                menuEntry.setAttribute('value', itemKey);
+                menuEntry.setAttribute('value', value);
                 this.els.searchDataList.appendChild(menuEntry);
             }
         } else {
@@ -27115,7 +23709,7 @@ NavigationBar.prototype = {
         }
     },
 
-    _setChromosomeMenu: function () {
+    _setChromosomeMenu: function() {
         var _this = this;
 
         while (this.els.chromosomesMenu.firstChild) {
@@ -27123,24 +23717,37 @@ NavigationBar.prototype = {
         }
 
         //find species object
-        var list = [];
-        for (var i in this.availableSpecies.items) {
-            for (var j in this.availableSpecies.items[i].items) {
-                var species = this.availableSpecies.items[i].items[j];
-                if (species.text === this.species.text) {
-                    list = species.chromosomes;
-                    break;
-                }
-            }
-        }
+        //var list = [];
+        //for (var i = 0; i < this.availableSpecies.items.length; i++) {
+        //    for (var j = 0; j < this.availableSpecies.items[i].items.length; j++) {
+        //        var species = this.availableSpecies.items[i].items[j];
+        //        if (species.text === this.species.text) {
+        //            list = species.chromosomes;
+        //            break;
+        //        }
+        //    }
 
-        this.currentChromosomeList = list;
-        for (var i in list) {
+        //}
+        //for (var i in this.availableSpecies.items) {
+        //    for (var j in this.availableSpecies.items[i].items) {
+        //        var species = this.availableSpecies.items[i].items[j];
+        //        if (species.text === this.species.text) {
+        //            list = species.chromosomes;
+        //            break;
+        //        }
+        //    }
+        //}
+
+        var list = [];
+        for (var chr in this.species.chromosomes) {
+            list.push(chr);
+
+
             var menuEntry = document.createElement('li');
-            menuEntry.textContent = list[i];
+            menuEntry.textContent = chr;
             this.els.chromosomesMenu.appendChild(menuEntry);
 
-            menuEntry.addEventListener('click', function () {
+            menuEntry.addEventListener('click', function() {
                 var region = new Region({
                     chromosome: this.textContent,
                     start: _this.region.start,
@@ -27148,7 +23755,25 @@ NavigationBar.prototype = {
                 });
                 _this._triggerRegionChange({region: region, sender: _this})
             });
+
         }
+        this.currentChromosomeList = list;
+
+
+        //for (var i in list) {
+        //    var menuEntry = document.createElement('li');
+        //    menuEntry.textContent = list[i];
+        //    this.els.chromosomesMenu.appendChild(menuEntry);
+        //
+        //    menuEntry.addEventListener('click', function () {
+        //        var region = new Region({
+        //            chromosome: this.textContent,
+        //            start: _this.region.start,
+        //            end: _this.region.end
+        //        });
+        //        _this._triggerRegionChange({region: region, sender: _this})
+        //    });
+        //}
     },
 
 //    _setSpeciesMenu: function () {
@@ -27175,26 +23800,33 @@ NavigationBar.prototype = {
 //            }
 //        }
 //    },
-    _setSpeciesMenu: function () {
+    _setSpeciesMenu: function() {
         var _this = this;
 
-        var createEntry = function (species, ul) {
+        var createSpeciesEntry = function(species, ul) {
             var menuEntry = document.createElement('li');
-            menuEntry.textContent = species.text + ' '+ species.assembly;
+            menuEntry.textContent = species.scientificName + ' (' + species.assembly.name + ')';
             ul.appendChild(menuEntry);
 
-            menuEntry.addEventListener('click', function () {
-                _this.species = species;
-                _this.els.speciesText.textContent = this.textContent;
-                _this._setChromosomeMenu();
+            menuEntry.addEventListener('click', function() {
                 _this.trigger('species:change', {species: species, sender: _this});
             });
         };
 
-        var createTaxonomy = function (taxonomy) {
+        //var createAssemblyEntry = function(assembly, ul, species) {
+        //    var menuEntry = document.createElement('li');
+        //    menuEntry.textContent = assembly.name;
+        //    ul.appendChild(menuEntry);
+        //
+        //    menuEntry.addEventListener('click', function() {
+        //        _this.trigger('species:change', {species: species, sender: _this});
+        //    });
+        //};
+
+        var createTaxonomy = function(taxonomy) {
             var menuEntry = document.createElement('li');
             menuEntry.setAttribute('data-sub', true);
-            menuEntry.textContent = taxonomy.text;
+            menuEntry.textContent = taxonomy;
             _this.els.speciesMenu.appendChild(menuEntry);
 
             var ul = document.createElement('ul');
@@ -27204,18 +23836,25 @@ NavigationBar.prototype = {
         };
 
         //find species object
-        var list = [];
-        for (var i = 0; i < this.availableSpecies.items.length; i++) {
-            var taxonomy = this.availableSpecies.items[i];
+        //var list = [];
+        for (var taxonomy in this.availableSpecies) {
             var taxUl = createTaxonomy(taxonomy);
-
-            for (var j = 0; j < taxonomy.items.length; j++) {
-                var species = taxonomy.items[j];
-                createEntry(species, taxUl);
+            for (var i = 0; i < this.availableSpecies[taxonomy].length; i++) {
+                var species = this.availableSpecies[taxonomy][i];
+                createSpeciesEntry(species, taxUl);
             }
         }
+        //for (var i = 0; i < this.availableSpecies.items.length; i++) {
+        //    var taxonomy = this.availableSpecies.items[i];
+        //    var taxUl = createTaxonomy(taxonomy);
+        //
+        //    for (var j = 0; j < taxonomy.items.length; j++) {
+        //        var species = taxonomy.items[j];
+        //        createEntry(species, taxUl);
+        //    }
+        //}
     },
-    _checkRegion: function (value) {
+    _checkRegion: function(value) {
         var reg = new Region(value);
         if (!reg.parse(value) || reg.start < 0 || reg.end < 0 || _.indexOf(this.currentChromosomeList, reg.chromosome) == -1) {
             this.els.regionField.classList.add('error');
@@ -27226,27 +23865,27 @@ NavigationBar.prototype = {
         }
     },
 
-    _handleZoomOutButton: function () {
-        this._handleZoomSlider(Math.max(0, this.zoom - 1));
+    _handleZoomOutButton: function() {
+        this._handleZoomSlider(Math.max(0, this.zoom - 5));
     },
-    _handleZoomSlider: function (value) {
+    _handleZoomSlider: function(value) {
         var _this = this;
-        if (!this.zoomChanging) {
-            this.zoomChanging = true;
+        if (!_this.zoomChanging) {
+            _this.zoomChanging = true;
             /**/
-            this.zoom = value;
-            this.trigger('zoom:change', {zoom: this.zoom, sender: this});
+            _this.zoom = 5 * (Math.round(value / 5));
+            _this.trigger('zoom:change', {zoom: _this.zoom, sender: _this});
             /**/
-            setTimeout(function () {
+            setTimeout(function() {
                 _this.zoomChanging = false;
             }, 700);
         }
     },
-    _handleZoomInButton: function () {
-        this._handleZoomSlider(Math.min(100, this.zoom + 1));
+    _handleZoomInButton: function() {
+        this._handleZoomSlider(Math.min(100, this.zoom + 5));
     },
 
-    _handleMoveRegion: function (positions) {
+    _handleMoveRegion: function(positions) {
         var pixelBase = (this.width - this.svgCanvasWidthOffset) / this.region.length();
         var disp = Math.round((positions * 10) / pixelBase);
         this.region.start -= disp;
@@ -27255,7 +23894,7 @@ NavigationBar.prototype = {
         this.trigger('region:move', {region: this.region, disp: disp, sender: this});
     },
 
-    setVisible: function (obj) {
+    setVisible: function(obj) {
         for (key in obj) {
             var el = this.els[key];
             if (obj[key]) {
@@ -27266,43 +23905,53 @@ NavigationBar.prototype = {
         }
     },
 
-    setRegion: function (region, zoom) {
+    setRegion: function(region, zoom) {
         this.region.load(region);
         if (zoom) {
-            this.zoom = zoom;
+            this.zoom = 5 * (Math.round(zoom / 5));
         }
         this.updateRegionControls();
         this._addRegionHistoryMenuItem(region);
     },
-    moveRegion: function (region) {
+    moveRegion: function(region) {
         this.region.load(region);
         this.els.chromosomesText.textContent = this.region.chromosome;
         this.els.regionField.value = this.region.toString()
     },
 
-    setWidth: function (width) {
+    setSpecies: function(species) {
+        this.species = species;
+        this.els.speciesText.textContent = this.species.scientificName;
+        this._setChromosomeMenu();
+    },
+
+    setWidth: function(width) {
         this.width = width;
     },
-    _triggerRegionChange: function (event) {
+    _triggerRegionChange: function(event) {
         var _this = this;
         if (!this.regionChanging) {
             this.regionChanging = true;
             /**/
             this.trigger('region:change', event);
             /**/
-            setTimeout(function () {
+            setTimeout(function() {
                 _this.regionChanging = false;
             }, 700);
         } else {
             this.updateRegionControls();
         }
     },
-    updateRegionControls: function () {
+    updateRegionControls: function() {
         this.els.chromosomesText.textContent = this.region.chromosome;
         this.els.regionField.value = this.region.toString();
         this.els.windowSizeField.value = this.region.length();
         this.els.regionField.classList.remove('error');
         this.els.progressBar.style.width = this.zoom + '%';
+        this.els.progressBarBall.style.left = this.zoom + '%';
+    },
+    setCellBaseHost: function(host) {
+        this.cellBaseHost = host;
     }
 
 }
@@ -27337,7 +23986,7 @@ function ChromosomePanel(args) {
 
     this.target;
     this.autoRender = true;
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'http://bioinfo.hpc.cam.ac.uk/cellbase';
     this.cellBaseVersion = 'v3';
 
     this.pixelBase;
@@ -27486,17 +24135,11 @@ ChromosomePanel.prototype = {
             resource: 'info',
             async: false,
             success: function (data) {
-              
-              _this.data = Utils.getChromosomes(data);
-              
-              var cytobands = _.get(_this, 'data.cytobands') || _.get(_this, 'data[0].cytobands');
-              
-              (cytobands).sort(function (a, b) {
-                return (a.start - b.start);
-              });
-              var data = _.get(_this, 'data[0]') || _.get(_this, 'data');
-              
-              _this._drawSvg(data);
+                _this.data = data.response[0].result[0].chromosomes[0];
+                _this.data.cytobands.sort(function (a, b) {
+                    return (a.start - b.start);
+                });
+                _this._drawSvg(_this.data);
             }
         });
 
@@ -27875,8 +24518,11 @@ ChromosomePanel.prototype = {
         }
 
         this.updateRegionControls();
+    },
+    setCellBaseHost: function (host) {
+        this.cellBaseHost = host;
     }
-}
+};
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -27907,7 +24553,7 @@ function KaryotypePanel(args) {
     this.autoRender = true;
     this.id = Utils.genId('KaryotypePanel');
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'http://bioinfo.hpc.cam.ac.uk/cellbase';
     this.cellBaseVersion = 'v3';
 
     this.pixelBase;
@@ -28072,7 +24718,7 @@ KaryotypePanel.prototype = {
             resource: 'all',
             async: false,
             success: function (data) {
-                _this.chromosomeList = Utils.getChromosomes(data);
+                _this.chromosomeList = data.response[0].result[0].chromosomes;
                 _this.chromosomeList.sort(sortfunction);
                 _this._drawSvg(_this.chromosomeList);
             }
@@ -28235,12 +24881,11 @@ KaryotypePanel.prototype = {
             needDraw = true;
             this.lastSpecies = this.species;
         }
-
-        this.updateRegionControls();
-
         if (needDraw) {
             this.draw();
         }
+
+        this.updateRegionControls();
     },
 
 
@@ -28287,7 +24932,12 @@ KaryotypePanel.prototype = {
 
     unmark: function () {
         $(this.markGroup).empty();
+    },
+
+    setCellBaseHost: function (host) {
+        this.cellBaseHost = host;
     }
+
 }
 
 /*
@@ -28345,7 +24995,13 @@ StatusBar.prototype = {
         $(this.div).append(this.leftDiv);
         $(this.div).append(this.rightDiv);
 
-        this.mousePositionEl = $('<span id="' + this.id + 'position">&nbsp;</span>')[0];
+        this.mousePositionEl = $('<span id="' + this.id + 'position"></span>')[0];
+        this.mousePositionBase = document.createElement('span');
+        this.mousePositionBase.style.marginRight = '5px';
+        this.mousePositionRegion = document.createElement('span');
+        this.mousePositionEl.appendChild(this.mousePositionBase);
+        this.mousePositionEl.appendChild(this.mousePositionRegion);
+
         this.versionEl = $('<span id="' + this.id + 'version">' + this.version + '</span>')[0];
         $(this.rightDiv).append(this.mousePositionEl);
         $(this.leftDiv).append(this.versionEl);
@@ -28366,7 +25022,10 @@ StatusBar.prototype = {
         $(this.mousePositionEl).html(Utils.formatNumber(event.region.center()));
     },
     setMousePosition: function (event) {
-        $(this.mousePositionEl).html(event.baseHtml + ' ' + this.region.chromosome + ':' + Utils.formatNumber(event.mousePos));
+        this.mousePositionBase.style.color = SEQUENCE_COLORS[event.base];
+        this.mousePositionBase.textContent = event.base;
+
+        this.mousePositionRegion.textContent = this.region.chromosome + ':' + Utils.formatNumber(event.mousePos);
     }
 
 }
@@ -28391,13 +25050,13 @@ StatusBar.prototype = {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-function TrackListPanel(args) {//parent is a DOM div element
+function TrackListPanel(args) { //parent is a DOM div element
     var _this = this;
 
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'http://bioinfo.hpc.cam.ac.uk/cellbase';
     this.cellBaseVersion = 'v3';
 
     //set default args
@@ -28450,44 +25109,56 @@ function TrackListPanel(args) {//parent is a DOM div element
 };
 
 TrackListPanel.prototype = {
-    show: function () {
-        $(this.div).css({display: 'block'});
+    show: function() {
+        $(this.div).css({
+            display: 'block'
+        });
         this.hidden = false;
     },
 
-    hide: function () {
-        $(this.div).css({display: 'none'});
+    hide: function() {
+        $(this.div).css({
+            display: 'none'
+        });
         this.hidden = true;
     },
-    setVisible: function (bool) {
+    setVisible: function(bool) {
         if (bool) {
             this.show()
         } else {
             this.hide()
         }
     },
-    setTitle: function (title) {
+    setTitle: function(title) {
         if ('titleDiv' in this) {
             $(this.titleDiv).html(title);
         }
     },
-    showContent: function () {
-        $(this.tlHeaderDiv).css({display: 'block'});
-        $(this.panelDiv).css({display: 'block'});
+    showContent: function() {
+        $(this.tlHeaderDiv).css({
+            display: 'block'
+        });
+        $(this.panelDiv).css({
+            display: 'block'
+        });
         this.collapsed = false;
         $(this.collapseDiv).removeClass('active');
         $(this.collapseDiv).children().first().removeClass('fa-plus');
         $(this.collapseDiv).children().first().addClass('fa-minus');
     },
-    hideContent: function () {
-        $(this.tlHeaderDiv).css({display: 'none'});
-        $(this.panelDiv).css({display: 'none'});
+    hideContent: function() {
+        $(this.tlHeaderDiv).css({
+            display: 'none'
+        });
+        $(this.panelDiv).css({
+            display: 'none'
+        });
         this.collapsed = true;
         $(this.collapseDiv).addClass('active');
         $(this.collapseDiv).children().first().removeClass('fa-minus');
         $(this.collapseDiv).children().first().addClass('fa-plus');
     },
-    render: function () {
+    render: function() {
         var _this = this;
 
         this.div = document.createElement('div');
@@ -28512,14 +25183,14 @@ TrackListPanel.prototype = {
 
                 this.collapseDiv.appendChild(collapseSpan);
 
-                $(titleDiv).dblclick(function () {
+                $(titleDiv).dblclick(function() {
                     if (_this.collapsed) {
                         _this.showContent();
                     } else {
                         _this.hideContent();
                     }
                 });
-                $(this.collapseDiv).click(function () {
+                $(this.collapseDiv).click(function() {
                     if (_this.collapsed) {
                         _this.showContent();
                     } else {
@@ -28541,11 +25212,17 @@ TrackListPanel.prototype = {
         var tlHeaderDiv = $('<div id="tl-header" class="unselectable"></div>')[0];
 
         var panelDiv = $('<div id="tl-panel"></div>')[0];
-        $(panelDiv).css({position: 'relative', width: '100%'});
+        $(panelDiv).css({
+            position: 'relative',
+            width: '100%'
+        });
 
 
         this.tlTracksDiv = $('<div id="tl-tracks"></div>')[0];
-        $(this.tlTracksDiv).css({ position: 'relative', 'z-index': 3});
+        $(this.tlTracksDiv).css({
+            position: 'relative',
+            'z-index': 3
+        });
 
 
         $(this.div).append(tlHeaderDiv);
@@ -28591,8 +25268,8 @@ TrackListPanel.prototype = {
             'position': 'absolute',
             'left': mid - 1,
             'top': 0,
-            'width': Math.floor(this.pixelBase),//this.pixelBase + 1,
-//            'height': '100%',
+            'width': Math.floor(this.pixelBase), //this.pixelBase + 1,
+            //            'height': '100%',
             'height': 'calc(100% - 8px)',
             'opacity': 0.5,
             'border': '1px solid orangered',
@@ -28607,7 +25284,7 @@ TrackListPanel.prototype = {
             'position': 'absolute',
             'left': -20.5,
             'top': 0,
-            'width': Math.floor(this.pixelBase),//this.pixelBase + 2,
+            'width': Math.floor(this.pixelBase), //this.pixelBase + 2,
             'height': 'calc(100% - 8px)',
             'border': '1px solid gray',
             'opacity': 0.7,
@@ -28638,7 +25315,7 @@ TrackListPanel.prototype = {
             $(panelDiv).append(regionOverviewBoxLeft);
             $(panelDiv).append(regionOverviewBoxRight);
             var regionOverviewBoxWidth = this.region.length() * this.pixelBase;
-            var regionOverviewDarkBoxWidth = (this.width - regionOverviewBoxWidth) / 2
+            var regionOverviewDarkBoxWidth = (this.width - regionOverviewBoxWidth) / 2;
             $(regionOverviewBoxLeft).css({
                 'z-index': 0,
                 'position': 'absolute',
@@ -28646,7 +25323,7 @@ TrackListPanel.prototype = {
                 'top': 0,
                 'width': regionOverviewDarkBoxWidth,
                 'height': 'calc(100% - 8px)',
-//                'border': '1px solid gray',
+                //                'border': '1px solid gray',
                 'opacity': 0.5,
                 //            'visibility': 'hidden',
                 'background-color': 'lightgray'
@@ -28658,7 +25335,7 @@ TrackListPanel.prototype = {
                 'top': 0,
                 'width': regionOverviewDarkBoxWidth,
                 'height': 'calc(100% - 8px)',
-//                'border': '1px solid gray',
+                //                'border': '1px solid gray',
                 'opacity': 0.5,
                 //            'visibility': 'hidden',
                 'background-color': 'lightgray'
@@ -28668,44 +25345,60 @@ TrackListPanel.prototype = {
         }
 
 
-        $(this.div).mousemove(function (event) {
+        $(this.div).mousemove(function(event) {
             var centerPosition = _this.region.center();
             var mid = _this.width / 2;
             var mouseLineOffset = _this.pixelBase / 2;
-            var offsetX = (event.clientX - $(_this.tlTracksDiv).offset().left);
+            var offsetX = (event.clientX - _this.tlTracksDiv.getBoundingClientRect().left);
+            //debugger
             var cX = offsetX - mouseLineOffset;
             var rcX = (cX / _this.pixelBase) | 0;
             var pos = (rcX * _this.pixelBase) + (mid % _this.pixelBase) - 1;
-            $(_this.mouseLine).css({'left': pos});
-//
+            $(_this.mouseLine).css({
+                'left': pos
+            });
+            //
             var posOffset = (mid / _this.pixelBase) | 0;
             _this.mousePosition = centerPosition + rcX - posOffset;
-            _this.trigger('mousePosition:change', {mousePos: _this.mousePosition, baseHtml: _this.getMousePosition(_this.mousePosition)});
+            _this.trigger('mousePosition:change', {
+                mousePos: _this.mousePosition,
+                chromosome: _this.region.chromosome,
+                base: _this.getMousePosition(_this.mousePosition)
+            });
         });
 
-        $(this.tlTracksDiv).dblclick(function (event) {
+        $(this.tlTracksDiv).dblclick(function(event) {
             if (!_this.regionChanging) {
                 _this.regionChanging = true;
                 /**/
                 /**/
                 /**/
                 var halfLength = _this.region.length() / 2;
-                var mouseRegion = new Region({chromosome: _this.region.chromosome, start: _this.mousePosition - halfLength, end: _this.mousePosition + halfLength})
-                _this.trigger('region:change', {region: mouseRegion, sender: _this});
+                var mouseRegion = new Region({
+                    chromosome: _this.region.chromosome,
+                    start: _this.mousePosition - halfLength,
+                    end: _this.mousePosition + halfLength
+                })
+                _this.trigger('region:change', {
+                    region: mouseRegion,
+                    sender: _this
+                });
                 /**/
                 /**/
                 /**/
-                setTimeout(function () {
+                setTimeout(function() {
                     _this.regionChanging = false;
                 }, 700);
             }
         });
 
         var downX, moveX;
-        $(this.tlTracksDiv).mousedown(function (event) {
+        $(this.tlTracksDiv).mousedown(function(event) {
             $('html').addClass('unselectable');
-//                            $('.qtip').qtip('hide').qtip('disable'); // Hide AND disable all tooltips
-            $(_this.mouseLine).css({'visibility': 'hidden'});
+            //                            $('.qtip').qtip('hide').qtip('disable'); // Hide AND disable all tooltips
+            $(_this.mouseLine).css({
+                'visibility': 'hidden'
+            });
 
             var mouseState = event.which;
             if (event.ctrlKey) {
@@ -28713,24 +25406,34 @@ TrackListPanel.prototype = {
             }
             switch (mouseState) {
                 case 1: //Left mouse button pressed
-                    $(this).css({"cursor": "move"});
+                    $(this).css({
+                        "cursor": "move"
+                    });
                     downX = event.clientX;
                     var lastX = 0;
-                    $(this).mousemove(function (event) {
-                        var newX = (downX - event.clientX) / _this.pixelBase | 0;//truncate always towards zero
+                    $(this).mousemove(function(event) {
+                        var newX = (downX - event.clientX) / _this.pixelBase | 0; //truncate always towards zero
                         if (newX != lastX) {
                             var disp = lastX - newX;
                             var centerPosition = _this.region.center();
                             var p = centerPosition - disp;
-                            if (p > 0) {//avoid 0 and negative positions
+                            if (p > 0) { //avoid 0 and negative positions
                                 _this.region.start -= disp;
                                 _this.region.end -= disp;
                                 _this._setTextPosition();
                                 //						_this.onMove.notify(disp);
-                                _this.trigger('region:move', {region: _this.region, disp: disp, sender: _this});
-                                _this.trigger('trackRegion:move', {region: _this.region, disp: disp, sender: _this});
+                                _this.trigger('region:move', {
+                                    region: _this.region,
+                                    disp: disp,
+                                    sender: _this
+                                });
+                                _this.trigger('trackRegion:move', {
+                                    region: _this.region,
+                                    disp: disp,
+                                    sender: _this
+                                });
                                 lastX = newX;
-                                _this.setNucleotidPosition(p);
+                                //_this.setNucleotidPosition(p);
                             }
                         }
                     });
@@ -28738,16 +25441,26 @@ TrackListPanel.prototype = {
                     break;
                 case 2: //Middle mouse button pressed
                 case 'ctrlKey1': //ctrlKey and left mouse button
-                    $(selBox).css({'visibility': 'visible'});
-                    $(selBox).css({'width': 0});
+                    $(selBox).css({
+                        'visibility': 'visible'
+                    });
+                    $(selBox).css({
+                        'width': 0
+                    });
                     downX = (event.pageX - $(_this.tlTracksDiv).offset().left);
-                    $(selBox).css({"left": downX});
-                    $(this).mousemove(function (event) {
+                    $(selBox).css({
+                        "left": downX
+                    });
+                    $(this).mousemove(function(event) {
                         moveX = (event.pageX - $(_this.tlTracksDiv).offset().left);
                         if (moveX < downX) {
-                            $(selBox).css({"left": moveX});
+                            $(selBox).css({
+                                "left": moveX
+                            });
                         }
-                        $(selBox).css({"width": Math.abs(moveX - downX)});
+                        $(selBox).css({
+                            "width": Math.abs(moveX - downX)
+                        });
                     });
 
 
@@ -28760,10 +25473,14 @@ TrackListPanel.prototype = {
 
         });
 
-        $(this.tlTracksDiv).mouseup(function (event) {
+        $(this.tlTracksDiv).mouseup(function(event) {
             $('html').removeClass("unselectable");
-            $(this).css({"cursor": "default"});
-            $(_this.mouseLine).css({'visibility': 'visible'});
+            $(this).css({
+                "cursor": "default"
+            });
+            $(_this.mouseLine).css({
+                'visibility': 'visible'
+            });
             $(this).off('mousemove');
 
             var mouseState = event.which;
@@ -28776,7 +25493,9 @@ TrackListPanel.prototype = {
                     break;
                 case 2: //Middle mouse button pressed
                 case 'ctrlKey1': //ctrlKey and left mouse button
-                    $(selBox).css({'visibility': 'hidden'});
+                    $(selBox).css({
+                        'visibility': 'hidden'
+                    });
                     $(this).off('mousemove');
                     if (downX != null && moveX != null) {
                         var ss = downX / _this.pixelBase;
@@ -28785,11 +25504,21 @@ TrackListPanel.prototype = {
                         ee += _this.visualRegion.start;
                         _this.region.start = parseInt(Math.min(ss, ee));
                         _this.region.end = parseInt(Math.max(ss, ee));
-                        _this.trigger('region:change', {region: _this.region, sender: _this});
+                        _this.trigger('region:change', {
+                            region: _this.region,
+                            sender: _this
+                        });
                         moveX = null;
                     } else if (downX != null && moveX == null) {
-                        var mouseRegion = new Region({chromosome: _this.region.chromosome, start: _this.mousePosition, end: _this.mousePosition})
-                        _this.trigger('region:change', {region: mouseRegion, sender: _this});
+                        var mouseRegion = new Region({
+                            chromosome: _this.region.chromosome,
+                            start: _this.mousePosition,
+                            end: _this.mousePosition
+                        })
+                        _this.trigger('region:change', {
+                            region: mouseRegion,
+                            sender: _this
+                        });
                     }
                     break;
                 case 3: //Right mouse button pressed
@@ -28799,37 +25528,45 @@ TrackListPanel.prototype = {
 
         });
 
-        $(this.tlTracksDiv).mouseleave(function (event) {
-            $(this).css({"cursor": "default"});
-            $(_this.mouseLine).css({'visibility': 'hidden'});
+        $(this.tlTracksDiv).mouseleave(function(event) {
+            $(this).css({
+                "cursor": "default"
+            });
+            $(_this.mouseLine).css({
+                'visibility': 'hidden'
+            });
             $(this).off('mousemove');
             $("body").off('keydown.genomeViewer');
 
-            $(selBox).css({'visibility': 'hidden'});
+            $(selBox).css({
+                'visibility': 'hidden'
+            });
             downX = null;
             moveX = null;
         });
 
-        $(this.tlTracksDiv).mouseenter(function (e) {
-//            $('.qtip').qtip('enable'); // To enable them again ;)
-            $(_this.mouseLine).css({'visibility': 'visible'});
+        $(this.tlTracksDiv).mouseenter(function(e) {
+            //            $('.qtip').qtip('enable'); // To enable them again ;)
+            $(_this.mouseLine).css({
+                'visibility': 'visible'
+            });
             $("body").off('keydown.genomeViewer');
             enableKeys();
         });
 
-        var enableKeys = function () {
+        var enableKeys = function() {
             //keys
-            $("body").bind('keydown.genomeViewer', function (e) {
+            $("body").bind('keydown.genomeViewer', function(e) {
                 var disp = 0;
                 switch (e.keyCode) {
-                    case 37://left arrow
+                    case 37: //left arrow
                         if (e.ctrlKey) {
                             disp = Math.round(100 / _this.pixelBase);
                         } else {
                             disp = Math.round(10 / _this.pixelBase);
                         }
                         break;
-                    case 39://right arrow
+                    case 39: //right arrow
                         if (e.ctrlKey) {
                             disp = Math.round(-100 / _this.pixelBase)
                         } else {
@@ -28841,9 +25578,17 @@ TrackListPanel.prototype = {
                     _this.region.start -= disp;
                     _this.region.end -= disp;
                     _this._setTextPosition();
-//					_this.onMove.notify(disp);
-                    _this.trigger('region:move', {region: _this.region, disp: disp, sender: _this});
-                    _this.trigger('trackRegion:move', {region: _this.region, disp: disp, sender: _this});
+                    //					_this.onMove.notify(disp);
+                    _this.trigger('region:move', {
+                        region: _this.region,
+                        disp: disp,
+                        sender: _this
+                    });
+                    _this.trigger('trackRegion:move', {
+                        region: _this.region,
+                        disp: disp,
+                        sender: _this
+                    });
                 }
             });
         };
@@ -28856,25 +25601,61 @@ TrackListPanel.prototype = {
         this.rendered = true;
     },
 
-    setHeight: function (height) {
-//        this.height=Math.max(height,60);
-//        $(this.tlTracksDiv).css('height',height);
-//        //this.grid.setAttribute("height",height);
-//        //this.grid2.setAttribute("height",height);
-//        $(this.centerLine).css("height",parseInt(height));//25 es el margen donde esta el texto de la posicion
-//        $(this.mouseLine).css("height",parseInt(height));//25 es el margen donde esta el texto de la posicion
+    setHeight: function(height) {
+        //        this.height=Math.max(height,60);
+        //        $(this.tlTracksDiv).css('height',height);
+        //        //this.grid.setAttribute("height",height);
+        //        //this.grid2.setAttribute("height",height);
+        //        $(this.centerLine).css("height",parseInt(height));//25 es el margen donde esta el texto de la posicion
+        //        $(this.mouseLine).css("height",parseInt(height));//25 es el margen donde esta el texto de la posicion
     },
 
-    setWidth: function (width) {
-        console.log(width);
+    setWidth: function(width) {
+        console.log('trackListPanel setWidth ------> '+ width);
         this.width = width - 18;
+    },
+
+    highlight: function(event) {
+        this.trigger('trackFeature:highlight', event)
+    },
+
+
+    moveRegion: function(event) {
+        this.region.load(event.region);
+        this.visualRegion.load(event.region);
+        this._setTextPosition();
+        this.trigger('trackRegion:move', event);
+    },
+
+    setSpecies: function(species) {
+        this.species = species;
+        //        this.trigger('trackSpecies:change', {species: species, sender: this});
+
+        for (var i = 0; i < this.tracks.length; i++) {
+            var track = this.tracks[i];
+            track.setSpecies(this.species);
+
+        }
+    },
+
+    setRegion: function(region) { //item.chromosome, item.position, item.species
+        console.log('trackListPanel setRegion region ------> '+ region);
+        console.log('trackListPanel setRegion width ------> '+ this.width);
+        var _this = this;
         var mid = this.width / 2;
+        this.region.load(region);
+        this.visualRegion.load(region);
         this._setPixelBase();
+        //get pixelbase by Region
 
-        $(this.centerLine).css({'left': mid - 1, 'width': this.pixelBase + 2});
-        $(this.mouseLine).css({'width': this.pixelBase});
 
-        this.trigger('trackWidth:change', {width: this.width, sender: this})
+        $(this.centerLine).css({
+            'left': mid - 1,
+            'width': this.pixelBase
+        });
+        $(this.mouseLine).css({
+            'width': this.pixelBase
+        });
 
         this._setTextPosition();
 
@@ -28890,99 +25671,76 @@ TrackListPanel.prototype = {
             });
         }
 
-    },
 
-    highlight: function (event) {
-        this.trigger('trackFeature:highlight', event)
-    },
+        this.trigger('window:size', {
+            windowSize: this.windowSize
+        });
 
+        //        if (region.species != null) {
+        //            //check species and modify CellBaseAdapter, clean cache
+        //            for (i in this.tracks) {
+        //                if (this.tracks[i].trackData.adapter instanceof CellBaseAdapter ||
+        //                    this.tracks[i].trackData.adapter instanceof SequenceAdapter
+        //                    ) {
+        //                    this.tracks[i].trackData.adapter.species = region.species;
+        //                    //this.tracks[i].trackData.adapter.featureCache.clear();
+        //
+        //                    this.tracks[i].trackData.adapter.clearData();
+        //                }
+        //            }
+        //        }
+        this.trigger('trackRegion:change', {
+            region: this.visualRegion,
+            sender: this
+        })
 
-    moveRegion: function (event) {
-        this.region.load(event.region);
-        this.visualRegion.load(event.region);
-        this._setTextPosition();
-        this.trigger('trackRegion:move', event);
-    },
-
-    setSpecies: function (species) {
-        this.species = species;
-        this.trigger('trackSpecies:change', {species: species, sender: this})
-    },
-
-    setRegion: function (region) {//item.chromosome, item.position, item.species
-        var _this = this;
-        this.region.load(region);
-        this.visualRegion.load(region);
-        this._setPixelBase();
-        //get pixelbase by Region
-
-
-        $(this.centerLine).css({'width': this.pixelBase + 2});
-        $(this.mouseLine).css({'width': this.pixelBase + 2});
-
-        this._setTextPosition();
-
-        this.trigger('window:size', {windowSize: this.windowSize});
-
-//        if (region.species != null) {
-//            //check species and modify CellBaseAdapter, clean cache
-//            for (i in this.tracks) {
-//                if (this.tracks[i].trackData.adapter instanceof CellBaseAdapter ||
-//                    this.tracks[i].trackData.adapter instanceof SequenceAdapter
-//                    ) {
-//                    this.tracks[i].trackData.adapter.species = region.species;
-//                    //this.tracks[i].trackData.adapter.featureCache.clear();
-//
-//                    this.tracks[i].trackData.adapter.clearData();
-//                }
-//            }
-//        }
-        this.trigger('trackRegion:change', {region: this.visualRegion, sender: this})
-
-        this.positionNucleotidDiv.textContent = "";//remove base char, will be drawn later if needed
+        this.positionNucleotidDiv.textContent = ""; //remove base char, will be drawn later if needed
 
         this.status = 'rendering';
 
-//        this.onRegionChange.notify();
+        //        this.onRegionChange.notify();
 
         //this.minRegionRect.setAttribute("width",this.minRectWidth);
         //this.minRegionRect.setAttribute("x",(this.width/2)-(this.minRectWidth/2)+6);
     },
 
-    draw: function () {
+    draw: function() {
         var _this = this;
-        this.targetDiv = ( this.target instanceof HTMLElement ) ? this.target : document.querySelector('#' + this.target);
+        this.targetDiv = (this.target instanceof HTMLElement) ? this.target : document.querySelector('#' + this.target);
         if (!this.targetDiv) {
             console.log('target not found');
             return;
         }
         this.targetDiv.appendChild(this.div);
 
-        this.trigger('track:draw', {sender: this});
+        this.trigger('track:draw', {
+            sender: this
+        });
     },
-    _checkAllTrackStatus: function (status) {
-        for (var i in this.tracks) {
-            if (this.tracks[i].status != status) return false;
+    _checkAllTrackStatus: function(status) {
+        for (var i = 0; i < this.tracks.length; i++) {
+            var track = this.tracks[i];
+            if (track.status != status) return false;
         }
         return true;
     },
-    checkTracksReady: function () {
+    checkTracksReady: function() {
         return this._checkAllTrackStatus('ready');
-//        if (this._checkAllTrackStatus('ready')) {
-//            this.status = 'ready';
-//            console.log('all ready')
-//            this.trigger('tracks:ready', {sender: this});
-//        }
-//        var checkStatus = function () {
-//            if (checkAllTrackStatus('ready')) {
-//                _this.trigger('tracks:ready', {sender: _this});
-//            } else {
-//                setTimeout(checkStatus, 100);
-//            }
-//        };
-//        setTimeout(checkStatus, 10);
+        //        if (this._checkAllTrackStatus('ready')) {
+        //            this.status = 'ready';
+        //            console.log('all ready')
+        //            this.trigger('tracks:ready', {sender: this});
+        //        }
+        //        var checkStatus = function () {
+        //            if (checkAllTrackStatus('ready')) {
+        //                _this.trigger('tracks:ready', {sender: _this});
+        //            } else {
+        //                setTimeout(checkStatus, 100);
+        //            }
+        //        };
+        //        setTimeout(checkStatus, 10);
     },
-    addTrack: function (track) {
+    addTrack: function(track) {
         if (_.isArray(track)) {
             for (var i in track) {
                 this._addTrack(track[i]);
@@ -28991,7 +25749,7 @@ TrackListPanel.prototype = {
             this._addTrack(track);
         }
     },
-    _addTrack: function (track) {
+    _addTrack: function(track) {
         if (!this.rendered) {
             console.info(this.id + ' is not rendered yet');
             return;
@@ -29021,6 +25779,9 @@ TrackListPanel.prototype = {
         track.set('pixelBase', this.pixelBase);
         track.set('region', this.visualRegion);
         track.set('width', this.width);
+        track.setSpecies(this.species);
+
+        track.set('trackListPanel', this);
 
         // Track must be initialized after we have created
         // de DIV element in order to create the elements in the DOM
@@ -29033,38 +25794,41 @@ TrackListPanel.prototype = {
 
 
         //trackEvents
-        track.set('track:draw', function (event) {
+        track.set('track:draw', function(event) {
             track.draw();
         });
 
 
-        track.set('trackSpecies:change', function (event) {
-            track.setSpecies(event.species);
-        });
+        //        track.set('trackSpecies:change', function (event) {
+        //            track.setSpecies(event.species);
+        //        });
 
 
-        track.set('trackRegion:change', function (event) {
+        track.set('trackRegion:change', function(event) {
+          console.log('trackListPanel trackRegion:change region ------> '+ event.region);
+          console.log('trackListPanel trackRegion:change width ------> '+ _this.width);
+            track.setWidth(_this.width);
             track.set('pixelBase', _this.pixelBase);
             track.set('region', event.region);
             track.draw();
         });
 
 
-        track.set('trackRegion:move', function (event) {
+        track.set('trackRegion:move', function(event) {
             track.set('region', event.region);
             track.set('pixelBase', _this.pixelBase);
             track.move(event.disp);
         });
 
 
-        track.set('trackWidth:change', function (event) {
-            track.setWidth(event.width);
-            track.set('pixelBase', _this.pixelBase);
-            track.draw();
-        });
+        //track.set('trackWidth:change', function (event) {
+        //    track.setWidth(event.width);
+        //    track.set('pixelBase', _this.pixelBase);
+        //    track.draw();
+        //});
 
 
-        track.set('trackFeature:highlight', function (event) {
+        track.set('trackFeature:highlight', function(event) {
 
 
             var attrName = event.attrName || 'feature_id';
@@ -29073,7 +25837,7 @@ TrackListPanel.prototype = {
                 for (var key in event.attrValue) {
                     var queryStr = attrName + '~=' + event.attrValue[key];
                     var group = $(track.svgdiv).find('g[' + queryStr + ']')
-                    $(group).each(function () {
+                    $(group).each(function() {
                         var animation = $(this).find('animate');
                         if (animation.length == 0) {
                             animation = SVG.addChild(this, 'animate', {
@@ -29097,72 +25861,74 @@ TrackListPanel.prototype = {
             }
         });
 
-        track.on('track:close', function (event) {
+        track.on('track:close', function(event) {
             _this.removeTrack(event.sender);
         });
-        track.on('track:up', function (event) {
+        track.on('track:up', function(event) {
             _this._reallocateAbove(event.sender);
         });
-        track.on('track:down', function (event) {
+        track.on('track:down', function(event) {
             _this._reallocateUnder(event.sender);
         });
 
         this.on('track:draw', track.get('track:draw'));
-        this.on('trackSpecies:change', track.get('trackSpecies:change'));
+        //        this.on('trackSpecies:change', track.get('trackSpecies:change'));
         this.on('trackRegion:change', track.get('trackRegion:change'));
         this.on('trackRegion:move', track.get('trackRegion:move'));
-        this.on('trackWidth:change', track.get('trackWidth:change'));
+        //this.on('trackWidth:change', track.get('trackWidth:change'));
         this.on('trackFeature:highlight', track.get('trackFeature:highlight'));
 
-//        track.on('track:ready', function () {
-//            _this.checkTracksReady();
-//        });
+        //        track.on('track:ready', function () {
+        //            _this.checkTracksReady();
+        //        });
     },
-    enableAutoHeight: function () {
+    toggleAutoHeight: function(bool) {
         for (var i = 0; i < this.tracks.length; i++) {
             var track = this.tracks[i];
-            track.enableAutoHeight();
+            track.toggleAutoHeight(bool);
         }
     },
-    updateHeight: function () {
+    updateHeight: function() {
         for (var i = 0; i < this.tracks.length; i++) {
             var track = this.tracks[i];
             track.updateHeight(true);
         }
     },
 
-    containsTrack: function (track) {
+    containsTrack: function(track) {
         if (typeof this.tracksIndex[track.id] !== 'undefined') {
             return true;
         } else {
             return false;
         }
     },
-    getTrackIndex: function (track) {
+    getTrackIndex: function(track) {
         return this.tracksIndex[track.id];
     },
-    _updateTracksIndex: function () {
+    _updateTracksIndex: function() {
         //update index with correct index after splice
         for (var i = 0; i < this.tracks.length; i++) {
             var track = this.tracks[i];
             this.tracksIndex[track.id] = i;
         }
     },
-    refreshTracksDom: function () {
+    refreshTracksDom: function() {
         for (var i = 0; i < this.tracks.length; i++) {
             var track = this.tracks[i];
             $(track.div).detach();
-            if (track.visible) {
-                $(this.tlTracksDiv).append(track.div);
-            }
+            $(this.tlTracksDiv).append(track.div);
         }
+        this.trigger('tracks:refresh', {
+            sender: this
+        });
     },
-    removeTrack: function (track) {
+    removeTrack: function(track) {
         if (!this.containsTrack(track)) {
             return false;
         }
         // first hide the track
         this.hideTrack(track);
+        track.remove();
 
         var index = this.getTrackIndex(track);
         // remove track from list and hash data
@@ -29171,18 +25937,24 @@ TrackListPanel.prototype = {
         this._updateTracksIndex();
 
         // delete listeners
+
+        track.off('track:close');
+        track.off('track:up');
+        track.off('track:down');
+
+
         this.off('track:draw', track.get('track:draw'));
-        this.off('trackSpecies:change', track.get('trackSpecies:change'));
+        //        this.off('trackSpecies:change', track.get('trackSpecies:change'));
         this.off('trackRegion:change', track.get('trackRegion:change'));
         this.off('trackRegion:move', track.get('trackRegion:move'));
-        this.off('trackWidth:change', track.set('trackWidth:change'));
+        //this.off('trackWidth:change', track.set('trackWidth:change'));
         this.off('trackFeature:highlight', track.get('trackFeature:highlight'));
 
         this.refreshTracksDom();
         return track;
     },
 
-    restoreTrack: function (track, index) {
+    restoreTrack: function(track, index) {
         if (this.containsTrack((track))) {
             return false;
         }
@@ -29197,7 +25969,7 @@ TrackListPanel.prototype = {
 
 
     //This routine is called when track order is modified
-    _reallocateAbove: function (track) {
+    _reallocateAbove: function(track) {
         if (!this.containsTrack((track))) {
             return false;
         }
@@ -29207,11 +25979,6 @@ TrackListPanel.prototype = {
         if (i > 0) {
             var aboveTrack = this.tracks[i - 1];
             var underTrack = this.tracks[i];
-
-            var y = parseInt(aboveTrack.main.getAttribute("y"));
-            var h = parseInt(underTrack.main.getAttribute("height"));
-            aboveTrack.main.setAttribute("y", y + h);
-            underTrack.main.setAttribute("y", y);
 
             this.tracks[i] = aboveTrack;
             this.tracks[i - 1] = underTrack;
@@ -29224,7 +25991,7 @@ TrackListPanel.prototype = {
     },
 
     //This routine is called when track order is modified
-    _reallocateUnder: function (track) {
+    _reallocateUnder: function(track) {
         if (!this.containsTrack((track))) {
             return false;
         }
@@ -29234,11 +26001,6 @@ TrackListPanel.prototype = {
         if (i + 1 < this.tracks.length) {
             var aboveTrack = this.tracks[i];
             var underTrack = this.tracks[i + 1];
-
-            var y = parseInt(aboveTrack.main.getAttribute("y"));
-            var h = parseInt(underTrack.main.getAttribute("height"));
-            aboveTrack.main.setAttribute("y", y + h);
-            underTrack.main.setAttribute("y", y);
 
             this.tracks[i] = underTrack;
             this.tracks[i + 1] = aboveTrack;
@@ -29250,7 +26012,7 @@ TrackListPanel.prototype = {
         }
     },
 
-    setTrackIndex: function (track, newIndex) {
+    setTrackIndex: function(track, newIndex) {
         if (!this.containsTrack((track))) {
             return false;
         }
@@ -29268,8 +26030,24 @@ TrackListPanel.prototype = {
         //update track div positions
         this.refreshTracksDom();
     },
+    swapTracks: function(t1, t2) {
+        if (!this.containsTrack((t1))) {
+            return false;
+        }
+        if (!this.containsTrack((t2))) {
+            return false;
+        }
+        var oldIndex1 = this.getTrackIndex(t1);
+        var oldIndex2 = this.getTrackIndex(t2);
 
-    scrollToTrack: function (track) {
+        this.tracks[oldIndex1] = t2;
+        this.tracks[oldIndex2] = t1;
+        this.tracksIndex[t1.id] = oldIndex2;
+        this.tracksIndex[t2.id] = oldIndex1;
+        this.refreshTracksDom();
+    },
+
+    scrollToTrack: function(track) {
         if (!this.containsTrack((track))) {
             return false;
         }
@@ -29279,7 +26057,7 @@ TrackListPanel.prototype = {
     },
 
 
-    hideTrack: function (track) {
+    hideTrack: function(track) {
         if (!this.containsTrack((track))) {
             return false;
         }
@@ -29287,22 +26065,22 @@ TrackListPanel.prototype = {
         this.refreshTracksDom();
     },
 
-    showTrack: function (track) {
+    showTrack: function(track) {
         if (!this.containsTrack((track))) {
             return false;
         }
         track.show();
         this.refreshTracksDom();
     },
-    _setPixelBase: function () {
+    _setPixelBase: function() {
         this.pixelBase = this.width / this.region.length();
         this.pixelBase = this.pixelBase / this.zoomMultiplier;
         this.halfVirtualBase = (this.width * 3 / 2) / this.pixelBase;
     },
 
-    _setTextPosition: function () {
+    _setTextPosition: function() {
         var centerPosition = this.region.center();
-        var baseLength = parseInt(this.width / this.pixelBase);//for zoom 100
+        var baseLength = parseInt(this.width / this.pixelBase); //for zoom 100
         var aux = Math.ceil((baseLength / 2) - 1);
         this.visualRegion.start = Math.floor(centerPosition - aux);
         this.visualRegion.end = Math.floor(centerPosition + aux);
@@ -29316,50 +26094,62 @@ TrackListPanel.prototype = {
         this.windowSizeDiv.innerHTML = this.windowSize;
     },
 
-    getTrackById: function (trackId) {
+    getTrackById: function(trackId) {
         if (typeof this.tracksIndex[trackId] !== 'undefined') {
             var i = this.tracksIndex[trackId];
             return this.tracks[i];
         }
     },
-    getSequenceTrack: function () {
+    getSequenceTrack: function() {
         //if multiple, returns the first found
         for (var i = 0; i < this.tracks.length; i++) {
             var track = this.tracks[i];
-            if (track instanceof SequenceTrack) {
+            if (track.renderer instanceof SequenceRenderer) {
                 return track;
             }
         }
         return;
     },
 
-    getMousePosition: function (position) {
+    getMousePosition: function(position) {
         var base = '';
-        var colorStyle = '';
         if (position > 0) {
             base = this.getSequenceNucleotid(position);
-            colorStyle = 'color:' + SEQUENCE_COLORS[base];
         }
-//        this.mouseLine.setAttribute('stroke',SEQUENCE_COLORS[base]);
-//        this.mouseLine.setAttribute('fill',SEQUENCE_COLORS[base]);
-        return '<span style="' + colorStyle + '">' + base + '</span>';
+        //        this.mouseLine.setAttribute('stroke',SEQUENCE_COLORS[base]);
+        //        this.mouseLine.setAttribute('fill',SEQUENCE_COLORS[base]);
+        return base;
     },
 
-    getSequenceNucleotid: function (position) {
+    getSequenceNucleotid: function(position) {
         var seqTrack = this.getSequenceTrack();
-        if (seqTrack != null && this.visualRegion.length() <= seqTrack.visibleRegionSize) {
-            var nt = seqTrack.dataAdapter.getNucleotidByPosition({start: position, end: position, chromosome: this.region.chromosome})
-            return nt;
+        if (seqTrack) {
+            var el = seqTrack.svgCanvasFeatures.querySelector('text[data-pos="' + position + '"]');
+            if (el) {
+                return el.textContent;
+            }
         }
         return '';
     },
 
-    setNucleotidPosition: function (position) {
+    setNucleotidPosition: function(position) {
         var base = this.getSequenceNucleotid(position);
         this.positionNucleotidDiv.style.color = SEQUENCE_COLORS[base];
         this.positionNucleotidDiv.textContent = base;
+    },
+
+    setCellBaseHost: function(host) {
+        this.cellBaseHost = host;
+        for (var i = 0; i < this.tracks.length; i++) {
+            var track = this.tracks[i];
+            if (track.dataAdapter instanceof CellBaseAdapter) {
+                track.dataAdapter.setHost(this.cellBaseHost);
+            }
+        }
     }
+
 };
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -29404,10 +26194,10 @@ function Track(args) {
     _.extend(this, args);
 
     this.pixelBase;
-    this.svgCanvasWidth = 500000;//mesa
+    this.svgCanvasWidth = 500000; //mesa
     this.pixelPosition = this.svgCanvasWidth / 2;
     this.svgCanvasOffset;
-    this.svgCanvasFeatures;
+    //    this.svgCanvasFeatures;
     this.status;
     this.histogram;
     this.histogramLogarithm;
@@ -29420,8 +26210,8 @@ function Track(args) {
 
     this.invalidZoomText;
 
-    this.renderedArea = {};//used for renders to store binary trees
-    this.chunksDisplayed = {};//used to avoid painting multiple times features contained in more than 1 chunk
+    this.renderedArea = {}; //used for renders to store binary trees
+    this.chunksDisplayed = {}; //used to avoid painting multiple times features contained in more than 1 chunk
 
     if ('handlers' in this) {
         for (eventName in this.handlers) {
@@ -29437,38 +26227,51 @@ function Track(args) {
 
 Track.prototype = {
 
-    get: function (attr) {
+    get: function(attr) {
         return this[attr];
     },
 
-    set: function (attr, value) {
+    set: function(attr, value) {
         this[attr] = value;
     },
-    hide: function () {
+    hide: function() {
         this.visible = false;
         this.div.classList.add('hidden');
     },
-    show: function () {
+    show: function() {
         this.visible = true;
         this.div.classList.remove('hidden');
+        this.updateHeight();
     },
-    hideContent: function () {
+    toggle: function() {
+        if (this.visible) {
+            this.hide();
+        } else {
+            this.show();
+
+        }
+    },
+    remove: function() {
+        $(this.div).remove();
+    },
+    hideContent: function() {
         this.contentVisible = false;
-        this.svgdiv.classList.add('hidden');
+        this.contentDiv.classList.add('hidden');
         this.resizeDiv.classList.add('hidden');
 
         this.iToggleEl.classList.remove('fa-minus');
         this.iToggleEl.classList.add('fa-plus');
     },
-    showContent: function () {
+    showContent: function() {
         this.contentVisible = true;
-        this.svgdiv.classList.remove('hidden');
+        this.contentDiv.classList.remove('hidden');
         this.resizeDiv.classList.remove('hidden');
 
         this.iToggleEl.classList.remove('fa-plus');
         this.iToggleEl.classList.add('fa-minus');
+        this.updateHeight();
     },
-    toggleContent: function () {
+    toggleContent: function() {
         if (this.contentVisible) {
             this.hideContent();
         } else {
@@ -29476,91 +26279,72 @@ Track.prototype = {
 
         }
     },
-    close: function () {
-        this.trigger('track:close', {sender: this});
+    close: function() {
+        this.trigger('track:close', {
+            sender: this
+        });
     },
-    up: function () {
-        this.trigger('track:up', {sender: this});
+    up: function() {
+        this.trigger('track:up', {
+            sender: this
+        });
     },
-    down: function () {
-        this.trigger('track:down', {sender: this});
+    down: function() {
+        this.trigger('track:down', {
+            sender: this
+        });
     },
-    setSpecies: function (species) {
+    setSpecies: function(species) {
         this.species = species;
-        this.dataAdapter.species = this.species
+        this.dataAdapter.setSpecies(this.species);
     },
 
-    setWidth: function (width) {
+    setWidth: function(width) {
+        this._setWidth(width);
+    },
+    _setWidth: function(width) {
         this.width = width;
-        this.main.setAttribute("width", width);
     },
-    _updateDIVHeight: function () {
-//        $(this.rrr).remove();
-//        delete this.rrr;
-//        this.rrr = SVG.addChild(this.svgCanvasFeatures, "rect", {
-//            'x': 0,
-//            'y': 0,
-//            'width': 0,
-//            'height': 18,
-//            'stroke': '#3B0B0B',
-//            'stroke-width': 1,
-//            'stroke-opacity': 1,
-//            'fill': 'black',
-//            'cursor': 'pointer'
-//        });
-        if (this.resizable) {
-            if (!this.histogram) {
-                var x = this.pixelPosition;
-                var width = this.width;
-                var lastContains = 0;
-                for (var i in this.renderedArea) {
-                    if (this.renderedArea[i].contains({start: x, end: x + width })) {
-                        lastContains = i;
-                    }
-                }
-                var divHeight = parseInt(lastContains) + 20;
-                $(this.svgdiv).css({'height': divHeight + 25});
-//                this.rrr.setAttribute('x', x);
-//                this.rrr.setAttribute('y', divHeight);
-//                this.rrr.setAttribute('width', width);
 
-            }
-        }
-        if (this.histogram) {
-            $(this.svgdiv).css({'height': this.height + 10});
-        }
+    updateHeight: function() {
+        this._updateHeight();
     },
-    _updateSVGHeight: function () {
-        if (this.resizable && !this.histogram) {
-            var renderedHeight = Object.keys(this.renderedArea).length * 20;//this must be passed by config, 20 for test
-            this.main.setAttribute('height', renderedHeight);
-            this.svgCanvasFeatures.setAttribute('height', renderedHeight);
-            this.hoverRect.setAttribute('height', renderedHeight);
-        }
-        if (this.histogram) {
-            this.main.setAttribute('height', this.height);
-            this.svgCanvasFeatures.setAttribute('height', this.height);
-            this.hoverRect.setAttribute('height', this.height);
-        }
+    _updateHeight: function() {
+        $(this.contentDiv).css({
+            'height': this.height + 10
+        });
     },
-    updateHeight: function (ignoreAutoHeight) {
-        this._updateSVGHeight();
-        if (this.autoHeight || ignoreAutoHeight) {
-            this._updateDIVHeight();
-        }
-//        if (this.histogram) {
-//
-//        }
-    },
-    enableAutoHeight: function () {
+    enableAutoHeight: function() {
+        console.log('enable autoHeigth');
         this.autoHeight = true;
         this.updateHeight();
     },
-    setTitle: function (title) {
+    disableAutoHeight: function() {
+        console.log('disable autoHeigth');
+        this.autoHeight = false;
+        this.updateHeight();
+    },
+    toggleAutoHeight: function(bool) {
+        if (bool == true) {
+            this.enableAutoHeight();
+            return;
+        } else if (bool == false) {
+            this.disableAutoHeight();
+            return;
+        }
+        if (this.autoHeight == true) {
+            this.disableAutoHeight();
+            return;
+        } else if (this.autoHeight == false) {
+            this.enableAutoHeight();
+            return;
+        }
+    },
+    setTitle: function(title) {
         $(this.titleText).html(title);
     },
 
-    setLoading: function (bool) {
+    setLoading: function(bool) {
         if (bool) {
             this.status = "rendering";
             $(this.loadingEl).html('&nbsp; &nbsp;<i class="fa fa-spinner fa-spin"></i> Loading...</span>');
@@ -29570,12 +26354,12 @@ Track.prototype = {
         }
     },
 
-    updateHistogramParams: function () {
+    updateHistogramParams: function() {
         if (this.region.length() > this.minHistogramRegionSize) {
             this.histogram = true;
             this.histogramLogarithm = true;
             this.histogramMax = 500;
-            this.interval = Math.ceil(10 / this.pixelBase);//server interval limit 512
+            this.interval = Math.ceil(10 / this.pixelBase); //server interval limit 512
             $(this.histogramEl).html('&nbsp;<i class="fa fa-signal"></i>');
         } else {
             this.histogram = undefined;
@@ -29585,33 +26369,33 @@ Track.prototype = {
             $(this.histogramEl).html('');
         }
 
-//        if (this.histogramRenderer) {
-//            if (this.zoom <= this.histogramZoom) {
-//                this.histogramGroup.setAttribute('visibility', 'visible');
-//            } else {
-//                this.histogramGroup.setAttribute('visibility', 'hidden');
-//            }
-//        }
+        //        if (this.histogramRenderer) {
+        //            if (this.zoom <= this.histogramZoom) {
+        //                this.histogramGroup.setAttribute('visibility', 'visible');
+        //            } else {
+        //                this.histogramGroup.setAttribute('visibility', 'hidden');
+        //            }
+        //        }
     },
-
-    cleanSvg: function (filters) {//clean
-//        console.time("-----------------------------------------empty");
-        while (this.svgCanvasFeatures.firstChild) {
-            this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
-        }
-//        console.timeEnd("-----------------------------------------empty");
+    clean: function() {
+        this._clean();
+    },
+    _clean: function() {
+        //Must be called on child clean method
         this.chunksDisplayed = {};
         this.renderedArea = {};
     },
-
-    initializeDom: function (targetId) {
+    initializeDom: function(targetId) {
+        this._initializeDom(targetId);
+    },
+    _initializeDom: function(targetId) {
 
         var _this = this;
         var div = $('<div id="' + this.id + '-div"></div>')[0];
         div.classList.add('ocb-gv-track');
         var titleBarHtml = '';
         titleBarHtml += '   <div class="ocb-gv-track-title">';
-//      titleBarHtml+=       '   <button id="configBtn" type="button" class="btn btn-xs btn-primary"><span class="glyphicon glyphicon-cog"></span></button>' ;
+        //      titleBarHtml+=       '   <button id="configBtn" type="button" class="btn btn-xs btn-primary"><span class="glyphicon glyphicon-cog"></span></button>' ;
         titleBarHtml += '   <div class="ocb-gv-track-title-el">';
         titleBarHtml += '       <span class="ocb-gv-track-title-text">' + this.title + '</span>';
         titleBarHtml += '       <span class="ocb-gv-track-title-histogram"></span>';
@@ -29652,147 +26436,134 @@ Track.prototype = {
         this.downEl = titleBardiv.querySelector('.ocb-gv-track-title-down');
         this.externalLinkEl = titleBardiv.querySelector('.ocb-gv-track-title-external-link');
 
-        var svgdiv = $('<div id="' + this.id + '-svgdiv"></div>')[0];
-        var resizediv = $('<div id="' + this.id + '-resizediv" class="ocb-track-resize"></div>')[0];
-
-        $(targetId).addClass("unselectable");
-        $(targetId).append(div);
-        $(div).append(titleBardiv);
-        $(div).append(svgdiv);
-        $(div).append(resizediv);
-
-
-        /** title div **/
-        $(titleBardiv).css({'padding': '4px'})
-            .on('dblclick', function (e) {
-                e.stopPropagation();
-            });
-//        $(this.titleText).click(function (e) {
-//            _this.toggleContent();
-//        });
-        $(this.toggleEl).click(function (e) {
-            _this.toggleContent();
-        });
-        $(this.closeEl).click(function (e) {
-            _this.close();
-        });
-        $(this.upEl).click(function (e) {
-            _this.up();
-        });
-        $(this.downEl).click(function (e) {
-            _this.down();
-        });
-        $(this.externalLinkEl).click(function (e) {
-            window.open(_this.externalLink);
-        });
-
-
-        /** svg div **/
-        $(svgdiv).css({
+        var contentDiv = $('<div id="' + this.id + '-svgdiv"></div>')[0];
+        $(contentDiv).css({
+            'position': 'relative',
+            'box-sizing': 'boder-box',
             'z-index': 3,
             'height': this.height,
             'overflow-y': (this.resizable) ? 'auto' : 'hidden',
             'overflow-x': 'hidden'
         });
 
-        var main = SVG.addChild(svgdiv, 'svg', {
-            'id': this.id,
-            'class': 'trackSvg',
-            'x': 0,
-            'y': 0,
-            'width': this.width,
-            'height': this.height
+        var resizediv = $('<div id="' + this.id + '-resizediv" class="ocb-track-resize"></div>')[0];
+
+        $(targetId).addClass("unselectable");
+        $(targetId).append(div);
+        $(div).append(titleBardiv);
+        $(div).append(contentDiv);
+        $(div).append(resizediv);
+
+
+        /** title div **/
+        $(titleBardiv).css({
+                'padding': '4px'
+            })
+            .on('dblclick', function(e) {
+                e.stopPropagation();
+            });
+        //        $(this.titleText).click(function (e) {
+        //            _this.toggleContent();
+        //        });
+        $(this.toggleEl).click(function(e) {
+            _this.toggleContent();
+        });
+        $(this.closeEl).click(function(e) {
+            _this.close();
+        });
+        $(this.upEl).click(function(e) {
+            _this.up();
+        });
+        $(this.downEl).click(function(e) {
+            _this.down();
+        });
+        $(this.externalLinkEl).click(function(e) {
+            window.open(_this.externalLink);
         });
 
-
         if (this.resizable) {
-            $(resizediv).mousedown(function (event) {
+            $(resizediv).mousedown(function(event) {
                 $('html').addClass('unselectable');
                 event.stopPropagation();
                 var downY = event.clientY;
-                $('html').bind('mousemove.genomeViewer', function (event) {
+                $('html').bind('mousemove.genomeViewer', function(event) {
                     var despY = (event.clientY - downY);
-                    var actualHeight = $(svgdiv).outerHeight();
-                    $(svgdiv).css({height: actualHeight + despY});
+                    var actualHeight = $(contentDiv).outerHeight();
+                    var newHeight = actualHeight + despY;
+                    if (newHeight > 0) {
+                        _this.height = newHeight;
+                        $(contentDiv).css({
+                            height: _this.height
+                        });
+                    }
                     downY = event.clientY;
-                    _this.autoHeight = false;
+                    //                    _this.autoHeight = false;
                 });
             });
-            $('html').bind('mouseup.genomeViewer', function (event) {
+            $('html').bind('mouseup.genomeViewer', function(event) {
                 $('html').removeClass('unselectable');
                 $('html').off('mousemove.genomeViewer');
             });
-            $(svgdiv).closest(".trackListPanels").mouseup(function (event) {
+            $(contentDiv).closest(".trackListPanels").mouseup(function(event) {
                 _this.updateHeight();
             });
         }
 
-        this.svgGroup = SVG.addChild(main, "g", {
-        });
 
-        var text = this.title;
-        var hoverRect = SVG.addChild(this.svgGroup, 'rect', {
-            'x': 0,
-            'y': 0,
-            'width': this.width,
-            'height': this.height,
-            'opacity': '0.6',
-            'fill': 'transparent'
-        });
+        //        var hoverRect = SVG.addChild(this.svgGroup, 'rect', {
+        //            'x': 0,
+        //            'y': 0,
+        //            'width': this.width,
+        //            'height': this.height,
+        //            'opacity': '0.6',
+        //            'fill': 'transparent'
+        //        });
 
-        this.svgCanvasFeatures = SVG.addChild(this.svgGroup, 'svg', {
-            'class': 'features',
-            'x': -this.pixelPosition,
-            'width': this.svgCanvasWidth,
-            'height': this.height
-        });
+        //        this.fnTitleMouseEnter = function () {
+        //            hoverRect.setAttribute('opacity', '0.1');
+        //            hoverRect.setAttribute('fill', 'lightblue');
+        //        };
+        //        this.fnTitleMouseLeave = function () {
+        //            hoverRect.setAttribute('opacity', '0.6');
+        //            hoverRect.setAttribute('fill', 'transparent');
+        //        };
 
-
-        this.fnTitleMouseEnter = function () {
-            hoverRect.setAttribute('opacity', '0.1');
-            hoverRect.setAttribute('fill', 'lightblue');
-        };
-        this.fnTitleMouseLeave = function () {
-            hoverRect.setAttribute('opacity', '0.6');
-            hoverRect.setAttribute('fill', 'transparent');
-        };
-
-        $(this.svgGroup).off('mouseenter');
-        $(this.svgGroup).off('mouseleave');
-        $(this.svgGroup).mouseenter(this.fnTitleMouseEnter);
-        $(this.svgGroup).mouseleave(this.fnTitleMouseLeave);
+        //        $(this.svgGroup).off('mouseenter');
+        //        $(this.svgGroup).off('mouseleave');
+        //        $(this.svgGroup).mouseenter(this.fnTitleMouseEnter);
+        //        $(this.svgGroup).mouseleave(this.fnTitleMouseLeave);
 
 
-        this.invalidZoomText = SVG.addChild(this.svgGroup, 'text', {
-            'x': 154,
-            'y': 18,
-            'opacity': '0.6',
-            'fill': 'black',
-            'visibility': 'hidden',
-            'class': this.fontClass
-        });
-        this.invalidZoomText.textContent = "Zoom in to view the sequence";
+        //        this.invalidZoomText = SVG.addChild(this.svgGroup, 'text', {
+        //            'x': 154,
+        //            'y': 18,
+        //            'opacity': '0.6',
+        //            'fill': 'black',
+        //            'visibility': 'hidden',
+        //            'class': this.fontClass
+        //        });
+        //        this.invalidZoomText.textContent = "No information available at this zoom";
 
         this.div = div;
-        this.svgdiv = svgdiv;
+        this.contentDiv = contentDiv;
         this.titlediv = titlediv;
         this.resizeDiv = resizediv;
-//        this.configBtn = configBtn;
+        //        this.configBtn = configBtn;
 
-        this.main = main;
-        this.hoverRect = hoverRect;
-//        this.titleText = titleText;
+        //        this.main = main;
+        //        this.hoverRect = hoverRect;
+        //        this.titleText = titleText;
 
 
-//        if (this.histogramRenderer) {
-//            this._drawHistogramLegend();
-//        }
+        //        if (this.histogramRenderer) {
+        //            this._drawHistogramLegend();
+        //        }
 
         this.rendered = true;
         this.status = "ready";
 
     },
-    _drawHistogramLegend: function () {
+    _drawHistogramLegend: function() {
         var histogramHeight = this.histogramRenderer.histogramHeight;
         var multiplier = this.histogramRenderer.multiplier;
 
@@ -29838,50 +26609,50 @@ Track.prototype = {
         text.textContent = "1000-";
     },
 
-//    showInfoWidget: function (args) {
-//        if (this.dataAdapter.species == "orange") {
-//            //data.resource+="orange";
-//            if (args.featureType.indexOf("gene") != -1)
-//                args.featureType = "geneorange";
-//            if (args.featureType.indexOf("transcript") != -1)
-//                args.featureType = "transcriptorange";
-//        }
-//        switch (args.featureType) {
-//            case "gene":
-//                new GeneInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "geneorange":
-//                new GeneOrangeInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "transcriptorange":
-//                new TranscriptOrangeInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "transcript":
-//                new TranscriptInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "snp" :
-//                new SnpInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            case "vcf" :
-//                new VCFVariantInfoWidget(null, this.dataAdapter.species).draw(args);
-//                break;
-//            default:
-//                break;
-//        }
-//    },
+    //    showInfoWidget: function (args) {
+    //        if (this.dataAdapter.species == "orange") {
+    //            //data.resource+="orange";
+    //            if (args.featureType.indexOf("gene") != -1)
+    //                args.featureType = "geneorange";
+    //            if (args.featureType.indexOf("transcript") != -1)
+    //                args.featureType = "transcriptorange";
+    //        }
+    //        switch (args.featureType) {
+    //            case "gene":
+    //                new GeneInfoWidget(null, this.dataAdapter.species).draw(args);
+    //                break;
+    //            case "geneorange":
+    //                new GeneOrangeInfoWidget(null, this.dataAdapter.species).draw(args);
+    //                break;
+    //            case "transcriptorange":
+    //                new TranscriptOrangeInfoWidget(null, this.dataAdapter.species).draw(args);
+    //                break;
+    //            case "transcript":
+    //                new TranscriptInfoWidget(null, this.dataAdapter.species).draw(args);
+    //                break;
+    //            case "snp" :
+    //                new SnpInfoWidget(null, this.dataAdapter.species).draw(args);
+    //                break;
+    //            case "vcf" :
+    //                new VCFVariantInfoWidget(null, this.dataAdapter.species).draw(args);
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //    },
 
-    draw: function () {
+    draw: function() {
 
     },
 
-    getFeaturesToRenderByChunk: function (response, filters) {
+    getFeaturesToRenderByChunk: function(response, filters) {
         //Returns an array avoiding already drawn features in this.chunksDisplayed
 
-        var getChunkId = function (position) {
+        var getChunkId = function(position) {
             return Math.floor(position / response.chunkSize);
         };
-        var getChunkKey = function (chromosome, chunkId) {
-            return chromosome + ":" + chunkId;
+        var getChunkKey = function(chromosome, chunkId) {
+            return chromosome + ":" + chunkId + "_" + response.dataType + "_" + response.chunkSize;
         };
 
         var chunks = response.items;
@@ -29890,7 +26661,7 @@ Track.prototype = {
 
         var feature, displayed, featureFirstChunk, featureLastChunk, features = [];
         for (var i = 0, leni = chunks.length; i < leni; i++) {
-            if (this.chunksDisplayed[chunks[i].chunkKey] != true) {//check if any chunk is already displayed and skip it
+            if (this.chunksDisplayed[chunks[i].chunkKey] != true) { //check if any chunk is already displayed and skip it
 
                 for (var j = 0, lenj = chunks[i].value.length; j < lenj; j++) {
                     feature = chunks[i].value[j];
@@ -29949,10 +26720,10 @@ Track.prototype = {
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-BamTrack.prototype = new Track({});
+AlignmentTrack.prototype = new Track({});
 
-function BamTrack(args) {
-    Track.call(this,args);
+function AlignmentTrack(args) {
+    Track.call(this, args);
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -29962,60 +26733,97 @@ function BamTrack(args) {
     this.defaultRenderer = this.renderer;
     this.histogramRenderer = new HistogramRenderer();
 
-
-    this.chunksDisplayed = {};
+    this.dataType = 'features';
 
     //set instantiation args, must be last
     _.extend(this, args);
 
-    this.dataType = 'features';
 };
 
-BamTrack.prototype.render = function(targetId){
-    var _this = this;
+
+AlignmentTrack.prototype.clean = function () {
+    this._clean();
+
+//    console.time("-----------------------------------------empty");
+    while (this.svgCanvasFeatures.firstChild) {
+        this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+    }
+//    console.timeEnd("-----------------------------------------empty");
+};
+
+AlignmentTrack.prototype.updateHeight = function () {
+//    this._updateHeight();
+    var renderedHeight = this.svgCanvasFeatures.getBoundingClientRect().height;
+    this.main.setAttribute('height', renderedHeight);
+};
+
+AlignmentTrack.prototype.setWidth = function(width) {
+    this._setWidth(width);
+    this.main.setAttribute("width", this.width);
+};
+
+AlignmentTrack.prototype.initializeDom = function (targetId) {
+    this._initializeDom(targetId);
+
+    this.main = SVG.addChild(this.contentDiv, 'svg', {
+        'class': 'trackSvg',
+        'x': 0,
+        'y': 0,
+        'width': this.width
+    });
+    this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+        'class': 'features',
+        'x': -this.pixelPosition,
+        'width': this.svgCanvasWidth
+    });
+    this.updateHeight();
+};
+
+AlignmentTrack.prototype.render = function (targetId) {
     this.initializeDom(targetId);
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset*2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset*2
-
-    this.dataAdapter.on('data:ready',function(event){
-        var features;
-        if (event.dataType == 'histogram') {
-            _this.renderer = _this.histogramRenderer;
-            features = event.items;
-        } else {
-            _this.renderer = _this.defaultRenderer;
-            features = _this._removeDisplayedChunks(event);
-        }
-        _this.renderer.render(features, {
-            svgCanvasFeatures : _this.svgCanvasFeatures,
-            featureTypes:_this.featureTypes,
-            renderedArea:_this.renderedArea,
-            pixelBase : _this.pixelBase,
-            position : _this.region.center(),
-            region : _this.region,
-            width : _this.width,
-            regionSize: _this.region.length(),
-            maxLabelRegionSize: _this.maxLabelRegionSize,
-            pixelPosition : _this.pixelPosition
-        });
-
-        _this.updateHeight();
-        _this.setLoading(false);
-    });
-
+    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
+    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
 };
 
-BamTrack.prototype.draw = function(){
+AlignmentTrack.prototype.getDataHandler = function (event) {
+    var features;
+    if (event.dataType == 'histogram') {
+        this.renderer = this.histogramRenderer;
+        features = event.items;
+    } else {
+        this.renderer = this.defaultRenderer;
+        features = this._removeDisplayedChunks(event);
+        //features = this.getFeaturesToRenderByChunk(event);
+    }
+    this.renderer.render(features, {
+        cacheItems: event.items,
+        svgCanvasFeatures: this.svgCanvasFeatures,
+        featureTypes: this.featureTypes,
+        renderedArea: this.renderedArea,
+        pixelBase: this.pixelBase,
+        position: this.region.center(),
+        regionSize: this.region.length(),
+        maxLabelRegionSize: this.maxLabelRegionSize,
+        width: this.width,
+        pixelPosition: this.pixelPosition,
+        region: this.region,
+        trackListPanel: this.trackListPanel
+    });
+    this.updateHeight();
+};
+
+
+AlignmentTrack.prototype.draw = function () {
     var _this = this;
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset*2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset*2
+    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
+    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
 
     this.updateHistogramParams();
-    this.cleanSvg();
+    this.clean();
 
     this.dataType = 'features';
     if (this.histogram) {
@@ -30036,18 +26844,21 @@ BamTrack.prototype.draw = function(){
                 histogramLogarithm: this.histogramLogarithm,
                 histogramMax: this.histogramMax,
                 interval: this.interval
+            },
+            done: function (event) {
+                _this.getDataHandler(event);
+                _this.setLoading(false);
             }
         });
-
-        this.invalidZoomText.setAttribute("visibility", "hidden");
-    }else{
-        this.invalidZoomText.setAttribute("visibility", "visible");
+        //this.invalidZoomText.setAttribute("visibility", "hidden");
+    } else {
+        //this.invalidZoomText.setAttribute("visibility", "visible");
     }
     _this.updateHeight();
 };
 
 
-BamTrack.prototype.move = function(disp){
+AlignmentTrack.prototype.move = function (disp) {
     var _this = this;
 
     this.dataType = 'features';
@@ -30056,19 +26867,19 @@ BamTrack.prototype.move = function(disp){
     }
 
     _this.region.center();
-    var pixelDisplacement = disp*_this.pixelBase;
-    this.pixelPosition-=pixelDisplacement;
+    var pixelDisplacement = disp * _this.pixelBase;
+    this.pixelPosition -= pixelDisplacement;
 
     //parseFloat important
-    var move =  parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
-    this.svgCanvasFeatures.setAttribute("x",move);
+    var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
+    this.svgCanvasFeatures.setAttribute("x", move);
 
     var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
     var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
 
     if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
 
-        if(disp>0 && virtualStart < this.svgCanvasLeftLimit){
+        if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
             this.dataAdapter.getData({
                 dataType: this.dataType,
                 region: new Region({
@@ -30081,12 +26892,15 @@ BamTrack.prototype.move = function(disp){
                     histogramLogarithm: this.histogramLogarithm,
                     histogramMax: this.histogramMax,
                     interval: this.interval
+                },
+                done: function (event) {
+                    _this.getDataHandler(event);
                 }
             });
             this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
         }
 
-        if(disp<0 && virtualEnd > this.svgCanvasRightLimit){
+        if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
             this.dataAdapter.getData({
                 dataType: this.dataType,
                 region: new Region({
@@ -30099,54 +26913,63 @@ BamTrack.prototype.move = function(disp){
                     histogramLogarithm: this.histogramLogarithm,
                     histogramMax: this.histogramMax,
                     interval: this.interval
+                },
+                done: function (event) {
+                    _this.getDataHandler(event);
                 }
             });
-            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit+this.svgCanvasOffset);
+            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
         }
 
     }
 
 };
 
-BamTrack.prototype._removeDisplayedChunks = function(response){
+AlignmentTrack.prototype._removeDisplayedChunks = function (response) {
     //Returns an array avoiding already drawn features in this.chunksDisplayed
+
+    var getChunkId = function (position) {
+        return Math.floor(position / response.chunkSize);
+    };
+    var getChunkKey = function (chromosome, chunkId) {
+        return chromosome + ":" + chunkId + "_" + response.dataType + "_" + response.chunkSize;
+    };
+
     var chunks = response.items;
-    var dataType = response.dataType;
     var newChunks = [];
-//    var chromosome = response.params.chromosome;
 
     var feature, displayed, featureFirstChunk, featureLastChunk, features = [];
-    for ( var i = 0, leni = chunks.length; i < leni; i++) {//loop over chunks
-        if(this.chunksDisplayed[chunks[i].chunkKey] != true){//check if any chunk is already displayed and skip it
+    for (var i = 0, leni = chunks.length; i < leni; i++) {//loop over chunks
+        if (this.chunksDisplayed[chunks[i].chunkKey] != true) {//check if any chunk is already displayed and skip it
 
             features = []; //initialize array, will contain features not drawn by other drawn chunks
-            for ( var j = 0, lenj =  chunks[i].value.reads.length; j < lenj; j++) {
-                feature = chunks[i].value.reads[j];
-                var chrChunkCache = this.dataAdapter.cache[dataType];
+            for (var j = 0, lenj = chunks[i].value.alignments.length; j < lenj; j++) {
+                feature = chunks[i].value.alignments[j];
 
                 //check if any feature has been already displayed by another chunk
                 displayed = false;
-                featureFirstChunk = chrChunkCache.getChunkId(feature.start);
-                featureLastChunk = chrChunkCache.getChunkId(feature.end);
-                for(var chunkId=featureFirstChunk; chunkId<=featureLastChunk; chunkId++){//loop over chunks touched by this feature
-                    var chunkKey = chrChunkCache.getChunkKey(feature.chromosome, chunkId);
-                    if(this.chunksDisplayed[chunkKey]==true){
+                featureFirstChunk = getChunkId(feature.start);
+                featureLastChunk = getChunkId(feature.end);
+                for (var chunkId = featureFirstChunk; chunkId <= featureLastChunk; chunkId++) {//loop over chunks touched by this feature
+                    var chunkKey = getChunkKey(feature.chromosome, chunkId);
+                    if (this.chunksDisplayed[chunkKey] == true) {
                         displayed = true;
                         break;
                     }
                 }
-                if(!displayed){
+                if (!displayed) {
                     features.push(feature);
                 }
             }
-            this.chunksDisplayed[chunks[i].chunkKey]=true;
-            chunks[i].value.reads = features;//update features array
+            this.chunksDisplayed[chunks[i].chunkKey] = true;
+            chunks[i].value.alignments = features;//update features array
             newChunks.push(chunks[i]);
         }
     }
     response.items = newChunks;
     return response;
 };
+
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -30194,39 +27017,105 @@ function FeatureTrack(args) {
     this.dataType = 'features';
 };
 
+
+FeatureTrack.prototype.clean = function () {
+    this._clean();
+
+//    console.time("-----------------------------------------empty");
+    while (this.svgCanvasFeatures.firstChild) {
+        this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+    }
+//    console.timeEnd("-----------------------------------------empty");
+};
+
+FeatureTrack.prototype.updateHeight = function () {
+    //this._updateHeight();
+    if (this.histogram) {
+        this.contentDiv.style.height = this.histogramRenderer.histogramHeight + 5 + 'px';
+        this.main.setAttribute('height', this.histogramRenderer.histogramHeight);
+        return;
+    }
+
+    var renderedHeight = this.svgCanvasFeatures.getBoundingClientRect().height;
+    this.main.setAttribute('height', renderedHeight);
+
+    if (this.resizable) {
+        if (this.autoHeight == false) {
+            this.contentDiv.style.height = this.height + 10 + 'px';
+        } else if (this.autoHeight == true) {
+            var x = this.pixelPosition;
+            var width = this.width;
+            var lastContains = 0;
+            for (var i in this.renderedArea) {
+                if (this.renderedArea[i].contains({
+                        start: x,
+                        end: x + width
+                    })) {
+                    lastContains = i;
+                }
+            }
+            var visibleHeight = parseInt(lastContains) + 30;
+            this.contentDiv.style.height = visibleHeight + 10 + 'px';
+            this.main.setAttribute('height', visibleHeight);
+        }
+    }
+};
+
+FeatureTrack.prototype.setWidth = function(width) {
+    this._setWidth(width);
+    this.main.setAttribute("width", this.width);
+};
+
+FeatureTrack.prototype.initializeDom = function (targetId) {
+    this._initializeDom(targetId);
+
+    this.main = SVG.addChild(this.contentDiv, 'svg', {
+        'class': 'trackSvg',
+        'x': 0,
+        'y': 0,
+        'width': this.width
+    });
+    this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+        'class': 'features',
+        'x': -this.pixelPosition,
+        'width': this.svgCanvasWidth
+    });
+    this.updateHeight();
+};
+
 FeatureTrack.prototype.render = function (targetId) {
-    var _this = this;
     this.initializeDom(targetId);
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
     this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
     this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
+};
 
-    this.dataAdapter.on('data:ready', function (event) {
-        var features;
-        if (event.dataType == 'histogram') {
-            _this.renderer = _this.histogramRenderer;
-            features = event.items;
-        } else {
-            _this.renderer = _this.defaultRenderer;
-            features = _this.getFeaturesToRenderByChunk(event);
-        }
-        _this.renderer.render(features, {
-            svgCanvasFeatures: _this.svgCanvasFeatures,
-            featureTypes: _this.featureTypes,
-            renderedArea: _this.renderedArea,
-            pixelBase: _this.pixelBase,
-            position: _this.region.center(),
-            regionSize: _this.region.length(),
-            maxLabelRegionSize: _this.maxLabelRegionSize,
-            width: _this.width,
-            pixelPosition: _this.pixelPosition,
-            resource: _this.resource,
-            species: _this.species,
-            featureType: _this.featureType
-        });
-        _this.updateHeight();
+FeatureTrack.prototype.getDataHandler = function (event) {
+    var features;
+    if (event.dataType == 'histogram') {
+        this.renderer = this.histogramRenderer;
+        features = event.items;
+    } else {
+        this.renderer = this.defaultRenderer;
+        features = this.getFeaturesToRenderByChunk(event);
+    }
+    this.renderer.render(features, {
+        cacheItems: event.items,
+        svgCanvasFeatures: this.svgCanvasFeatures,
+        featureTypes: this.featureTypes,
+        renderedArea: this.renderedArea,
+        pixelBase: this.pixelBase,
+        position: this.region.center(),
+        regionSize: this.region.length(),
+        maxLabelRegionSize: this.maxLabelRegionSize,
+        width: this.width,
+        pixelPosition: this.pixelPosition,
+        resource: this.resource,
+        species: this.species,
+        featureType: this.featureType
     });
+    this.updateHeight();
 };
 
 FeatureTrack.prototype.draw = function () {
@@ -30237,7 +27126,7 @@ FeatureTrack.prototype.draw = function () {
     this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2;
 
     this.updateHistogramParams();
-    this.cleanSvg();
+    this.clean();
 
     this.dataType = 'features';
     if (this.histogram) {
@@ -30260,16 +27149,17 @@ FeatureTrack.prototype.draw = function () {
                 histogramMax: this.histogramMax,
                 interval: this.interval
             },
-            done: function () {
+            done: function (event) {
+                _this.getDataHandler(event);
                 _this.setLoading(false);
             }
         });
 
-        this.invalidZoomText.setAttribute("visibility", "hidden");
+//        this.invalidZoomText.setAttribute("visibility", "hidden");
     } else {
-        this.invalidZoomText.setAttribute("visibility", "visible");
+//        this.invalidZoomText.setAttribute("visibility", "visible");
     }
-    _this.updateHeight();
+    this.updateHeight();
 };
 
 
@@ -30308,8 +27198,8 @@ FeatureTrack.prototype.move = function (disp) {
                     histogramMax: this.histogramMax,
                     interval: this.interval
                 },
-                done: function () {
-
+                done: function (event) {
+                    _this.getDataHandler(event);
                 }
             });
             this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
@@ -30329,16 +27219,18 @@ FeatureTrack.prototype.move = function (disp) {
                     histogramMax: this.histogramMax,
                     interval: this.interval
                 },
-                done: function () {
-
+                done: function (event) {
+                    _this.getDataHandler(event);
                 }
 
             });
             this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
         }
-
     }
 
+    if (this.autoHeight == true) {
+        this.updateHeight();
+    }
 };
 
 /*
@@ -30374,7 +27266,7 @@ function GeneTrack(args) {
 
     //save default render reference;
     this.defaultRenderer = this.renderer;
-//    this.histogramRenderer = new FeatureClusterRenderer();
+    //    this.histogramRenderer = new FeatureClusterRenderer();
     this.histogramRenderer = new HistogramRenderer(args);
 
 
@@ -30384,47 +27276,113 @@ function GeneTrack(args) {
     this.exclude;
 };
 
-GeneTrack.prototype.render = function (targetId) {
-    var _this = this;
+
+GeneTrack.prototype.clean = function() {
+        console.time("-----------------------------------------empty");
+    while (this.svgCanvasFeatures.firstChild) {
+        this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+    }
+        console.timeEnd("-----------------------------------------empty");
+    this._clean();
+};
+
+GeneTrack.prototype.updateHeight = function() {
+    //    this._updateHeight();
+
+    if (this.histogram) {
+        this.contentDiv.style.height = this.histogramRenderer.histogramHeight + 5 + 'px';
+        this.main.setAttribute('height', this.histogramRenderer.histogramHeight);
+        return;
+    }
+
+    var renderedHeight = this.svgCanvasFeatures.getBoundingClientRect().height;
+    this.main.setAttribute('height', renderedHeight);
+
+    if (this.resizable) {
+        if (this.autoHeight == false) {
+            this.contentDiv.style.height = this.height + 10 + 'px';
+        } else if (this.autoHeight == true) {
+            var x = this.pixelPosition;
+            var width = this.width;
+            var lastContains = 0;
+            for (var i in this.renderedArea) {
+                if (this.renderedArea[i].contains({
+                        start: x,
+                        end: x + width
+                    })) {
+                    lastContains = i;
+                }
+            }
+            var visibleHeight = parseInt(lastContains) + 30;
+            this.contentDiv.style.height = visibleHeight + 10 + 'px';
+            this.main.setAttribute('height', visibleHeight);
+        }
+    }
+};
+
+GeneTrack.prototype.setWidth = function(width) {
+    this._setWidth(width);
+    this.main.setAttribute("width", this.width);
+};
+
+GeneTrack.prototype.initializeDom = function(targetId) {
+    this._initializeDom(targetId);
+
+    this.main = SVG.addChild(this.contentDiv, 'svg', {
+        'class': 'trackSvg',
+        'x': 0,
+        'y': 0,
+        'width': this.width
+    });
+    this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+        'class': 'features',
+        'x': -this.pixelPosition,
+        'width': this.svgCanvasWidth
+    });
+    this.updateHeight();
+};
+
+GeneTrack.prototype.render = function(targetId) {
     this.initializeDom(targetId);
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
     this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
     this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
-
-    this.dataAdapter.on('data:ready', function (event) {
-        var features;
-        if (event.dataType == 'histogram') {
-            _this.renderer = _this.histogramRenderer;
-            features = event.items;
-        } else {
-            _this.renderer = _this.defaultRenderer;
-            features = _this.getFeaturesToRenderByChunk(event);
-        }
-        _this.renderer.render(features, {
-            svgCanvasFeatures: _this.svgCanvasFeatures,
-            renderedArea: _this.renderedArea,
-            pixelBase: _this.pixelBase,
-            position: _this.region.center(),
-            regionSize: _this.region.length(),
-            maxLabelRegionSize: _this.maxLabelRegionSize,
-            width: _this.width,
-            pixelPosition: _this.pixelPosition
-
-        });
-        _this.updateHeight();
-    });
 };
 
-GeneTrack.prototype.updateTranscriptParams = function () {
+GeneTrack.prototype.getDataHandler = function(event) {
+    var features;
+    if (event.dataType == 'histogram') {
+        this.renderer = this.histogramRenderer;
+        features = event.items;
+    } else {
+        this.renderer = this.defaultRenderer;
+        features = this.getFeaturesToRenderByChunk(event);
+    }
+    this.renderer.render(features, {
+        cacheItems: event.items,
+        svgCanvasFeatures: this.svgCanvasFeatures,
+        renderedArea: this.renderedArea,
+        pixelBase: this.pixelBase,
+        position: this.region.center(),
+        regionSize: this.region.length(),
+        maxLabelRegionSize: this.maxLabelRegionSize,
+        width: this.width,
+        pixelPosition: this.pixelPosition
+
+    });
+    this.updateHeight();
+};
+
+GeneTrack.prototype.updateTranscriptParams = function() {
     if (this.region.length() < this.minTranscriptRegionSize) {
         this.exclude = this.dataAdapter.params.exclude;
     } else {
-        this.exclude = 'transcripts';
+        this.exclude = 'transcripts,chunkIds';
     }
 };
 
-GeneTrack.prototype.draw = function () {
+GeneTrack.prototype.draw = function() {
     var _this = this;
 
     this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
@@ -30433,13 +27391,13 @@ GeneTrack.prototype.draw = function () {
 
     this.updateTranscriptParams();
     this.updateHistogramParams();
-    this.cleanSvg();
+    this.clean();
 
     var dataType = 'features';
-
-    if (!_.isUndefined(this.exclude)) {
-        dataType = 'features' + this.exclude;
-    }
+    /*
+     if (!_.isUndefined(this.exclude)) {
+     dataType = 'features' + this.exclude.replace(/[,.]/gi,'');
+     }*/
 
     if (this.histogram) {
         dataType = 'histogram';
@@ -30462,20 +27420,21 @@ GeneTrack.prototype.draw = function () {
                 interval: this.interval,
                 exclude: this.exclude
             },
-            done: function () {
+            done: function(event) {
+                _this.getDataHandler(event);
                 _this.setLoading(false);
             }
         });
 
-        this.invalidZoomText.setAttribute("visibility", "hidden");
+        //        this.invalidZoomText.setAttribute("visibility", "hidden");
     } else {
-        this.invalidZoomText.setAttribute("visibility", "visible");
+        //        this.invalidZoomText.setAttribute("visibility", "visible");
     }
-    _this.updateHeight();
+    this.updateHeight();
 };
 
 
-GeneTrack.prototype.move = function (disp) {
+GeneTrack.prototype.move = function(disp) {
     var _this = this;
 
     this.dataType = 'features';
@@ -30488,7 +27447,7 @@ GeneTrack.prototype.move = function (disp) {
         this.dataType = 'histogram';
     }
 
-//    trackSvg.position = _this.region.center();
+    //    trackSvg.position = _this.region.center();
     _this.region.center();
     var pixelDisplacement = disp * _this.pixelBase;
     this.pixelPosition -= pixelDisplacement;
@@ -30501,14 +27460,14 @@ GeneTrack.prototype.move = function (disp) {
     var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
     // check if track is visible in this zoom
 
-//    console.log(virtualStart+'  ----  '+virtualEnd)
-//    console.log(this.svgCanvasLeftLimit+'  ----  '+this.svgCanvasRightLimit)
-//    console.log(this.svgCanvasOffset)
+    //    console.log(virtualStart+'  ----  '+virtualEnd)
+    //    console.log(this.svgCanvasLeftLimit+'  ----  '+this.svgCanvasRightLimit)
+    //    console.log(this.svgCanvasOffset)
 
     if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
 
         if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
-//          left
+            //          left
             this.dataAdapter.getData({
                 dataType: this.dataType,
                 region: new Region({
@@ -30523,15 +27482,15 @@ GeneTrack.prototype.move = function (disp) {
                     interval: this.interval,
                     exclude: this.exclude
                 },
-                done: function () {
-
+                done: function(event) {
+                    _this.getDataHandler(event);
                 }
             });
             this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
         }
 
         if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
-//          right
+            //          right
             this.dataAdapter.getData({
                 dataType: this.dataType,
                 region: new Region({
@@ -30546,135 +27505,19 @@ GeneTrack.prototype.move = function (disp) {
                     interval: this.interval,
                     exclude: this.exclude
                 },
-                done: function () {
-
+                done: function(event) {
+                    _this.getDataHandler(event);
                 }
             });
             this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
         }
     }
-};
-/*
- * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
- * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
- * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
- *
- * This file is part of JS Common Libs.
- *
- * JS Common Libs is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * JS Common Libs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
- */
 
-SequenceTrack.prototype = new Track({});
-
-function SequenceTrack(args) {
-    args.resizable = false;
-    Track.call(this, args);
-    // Using Underscore 'extend' function to extend and add Backbone Events
-    _.extend(this, Backbone.Events);
-
-    //set default args
-
-    _.extend(this, args);
-};
-
-SequenceTrack.prototype.render = function (targetId) {
-    var _this = this;
-    this.initializeDom(targetId);
-
-    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
-
-    this.dataAdapter.on('data:ready', function (event) {
-        _this.renderer.render(event, {
-            svgCanvasFeatures: _this.svgCanvasFeatures,
-            pixelBase: _this.pixelBase,
-            position: _this.region.center(),
-            width: _this.width,
-            pixelPosition: _this.pixelPosition
-        });
-        _this.setLoading(false);
-    });
-};
-
-SequenceTrack.prototype.draw = function () {
-    var _this = this;
-    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
-
-    this.cleanSvg();
-
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
-        this.setLoading(true);
-        var data = this.dataAdapter.getData({
-            region: new Region({
-                chromosome: this.region.chromosome,
-                start: this.region.start - this.svgCanvasOffset * 2,
-                end: this.region.end + this.svgCanvasOffset * 2
-            })
-        });
-        this.invalidZoomText.setAttribute("visibility", "hidden");
-    } else {
-        this.invalidZoomText.setAttribute("visibility", "visible");
+    if (this.autoHeight == true) {
+        this.updateHeight();
     }
-
-
 };
 
-
-SequenceTrack.prototype.move = function (disp) {
-    var _this = this;
-    var pixelDisplacement = disp * _this.pixelBase;
-    this.pixelPosition -= pixelDisplacement;
-
-    //parseFloat important
-    var move = parseFloat(this.svgCanvasFeatures.getAttribute("x")) + pixelDisplacement;
-    this.svgCanvasFeatures.setAttribute("x", move);
-
-    var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
-    var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
-
-    // check if track is visible in this region size
-    if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
-        if (disp > 0 && virtualStart < this.svgCanvasLeftLimit) {
-            this.dataAdapter.getData({
-                region: new Region({
-                    chromosome: _this.region.chromosome,
-                    start: parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset),
-                    end: this.svgCanvasLeftLimit
-                }),
-                sender: 'move'
-            });
-            this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
-        }
-
-        if (disp < 0 && virtualEnd > this.svgCanvasRightLimit) {
-            this.dataAdapter.getData({
-                region: new Region({
-                    chromosome: _this.region.chromosome,
-                    start: this.svgCanvasRightLimit,
-                    end: parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset),
-                }),
-                sender: 'move'
-            });
-            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset);
-        }
-
-    }
-
-};
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -30708,9 +27551,9 @@ Renderer.prototype = {
 
     },
 
-    getFeatureX: function (feature, args) {//returns svg feature x value from feature genomic position
+    getFeatureX: function (start, args) {//returns svg feature x value from feature genomic position
         var middle = args.width / 2;
-        var x = args.pixelPosition + middle - ((args.position - feature.start) * args.pixelBase);
+        var x = args.pixelPosition + middle - ((args.position - start) * args.pixelBase);
         return x;
     },
 
@@ -30753,9 +27596,9 @@ Renderer.prototype = {
  */
 
 //any item with chromosome start end
-BamRenderer.prototype = new Renderer({});
+AlignmentRenderer.prototype = new Renderer({});
 
-function BamRenderer(args) {
+function AlignmentRenderer(args) {
     Renderer.call(this, args);
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
@@ -30771,9 +27614,10 @@ function BamRenderer(args) {
 };
 
 
-BamRenderer.prototype.render = function (response, args) {
+AlignmentRenderer.prototype.render = function (response, args) {
     var _this = this;
 
+    var sequenceDataAdapter = args.trackListPanel.getSequenceTrack().dataAdapter;
 
     //CHECK VISUALIZATON MODE
     if (_.isUndefined(response.params)) {
@@ -30798,7 +27642,7 @@ BamRenderer.prototype.render = function (response, args) {
     //Prevent browser context menu
     $(args.svgCanvasFeatures).contextmenu(function (e) {
         console.log("click derecho")
-        e.preventDefault();
+        //e.preventDefault();
     });
 
     console.time("BamRender " + response.params.resource);
@@ -30901,24 +27745,24 @@ BamRenderer.prototype.render = function (response, args) {
 
         $(dummyRect).qtip({
             content: " ",
-            position: {my: 'top center', at: 'bottom center', target: $(dummyRect), adjust: {x: -25, y: 0, resize:true} /*, viewport: $(window) */, effect: false},
-            style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip-shadow'},
+            position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+            style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip-shadow'},
             show: {delay: 300},
             hide: {delay: 300}
         });
 
 
-//        args.trackSvgLayout.onMousePosition.addEventListener(function (sender, obj) {
-//            var pos = obj.mousePos - parseInt(chunk.start);
-//            //if(coverageList[pos]!=null){
-//            var str = 'depth: <span class="ssel">' + coverageList[pos] + '</span><br>' +
-//                '<span style="color:green">A</span>: <span class="ssel">' + chunk.coverage.a[pos] + '</span><br>' +
-//                '<span style="color:blue">C</span>: <span class="ssel">' + chunk.coverage.c[pos] + '</span><br>' +
-//                '<span style="color:darkgoldenrod">G</span>: <span class="ssel">' + chunk.coverage.g[pos] + '</span><br>' +
-//                '<span style="color:red">T</span>: <span class="ssel">' + chunk.coverage.t[pos] + '</span><br>';
-//            $(dummyRect).qtip('option', 'content.text', str);
-//            //}
-//        });
+        args.trackListPanel.on('mousePosition:change', function (e) {
+            var pos = e.mousePos - parseInt(chunk.start);
+            //if(coverageList[pos]!=null){
+            var str = 'depth: <span class="ssel">' + coverageList[pos] + '</span><br>' +
+                '<span style="color:green">A</span>: <span class="ssel">' + chunk.coverage.a[pos] + '</span><br>' +
+                '<span style="color:blue">C</span>: <span class="ssel">' + chunk.coverage.c[pos] + '</span><br>' +
+                '<span style="color:darkgoldenrod">G</span>: <span class="ssel">' + chunk.coverage.g[pos] + '</span><br>' +
+                '<span style="color:red">T</span>: <span class="ssel">' + chunk.coverage.t[pos] + '</span><br>';
+            $(dummyRect).qtip('option', 'content.text', str);
+            //}
+        });
     };
 
     var drawSingleRead = function (feature) {
@@ -30926,8 +27770,11 @@ BamRenderer.prototype.render = function (response, args) {
         //var end = feature.end;
         var start = feature.unclippedStart;
         var end = feature.unclippedEnd;
+        if (feature.end == 0) {
+            end = start + feature.length - 1;
+        }
         var length = (end - start) + 1;
-        var diff = feature.diff;
+        var differences = feature.differences;
 
         //get feature render configuration
         var color = _.isFunction(_this.color) ? _this.color(feature, args.region.chromosome) : _this.color;
@@ -30939,8 +27786,6 @@ BamRenderer.prototype.render = function (response, args) {
         var strand = _.isFunction(_this.strand) ? _this.strand(feature) : _this.strand;
         var mateUnmappedFlag = _.isFunction(_this.mateUnmappedFlag) ? _this.mateUnmappedFlag(feature) : _this.mateUnmappedFlag;
         var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
-        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
-        var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
         if (insertSizeMin != 0 && insertSizeMax != 0 && !mateUnmappedFlag) {
             if (Math.abs(feature.inferredInsertSize) > insertSizeMax) {
@@ -30954,15 +27799,20 @@ BamRenderer.prototype.render = function (response, args) {
         //transform to pixel position
         var width = length * args.pixelBase;
         //calculate x to draw svg rect
-        var x = _this.getFeatureX(feature, args);
+        var x = _this.getFeatureX(start, args);
 //		try{
 //			var maxWidth = Math.max(width, /*settings.getLabel(feature).length*8*/0); //XXX cuidado : text.getComputedTextLength()
 //		}catch(e){
 //			var maxWidth = 72;
 //		}
         maxWidth = width;
+        //if(length <0){
+        //    debugger
+        //}
+        console.log(length + ' in px: ' + width);
 
-        var rowHeight = 12;
+
+        var rowHeight = 16;
         var rowY = 70;
 //		var textY = 12+settings.height;
         while (true) {
@@ -30973,15 +27823,33 @@ BamRenderer.prototype.render = function (response, args) {
             if (enc) {
                 var featureGroup = SVG.addChild(bamReadGroup, "g", {'feature_id': feature.name});
                 var points = {
-                    "Reverse": x + "," + (rowY + (height / 2)) + " " + (x + 5) + "," + rowY + " " + (x + width - 5) + "," + rowY + " " + (x + width - 5) + "," + (rowY + height) + " " + (x + 5) + "," + (rowY + height),
-                    "Forward": x + "," + rowY + " " + (x + width - 5) + "," + rowY + " " + (x + width) + "," + (rowY + (height / 2)) + " " + (x + width - 5) + "," + (rowY + height) + " " + x + "," + (rowY + height)
+                    "Reverse": x + "," + (rowY + (height / 2)) + " " + (x + 5) + "," + rowY + " " + (x + width) + "," + rowY + " " + (x + width) + "," + (rowY + height) + " " + (x + 5) + "," + (rowY + height),
+                    "Forward": (x - 1) + "," + rowY + " " + (x + width - 5) + "," + rowY + " " + (x + width) + "," + (rowY + (height / 2)) + " " + (x + width - 5) + "," + (rowY + height) + " " + (x - 1) + "," + (rowY + height)
                 }
                 var poly = SVG.addChild(featureGroup, "polygon", {
                     "points": points[strand],
-                    "stroke": strokeColor,
+                    "stroke": color,
                     "stroke-width": 1,
                     "fill": color,
                     "cursor": "pointer"
+                });
+
+                $(featureGroup).qtip({
+                    content: {text: tooltipText, title: tooltipTitle},
+                    position: { my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: -25, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+                    style: {tip: { corner: true }, width: 300, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                    show: 'mouseenter',
+                    hide: 'mousedown mouseup mouseleave'
+                });
+
+                featureGroup.addEventListener('click', function (event) {
+                    console.log(feature);
+                    _this.trigger('feature:click', {
+                        query: feature[infoWidgetId],
+                        feature: feature,
+                        featureType: feature.featureType,
+                        clickEvent: event
+                    })
                 });
 
                 //var rect = SVG.addChild(featureGroup,"rect",{
@@ -30997,36 +27865,18 @@ BamRenderer.prototype.render = function (response, args) {
                 //});
                 //readEls.push(rect);
 
-                if (diff != null && args.regionSize < 400) {
-                    //var	t = SVG.addChild(featureGroup,"text",{
-                    //"x":x+1,
-                    //"y":rowY+settings.height-1,
-                    //"fill":"darkred",
-                    //"textLength":width,
-                    //"cursor": "pointer"
-                    //});
-                    //t.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve");
-                    //t.textContent = diff;
-                    //readEls.push(t);
-                    var path = SVG.addChild(featureGroup, "path", {
-                        "d": Utils.genBamVariants(diff, args.pixelBase, x, rowY),
-                        "fill": variantColor
+                //PROCESS differences
+                if (differences != null && args.regionSize < 400) {
+                    var region = new Region({chromosome: args.region.chromosome, start: start, end: end});
+                    sequenceDataAdapter.getData({
+                        region: region,
+                        done: function (event) {
+                            var referenceString = AlignmentRenderer._getReferenceString(event.items, region);
+                            featureGroup.appendChild(AlignmentRenderer.drawBamDifferences(referenceString, differences, args.pixelBase, x, rowY + height));
+                        }
                     });
                 }
-                $(featureGroup).qtip({
-                    content: {text: tooltipText, title: tooltipTitle},
-                    position: { my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: -25, y: 0, resize:true}, container: tooltipAnchorContainerEl},
-                    style: {tip: { corner: true }, width: 300, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
-                    show: 'click',
-                    hide: 'click mouseleave'
-                });
 
-
-//                $(featureGroup).click(function (event) {
-//                    console.log(feature);
-//                    _this.trigger('feature:click', {query: feature[infoWidgetId], feature: feature, featureType: feature.featureType, clickEvent: event})
-////                    _this.showInfoWidget({query: feature[settings.infoWidgetId], feature: feature, featureType: feature.featureType, adapter: _this.trackData.adapter});
-//                });
                 break;
             }
             rowY += rowHeight;
@@ -31155,7 +28005,12 @@ BamRenderer.prototype.render = function (response, args) {
                 });
                 $(readEls).click(function (event) {
                     console.log(read);
-                    _this.showInfoWidget({query: read[readSettings.infoWidgetId], feature: read, featureType: read.featureType, adapter: _this.trackData.adapter});
+                    _this.showInfoWidget({
+                        query: read[readSettings.infoWidgetId],
+                        feature: read,
+                        featureType: read.featureType,
+                        adapter: _this.trackData.adapter
+                    });
                 });
                 $(mateEls).qtip({
                     content: {text: mateSettings.getTipText(mate), title: mateSettings.getTipTitle(mate)},
@@ -31166,7 +28021,12 @@ BamRenderer.prototype.render = function (response, args) {
                 });
                 $(mateEls).click(function (event) {
                     console.log(mate);
-                    _this.showInfoWidget({query: mate[mateSettings.infoWidgetId], feature: mate, featureType: mate.featureType, adapter: _this.trackData.adapter});
+                    _this.showInfoWidget({
+                        query: mate[mateSettings.infoWidgetId],
+                        feature: mate,
+                        featureType: mate.featureType,
+                        adapter: _this.trackData.adapter
+                    });
                 });
                 break;
             }
@@ -31177,21 +28037,21 @@ BamRenderer.prototype.render = function (response, args) {
 
     var drawChunk = function (chunk) {
         drawCoverage(chunk.value);
-        var readList = chunk.value.reads;
-        for (var i = 0, li = readList.length; i < li; i++) {
-            var read = readList[i];
+        var alignments = chunk.value.alignments;
+        for (var i = 0, li = alignments.length; i < li; i++) {
+            var alignment = alignments[i];
             if (viewAsPairs) {
-                var nextRead = readList[i + 1];
+                var nextRead = alignments[i + 1];
                 if (nextRead != null) {
-                    if (read.name == nextRead.name) {
-                        drawPairedReads(read, nextRead);
+                    if (alignment.name == nextRead.name) {
+                        drawPairedReads(alignment, nextRead);
                         i++;
                     } else {
-                        drawSingleRead(read);
+                        drawSingleRead(alignment);
                     }
                 }
             } else {
-                drawSingleRead(read);
+                drawSingleRead(alignment);
             }
         }
     };
@@ -31209,6 +28069,274 @@ BamRenderer.prototype.render = function (response, args) {
 //        this.setHeight(200);
     }
     console.timeEnd("BamRender " + response.params.resource);
+};
+
+/**
+ * @Deprecated
+ * **/
+AlignmentRenderer.genBamVariants = function (differences, size, mainX, y) {
+
+    var s = size / 6;
+    var d = "";
+    for (var i = 0; i < differences.length; i++) {
+        var difference = differences[i];
+
+        switch (difference.op) {
+            case "S" :
+                var x = mainX + (size * difference.pos);
+                for (var j = 0; j < difference.length; j++) {
+                    var char = difference.seq[j];
+                    switch (char) {
+                        case "A" :
+                            d += "M" + ((2.5 * s) + x) + "," + (y) +
+                                "l-" + (2.5 * s) + "," + (6 * s) +
+                                "l" + s + ",0" +
+                                "l" + (0.875 * s) + ",-" + (2 * s) +
+                                "l" + (2.250 * s) + ",0" +
+                                "l" + (0.875 * s) + "," + (2 * s) +
+                                "l" + s + ",0" +
+                                "l-" + (2.5 * s) + ",-" + (6 * s) +
+                                "l-" + (0.5 * s) + ",0" +
+                                "l0," + s +
+                                "l" + (0.75 * s) + "," + (2 * s) +
+                                "l-" + (1.5 * s) + ",0" +
+                                "l" + (0.75 * s) + ",-" + (2 * s) +
+                                "l0,-" + s +
+                                " ";
+                            break;
+                        case "T" :
+                            d += "M" + ((0.5 * s) + x) + "," + (y) +
+                                "l0," + s +
+                                "l" + (2 * s) + ",0" +
+                                "l0," + (5 * s) +
+                                "l" + s + ",0" +
+                                "l0,-" + (5 * s) +
+                                "l" + (2 * s) + ",0" +
+                                "l0,-" + s +
+                                " ";
+                            break;
+                        case "C" :
+                            d += "M" + ((5 * s) + x) + "," + ((0 * s) + y) +
+                                "l-" + (2 * s) + ",0" +
+                                "l-" + (1.5 * s) + "," + (0.5 * s) +
+                                "l-" + (0.5 * s) + "," + (1.5 * s) +
+                                "l0," + (2 * s) +
+                                "l" + (0.5 * s) + "," + (1.5 * s) +
+                                "l" + (1.5 * s) + "," + (0.5 * s) +
+                                "l" + (2 * s) + ",0" +
+                                "l0,-" + s +
+                                "l-" + (2 * s) + ",0" +
+                                "l-" + (0.75 * s) + ",-" + (0.25 * s) +
+                                "l-" + (0.25 * s) + ",-" + (0.75 * s) +
+                                "l0,-" + (2 * s) +
+                                "l" + (0.25 * s) + ",-" + (0.75 * s) +
+                                "l" + (0.75 * s) + ",-" + (0.25 * s) +
+                                "l" + (2 * s) + ",0" +
+                                " ";
+                            break;
+                        case "G" :
+                            d += "M" + ((5 * s) + x) + "," + ((0 * s) + y) +
+                                "l-" + (2 * s) + ",0" +
+                                "l-" + (1.5 * s) + "," + (0.5 * s) +
+                                "l-" + (0.5 * s) + "," + (1.5 * s) +
+                                "l0," + (2 * s) +
+                                "l" + (0.5 * s) + "," + (1.5 * s) +
+                                "l" + (1.5 * s) + "," + (0.5 * s) +
+                                "l" + (2 * s) + ",0" +
+                                "l0,-" + (3 * s) +
+                                "l-" + (s) + ",0" +
+                                "l0," + (2 * s) +
+                                "l-" + (s) + ",0" +
+                                "l-" + (0.75 * s) + ",-" + (0.25 * s) +
+                                "l-" + (0.25 * s) + ",-" + (0.75 * s) +
+                                "l0,-" + (2 * s) +
+                                "l" + (0.25 * s) + ",-" + (0.75 * s) +
+                                "l" + (0.75 * s) + ",-" + (0.25 * s) +
+                                "l" + (2 * s) + ",0" +
+                                " ";
+//                d += "M" + ((5 * s) + x) + "," + ((0 * s) + y) +
+//                    "l-" + (2 * s) + ",0" +
+//                    "l-" + (2 * s) + "," + (2 * s) +
+//                    "l0," + (2 * s) +
+//                    "l" + (2 * s) + "," + (2 * s) +
+//                    "l" + (2 * s) + ",0" +
+//                    "l0,-" + (3 * s) +
+//                    "l-" + (1 * s) + ",0" +
+//                    "l0," + (2 * s) +
+//                    "l-" + (0.5 * s) + ",0" +
+//                    "l-" + (1.5 * s) + ",-" + (1.5 * s) +
+//                    "l0,-" + (1 * s) +
+//                    "l" + (1.5 * s) + ",-" + (1.5 * s) +
+//                    "l" + (1.5 * s) + ",0" +
+//                    " ";
+                            break;
+                        case "N" :
+                            d += "M" + ((0.5 * s) + x) + "," + ((0 * s) + y) +
+                                "l0," + (6 * s) +
+                                "l" + s + ",0" +
+                                "l0,-" + (4.5 * s) +
+                                "l" + (3 * s) + "," + (4.5 * s) +
+                                "l" + s + ",0" +
+                                "l0,-" + (6 * s) +
+                                "l-" + s + ",0" +
+                                "l0," + (4.5 * s) +
+                                "l-" + (3 * s) + ",-" + (4.5 * s) +
+                                " ";
+                            break;
+                        case "d" :
+                            d += "M" + ((0 * s) + x) + "," + ((2.5 * s) + y) +
+                                "l" + (6 * s) + ",0" +
+                                "l0," + (s) +
+                                "l-" + (6 * s) + ",0" +
+                                "l0,-" + (s) +
+                                " ";
+                            break;
+                        default:
+                            d += "M0,0";
+                            break;
+                    }
+                    x += size;
+                }
+                break;
+        }
+
+    }
+
+    return d;
+};
+
+AlignmentRenderer.drawBamDifferences = function (refString, differences, size, mainX, y) {
+    var text = SVG.create("text", {
+        "x": mainX,
+        "y": y - 2,
+        "class": 'ocb-font-ubuntumono ocb-font-size-15'
+    });
+    for (var i = 0; i < differences.length; i++) {
+        var difference = differences[i];
+
+        switch (difference.op) {
+            // M 0 alignment match (can be a sequence match or mismatch)
+            // I 1 insertion to the reference
+            // D 2 deletion from the reference
+            // N 3 skipped region from the reference
+            // S 4 soft clipping (clipped sequences present in SEQ)
+            // H 5 hard clipping (clipped sequences NOT present in SEQ)
+            //P 6 padding (silent deletion from padded reference)
+            //= 7 sequence match
+            // X 8 sequence mismatch
+
+            case "I" :
+                var x = mainX + (size * difference.pos) - size / 2;
+                var t = SVG.addChild(text, "tspan", {
+                    "x": x,
+                    "font-weight": 'bold',
+                    "textLength": size
+                });
+                t.textContent = '·';
+                $(t).qtip({
+                    content: {text: difference.seq, title: 'Insertion'},
+                    position: {target: "mouse", adjust: {x: 25, y: 15}},
+                    style: {classes: this.toolTipfontClass + ' qtip-dark qtip-shadow'}
+                });
+                break;
+            case "D" :
+                var x = mainX + (size * difference.pos);
+                for (var j = 0; j < difference.length; j++) {
+                    var t = SVG.addChild(text, "tspan", {
+                        "x": x,
+                        "font-weight": 'bold',
+                        "textLength": size
+                    });
+                    t.textContent = '—';
+                    x += size;
+                }
+                break;
+            case "N" :
+                var x = mainX + (size * difference.pos);
+                for (var j = 0; j < difference.length; j++) {
+                    var t = SVG.addChild(text, "tspan", {
+                        "x": x,
+                        "fill": "#888",
+                        "textLength": size
+                    });
+                    t.textContent = '—';
+                    x += size;
+                }
+                break;
+            case "S" :
+                var x = mainX + (size * difference.pos);
+                for (var j = 0; j < difference.length; j++) {
+                    var char = difference.seq[j];
+                    var t = SVG.addChild(text, "tspan", {
+                        "x": x,
+                        "fill": "#aaa",
+                        "textLength": size
+                    });
+                    t.textContent = char;
+                    x += size;
+                }
+                break;
+            case "H" :
+                var x = mainX + (size * difference.pos);
+                for (var j = 0; j < difference.length; j++) {
+                    var t = SVG.addChild(text, "tspan", {
+                        "x": x,
+                        "fill": "#aaa",
+                        "textLength": size
+                    });
+                    t.textContent = 'H';
+                    x += size;
+                }
+                break;
+            case "X" :
+            case "M" :
+                var x = mainX + (size * difference.pos);
+                for (var j = 0; j < difference.length; j++) {
+                    var char = difference.seq[j];
+                    var refPos = difference.pos + j;
+                    // console.log("ref:"+ refString.charAt(refPos)+" - "+"seq:"+char);
+                    if (char != refString.charAt(refPos)) {
+                        var t = SVG.addChild(text, "tspan", {
+                            "x": x,
+                            "fill": SEQUENCE_COLORS[char],
+                            "textLength": size
+                        });
+                        t.textContent = char;
+                    }
+                    x += size;
+                }
+                break;
+        }
+
+    }
+
+    return text;
+};
+
+AlignmentRenderer._getReferenceString = function (chunks, region) {
+    var sequenceItems = [];
+    var chunk;
+    for (var i = 0; i < chunks.length; i++) {
+        chunk = chunks[i];
+        for (var j = 0; j < chunk.value.length; j++) {
+            sequenceItems.push(chunk.value[j]);
+        }
+    }
+    sequenceItems.sort(function (a, b) {
+        return a.start - b.start;
+    });
+    var aux = [];
+    var s = sequenceItems[0].start;
+    var e = sequenceItems[sequenceItems.length - 1].end;
+    for (var i = 0; i < sequenceItems.length; i++) {
+        aux.push(sequenceItems[i].sequence);
+    }
+    var str = aux.join("");
+    var i1 = region.start - s;
+    var i2 = i1 + region.length();
+    var substr = str.substring(i1, i2);
+
+    return substr;
 };
 
 /*
@@ -31234,8 +28362,8 @@ BamRenderer.prototype.render = function (response, args) {
 
 ConservedRenderer.prototype = new Renderer({});
 
-function ConservedRenderer(args){
-    Renderer.call(this,args);
+function ConservedRenderer(args) {
+    Renderer.call(this, args);
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -31245,35 +28373,34 @@ function ConservedRenderer(args){
 
 };
 
+ConservedRenderer.prototype.render = function (chunks, args) {
+    for (var i = 0; i < chunks.length; i++) {
+        this._paintChunk(chunks[i], args);
+    }
+};
 
-ConservedRenderer.prototype.render = function(features, args) {
-    var middle = args.width/2;
-    var multiplier = 20;
+ConservedRenderer.prototype._paintChunk = function (chunk, args) {
+    var middle = args.width / 2;
+    var multiplier = 15;
     var histogramHeight = 75;
     var points = '';
     var width = args.pixelBase;
 
-    var firstFeature = features[0];
-    var x = args.pixelPosition+middle-((args.position-parseInt(firstFeature.start))*args.pixelBase);
-    points = (x+(width/2))+','+histogramHeight+' ';
+    var x = args.pixelPosition + middle - ((args.position - parseInt(chunk.start)) * args.pixelBase);
 
-    for ( var i = 0, len = features.length; i < len; i++) {
-        var feature = features[i];
-        feature.start = parseInt(feature.start);
-        feature.end = parseInt(feature.end);
-
-        for ( var j = 0, len = feature.values; j < len; j++) {
-            var value = feature.values[j];
-            var height = value*multiplier;
-            var s = start+j;
-            var x = args.pixelPosition+middle-((args.position-s)*args.pixelBase);
-            points += (x+(width/2))+","+(histogramHeight - height)+" ";
-        }
+    for (var i = 0, len = chunk.values.length; i < len; i++) {
+        var value = chunk.values[i];
+        var height = value * multiplier;
+        var s = chunk.start + i;
+        var x = args.pixelPosition + middle - ((args.position - s) * args.pixelBase);
+        points += (x) + "," + 0 + " ";
+        points += (x) + "," + (histogramHeight - height) + " ";
+        points += (x + width) + "," + (histogramHeight - height) + " ";
+        points += (x + width) + "," + 0 + " ";
     }
-    points += (x+(width/2))+","+(histogramHeight)+" ";
 
-    var pol = SVG.addChild(args.svgCanvasFeatures,"polyline",{
-        "points":points,
+    var pol = SVG.addChild(args.svgCanvasFeatures, "polyline", {
+        "points": points,
         "stroke": "#000000",
         "stroke-width": 0.2,
         "fill": 'salmon',
@@ -31282,6 +28409,7 @@ ConservedRenderer.prototype.render = function(features, args) {
 
 
 };
+
 
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
@@ -31350,7 +28478,7 @@ FeatureClusterRenderer.prototype.render = function (features, args) {
         var width = (feature.end - feature.start);
 
         width = width * args.pixelBase;
-        var x = _this.getFeatureX(feature, args);
+        var x = _this.getFeatureX(feature.start, args);
 
         if (feature.features_count == null) {
 //            var height = Math.log(features[i].absolute);
@@ -31421,7 +28549,7 @@ FeatureClusterRenderer.prototype.render = function (features, args) {
                     }
                 }
             },
-            position: { my: 'top center', at: 'bottom center', target: 'mouse', adjust: {x: -25, y: 0, resize:true}},
+            position: { my: 'top center', at: 'bottom center', target: $(rect), adjust: {x: -25, y: 0, resize:true}},
             style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
             show: {delay: 300},
             hide: {delay: 300}
@@ -31480,7 +28608,11 @@ function FeatureRenderer(args) {
     this.fontClass = 'ocb-font-roboto ocb-font-size-11';
     this.toolTipfontClass = 'ocb-tooltip-font';
 
-     if (_.isObject(args)) {
+    if (args == null) {
+        args = FEATURE_TYPES.undefined;
+    }
+
+    if (_.isObject(args)) {
         _.extend(this, args);
     }
 
@@ -31492,9 +28624,32 @@ FeatureRenderer.prototype.render = function (features, args) {
     var _this = this;
     var draw = function (feature, svgGroup) {
 
-        if (typeof feature.featureType === 'undefined') {
-            feature.featureType = args.featureType;
+        if ('featureType' in feature) {
+            _.extend(_this, FEATURE_TYPES[feature.featureType]);
         }
+        if ('featureClass' in feature) {
+            _.extend(_this, FEATURE_TYPES[feature.featureClass]);
+        }
+
+        //Temporal fix for clinical
+        if (args.featureType == 'clinical') {
+            if ('clinvarSet' in feature) {
+                _.extend(_this, FEATURE_TYPES['Clinvar'])
+            } else if ('mutationID' in feature) {
+                _.extend(_this, FEATURE_TYPES['Cosmic'])
+            }else{
+                _.extend(_this, FEATURE_TYPES['GWAS'])
+            }
+        }
+
+
+        ////check feature class
+        //if (feature.featureClass != null) {//regulatory
+        //    _.extend(_this, FEATURE_TYPES[feature.featureClass]);
+        //} else if (feature.source != null) {//clinical
+        //    _.extend(_this, FEATURE_TYPES[feature.source]);
+        //}
+
         //get feature render configuration
         var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
         var label = _.isFunction(_this.label) ? _this.label(feature) : _this.label;
@@ -31521,7 +28676,7 @@ FeatureRenderer.prototype.render = function (features, args) {
         var svgLabelWidth = label.length * 6.4;
 
         //calculate x to draw svg rect
-        var x = _this.getFeatureX(feature, args);
+        var x = _this.getFeatureX(start, args);
 
         var maxWidth = Math.max(width, 2);
         var textHeight = 0;
@@ -31580,11 +28735,21 @@ FeatureRenderer.prototype.render = function (features, args) {
                 }
 
                 $(featureGroup).mouseover(function (event) {
-                    _this.trigger('feature:mouseover', {query: feature[infoWidgetId], feature: feature, featureType: feature.featureType, mouseoverEvent: event})
+                    _this.trigger('feature:mouseover', {
+                        query: feature[infoWidgetId],
+                        feature: feature,
+                        featureType: feature.featureType,
+                        mouseoverEvent: event
+                    })
                 });
 
                 $(featureGroup).click(function (event) {
-                    _this.trigger('feature:click', {query: feature[infoWidgetId], feature: feature, featureType: feature.featureType, clickEvent: event})
+                    _this.trigger('feature:click', {
+                        query: feature[infoWidgetId],
+                        feature: feature,
+                        featureType: feature.featureType,
+                        clickEvent: event
+                    })
                 });
                 break;
             }
@@ -31682,11 +28847,11 @@ GeneRenderer.prototype.render = function (features, args) {
         var width = length * args.pixelBase;
 
 
-//        var svgLabelWidth = _this.getLabelWidth(label, args);
+        // var svgLabelWidth = _this.getLabelWidth(label, args);
         var svgLabelWidth = label.length * 6.4;
 
         //calculate x to draw svg rect
-        var x = _this.getFeatureX(feature, args);
+        var x = _this.getFeatureX(start, args);
 
         var maxWidth = Math.max(width, 2);
         var textHeight = 0;
@@ -31757,17 +28922,22 @@ GeneRenderer.prototype.render = function (features, args) {
 
                 $(featureGroup).qtip({
                     content: {text: tooltipText, title: tooltipTitle},
-//                    position: {target: "mouse", adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+                    // position: {target: "mouse", adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
                     position: {my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
                     style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                     show: {delay: 300},
                     hide: {delay: 300}
                 });
 
-                $(featureGroup).click(function (event) {
-                    _this.trigger('feature:click', {query: feature[infoWidgetId], feature: feature, featureType: 'gene', clickEvent: event});
-                });
 
+                featureGroup.addEventListener('click', function (e) {
+                    _this.trigger('feature:click', {
+                        query: feature[infoWidgetId],
+                        feature: feature,
+                        featureType: 'gene',
+                        clickEvent: e
+                    });
+                });
 
                 //paint transcripts
                 var checkRowY = rowY + rowHeight;
@@ -31778,7 +28948,7 @@ GeneRenderer.prototype.render = function (features, args) {
                             args.renderedArea[checkRowY] = new FeatureBinarySearchTree();
                         }
                         var transcript = feature.transcripts[i];
-                        var transcriptX = _this.getFeatureX(transcript, args);
+                        var transcriptX = _this.getFeatureX(transcript.start, args);
                         var transcriptWidth = (transcript.end - transcript.start + 1) * ( args.pixelBase);
 
                         //get type settings object
@@ -31792,8 +28962,8 @@ GeneRenderer.prototype.render = function (features, args) {
                         var tooltipContainerID = _this.tooltipContainerID || '#genomic';
                         var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
-                        //se resta el trozo del final del gen hasta el principio del transcrito y se le suma el texto del transcrito
-//                        var svgLabelWidth = _this.getLabelWidth(label, args);
+                        //  se resta el trozo del final del gen hasta el principio del transcrito y se le suma el texto del transcrito
+                        // var svgLabelWidth = _this.getLabelWidth(label, args);
                         var svgLabelWidth = label.length * 6.4;
                         var maxWidth = Math.max(width, width - ((feature.end - transcript.start) * ( args.pixelBase)) + svgLabelWidth);
 
@@ -31820,7 +28990,6 @@ GeneRenderer.prototype.render = function (features, args) {
                         var text = SVG.addChild(transcriptGroup, 'text', {
                             'x': transcriptX,
                             'y': checkTextY,
-                            'opacity': null,
                             'fill': 'black',
                             'cursor': 'pointer',
                             'class': _this.fontClass
@@ -31830,8 +28999,8 @@ GeneRenderer.prototype.render = function (features, args) {
 
                         $(transcriptGroup).qtip({
                             content: {text: tooltipText, title: tooltipTitle},
-//                            position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                            position: {my: 'top center', at: 'bottom center', target: $(transcriptGroup), adjust: {x: 25, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+                            // position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+                            position: {my: 'top center', at: 'bottom center', target: $(transcriptGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
                             style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                             show: {delay: 300},
                             hide: {delay: 300}
@@ -31839,11 +29008,17 @@ GeneRenderer.prototype.render = function (features, args) {
                         transcriptGroup.addEventListener('click', function (e) {
                             var query = this.getAttribute('data-widget-id');
                             var idx = this.getAttribute("data-transcript-idx");
-                            _this.trigger('feature:click', {query: query, feature: feature.transcripts[idx], featureType: 'transcript', clickEvent: event});
+                            _this.trigger('feature:click', {
+                                query: query,
+                                feature: feature.transcripts[idx],
+                                featureType: 'transcript',
+                                clickEvent: event
+                            });
                         });
 
+
                         //paint exons
-                        for (var e = 0, lene = feature.transcripts[i].exons.length; e < lene; e++) {/* loop over exons*/
+                        for (var e = 0, lene = feature.transcripts[i].exons.length; e < lene; e++) {
                             var exon = feature.transcripts[i].exons[e];
                             var exonStart = parseInt(exon.start);
                             var exonEnd = parseInt(exon.end);
@@ -31861,22 +29036,27 @@ GeneRenderer.prototype.render = function (features, args) {
                             var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(exon, transcript) : _this.tooltipText;
                             var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(exon) : _this.infoWidgetId;
 
-                            var exonGroup = SVG.addChild(args.svgCanvasFeatures, "g");
-                            var tooltipContainerID = _this.tooltipContainerID || '#genomic';
-                            var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
-
-
+                            var exonGroup = SVG.addChild(args.svgCanvasFeatures, "g", {
+                                "class": "ocb-coding",
+                                "data-id": exon.id
+                            });
 
                             $(exonGroup).qtip({
                                 content: {text: tooltipText, title: tooltipTitle},
-//                                position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
-                                position: {my: 'top center', at: 'bottom center', target: $(exonGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl },
+                                // position: {target: 'mouse', adjust: {x: 15, y: 0}, viewport: $(window), effect: false},
+                                position: {my: 'top center', at: 'bottom center', target: $(exonGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
                                 style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                                style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
                                 show: {delay: 300},
                                 hide: {delay: 300}
                             });
+                            exonGroup.addEventListener('click', function (e) {
+                                console.log(this.dataset.id);
+                            });
 
-                            var eRect = SVG.addChild(exonGroup, "rect", {//paint exons in white without coding region
+
+                            // Paint exons in white without coding region
+                            var eRect = SVG.addChild(exonGroup, "rect", {
                                 "i": i,
                                 "x": exonX,
                                 "y": checkRowY - 1,
@@ -31887,34 +29067,12 @@ GeneRenderer.prototype.render = function (features, args) {
                                 "fill": "white",
                                 "cursor": "pointer"
                             });
-                            //XXX now paint coding region
-                            var codingStart = 0;
-                            var codingEnd = 0;
-                            // 5'-UTR
-                            if (transcript.genomicCodingStart > exonStart && transcript.genomicCodingStart < exonEnd) {
-                                codingStart = parseInt(transcript.genomicCodingStart);
-                                codingEnd = exonEnd;
-                            } else {
-                                // 3'-UTR
-                                if (transcript.genomicCodingEnd > exonStart && transcript.genomicCodingEnd < exonEnd) {
-                                    codingStart = exonStart;
-                                    codingEnd = parseInt(transcript.genomicCodingEnd);
-                                } else
-                                // all exon is transcribed
-                                if (transcript.genomicCodingStart < exonStart && transcript.genomicCodingEnd > exonEnd) {
-                                    codingStart = exonStart;
-                                    codingEnd = exonEnd;
-                                }
-//									else{
-//										if(exonEnd < transcript.genomicCodingStart){
-//
-//									}
-                            }
-                            var coding = codingEnd - codingStart;
-                            var codingX = args.pixelPosition + middle - ((args.position - codingStart) * args.pixelBase);
-                            var codingWidth = (coding + 1) * ( args.pixelBase);
 
-                            if (coding > 0) {
+                            var codingLength = exon.genomicCodingEnd - exon.genomicCodingStart;
+                            var codingX = args.pixelPosition + middle - ((args.position - exon.genomicCodingStart) * args.pixelBase);
+                            var codingReverseX = args.pixelPosition + middle - ((args.position - exon.genomicCodingEnd) * args.pixelBase);
+                            var codingWidth = (codingLength + 1) * (args.pixelBase);
+                            if (codingLength > 0) {
                                 var cRect = SVG.addChild(exonGroup, "rect", {
                                     "i": i,
                                     "x": codingX,
@@ -31926,25 +29084,56 @@ GeneRenderer.prototype.render = function (features, args) {
                                     "fill": transcriptColor,
                                     "cursor": "pointer"
                                 });
-                                //XXX draw phase only at zoom 100, where this.pixelBase=10
-                                for (var p = 0, lenp = 3 - exon.phase; p < lenp && Math.round(args.pixelBase) == 10 && exon.phase != -1 && exon.phase != null; p++) {//==10 for max zoom only
-                                    SVG.addChild(exonGroup, "rect", {
-                                        "i": i,
-                                        "x": codingX + (p * 10),
-                                        "y": checkRowY - 1,
-                                        "width": args.pixelBase,
-                                        "height": height,
-                                        "stroke": color,
-                                        "stroke-width": 1,
-                                        "fill": 'white',
-                                        "cursor": "pointer"
-                                    });
+                                if (args.pixelBase > 9.5 && transcript.proteinSequence != null) {
+                                    if (exon.strand == '+') {
+                                        var proteinString = transcript.proteinSequence.substring(Math.floor(exon.cdsStart / 3), Math.floor(exon.cdsEnd / 3));
+                                        var proteinPhaseOffset = codingX - (((3 - exon.phase) % 3) * args.pixelBase);
+                                        var sign = 1;
+
+                                    } else if (exon.strand == '-') {
+                                        var proteinString = transcript.proteinSequence.substring(Math.floor(exon.cdsStart / 3), Math.ceil(exon.cdsEnd / 3));
+                                        var proteinPhaseOffset = codingReverseX - (args.pixelBase * 2) - (exon.phase * args.pixelBase);
+                                        var sign = -1;
+                                    }
+                                    for (var j = 0; j < proteinString.length; j++) {
+                                        var codonRect = SVG.addChild(exonGroup, "rect", {
+                                            "x": proteinPhaseOffset + (sign * args.pixelBase * 3 * j ),
+                                            "y": checkRowY - 1,
+                                            "width": (args.pixelBase * 3),
+                                            "height": height,
+                                            'stroke': '#3B0B0B',
+                                            'stroke-width': 0.5,
+                                            "fill": CODON_CONFIG[proteinString.charAt(j)].color,
+                                            "class": 'ocb-codon'
+                                        });
+                                        var codonText = SVG.addChild(exonGroup, "text", {
+                                            "x": proteinPhaseOffset + (sign * args.pixelBase * j * 3) + args.pixelBase / 3,
+                                            "y": checkRowY - 3,
+                                            "width": (args.pixelBase * 3),
+                                            "class": 'ocb-font-ubuntumono ocb-font-size-16 ocb-codon'
+                                        });
+                                        codonText.textContent = CODON_CONFIG[proteinString.charAt(j)].text;
+                                    }
                                 }
+
+                                // Draw phase only at zoom 100, where this.pixelBase < 11
+                                //if (args.pixelBase < 11 && exon.phase != null && exon.phase != -1) {
+                                //    for (var p = 0, lenp = 3 - exon.phase; p < lenp; p++) {
+                                //        SVG.addChild(exonGroup, "rect", {
+                                //            "i": i,
+                                //            "x": codingX + (p * args.pixelBase),
+                                //            "y": checkRowY - 1,
+                                //            "width": args.pixelBase,
+                                //            "height": height,
+                                //            "stroke": color,
+                                //            "stroke-width": 1,
+                                //            "fill": 'white',
+                                //            "cursor": "pointer"
+                                //        });
+                                //    }
+                                //}
                             }
-
-
                         }
-
                         checkRowY += rowHeight;
                         checkTextY += rowHeight;
                     }
@@ -31994,27 +29183,18 @@ function HistogramRenderer(args) {
 //    this.multiplier = 7;
 
     this.maxValue = 10;
-    if (args != null) {
-        if (args.height != null) {
-            this.histogramHeight = args.height * 0.95;
-        }
-        if (args.histogramMaxFreqValue != null) {
-            this.maxValue = args.histogramMaxFreqValue;
-        }
-    }
-    //this.multiplier = 7;
-    this.multiplier = this.histogramHeight / this.maxValue;
-
+    this.updateScale(args);
     //set instantiation args
     _.extend(this, args);
 
 };
 
-HistogramRenderer.prototype._checkFeatureValue = function (feature) {
+HistogramRenderer.prototype._checkFeatureValue = function(feature) {
     if (feature.features_count == null) {
 //            var height = Math.log(features[i].absolute);
-        if (feature.absolute != 0) {
-            feature.features_count = Math.log(feature.absolute);
+        if (feature.absolute != 0 && feature.absolute > 0) {
+            // take care of feature.absolute==1 counts and set scaled value to 0.2 as log(2) ~= 0.3
+            feature.features_count = Math.max(0.2, Math.log(feature.absolute));
         } else {
             feature.features_count = 0;
         }
@@ -32028,10 +29208,35 @@ HistogramRenderer.prototype._checkFeatureValue = function (feature) {
 //        }
 }
 
-HistogramRenderer.prototype.render = function (features, args) {
+/**
+ * updates "this.multiplier" using "histogramMaxFreqValue" and "height"
+ * @param args
+ */
+HistogramRenderer.prototype.updateScale = function(args) {
+    if (args != null) {
+        if (args.height != null) {
+            this.histogramHeight = args.height * 0.95;
+        }
+        if (args.histogramMaxFreqValue != null) {
+            this.maxValue = args.histogramMaxFreqValue;
+        }
+    }
+    //this.multiplier = 7;
+    this.multiplier = this.histogramHeight / this.maxValue;
+};
+
+HistogramRenderer.prototype.render = function(features, args) {
+    features.sort(function(a, b) {
+        return a.value.start - b.value.start;
+    });
+
+
     var middle = args.width / 2;
-    console.log(middle)
+    //console.log(middle);
     var points = '';
+
+    this.updateScale(args);
+
     if (features.length > 0) {
         var firstFeature = features[0].value;
         var width = (firstFeature.end - firstFeature.start + 1) * args.pixelBase;
@@ -32040,10 +29245,9 @@ HistogramRenderer.prototype.render = function (features, args) {
         this._checkFeatureValue(firstFeature);
         var height = firstFeature.features_count * this.multiplier;
 
-        points = (x - (width / 2)) + ',' + this.histogramHeight + ' ';
-        points += (x - (width / 2)) + ',' + (this.histogramHeight - height) + ' ';
+        points = (x - (width / 2)).toFixed(1) + ',' + this.histogramHeight.toFixed(1) + ' ';
+        points += (x - (width / 2)).toFixed(1) + ',' + (this.histogramHeight - height).toFixed(1) + ' ';
     }
-
     for (var i = 0, len = features.length; i < len; i++) {
         var feature = features[i].value;
         feature.start = parseInt(feature.start);
@@ -32054,8 +29258,7 @@ HistogramRenderer.prototype.render = function (features, args) {
         this._checkFeatureValue(feature);
         var height = feature.features_count * this.multiplier;
 
-        points += (x + (width / 2)) + "," + (this.histogramHeight - height) + " ";
-
+        points += (x + (width / 2)).toFixed(1) + "," + (this.histogramHeight - height).toFixed(1) + " ";
     }
     if (features.length > 0) {
         var lastFeature = features[features.length - 1].value;
@@ -32065,8 +29268,8 @@ HistogramRenderer.prototype.render = function (features, args) {
         this._checkFeatureValue(lastFeature);
         var height = lastFeature.features_count * this.multiplier;
 
-        points += (x + (width)) + ',' + (this.histogramHeight - height) + ' ';
-        points += (x + (width)) + ',' + this.histogramHeight + ' ';
+        points += (x + (width)).toFixed(1) + ',' + (this.histogramHeight - height).toFixed(1) + ' ';
+        points += (x + (width)).toFixed(1) + ',' + this.histogramHeight.toFixed(1) + ' ';
     }
 
     if (points !== '') {
@@ -32104,8 +29307,8 @@ HistogramRenderer.prototype.render = function (features, args) {
 
 SequenceRenderer.prototype = new Renderer({});
 
-function SequenceRenderer(args){
-    Renderer.call(this,args);
+function SequenceRenderer(args) {
+    Renderer.call(this, args);
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -32117,30 +29320,41 @@ function SequenceRenderer(args){
 };
 
 
-SequenceRenderer.prototype.render = function(features, args) {
+SequenceRenderer.prototype.render = function (chunks, args) {
+    for (var i = 0; i < chunks.length; i++) {
+        this._paintSequenceChunk(chunks[i], args);
+    }
+};
 
-    console.time("Sequence render "+features.items.sequence.length);
-    var middle = args.width/2;
 
-    var start = features.items.start;
-    var seqStart = features.items.start;
-    var seqString = features.items.sequence;
+SequenceRenderer.prototype._paintSequenceChunk = function (chunk, args) {
+    /* Time */
+    var timeId = new Region(chunk).toString();
+    console.time("Sequence render " + timeId);
+    /**/
+
+    var middle = args.width / 2;
+
+    var start = chunk.start;
+    var seqStart = chunk.start;
+    var seqString = chunk.sequence;
     var tooltipContainerID = this.tooltipContainerID || '#genomic';
     var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
-    for ( var i = 0; i < seqString.length; i++) {
-        var x = args.pixelPosition+middle-((args.position-start)*args.pixelBase);
-        start++;
 
-        var text = SVG.addChild(args.svgCanvasFeatures,"text",{
-            'x':x+1,
-            'y':12,
-            'fill':SEQUENCE_COLORS[seqString.charAt(i)],
+    for (var i = 0; i < seqString.length; i++) {
+        var x = args.pixelPosition + middle - ((args.position - start) * args.pixelBase);
+        var text = SVG.addChild(args.svgCanvasFeatures, "text", {
+            'x': x + 1,
+            'y': 12,
+            'fill': SEQUENCE_COLORS[seqString.charAt(i)],
+            'data-pos': start,
             'class': this.fontClass
         });
+        start++;
         text.textContent = seqString.charAt(i);
         $(text).qtip({
-            content:seqString.charAt(i)+" "+(seqStart+i).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")/*+'<br>'+phastCons[i]+'<br>'+phylop[i]*/,
+            content: seqString.charAt(i) + " " + (seqStart + i).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")/*+'<br>'+phastCons[i]+'<br>'+phylop[i]*/,
             position: {my: 'top center', at: 'bottom center', target: $(text), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
             style: { tip: { corner: true }, width:true, classes: this.toolTipfontClass+' qtip-light qtip-shadow'},
             show: {delay: 300},
@@ -32148,9 +29362,243 @@ SequenceRenderer.prototype.render = function(features, args) {
         });
     }
 
-    console.timeEnd("Sequence render "+features.items.sequence.length);
 //    this.trackSvgLayout.setNucleotidPosition(this.position);
 
+    /* Time */
+    console.timeEnd("Sequence render " + timeId);
+    /**/
+
+};
+
+/*
+ * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
+ * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
+ * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
+ *
+ * This file is part of JS Common Libs.
+ *
+ * JS Common Libs is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * JS Common Libs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Stateless (or almost) object to render variants.
+ *
+ * If you have a svg element where you want to draw, pass it to VariantRenderer.init()
+ * and later, in each VariantRenderer.render() as args.svgCanvasFeatures.
+ *
+ * @type {Renderer}
+ */
+VariantRenderer.prototype = new Renderer({});
+
+function VariantRenderer(args) {
+    Renderer.call(this, args);
+    // Using Underscore 'extend' function to extend and add Backbone Events
+    _.extend(this, Backbone.Events);
+
+    this.fontClass = 'ocb-font-roboto ocb-font-size-11';
+    this.toolTipfontClass = 'ocb-tooltip-font';
+
+    if (_.isObject(args)) {
+        _.extend(this, args);
+    }
+
+    this.on(this.handlers);
+};
+
+
+VariantRenderer.prototype.init = function (svgGroup, sample) {
+    //Prevent browser context menu
+    $(svgGroup).contextmenu(function (e) {
+        console.log("right click");
+        e.preventDefault();
+    });
+};
+
+VariantRenderer.prototype.render = function (features, args) {
+
+    for (var i = 0, leni = features.length; i < leni; i++) {
+        for (var j = 0; j < features[i].length; j++) {
+            var feature = features[i][j];
+            this.draw(feature, args);
+        }
+    }
+};
+
+VariantRenderer.prototype.draw = function (feature, args) {
+    var _this = this;
+    //get feature render configuration
+    var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
+    var label = _.isFunction(_this.label) ? _this.label(feature) : _this.label;
+    var height = _.isFunction(_this.height) ? _this.height(feature) : _this.height;
+    var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
+    var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
+    var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
+
+    //get feature genomic information
+    var start = feature.start;
+    var end = feature.end;
+    var length = (end - start) + 1;
+
+    //check genomic length
+    length = (length < 0) ? Math.abs(length) : length;
+    length = (length == 0) ? 1 : length;
+
+    //transform to pixel position
+    var width = length * args.pixelBase;
+
+    var svgLabelWidth = _this.getLabelWidth(label, args);
+
+    //calculate x to draw svg rect
+    var x = _this.getFeatureX(start, args);
+
+    var maxWidth = Math.max(width, 2);
+    var textHeight = 0;
+    if (args.regionSize < args.maxLabelRegionSize) {
+        textHeight = 9;
+        maxWidth = Math.max(width, svgLabelWidth);
+    }
+
+
+    var rowY = 0;
+    var textY = textHeight + height;
+    var rowHeight = textHeight + height + 2;
+
+
+//        azul osucuro: 0/0
+//        negro: ./.
+//        rojo: 1/1
+//        naranja 0/1
+
+    var d00 = '';
+    var dDD = '';
+    var d11 = '';
+    var d01 = '';
+    var xs = x; // x start
+    var xe = x + width; // x end
+    var ys = 1; // y
+    var yi = 6; //y increment
+    var yi2 = 10; //y increment
+
+//    debugger
+//    for (var i = 0, leni = feature.samples.length; i < leni; i++) {
+    var samplesCount = 0;
+//    var indices = [];
+    for (var i in feature.files) {
+        for (var j in feature.files[i].samplesData) {
+//            indices.push(j);
+            args.renderedArea[ys] = new FeatureBinarySearchTree();
+            args.renderedArea[ys].add({start: xs, end: xe});
+//            var genotype = Math.round(Math.random()) + "/" + Math.round(Math.random()); // FIXME put in real values
+
+            var genotype = feature.files[i].samplesData[j].GT;
+            switch (genotype) {
+                case '0|0':
+                case '0/0':
+                    d00 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                    d00 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                    break;
+                case '.|.':
+                case './.':
+                    dDD += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                    dDD += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                    break;
+                case '1|1':
+                case '1/1':
+                    d11 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                    d11 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                    break;
+                case '0|1':
+                case '0/1':
+                case '1|0':
+                case '1/0':
+                    d01 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                    d01 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                    break;
+            }
+            samplesCount++;
+            ys += yi2;
+        }
+    }
+    var featureGroup = SVG.addChild(args.svgCanvasFeatures, "g", {'feature_id': feature.id});
+    var dummyRect = SVG.addChild(featureGroup, "rect", {
+        'x': xs,
+        'y': 1,
+        'width': width,
+        'height': ys,
+        'fill': 'transparent',
+        'cursor': 'pointer'
+    });
+    if (d00 != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': d00,
+            'fill': 'blue',
+            'cursor': 'pointer'
+        });
+    }
+    if (dDD != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': dDD,
+            'fill': 'black',
+            'cursor': 'pointer'
+        });
+    }
+    if (d11 != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': d11,
+            'fill': 'red',
+            'cursor': 'pointer'
+        });
+    }
+    if (d01 != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': d01,
+            'fill': 'orange',
+            'cursor': 'pointer'
+        });
+    }
+
+//debugger
+    var lastSampleIndex = 0;
+    $(featureGroup).qtip({
+//        content: {text: tooltipText + '<br>' + feature.files[lastSampleIndex], title: tooltipTitle},
+        content: {text: tooltipText + '<br>' + samplesCount + " samples", title: tooltipTitle},
+//                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
+        position: {target: "mouse", adjust: {x: 25, y: 15}},
+        style: { width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+        show: {delay: 300},
+        hide: {delay: 300}
+    });
+    $(featureGroup).mousemove(function (event) {
+        var sampleIndex = parseInt(event.offsetY / yi2);
+        if (sampleIndex != lastSampleIndex) {
+            console.log(sampleIndex);
+            samplesCount = 0;
+            var sampleName = "";
+            var found = false;
+            for (var i in feature.files) {
+                for (var j in feature.files[i].samplesData) {   // better search it up than storing it? memory could be an issue.
+                    if (sampleIndex == samplesCount) {
+                        found = true;
+                        sampleName = j;
+                    }
+                    samplesCount++;
+                }
+            }
+            $(featureGroup).qtip('option', 'content.text', tooltipText + '<br>' + sampleName);
+        }
+        lastSampleIndex = sampleIndex;
+    });
 };
 
 /*
@@ -32185,55 +29633,164 @@ function VcfMultisampleRenderer(args) {
     this.fontClass = 'ocb-font-roboto ocb-font-size-11';
     this.toolTipfontClass = 'ocb-tooltip-font';
 
-    if (_.isObject(args)) {
-        _.extend(this, args);
-    }
+    _.extend(this, FEATURE_TYPES.variant);
 
     this.on(this.handlers);
 };
 
 
 VcfMultisampleRenderer.prototype.render = function (features, args) {
+    for (var i = 0, leni = features.length; i < leni; i++) {
+        this._drawFeature(features[i], args);
+    }
+};
+
+VcfMultisampleRenderer.prototype._drawFeature = function (feature, args) {
     var _this = this;
-    var draw = function (feature) {
-        //get feature render configuration
-        var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
-        var label = _.isFunction(_this.label) ? _this.label(feature) : _this.label;
-        var height = _.isFunction(_this.height) ? _this.height(feature) : _this.height;
-        var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
-        var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
-        var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
-        var tooltipContainerID = _this.tooltipContainerID || '#genomic';
-        var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
 
-        //get feature genomic information
-        var start = feature.start;
-        var end = feature.end;
-        var length = (end - start) + 1;
+    var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
+    var label = _.isFunction(_this.label) ? _this.label(feature) : _this.label;
+    var height = _.isFunction(_this.height) ? _this.height(feature) : _this.height;
+    var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
+    var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
+    var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
 
-        //check genomic length
-        length = (length < 0) ? Math.abs(length) : length;
-        length = (length == 0) ? 1 : length;
+    //get feature genomic information
+    var start = feature.start;
+    var end = feature.end;
+    var length = (end - start) + 1;
 
-        //transform to pixel position
-        var width = length * args.pixelBase;
+    //check genomic length
+    length = (length < 0) ? Math.abs(length) : length;
+    length = (length == 0) ? 1 : length;
 
-        var svgLabelWidth = _this.getLabelWidth(label, args);
+    //transform to pixel position
+    var width = length * args.pixelBase;
 
-        //calculate x to draw svg rect
-        var x = _this.getFeatureX(feature, args);
+    var svgLabelWidth = label.length * 6.4;
 
-        var maxWidth = Math.max(width, 2);
-        var textHeight = 0;
-        if (args.regionSize < args.maxLabelRegionSize) {
-            textHeight = 9;
-            maxWidth = Math.max(width, svgLabelWidth);
+    //calculate x to draw svg rect
+    var x = _this.getFeatureX(start, args);
+
+    var maxWidth = Math.max(width, 2);
+    var textHeight = 0;
+    if (args.maxLabelRegionSize > args.regionSize) {
+        textHeight = 9;
+        maxWidth = Math.max(width, svgLabelWidth);
+    }
+
+    var rowY = 0;
+    var textY = textHeight + height;
+    var rowHeight = textHeight + height + 2;
+
+    while (true) {
+        if (!(rowY in args.renderedArea)) {
+            args.renderedArea[rowY] = new FeatureBinarySearchTree();
         }
+        var foundArea = args.renderedArea[rowY].add({start: x, end: x + maxWidth - 1});
+
+        if (foundArea) {
+            var featureGroup = SVG.addChild(args.svgCanvasFeatures, "g", {'feature_id': feature.id});
+            var rect = SVG.addChild(featureGroup, "rect", {
+                'x': x,
+                'y': rowY,
+                'width': width,
+                'height': height,
+                'stroke': '#3B0B0B',
+                'stroke-width': 1,
+                'stroke-opacity': 0.7,
+                'fill': color,
+                'cursor': 'pointer'
+            });
+            if (args.maxLabelRegionSize > args.regionSize) {
+                var text = SVG.addChild(featureGroup, "text", {
+                    'x': x,
+                    'y': textY,
+                    'font-weight': 400,
+                    'opacity': null,
+                    'fill': 'black',
+                    'cursor': 'pointer',
+                    'class': _this.fontClass
+                });
+                text.textContent = label;
+            }
+
+            if ('tooltipText' in _this) {
+                $(featureGroup).qtip({
+                    content: {text: tooltipText, title: tooltipTitle},
+//                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
+                    position: {target: "mouse", adjust: {x: 25, y: 15}},
+                    style: {width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+                    show: {delay: 300},
+                    hide: {delay: 300}
+                });
+            }
+
+            $(featureGroup).mouseover(function (event) {
+                _this.trigger('feature:mouseover', {
+                    query: feature[infoWidgetId],
+                    feature: feature,
+                    featureType: feature.featureType,
+                    mouseoverEvent: event
+                })
+            });
+
+            $(featureGroup).click(function (event) {
+                _this.trigger('feature:click', {
+                    query: feature[infoWidgetId],
+                    feature: feature,
+                    featureType: feature.featureType,
+                    clickEvent: event
+                })
+            });
+            break;
+        }
+        rowY += rowHeight;
+        textY += rowHeight;
+    }
+};
+
+VcfMultisampleRenderer.prototype._drawFeatureMultiSample = function (feature, args) {
+    //TODO fix with new data structure
+    var _this = this;
+    //get feature render configuration
+    var color = _.isFunction(_this.color) ? _this.color(feature) : _this.color;
+    var label = _.isFunction(_this.label) ? _this.label(feature) : _this.label;
+    var height = _.isFunction(_this.height) ? _this.height(feature) : _this.height;
+    var tooltipTitle = _.isFunction(_this.tooltipTitle) ? _this.tooltipTitle(feature) : _this.tooltipTitle;
+    var tooltipText = _.isFunction(_this.tooltipText) ? _this.tooltipText(feature) : _this.tooltipText;
+    var infoWidgetId = _.isFunction(_this.infoWidgetId) ? _this.infoWidgetId(feature) : _this.infoWidgetId;
+    var tooltipContainerID = _this.tooltipContainerID || '#genomic';
+    var tooltipAnchorContainerEl = jQuery(tooltipContainerID);
+
+    //get feature genomic information
+    var start = feature.start;
+    var end = feature.end;
+    var length = (end - start) + 1;
+
+    //check genomic length
+    length = (length < 0) ? Math.abs(length) : length;
+    length = (length == 0) ? 1 : length;
+
+    //transform to pixel position
+    var width = length * args.pixelBase;
+
+    var svgLabelWidth = _this.getLabelWidth(label, args);
+
+    //calculate x to draw svg rect
+    var x = _this.getFeatureX(start, args);
+
+    var maxWidth = Math.max(width, 2);
+    var textHeight = 0;
+    if (args.regionSize < args.maxLabelRegionSize) {
+        textHeight = 9;
+        maxWidth = Math.max(width, svgLabelWidth);
+    }
 
 
-        var rowY = 0;
-        var textY = textHeight + height;
-        var rowHeight = textHeight + height + 2;
+    var rowY = 0;
+    var textY = textHeight + height;
+    var rowHeight = textHeight + height + 2;
 
 
 //        azul osucuro: 0/0
@@ -32241,108 +29798,101 @@ VcfMultisampleRenderer.prototype.render = function (features, args) {
 //        rojo: 1/1
 //        naranja 0/1
 
-        var d00 = '';
-        var dDD = '';
-        var d11 = '';
-        var d01 = '';
-        var xs = x; // x start
-        var xe = x + width; // x end
-        var ys = 1; // y
-        var yi = 6; //y increment
-        var yi2 = 10; //y increment
-        for (var i = 0, leni = feature.samples.length; i < leni; i++) {
-            args.renderedArea[ys] = new FeatureBinarySearchTree();
-            args.renderedArea[ys].add({start: xs, end: xe});
-            var genotype = feature.samples[i].split(':')[0];
-            switch (genotype) {
-                case '0|0':
-                case '0/0':
-                    d00 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
-                    d00 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
-                    break;
-                case '.|.':
-                case './.':
-                    dDD += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
-                    dDD += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
-                    break;
-                case '1|1':
-                case '1/1':
-                    d11 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
-                    d11 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
-                    break;
-                case '0|1':
-                case '0/1':
-                case '1|0':
-                case '1/0':
-                    d01 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
-                    d01 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
-                    break;
-            }
-            ys += yi2;
+    var d00 = '';
+    var dDD = '';
+    var d11 = '';
+    var d01 = '';
+    var xs = x; // x start
+    var xe = x + width; // x end
+    var ys = 1; // y
+    var yi = 6; //y increment
+    var yi2 = 10; //y increment
+    for (var i = 0, leni = feature.samples.length; i < leni; i++) {
+        args.renderedArea[ys] = new FeatureBinarySearchTree();
+        args.renderedArea[ys].add({start: xs, end: xe});
+        var genotype = feature.samples[i].split(':')[0];
+        switch (genotype) {
+            case '0|0':
+            case '0/0':
+                d00 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                d00 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                break;
+            case '.|.':
+            case './.':
+                dDD += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                dDD += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                break;
+            case '1|1':
+            case '1/1':
+                d11 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                d11 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                break;
+            case '0|1':
+            case '0/1':
+            case '1|0':
+            case '1/0':
+                d01 += 'M' + xs + ',' + ys + ' L' + xe + ',' + ys + ' ';
+                d01 += 'L' + xe + ',' + (ys + yi) + ' L' + xs + ',' + (ys + yi) + ' z ';
+                break;
         }
-        var featureGroup = SVG.addChild(args.svgCanvasFeatures, "g", {'feature_id': feature.id});
-        var dummyRect = SVG.addChild(featureGroup, "rect", {
-            'x': xs,
-            'y': 1,
-            'width': width,
-            'height': ys,
-            'fill': 'transparent',
+        ys += yi2;
+    }
+    var featureGroup = SVG.addChild(args.svgCanvasFeatures, "g", {'feature_id': feature.id});
+    var dummyRect = SVG.addChild(featureGroup, "rect", {
+        'x': xs,
+        'y': 1,
+        'width': width,
+        'height': ys,
+        'fill': 'transparent',
+        'cursor': 'pointer'
+    });
+    if (d00 != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': d00,
+            'fill': 'blue',
             'cursor': 'pointer'
         });
-        if (d00 != '') {
-            var path = SVG.addChild(featureGroup, "path", {
-                'd': d00,
-                'fill': 'blue',
-                'cursor': 'pointer'
-            });
-        }
-        if (dDD != '') {
-            var path = SVG.addChild(featureGroup, "path", {
-                'd': dDD,
-                'fill': 'black',
-                'cursor': 'pointer'
-            });
-        }
-        if (d11 != '') {
-            var path = SVG.addChild(featureGroup, "path", {
-                'd': d11,
-                'fill': 'red',
-                'cursor': 'pointer'
-            });
-        }
-        if (d01 != '') {
-            var path = SVG.addChild(featureGroup, "path", {
-                'd': d01,
-                'fill': 'orange',
-                'cursor': 'pointer'
-            });
-        }
-
-
-        var lastSampleIndex = 0;
-        $(featureGroup).qtip({
-            content: {text: tooltipText + '<br>' + feature.samples[lastSampleIndex], title: tooltipTitle},
-//                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
-            position: {my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
-            style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
-            show: {delay: 300},
-            hide: {delay: 300}
-        });
-        $(featureGroup).mousemove(function (event) {
-            var sampleIndex = parseInt(event.offsetY / yi2);
-            if (sampleIndex != lastSampleIndex) {
-                console.log(sampleIndex);
-                $(featureGroup).qtip('option', 'content.text', tooltipText + '<br>' + feature.samples[sampleIndex]);
-            }
-            lastSampleIndex = sampleIndex;
-        });
-    };
-
-    //process features
-    for (var i = 0, leni = features.length; i < leni; i++) {
-        var feature = features[i];
-        draw(feature);
     }
+    if (dDD != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': dDD,
+            'fill': 'black',
+            'cursor': 'pointer'
+        });
+    }
+    if (d11 != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': d11,
+            'fill': 'red',
+            'cursor': 'pointer'
+        });
+    }
+    if (d01 != '') {
+        var path = SVG.addChild(featureGroup, "path", {
+            'd': d01,
+            'fill': 'orange',
+            'cursor': 'pointer'
+        });
+    }
+
+
+    var lastSampleIndex = 0;
+    $(featureGroup).qtip({
+        content: {text: tooltipText + '<br>' + feature.samples[lastSampleIndex], title: tooltipTitle},
+//                        position: {target: "mouse", adjust: {x: 15, y: 0}, effect: false},
+        position: {my: 'top center', at: 'bottom center', target: $(featureGroup), adjust: {x: 0, y: 0, resize:true}, container: tooltipAnchorContainerEl},
+        style: { tip: { corner: true }, width: true, classes: _this.toolTipfontClass + ' ui-tooltip ui-tooltip-shadow'},
+        show: {delay: 300},
+        hide: {delay: 300}
+    });
+    $(featureGroup).mousemove(function (event) {
+        var sampleIndex = parseInt(event.offsetY / yi2);
+        if (sampleIndex != lastSampleIndex) {
+            console.log(sampleIndex);
+            $(featureGroup).qtip('option', 'content.text', tooltipText + '<br>' + feature.samples[sampleIndex]);
+        }
+        lastSampleIndex = sampleIndex;
+    });
 };
 
 /*
@@ -32381,11 +29931,11 @@ function GenomeViewer(args) {
     this.width;
     this.height;
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'http://bioinfo.hpc.cam.ac.uk/cellbase';
     this.cellBaseVersion = 'v3';
 
     this.quickSearchResultFn;
-    this.quickSearchDisplayKey;
+    this.quickSearchDisplayKey = 'name';
 
     this.drawNavigationBar = true;
     this.drawKaryotypePanel = true;
@@ -32393,41 +29943,27 @@ function GenomeViewer(args) {
     this.drawOverviewTrackListPanel = true;
     this.overviewZoomMultiplier = 8;
     this.karyotypePanelConfig = {
-        hidden:false,
+        hidden: false,
         collapsed: false,
         collapsible: true
     };
     this.chromosomePanelConfig = {
-        hidden:false,
+        hidden: false,
         collapsed: false,
         collapsible: true
     };
     this.regionPanelConfig = {
-        hidden:false,
+        hidden: false,
         collapsed: false,
         collapsible: true
     };
-    this.navigationBarConfig = {
-
-    };
+    this.navigationBarConfig = {};
     this.drawStatusBar = true;
     this.resizable = true;
     this.sidePanel = true;//enable or disable sidePanel at construction
     this.trackListTitle = 'Detailed information';//enable or disable sidePanel at construction
     this.trackPanelScrollWidth = 18;
-    this.availableSpecies = {
-        "text": "Species",
-        "items": [
-            {
-                "text": "Vertebrates",
-                "items": [
-                    {"text": "Homo sapiens", "assembly": "GRCh37.p10", "region": {"chromosome": "13", "start": 32889611, "end": 32889611}, "chromosomes": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y", "MT"], "url": "ftp://ftp.ensembl.org/pub/release-71/"},
-                    {"text": "Mus musculus", "assembly": "GRCm38.p1", "region": {"chromosome": "1", "start": 18422009, "end": 18422009}, "chromosomes": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "X", "Y", "MT"], "url": "ftp://ftp.ensembl.org/pub/release-71/"}
-                ]
-            }
-        ]
-    };
-    this.species = this.availableSpecies.items[0].items[0];
+
     this.zoom;
 
     this.chromosomes;
@@ -32435,6 +29971,9 @@ function GenomeViewer(args) {
 
     //set instantiation args, must be last
     _.extend(this, args);
+
+    this.chromosomes = this.getChromosomes();
+    this.species.chromosomes = this.chromosomes;
 
     this.defaultRegion = new Region(this.region);
 
@@ -32457,7 +29996,6 @@ function GenomeViewer(args) {
 
 GenomeViewer.prototype = {
     render: function () {
-        var _this = this;
         console.log("Initializing Genome Viewer");
 
         //HTML skel
@@ -32509,37 +30047,37 @@ GenomeViewer.prototype = {
         this.trackListPanelsDiv.appendChild(this.tracksDiv);
 
 
-        /****************************/
-        /****************************/
-        /****************************/
+        this._init();
 
+        this.rendered = true;
+    },
 
-        this.chromosomes = this.getChromosomes();
-
+    _init: function () {
+        var _this = this;
         this._checkAndSetMinimumRegion(this.region, this.getSVGCanvasWidth());
         this.zoom = this._calculateZoomByRegion(this.region);
 
-        // Resize
-        if (this.resizable) {
-            $(window).resize(function (event) {
-                if (event.target == window) {
-                    if (!_this.resizing) {//avoid multiple resize events
-                        _this.resizing = true;
-                        _this.setWidth($(_this.targetDiv).width());
-                        setTimeout(function () {
-                            _this.resizing = false;
-                        }, 400);
-                    }
-                }
-            });
-//            $(this.targetDiv).resizable({
-//                handles: 'e',
-//                ghost: true,
-//                stop: function (event, ui) {
-//                    _this._setWidth($(_this.targetDiv).width());
+//        // Resize
+//        if (this.resizable) {
+//            $(window).resize(function (event) {
+//                if (event.target == window) {
+//                    if (!_this.resizing) {//avoid multiple resize events
+//                        _this.resizing = true;
+//                        _this.setWidth($(_this.targetDiv).width());
+//                        setTimeout(function () {
+//                            _this.resizing = false;
+//                        }, 400);
+//                    }
 //                }
 //            });
-        }
+////            $(this.targetDiv).resizable({
+////                handles: 'e',
+////                ghost: true,
+////                stop: function (event, ui) {
+////                    _this._setWidth($(_this.targetDiv).width());
+////                }
+////            });
+//        }
 
         /* Navigation Bar */
         if (this.drawNavigationBar) {
@@ -32582,10 +30120,10 @@ GenomeViewer.prototype = {
                 $(_this.targetDiv).width(event.width);
             }
         });
-        this.on('species:change', function (event) {
-            _this.species = event.species;
-            _this.chromosomes = _this.getChromosomes();
-        });
+        //this.on('species:change', function (event) {
+        //    _this.species = event.species;
+        //    _this.chromosomes = _this.getChromosomes();
+        //});
 
         $("html").bind('keydown.genomeViewer', function (e) {
             switch (e.keyCode) {
@@ -32603,14 +30141,8 @@ GenomeViewer.prototype = {
                     break;
             }
         });
-
-        /****************************/
-        /****************************/
-        /****************************/
-
-
-        this.rendered = true;
     },
+
     draw: function () {
         this.targetDiv = ( this.target instanceof HTMLElement ) ? this.target : document.querySelector('#' + this.target);
         if (!this.targetDiv) {
@@ -32628,10 +30160,10 @@ GenomeViewer.prototype = {
         delete this;
     },
     getChromosomes: function () {
-        var saveChromosomes = function (chromosomeList) {
+        var saveChromosomes = function (chromsomeList) {
             var chromosomes = {};
-            for (var i = 0; i < chromosomeList.length; i++) {
-                var chromosome = chromosomeList[i];
+            for (var i = 0; i < chromsomeList.length; i++) {
+                var chromosome = chromsomeList[i];
                 chromosomes[chromosome.name] = chromosome;
             }
             return chromosomes;
@@ -32650,7 +30182,11 @@ GenomeViewer.prototype = {
                 resource: 'all',
                 async: false,
                 success: function (data) {
-                  chromosomes = saveChromosomes(Utils.getChromosomes(data));
+                    chromosomes = saveChromosomes(data.response[0].result[0].chromosomes);
+                    for (var i = 0; i < chromosomes.length; i++) {
+                        var chr = chromosomes[i];
+                        debugger
+                    }
                 },
                 error: function (data) {
                     console.log('Could not get chromosome list');
@@ -32669,57 +30205,60 @@ GenomeViewer.prototype = {
         if (!$.isFunction(this.quickSearchResultFn)) {
             this.quickSearchResultFn = function (query) {
                 var results = [];
-                var speciesCode = Utils.getSpeciesCode(this.species.text).substr(0, 3);
+                var speciesCode = Utils.getSpeciesCode(this.species.scientificName);
 
                 CellBaseManager.get({
                     host: _this.cellBaseHost,
                     version: _this.cellBaseVersion,
 //                    host: 'http://ws.bioinfo.cipf.es/cellbase/rest',
                     species: speciesCode,
-                    version: 'latest',
                     category: 'feature',
                     subCategory: 'id',
                     query: query,
                     resource: 'starts_with',
                     params: {
-                        of: 'json'
+                        limit: 10
                     },
                     async: false,
                     success: function (data, textStatus, jqXHR) {
-                        for (var i in data[0]) {
-                            results.push(data[0][i].displayId);
-                        }
+                        results = data.response[0].result;
+//                        var features = data.response[0].result;
+//                        for (var i = 0; i < features.length; i++) {
+//                            results.push(features[i].name)
+//                        }
                     }
                 });
                 return results;
             };
         }
 
-        var goFeature = function (featureName) {
-            if (featureName != null) {
-                if (featureName.slice(0, "rs".length) == "rs" || featureName.slice(0, "AFFY_".length) == "AFFY_" || featureName.slice(0, "SNP_".length) == "SNP_" || featureName.slice(0, "VAR_".length) == "VAR_" || featureName.slice(0, "CRTAP_".length) == "CRTAP_" || featureName.slice(0, "FKBP10_".length) == "FKBP10_" || featureName.slice(0, "LEPRE1_".length) == "LEPRE1_" || featureName.slice(0, "PPIB_".length) == "PPIB_") {
-                    this.openSNPListWidget(featureName);
-                } else {
-                    console.log(featureName);
-                    CellBaseManager.get({
-                        host: _this.cellBaseHost,
-                        version: _this.cellBaseVersion,
-                        species: _this.species,
-                        category: 'feature',
-                        subCategory: 'gene',
-                        query: featureName,
-                        resource: 'info',
-                        params: {
-                            include: 'chromosome,start,end'
-                        },
-                        success: function (data) {
-                            var feat = data.response[0].result[0];
-                            var region = new Region(feat);
-                            _this._regionChangeHandler({region: region});
-                        }
-                    });
-                }
-            }
+        var goFeature = function (feature) {
+            _this._regionChangeHandler({region: new Region(feature)});
+//            if (featureName != null) {
+//                if (featureName.slice(0, "rs".length) == "rs" || featureName.slice(0, "AFFY_".length) == "AFFY_" || featureName.slice(0, "SNP_".length) == "SNP_" || featureName.slice(0, "VAR_".length) == "VAR_" || featureName.slice(0, "CRTAP_".length) == "CRTAP_" || featureName.slice(0, "FKBP10_".length) == "FKBP10_" || featureName.slice(0, "LEPRE1_".length) == "LEPRE1_" || featureName.slice(0, "PPIB_".length) == "PPIB_") {
+//                    this.openSNPListWidget(featureName);
+//                } else {
+//                    console.log(featureName);
+//                    CellBaseManager.get({
+//                        host: _this.cellBaseHost,
+//                        version: _this.cellBaseVersion,
+//                        species: _this.species,
+//                        category: 'feature',
+//                        subCategory: 'id',
+//                        query: featureName,
+//                        resource: 'info',
+//                        params: {
+//                            include: 'chromosome,start,end'
+//                        },
+//                        success: function (data) {
+//                            debugger
+//                            var feat = data.response[0].result[0];
+//                            var region = new Region(feat);
+//                            _this._regionChangeHandler({region: region});
+//                        }
+//                    });
+//                }
+//            }
         };
 
         var navigationBar = new NavigationBar({
@@ -32788,8 +30327,8 @@ GenomeViewer.prototype = {
                     event.region = _this.defaultRegion;
                     _this._regionChangeHandler(event);
                 },
-                'autoHeight-button:click': function (event) {
-                    _this.enableAutoHeight();
+                'autoHeight-button:change': function (event) {
+                    _this.toggleAutoHeight(event.selected);
                 },
                 'quickSearch:select': function (event) {
                     goFeature(event.item);
@@ -32832,7 +30371,7 @@ GenomeViewer.prototype = {
             title: 'Karyotype',
             collapsed: this.karyotypePanelConfig.collapsed,
             collapsible: this.karyotypePanelConfig.collapsible,
-            hidden:this.karyotypePanelConfig.hidden,
+            hidden: this.karyotypePanelConfig.hidden,
             region: this.region,
             autoRender: true,
             handlers: {
@@ -32850,9 +30389,9 @@ GenomeViewer.prototype = {
         this.on('width:change', function (event) {
             karyotypePanel.setWidth(event.width - _this.sidePanelWidth);
         });
-        this.on('species:change', function (event) {
-            karyotypePanel.setSpecies(event.species);
-        });
+//        this.on('species:change', function (event) {
+//            karyotypePanel.setSpecies(event.species);
+//        });
 
         karyotypePanel.draw();
 
@@ -32873,7 +30412,7 @@ GenomeViewer.prototype = {
             title: 'Chromosome',
             collapsed: this.chromosomePanelConfig.collapsed,
             collapsible: this.chromosomePanelConfig.collapsible,
-            hidden:this.chromosomePanelConfig.hidden,
+            hidden: this.chromosomePanelConfig.hidden,
             region: this.region,
             handlers: {
                 'region:change': function (event) {
@@ -32890,9 +30429,9 @@ GenomeViewer.prototype = {
         this.on('width:change', function (event) {
             chromosomePanel.setWidth(event.width - _this.sidePanelWidth);
         });
-        this.on('species:change', function (event) {
-            chromosomePanel.setSpecies(event.species);
-        });
+//        this.on('species:change', function (event) {
+//            chromosomePanel.setSpecies(event.species);
+//        });
 
         chromosomePanel.draw();
 
@@ -32912,6 +30451,7 @@ GenomeViewer.prototype = {
             showRegionOverviewBox: true,
             collapsible: this.regionPanelConfig.collapsible,
             region: this.region,
+            species: this.species,
             handlers: {
                 'region:change': function (event) {
                     event.sender = undefined;
@@ -32936,13 +30476,13 @@ GenomeViewer.prototype = {
         this.on('width:change', function (event) {
             trackListPanel.setWidth(event.width - _this.sidePanelWidth);
         });
-        this.on('species:change', function (event) {
-            trackListPanel.setSpecies(event.species);
-        });
+//        this.on('species:change', function (event) {
+//            trackListPanel.setSpecies(event.species);
+//        });
 
         trackListPanel.draw();
 
-        return  trackListPanel;
+        return trackListPanel;
     },
 
     _createTrackListPanel: function (target) {
@@ -32955,7 +30495,8 @@ GenomeViewer.prototype = {
             width: this.width - this.sidePanelWidth,
             title: this.trackListTitle,
             region: this.region,
-            hidden:this.regionPanelConfig.hidden,
+            species: this.species,
+            hidden: this.regionPanelConfig.hidden,
             handlers: {
                 'region:change': function (event) {
                     event.sender = undefined;
@@ -32980,9 +30521,9 @@ GenomeViewer.prototype = {
         this.on('width:change', function (event) {
             trackListPanel.setWidth(event.width - _this.sidePanelWidth);
         });
-        this.on('species:change', function (event) {
-            trackListPanel.setSpecies(event.species);
-        });
+//        this.on('species:change', function (event) {
+//            trackListPanel.setSpecies(event.species);
+//        });
 
         this.on('feature:highlight', function (event) {
             trackListPanel.highlight(event);
@@ -32990,7 +30531,7 @@ GenomeViewer.prototype = {
 
         trackListPanel.draw();
 
-        return  trackListPanel;
+        return trackListPanel;
     },
 
     _createStatusBar: function (target) {
@@ -33013,7 +30554,7 @@ GenomeViewer.prototype = {
         });
 
         statusBar.draw();
-        return  statusBar;
+        return statusBar;
     },
 
 
@@ -33063,7 +30604,7 @@ GenomeViewer.prototype = {
     },
     _calculateZoomByRegion: function (region) {
         var minNtPixels = 10; // 10 is the minimum pixels per nt
-        var chr = this.chromosomes[this.region.chromosome];
+        var chr = this.chromosomes[region.chromosome];
         var minRegionLength = this.getSVGCanvasWidth() / minNtPixels;
         var zoomLevelMultiplier = Math.pow(chr.size / minRegionLength, 0.01); // 0.01 = 1/100  100 zoom levels
 
@@ -33071,7 +30612,7 @@ GenomeViewer.prototype = {
 
 //      zoom = Math.log(REGIONLENGTH/mrl) / Math.log(zlm);
         var zoom = Math.log(regionLength / minRegionLength) / Math.log(zoomLevelMultiplier);
-        return 100 - zoom;
+        return 100 - Math.round(zoom);
     },
     /*****************/
     /*****************/
@@ -33193,7 +30734,64 @@ GenomeViewer.prototype = {
     _speciesChangeHandler: function (event) {
         //Relaunch
         this.trigger('species:change', event);
-        this.setRegion(event.species.region);
+        this._updateSpecies(event.species);
+
+
+        var firstGeneRegion;
+        CellBaseManager.get({
+            host: this.cellBaseHost,
+            async: false,
+            category: 'feature',
+            subCategory: 'gene',
+            resource: 'first',
+            species: event.species,
+            params: {
+                include: 'chromosome,start,end'
+            },
+            success: function (r) {
+                firstGeneRegion = r.response[0].result[0];
+            }
+        });
+
+
+        var region = new Region(firstGeneRegion);
+        this.setRegion(region);
+    },
+    _updateSpecies: function (species) {
+        this.species = species;
+        this.chromosomes = this.getChromosomes();
+        this.species.chromosomes = this.chromosomes;
+
+        if (this.overviewTrackListPanel) {
+            this.overviewTrackListPanel.setSpecies(species);
+        }
+        if (this.trackListPanel) {
+            this.trackListPanel.setSpecies(species);
+        }
+        if (this.chromosomePanel) {
+            this.chromosomePanel.setSpecies(species);
+        }
+        if (this.karyotypePanel) {
+            this.karyotypePanel.setSpecies(species);
+        }
+        if (this.navigationBar) {
+            this.navigationBar.setSpecies(species);
+        }
+    },
+    _getSpeciesByTaxonomy: function (taxonomyCode) {
+        //find species object
+        var speciesObject = null;
+        for (var i = 0; i < this.availableSpecies.items.length; i++) {
+            for (var j = 0; j < this.availableSpecies.items[i].items.length; j++) {
+                var species = this.availableSpecies.items[i].items[j];
+                var taxonomy = Utils.getSpeciesCode(species.scientificName);
+                if (taxonomy === taxonomyCode) {
+                    speciesObject = species;
+                    break;
+                }
+            }
+        }
+        return speciesObject;
     },
 
     /*****************/
@@ -33202,7 +30800,19 @@ GenomeViewer.prototype = {
     /*****************/
     /** API METHODS **/
     /*****************/
-    setRegion: function (region) {
+    setSpeciesByTaxonomy: function (taxonomyCode) {
+        var species = this._getSpeciesByTaxonomy(taxonomyCode);
+        if (species != null) {
+            this._speciesChangeHandler({species: species});
+        } else {
+            console.log("Species taxonomy not found on availableSpecies.")
+        }
+    },
+    setRegion: function (region, taxonomy) {
+        if (taxonomy != null) {
+            var species = this._getSpeciesByTaxonomy(taxonomy);
+            this._updateSpecies(species);
+        }
         return this._regionChangeHandler({region: new Region(region)});
     },
     moveRegion: function (disp) {
@@ -33211,7 +30821,35 @@ GenomeViewer.prototype = {
         this.trigger('region:move', {region: this.region, disp: -disp, sender: this});
     },
     setWidth: function (width) {
-        this.trigger('width:change', {width: width});
+        var me = this;
+        var newRegion = new Region(this.region);
+        var newLength = width * this.region.length() / this.width;
+        var centerPosition = this.region.center();
+        var aux = Math.ceil((newLength / 2) - 1);
+        newRegion.start = Math.floor(centerPosition - aux);
+        newRegion.end = Math.floor(centerPosition + aux);
+
+        this.width = width;
+
+        if (this.overviewTrackListPanel) {
+            this.overviewTrackListPanel.setWidth(width);
+        }
+        if (this.trackListPanel) {
+            this.trackListPanel.setWidth(width);
+        }
+        if (this.chromosomePanel) {
+            this.chromosomePanel.setWidth(width);
+        }
+        if (this.karyotypePanel) {
+            this.karyotypePanel.setWidth(width);
+        }
+        if (this.navigationBar) {
+            this.navigationBar.setWidth(width);
+        }
+
+        var hasChanged = this._regionChangeHandler({
+            region: newRegion
+        });
     },
     setZoom: function (zoom) {
         zoom = Math.min(100, zoom);
@@ -33224,6 +30862,20 @@ GenomeViewer.prototype = {
         var zoom = this.zoom + zoomToIncrease;
         this.setZoom(zoom);
     },
+    setCellBaseHost: function (host) {
+        if (host != this.cellBaseHost) {
+            this.cellBaseHost = host;
+            this.navigationBar.setCellBaseHost(this.cellBaseHost);
+            this.chromosomePanel.setCellBaseHost(this.cellBaseHost);
+            this.karyotypePanel.setCellBaseHost(this.cellBaseHost);
+            this.trackListPanel.setCellBaseHost(this.cellBaseHost);
+            this.overviewTrackListPanel.setCellBaseHost(this.cellBaseHost);
+
+            this._updateSpecies(this.species);
+            this.setRegion(new Region(this.region));
+        }
+    },
+
     /*****************/
     /*****************/
     getSVGCanvasWidth: function () {
@@ -33291,9 +30943,9 @@ GenomeViewer.prototype = {
         navigationBar.render(this.getNavigationPanelId());
     },
 
-    enableAutoHeight: function () {
-        this.trackListPanel.enableAutoHeight();
-        this.overviewTrackListPanel.enableAutoHeight();
+    toggleAutoHeight: function (bool) {
+        this.trackListPanel.toggleAutoHeight(bool);
+        this.overviewTrackListPanel.toggleAutoHeight(bool);
     },
     updateHeight: function () {
         this.trackListPanel.updateHeight();
@@ -33380,5 +31032,3 @@ GenomeViewer.prototype = {
         this.trackExists(trackId);
     }
 };
-
-
