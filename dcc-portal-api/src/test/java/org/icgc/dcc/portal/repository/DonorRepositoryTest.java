@@ -27,12 +27,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.model.EntitySet.State;
@@ -40,11 +39,9 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.service.TermsLookupService;
-import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
+import org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType;
 import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -60,8 +57,6 @@ import lombok.val;
 
 @RunWith(MockitoJUnitRunner.class)
 
-// FIXME: Temporarily disables this test suite as the PQL implementation is not stable.
-@Ignore
 public class DonorRepositoryTest extends BaseElasticSearchTest {
 
   private static final String DEFAULT_SORT = "ssmAffectedGenes";
@@ -95,21 +90,21 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
   }
 
   @Test
-  public void testFindAll() throws Exception {
+  public void testFindAllCentric() throws Exception {
     Query query = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).build();
-    SearchResponse response = donorRepository.findAll(query);
+    SearchResponse response = donorRepository.findAllCentric(query);
     assertThat(response.getHits().getTotalHits()).isEqualTo(9);
   }
 
   @Test
-  public void testFindAllWithFields() throws Exception {
+  public void testFindAllCentricWithFields() throws Exception {
     Query query = Query.builder()
         .from(1)
         .size(10)
         .sort(DEFAULT_SORT).order(DEFAULT_ORDER)
-        .fields(Lists.newArrayList("id", "primarySite", "notarealthing"))
+        .fields(Lists.newArrayList("id", "primarySite"))
         .build();
-    SearchResponse response = donorRepository.findAll(query);
+    SearchResponse response = donorRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
     assertThat(hits.getTotalHits()).isEqualTo(9);
@@ -122,11 +117,11 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
   }
 
   @Test
-  public void testFindAllWithIsFilters() throws Exception {
+  public void testFindAllCentricWithIsFilters() throws Exception {
     FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER));
     Query query =
         Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-    SearchResponse response = donorRepository.findAll(query);
+    SearchResponse response = donorRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
     assertThat(hits.getTotalHits()).isEqualTo(3);
@@ -138,11 +133,11 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
   }
 
   @Test
-  public void testFindAllWithNotFilters() throws Exception {
+  public void testFindAllCentricWithNotFilters() throws Exception {
     FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER));
     Query query =
         Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-    SearchResponse response = donorRepository.findAll(query);
+    SearchResponse response = donorRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
     assertThat(hits.getTotalHits()).isEqualTo(6);
@@ -153,54 +148,54 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
     }
   }
 
-  // @Test
-  // public void testFindAllWithNestedGeneFilters() throws Exception {
-  // FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, GENE_FILTER));
-  // Query query =
-  // Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-  // SearchResponse response = donorRepository.findAllCentric(query);
-  // SearchHits hits = response.getHits();
+  @Test
+  public void testFindAllWithNestedGeneFilters() throws Exception {
+    FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, GENE_FILTER));
+    Query query =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+    SearchResponse response = donorRepository.findAllCentric(query);
+    SearchHits hits = response.getHits();
 
-  // assertThat(hits.getTotalHits()).isEqualTo(5);
-  // assertThat(hits.getHits().length).isEqualTo(5);
+    assertThat(hits.getTotalHits()).isEqualTo(5);
+    assertThat(hits.getHits().length).isEqualTo(5);
 
-  // for (SearchHit hit : hits) {
-  // assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(
-  // Lists.newArrayList("DO2", "DO2", "DO9", "DO1", "DO4", "DO8", "DO5"));
-  // }
-  // }
+    for (SearchHit hit : hits) {
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(
+          Lists.newArrayList("DO2", "DO2", "DO9", "DO1", "DO4", "DO8", "DO5"));
+    }
+  }
 
-  // @Test
-  // public void testFindAllWithNestedMutationFilters() throws Exception {
-  // FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, MUTATION_FILTER));
-  // Query query =
-  // Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-  // SearchResponse response = donorRepository.findAllCentric(query);
-  // SearchHits hits = response.getHits();
+  @Test
+  public void testFindAllWithNestedMutationFilters() throws Exception {
+    FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, MUTATION_FILTER));
+    Query query =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+    SearchResponse response = donorRepository.findAllCentric(query);
+    SearchHits hits = response.getHits();
 
-  // assertThat(hits.getTotalHits()).isEqualTo(1);
-  // assertThat(hits.getHits().length).isEqualTo(1);
+    assertThat(hits.getTotalHits()).isEqualTo(1);
+    assertThat(hits.getHits().length).isEqualTo(1);
 
-  // for (SearchHit hit : hits) {
-  // assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO9"));
-  // }
-  // }
+    for (SearchHit hit : hits) {
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO9"));
+    }
+  }
 
-  // @Test
-  // public void testFindAllWithNestedGeneMutationFilters() throws Exception {
-  // FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER, GENE_FILTER, MUTATION_FILTER));
-  // Query query =
-  // Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-  // SearchResponse response = donorRepository.findAllCentric(query);
-  // SearchHits hits = response.getHits();
+  @Test
+  public void testFindAllWithNestedGeneMutationFilters() throws Exception {
+    FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER, GENE_FILTER, MUTATION_FILTER));
+    Query query =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+    SearchResponse response = donorRepository.findAllCentric(query);
+    SearchHits hits = response.getHits();
 
-  // assertThat(hits.getTotalHits()).isEqualTo(1);
-  // assertThat(hits.getHits().length).isEqualTo(1);
+    assertThat(hits.getTotalHits()).isEqualTo(1);
+    assertThat(hits.getHits().length).isEqualTo(1);
 
-  // for (SearchHit hit : hits) {
-  // assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO2"));
-  // }
-  // }
+    for (SearchHit hit : hits) {
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO2"));
+    }
+  }
 
   @Test
   public void testCountIntersection() throws Exception {
@@ -275,10 +270,10 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
     assertThat(responseInclude.containsKey("specimen")).isTrue();
   }
 
-  @Test(expected = WebApplicationException.class)
-  public void testFind404() throws Exception {
+  @Test(expected = UnsupportedOperationException.class)
+  public void testUnsupported() throws Exception {
     Query query = Query.builder().build();
-    donorRepository.findOne(MISSING_ID, query);
+    donorRepository.findAll(query);
   }
 
   @Test
@@ -324,14 +319,16 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
   }
 
   private void setUpTermsLookup(final UUID id1, final UUID id2) {
-    val termsLookupService = new TermsLookupService(es.client());
+    val termsLookupRepository =
+        new TermsLookupRepository(es.client(), TestIndex.RELEASE.getName(), TestIndex.REPOSITORY.getName(),
+            new PortalProperties());
     val lookupType = TermLookupType.DONOR_IDS;
 
     val donorSet1 = newArrayList("DO1", "DO3", "DO5", "DO7", "DO9");
-    termsLookupService.createTermsLookup(lookupType, id1, donorSet1);
+    termsLookupRepository.createTermsLookup(lookupType, id1, donorSet1);
 
     val donorSet2 = newArrayList("DO2", "DO4", "DO5", "DO6", "DO8");
-    termsLookupService.createTermsLookup(lookupType, id2, donorSet2);
+    termsLookupRepository.createTermsLookup(lookupType, id2, donorSet2);
   }
 
 }

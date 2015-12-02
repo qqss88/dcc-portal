@@ -17,29 +17,30 @@
  */
 package org.icgc.dcc.portal.service;
 
-import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType.GENE_IDS;
 
 import java.util.Set;
 import java.util.UUID;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet.Type;
 import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.icgc.dcc.portal.repository.EntityListRepository;
+import org.icgc.dcc.portal.repository.TermsLookupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 /**
  * User "gene set" related operations.
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UserGeneSetService {
 
   /**
@@ -48,7 +49,7 @@ public class UserGeneSetService {
   @NonNull
   private final EntityListRepository repository;
   @NonNull
-  private final TermsLookupService termsLookupService;
+  private final TermsLookupRepository termsLookupRepository;
   @NonNull
   private final PortalProperties properties;
 
@@ -65,10 +66,11 @@ public class UserGeneSetService {
     val id = UUID.randomUUID();
     val version = getDataVersion();
 
-    val newEntitySet = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size(), version);
+    val newEntitySet =
+        EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size(), version);
     newEntitySet.setSubtype(SubType.UPLOAD);
 
-    termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
+    termsLookupRepository.createTermsLookup(GENE_IDS, id, geneIds);
     repository.save(newEntitySet, version);
 
     return id;
