@@ -1,6 +1,10 @@
 header {
-  @include clearfix();
+  //@include clearfix();
 
+  .header-container {
+    display: table;
+    width: 100%;
+  }
   border-bottom: 1px solid $greyLighter;
   background: $greyLightestEver;
 
@@ -10,17 +14,19 @@ header {
   position: relative;
 
   #brand {
-    @include float-span(4);
+    //@include float-span(4);
     width: 27%;
+    white-space: nowrap;
 
-    display: inline-block;
+    display: table-cell;
+    vertical-align: middle;
 
-    @include breakpoint($break-tablet) {
+    /*@include breakpoint($break-tablet) {
       font-size: 1.8rem;
       margin-top: .8rem;
       line-height: 2.5rem;
       margin-right: 0.2rem;
-    }
+    }*/
 
     #icgc {
       color: $blueDark;
@@ -43,11 +49,134 @@ header {
       }
     }
     img {
-      height: 2.6rem;
-      width: 2.6rem;
+      height: 2.8rem;
+      width: 2.8rem;
+      vertical-align: top;
 
-      @include breakpoint($break-tablet) {
+      /*@include breakpoint($break-tablet) {
         margin-bottom: -0.3rem;
+      }*/
+    }
+  }
+}
+/*
+@media screen and (min-width: 884px) and (max-width: 950px) {
+  header {
+
+    .header-container {
+      display: block;
+
+      #brand {
+        width: 5%;
+      }
+
+      .t_nav__actions {
+        //width: 20%;
+      }
+
+      .t_nav__pages {
+        //width: 30%;
+        min-width: 228px;
+      }
+    }
+  }
+} */
+
+
+@media screen and (min-width: 721px) and (max-width: 950px) {
+  header {
+    .header-container {
+      display: block;
+      #brand {
+        width: 100%;
+        display: block;
+        text-align: center;
+        margin-top: 1.4rem;
+        a {
+          font-size: 3.5rem;
+        }
+      }
+
+      .t_nav__actions {
+        display: block;
+        width: 100%;
+
+        .t_nav__items__item {
+          width: 100%;
+
+          .t_suggest.t_suggest__header {
+            width: 98%;
+            margin: 0rem 0.5rem 0.5rem 0.5rem;
+
+            .t_suggest__input {
+              border-radius: 4rem;
+            }
+
+          }
+        }
+      }
+
+      .t_nav__pages {
+        width: 100%;
+        min-width: 228px;
+        display: block;
+      }
+
+
+    }
+  }
+}
+
+@media screen and (max-width: 720px) {
+  header {
+    padding: 0 0;
+    .header-container {
+      display: block;
+
+      #brand {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-top: 1.4rem;
+        a {
+          font-size: 3.5rem;
+        }
+      }
+      .t_nav__pages {
+        display: block;
+        width: 100%;
+        text-align: center;
+
+        .t_nav__items__item {
+          display: inline;
+          margin: 0.5rem 0;
+
+          a {
+           border-width: 1px;
+          }
+
+          .t_nav__items__item__title {
+            display: inline;
+          }
+          .t_nav__items__item__icon i {
+            position: relative;
+            display: inline-block;
+            margin: 0 auto;
+            padding: .8rem 1rem .8rem 1.1rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1) !important;
+          }
+        }
+      }
+
+      .t_suggest.t_suggest__header {
+        width: 98%;
+        margin: 0rem 0.5rem 0.5rem 0.5rem;
+
+        .t_suggest__input {
+          border-radius: 4rem;
+        }
+
       }
     }
   }
@@ -55,19 +184,23 @@ header {
 
 .t_nav {
   font-size: 1.3rem;
-  padding-top: .1rem;
+  //padding-top: .1rem;
 }
 
 .t_nav__pages {
+  display: table-cell;
+  vertical-align: middle;
   text-align: center;
-  @include float-span(4);
+ // @include float-span(4);
   width: 38%;
 }
 
 .t_nav__actions {
+  display: table-cell;
   text-align: right;
-  @include float-span(4);
+  //@include float-span(4);
   margin-right: 0;
+  width: 27%;
 }
 
 .t_nav__items {
@@ -80,6 +213,7 @@ header {
   text-align: left;
   margin-right: 0.7rem;
   margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 
   @include breakpoint($break-tablet) {
     display: inline-block;
@@ -260,50 +394,74 @@ header {
   display: none;
 }
 
+@media screen and (max-width: 720px) {
+  #home-page {
+    .home-landing {
+      .t_suggest {
+        width: 98%;
+        margin: 0rem 0.5rem 0.5rem 0.5rem;
+        .t_suggest__input {
+          border-radius: 4rem;
+        }
+      }
+    }
+  }
+}
+
 #home-page {
   header {
     text-align: center;
     padding: 0;
-    @include breakpoint($break-tablet) {
+    /*@include breakpoint($break-tablet) {
       padding-bottom: 2rem;
+    }*/
+
+    .header-container {
+      display: block;
     }
 
     #brand {
-      @include grid-span(12);
+      display: block;
+      //@include grid-span(12);
+      width: 100%;
       margin: 0;
+
       a {
-        line-height: 5rem;
+        line-height: 7rem;
         font: {
-          size: 3rem;
+          size: 4rem;
           weight: 300;
           family: $sans-stack;
-        }
-        @include breakpoint($break-tablet) {
+        /*@include breakpoint($break-tablet) {
           line-height: 7rem;
           font: {
             size: 4rem;
             weight: 300;
             family: $sans-stack;
-          }
+          } */
         }
       }
 
       img {
-        height: 3rem;
-        margin-bottom: -.4rem;
-        width: 3rem;
-        @include breakpoint($break-tablet) {
+        height: 4rem;
+        margin-bottom: .9rem;
+        width: 4rem;
+        vertical-align: middle;
+        /*@include breakpoint($break-tablet) {
           height: 4rem;
           margin-bottom: -.6rem;
           width: 4rem;
-        }
+        } */
       }
     }
   }
 
   .t_nav__pages {
-    @include grid-span(12);
-    margin-right: 0;
+    //@include grid-span(12);
+    margin: 0.5rem 0rem;
+    display:block;
+    width: 100%;
+    //margin-right: 0;
     .t_nav__items__item {
       text-align: left;
       margin: 0;

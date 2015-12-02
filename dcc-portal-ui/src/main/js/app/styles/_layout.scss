@@ -43,6 +43,7 @@ body {
   }
 }
 
+/*
 .wrap {
   @include clearfix();
 
@@ -58,12 +59,13 @@ body {
   @include breakpoint($break-tablet) {
     margin-bottom: -$footer-height;
   }
-}
+}*/
 
 .content {
   @include clearfix();
 }
 
+/*
 footer, .push {
   height: 2 * $footer-height;
 
@@ -71,7 +73,7 @@ footer, .push {
     height: $footer-height;
 
   }
-}
+}*/
 
 
 aside {

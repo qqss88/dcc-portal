@@ -656,14 +656,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -680,69 +680,52 @@ body:after {
   }
 }
 
-/* line 46, _layout.scss */
+/*
 .wrap {
-  /* for IE 6/7 */
-  *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
-  /* non-JS fallback */
-  *zoom: 1;
+  @include clearfix();
+
   position: relative;
   min-height: 100%;
   height: auto !important;
   height: 100%;
-  margin-bottom: -32rem;
+  margin-bottom: -2 * $footer-height;
   overflow: hidden;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-}
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
-.wrap:before, .wrap:after {
-  content: ".";
-  display: block;
-  height: 0;
-  overflow: hidden;
-}
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
-.wrap:after {
-  clear: both;
-}
-@media (min-width: 721px) {
-  /* line 46, _layout.scss */
-  .wrap {
-    margin-bottom: -16rem;
-  }
-}
 
-/* line 63, _layout.scss */
+  box-shadow: 0 0 4px hsla(0, 0%, 0%, 0.3);
+
+  @include breakpoint($break-tablet) {
+    margin-bottom: -$footer-height;
+  }
+}*/
+/* line 64, _layout.scss */
 .content {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
 
-/* line 67, _layout.scss */
+/*
 footer, .push {
-  height: 32rem;
-}
-@media (min-width: 721px) {
-  /* line 67, _layout.scss */
-  footer, .push {
-    height: 16rem;
-  }
-}
+  height: 2 * $footer-height;
 
-/* line 77, _layout.scss */
+  @include breakpoint($break-tablet) {
+    height: $footer-height;
+
+  }
+}*/
+/* line 79, _layout.scss */
 aside {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
@@ -754,19 +737,19 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
 
-/* line 82, _layout.scss */
+/* line 84, _layout.scss */
 article {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
@@ -779,39 +762,39 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
 
-/* line 88, _layout.scss */
+/* line 90, _layout.scss */
 section {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
 
 @media (min-width: 769px) {
-  /* line 93, _layout.scss */
+  /* line 95, _layout.scss */
   .wide {
     width: 65.9574468085%;
     clear: right;
@@ -822,7 +805,7 @@ section:after {
 }
 
 @media (min-width: 769px) {
-  /* line 99, _layout.scss */
+  /* line 101, _layout.scss */
   .quarter {
     width: 23.4042553191%;
     clear: right;
@@ -833,7 +816,7 @@ section:after {
 }
 
 @media (min-width: 769px) {
-  /* line 105, _layout.scss */
+  /* line 107, _layout.scss */
   .narrow {
     width: 31.914893617%;
     clear: right;
@@ -844,7 +827,7 @@ section:after {
 }
 
 @media (min-width: 769px) {
-  /* line 111, _layout.scss */
+  /* line 113, _layout.scss */
   .half {
     width: 48.9361702128%;
     clear: right;
@@ -855,7 +838,7 @@ section:after {
 }
 
 @media (min-width: 769px) {
-  /* line 117, _layout.scss */
+  /* line 119, _layout.scss */
   .third {
     width: 31.914893617%;
     clear: right;
@@ -865,37 +848,37 @@ section:after {
   }
 }
 
-/* line 123, _layout.scss */
+/* line 125, _layout.scss */
 .relative {
   position: relative;
 }
 
-/* line 127, _layout.scss */
+/* line 129, _layout.scss */
 .clearfix {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
 
-/* line 131, _layout.scss */
+/* line 133, _layout.scss */
 .hidden {
   display: none;
   visibility: hidden;
 }
 
-/* line 136, _layout.scss */
+/* line 138, _layout.scss */
 .omega {
   margin-right: 0 !important;
 }
@@ -987,53 +970,37 @@ h5 {
 
 /* line 1, _sections/_header.scss */
 header {
-  /* for IE 6/7 */
-  *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
-  /* non-JS fallback */
-  *zoom: 1;
   border-bottom: 1px solid #e6e6e6;
   background: #fafafa;
   margin-bottom: 1rem;
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
-header:before, header:after {
-  content: ".";
-  display: block;
-  height: 0;
-  overflow: hidden;
+/* line 4, _sections/_header.scss */
+header .header-container {
+  display: table;
+  width: 100%;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
-header:after {
-  clear: both;
-}
-/* line 12, _sections/_header.scss */
+/* line 16, _sections/_header.scss */
 header #brand {
-  width: 31.914893617%;
-  clear: right;
-  float: left;
-  margin-left: 0;
-  margin-right: 2.1276595745%;
   width: 27%;
-  display: inline-block;
-}
-@media (min-width: 721px) {
-  /* line 12, _sections/_header.scss */
-  header #brand {
+  white-space: nowrap;
+  display: table-cell;
+  vertical-align: middle;
+  /*@include breakpoint($break-tablet) {
     font-size: 1.8rem;
     margin-top: .8rem;
     line-height: 2.5rem;
     margin-right: 0.2rem;
-  }
+  }*/
 }
-/* line 25, _sections/_header.scss */
+/* line 31, _sections/_header.scss */
 header #brand #icgc {
   color: #283e5d;
   font-weight: bold;
   letter-spacing: -2px;
 }
-/* line 30, _sections/_header.scss */
+/* line 36, _sections/_header.scss */
 header #brand a {
   color: #333333;
   font-size: 2.6rem;
@@ -1042,71 +1009,184 @@ header #brand a {
   text-transform: none;
   text-decoration: none;
 }
-/* line 40, _sections/_header.scss */
+/* line 46, _sections/_header.scss */
 header #brand a:hover {
   text-decoration: none;
   background: none;
 }
-/* line 45, _sections/_header.scss */
+/* line 51, _sections/_header.scss */
 header #brand img {
-  height: 2.6rem;
-  width: 2.6rem;
-}
-@media (min-width: 721px) {
-  /* line 45, _sections/_header.scss */
-  header #brand img {
+  height: 2.8rem;
+  width: 2.8rem;
+  vertical-align: top;
+  /*@include breakpoint($break-tablet) {
     margin-bottom: -0.3rem;
+  }*/
+}
+
+/*
+@media screen and (min-width: 884px) and (max-width: 950px) {
+  header {
+
+    .header-container {
+      display: block;
+
+      #brand {
+        width: 5%;
+      }
+
+      .t_nav__actions {
+        //width: 20%;
+      }
+
+      .t_nav__pages {
+        //width: 30%;
+        min-width: 228px;
+      }
+    }
+  }
+} */
+@media screen and (min-width: 721px) and (max-width: 950px) {
+  /* line 88, _sections/_header.scss */
+  header .header-container {
+    display: block;
+  }
+  /* line 90, _sections/_header.scss */
+  header .header-container #brand {
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin-top: 1.4rem;
+  }
+  /* line 95, _sections/_header.scss */
+  header .header-container #brand a {
+    font-size: 3.5rem;
+  }
+  /* line 100, _sections/_header.scss */
+  header .header-container .t_nav__actions {
+    display: block;
+    width: 100%;
+  }
+  /* line 104, _sections/_header.scss */
+  header .header-container .t_nav__actions .t_nav__items__item {
+    width: 100%;
+  }
+  /* line 107, _sections/_header.scss */
+  header .header-container .t_nav__actions .t_nav__items__item .t_suggest.t_suggest__header {
+    width: 98%;
+    margin: 0rem 0.5rem 0.5rem 0.5rem;
+  }
+  /* line 111, _sections/_header.scss */
+  header .header-container .t_nav__actions .t_nav__items__item .t_suggest.t_suggest__header .t_suggest__input {
+    border-radius: 4rem;
+  }
+  /* line 119, _sections/_header.scss */
+  header .header-container .t_nav__pages {
+    width: 100%;
+    min-width: 228px;
+    display: block;
   }
 }
-
-/* line 56, _sections/_header.scss */
+@media screen and (max-width: 720px) {
+  /* line 131, _sections/_header.scss */
+  header {
+    padding: 0 0;
+  }
+  /* line 133, _sections/_header.scss */
+  header .header-container {
+    display: block;
+  }
+  /* line 136, _sections/_header.scss */
+  header .header-container #brand {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 1.4rem;
+  }
+  /* line 141, _sections/_header.scss */
+  header .header-container #brand a {
+    font-size: 3.5rem;
+  }
+  /* line 145, _sections/_header.scss */
+  header .header-container .t_nav__pages {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  /* line 150, _sections/_header.scss */
+  header .header-container .t_nav__pages .t_nav__items__item {
+    display: inline;
+    margin: 0.5rem 0;
+  }
+  /* line 154, _sections/_header.scss */
+  header .header-container .t_nav__pages .t_nav__items__item a {
+    border-width: 1px;
+  }
+  /* line 158, _sections/_header.scss */
+  header .header-container .t_nav__pages .t_nav__items__item .t_nav__items__item__title {
+    display: inline;
+  }
+  /* line 161, _sections/_header.scss */
+  header .header-container .t_nav__pages .t_nav__items__item .t_nav__items__item__icon i {
+    position: relative;
+    display: inline-block;
+    margin: 0 auto;
+    padding: .8rem 1rem .8rem 1.1rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  /* line 172, _sections/_header.scss */
+  header .header-container .t_suggest.t_suggest__header {
+    width: 98%;
+    margin: 0rem 0.5rem 0.5rem 0.5rem;
+  }
+  /* line 176, _sections/_header.scss */
+  header .header-container .t_suggest.t_suggest__header .t_suggest__input {
+    border-radius: 4rem;
+  }
+}
+/* line 185, _sections/_header.scss */
 .t_nav {
   font-size: 1.3rem;
-  padding-top: .1rem;
 }
 
-/* line 61, _sections/_header.scss */
+/* line 190, _sections/_header.scss */
 .t_nav__pages {
+  display: table-cell;
+  vertical-align: middle;
   text-align: center;
-  width: 31.914893617%;
-  clear: right;
-  float: left;
-  margin-left: 0;
-  margin-right: 2.1276595745%;
   width: 38%;
 }
 
-/* line 67, _sections/_header.scss */
+/* line 198, _sections/_header.scss */
 .t_nav__actions {
+  display: table-cell;
   text-align: right;
-  width: 31.914893617%;
-  clear: right;
-  float: left;
-  margin-left: 0;
-  margin-right: 2.1276595745%;
   margin-right: 0;
+  width: 27%;
 }
 
-/* line 73, _sections/_header.scss */
+/* line 206, _sections/_header.scss */
 .t_nav__items {
   position: relative;
 }
 
-/* line 77, _sections/_header.scss */
+/* line 210, _sections/_header.scss */
 .t_nav__items__item {
   background-color: transparent;
   display: inline;
   text-align: left;
   margin-right: 0.7rem;
   margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 @media (min-width: 721px) {
-  /* line 77, _sections/_header.scss */
+  /* line 210, _sections/_header.scss */
   .t_nav__items__item {
     display: inline-block;
   }
 }
-/* line 88, _sections/_header.scss */
+/* line 222, _sections/_header.scss */
 .t_nav__items__item a, .t_nav__items__item a:active, .t_nav__items__item a:visited {
   border-radius: 0;
   display: block;
@@ -1120,126 +1200,126 @@ header #brand img {
   transition: color .2s, background .2s;*/
 }
 @media (min-width: 721px) {
-  /* line 88, _sections/_header.scss */
+  /* line 222, _sections/_header.scss */
   .t_nav__items__item a, .t_nav__items__item a:active, .t_nav__items__item a:visited {
     border-radius: 3rem;
   }
 }
-/* line 105, _sections/_header.scss */
+/* line 239, _sections/_header.scss */
 .t_nav__items__item a:hover {
   text-decoration: none;
 }
-/* line 109, _sections/_header.scss */
+/* line 243, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__home a {
   color: #ce6503;
   border: 0.3rem solid #ce6503;
 }
-/* line 114, _sections/_header.scss */
+/* line 248, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__home a:hover {
   color: white;
   background: #ce6503;
 }
-/* line 119, _sections/_header.scss */
+/* line 253, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__projects a {
   color: #e9931c;
   border: 0.3rem solid #e9931c;
 }
-/* line 124, _sections/_header.scss */
+/* line 258, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__projects a:hover {
   color: white;
   background: #e9931c;
 }
-/* line 129, _sections/_header.scss */
+/* line 263, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__advanced a {
   color: #166aa2;
   border: 0.3rem solid #166aa2;
 }
-/* line 134, _sections/_header.scss */
+/* line 268, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__advanced a:hover {
   color: white;
   background: #166aa2;
 }
-/* line 139, _sections/_header.scss */
+/* line 273, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__analysis a {
   color: #9b315b;
   border: 0.3rem solid #9b315b;
 }
-/* line 144, _sections/_header.scss */
+/* line 278, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__analysis a:hover {
   color: white;
   background: #9b315b;
 }
-/* line 149, _sections/_header.scss */
+/* line 283, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__data_repositories a {
   color: #638f56;
   border: 0.3rem solid #638f56;
 }
-/* line 154, _sections/_header.scss */
+/* line 288, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__data_repositories a:hover {
   color: white;
   background: #638f56;
 }
-/* line 159, _sections/_header.scss */
+/* line 293, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
   color: #1693c0;
   border: 0.3rem solid #1693c0;
 }
-/* line 164, _sections/_header.scss */
+/* line 298, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a:hover {
   color: white;
   background: #1693c0;
 }
-/* line 169, _sections/_header.scss */
+/* line 303, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a {
   background: #cccccc;
   border: 0.3rem solid #cccccc;
 }
-/* line 172, _sections/_header.scss */
+/* line 306, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a .icon-search {
   padding: 1rem;
 }
-/* line 176, _sections/_header.scss */
+/* line 310, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a form {
   opacity: 0;
 }
-/* line 181, _sections/_header.scss */
+/* line 315, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a:hover {
   background: #cccccc;
 }
-/* line 185, _sections/_header.scss */
+/* line 319, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open {
   border: 0.3rem solid #cccccc;
   text-align: left;
   background: white;
 }
-/* line 189, _sections/_header.scss */
+/* line 323, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open i {
   color: #cccccc;
 }
-/* line 192, _sections/_header.scss */
+/* line 326, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form {
   width: auto;
   opacity: 1;
 }
-/* line 195, _sections/_header.scss */
+/* line 329, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form input {
   border-radius: 1rem;
 }
-/* line 201, _sections/_header.scss */
+/* line 335, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open:hover {
   background: white;
 }
-/* line 205, _sections/_header.scss */
+/* line 339, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a {
   background: #6d72c5;
   border: 0.3rem solid #6d72c5;
 }
-/* line 210, _sections/_header.scss */
+/* line 344, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a:hover {
   background: #6d72c5;
 }
 
-/* line 216, _sections/_header.scss */
+/* line 350, _sections/_header.scss */
 .t_nav__items__item__icon i {
   position: relative;
   display: inline-block;
@@ -1249,203 +1329,205 @@ header #brand img {
   background: rgba(255, 255, 255, 0.1);
 }
 @media (min-width: 1025px) {
-  /* line 216, _sections/_header.scss */
+  /* line 350, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem 1rem .9rem;
   }
 }
 @media (min-width: 1535px) {
-  /* line 216, _sections/_header.scss */
+  /* line 350, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .9rem;
   }
 }
 
-/* line 259, _sections/_header.scss */
+/* line 393, _sections/_header.scss */
 .t_nav__items__item__title {
   display: none;
 }
 
-/* line 264, _sections/_header.scss */
+@media screen and (max-width: 720px) {
+  /* line 400, _sections/_header.scss */
+  #home-page .home-landing .t_suggest {
+    width: 98%;
+    margin: 0rem 0.5rem 0.5rem 0.5rem;
+  }
+  /* line 403, _sections/_header.scss */
+  #home-page .home-landing .t_suggest .t_suggest__input {
+    border-radius: 4rem;
+  }
+}
+/* line 412, _sections/_header.scss */
 #home-page header {
   text-align: center;
   padding: 0;
-}
-@media (min-width: 721px) {
-  /* line 264, _sections/_header.scss */
-  #home-page header {
+  /*@include breakpoint($break-tablet) {
     padding-bottom: 2rem;
-  }
+  }*/
 }
-/* line 271, _sections/_header.scss */
+/* line 419, _sections/_header.scss */
+#home-page header .header-container {
+  display: block;
+}
+/* line 423, _sections/_header.scss */
 #home-page header #brand {
+  display: block;
   width: 100%;
-  float: right;
-  margin-left: 0;
-  margin-right: 0;
-  clear: none;
   margin: 0;
 }
-/* line 274, _sections/_header.scss */
+/* line 429, _sections/_header.scss */
 #home-page header #brand a {
-  line-height: 5rem;
-  font-size: 3rem;
+  line-height: 7rem;
+  font-size: 4rem;
   font-weight: 300;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-@media (min-width: 721px) {
-  /* line 274, _sections/_header.scss */
-  #home-page header #brand a {
+  /*@include breakpoint($break-tablet) {
     line-height: 7rem;
-    font-size: 4rem;
-    font-weight: 300;
-    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  }
+    font: {
+      size: 4rem;
+      weight: 300;
+      family: $sans-stack;
+    } */
 }
-/* line 291, _sections/_header.scss */
+/* line 445, _sections/_header.scss */
 #home-page header #brand img {
-  height: 3rem;
-  margin-bottom: -.4rem;
-  width: 3rem;
-}
-@media (min-width: 721px) {
-  /* line 291, _sections/_header.scss */
-  #home-page header #brand img {
+  height: 4rem;
+  margin-bottom: .9rem;
+  width: 4rem;
+  vertical-align: middle;
+  /*@include breakpoint($break-tablet) {
     height: 4rem;
     margin-bottom: -.6rem;
     width: 4rem;
-  }
+  } */
 }
-/* line 304, _sections/_header.scss */
+/* line 459, _sections/_header.scss */
 #home-page .t_nav__pages {
+  margin: 0.5rem 0rem;
+  display: block;
   width: 100%;
-  float: right;
-  margin-left: 0;
-  margin-right: 0;
-  clear: none;
-  margin-right: 0;
 }
-/* line 307, _sections/_header.scss */
+/* line 465, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item {
   text-align: left;
   margin: 0;
 }
 @media (min-width: 721px) {
-  /* line 307, _sections/_header.scss */
+  /* line 465, _sections/_header.scss */
   #home-page .t_nav__pages .t_nav__items__item {
     margin: 0rem 1.25rem 0.7rem 0rem;
   }
 }
-/* line 314, _sections/_header.scss */
+/* line 472, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item a {
   padding-right: 1rem;
 }
-/* line 321, _sections/_header.scss */
+/* line 479, _sections/_header.scss */
 #home-page .t_nav__actions {
   position: absolute;
   top: .4rem;
   right: 2rem;
 }
-/* line 327, _sections/_header.scss */
+/* line 485, _sections/_header.scss */
 #home-page .t_nav__items__item__title {
   font-weight: 300;
   display: inline-block;
 }
-/* line 332, _sections/_header.scss */
+/* line 490, _sections/_header.scss */
 #home-page .t_nav__items__item__home {
   display: none;
 }
-/* line 335, _sections/_header.scss */
+/* line 493, _sections/_header.scss */
 #home-page .t_nav__items__item__search {
   display: none;
 }
-/* line 338, _sections/_header.scss */
+/* line 496, _sections/_header.scss */
 #home-page .t_nav__items__item__projects a {
   background: #e9931c;
   color: white;
 }
-/* line 342, _sections/_header.scss */
+/* line 500, _sections/_header.scss */
 #home-page .t_nav__items__item__advanced a {
   background: #166aa2;
   color: white;
 }
-/* line 346, _sections/_header.scss */
+/* line 504, _sections/_header.scss */
 #home-page .t_nav__items__item__analysis a {
   background: #9b315b;
   color: white;
 }
-/* line 350, _sections/_header.scss */
+/* line 508, _sections/_header.scss */
 #home-page .t_nav__items__item__download a {
   background: #1693c0;
   color: white;
 }
-/* line 354, _sections/_header.scss */
+/* line 512, _sections/_header.scss */
 #home-page .t_nav__items__item__data_repositories a {
   background: #638f56;
   color: white;
 }
 
-/* line 361, _sections/_header.scss */
+/* line 519, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a {
   cursor: default;
   background: #e9931c;
   color: white;
 }
-/* line 365, _sections/_header.scss */
+/* line 523, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 373, _sections/_header.scss */
+/* line 531, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a {
   cursor: default;
   background: #166aa2;
   color: white;
 }
-/* line 377, _sections/_header.scss */
+/* line 535, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 386, _sections/_header.scss */
+/* line 544, _sections/_header.scss */
 #analysis-page .t_nav__items__item__analysis a {
   cursor: default;
   background: #9b315b;
   color: white;
 }
-/* line 390, _sections/_header.scss */
+/* line 548, _sections/_header.scss */
 #analysis-page .t_nav__items__item__analysis a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 398, _sections/_header.scss */
+/* line 556, _sections/_header.scss */
 #dataReleases-page .t_nav__items__item__download a {
   cursor: default;
   background: #1693c0;
   color: white;
 }
-/* line 402, _sections/_header.scss */
+/* line 560, _sections/_header.scss */
 #dataReleases-page .t_nav__items__item__download a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 410, _sections/_header.scss */
+/* line 568, _sections/_header.scss */
 #repository-page .t_nav__items__item__data_repositories a {
   cursor: default;
   background: #638f56;
   color: white;
 }
-/* line 414, _sections/_header.scss */
+/* line 572, _sections/_header.scss */
 #repository-page .t_nav__items__item__data_repositories a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 422, _sections/_header.scss */
+/* line 580, _sections/_header.scss */
 #q-page .t_nav__items__item__search {
   display: none;
 }
@@ -1453,14 +1535,14 @@ header #brand img {
 /* ************************************
  *   Suggest
  *********************************** */
-/* line 430, _sections/_header.scss */
+/* line 588, _sections/_header.scss */
 .t_suggest.t_suggest__header {
   color: #333333;
   width: 150%;
   float: right;
   margin: 0;
 }
-/* line 437, _sections/_header.scss */
+/* line 595, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__input {
   margin: .4rem 0 0 0;
   padding-top: .5rem;
@@ -1468,16 +1550,16 @@ header #brand img {
   padding-bottom: .5rem;
   padding-left: 0;
 }
-/* line 447, _sections/_header.scss */
+/* line 605, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest_flyout {
   margin-top: .5rem;
 }
-/* line 451, _sections/_header.scss */
+/* line 609, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__left {
   top: 1.1rem;
   left: 1rem;
 }
-/* line 456, _sections/_header.scss */
+/* line 614, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__right {
   top: 1rem;
   right: 1rem;
@@ -1487,16 +1569,16 @@ header #brand img {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 467, _sections/_header.scss */
+  /* line 625, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__left {
     top: 1.3rem;
   }
-  /* line 471, _sections/_header.scss */
+  /* line 629, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__right {
     top: 1.2rem;
   }
 
-  /* line 477, _sections/_header.scss */
+  /* line 635, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem;
   }
@@ -1728,14 +1810,14 @@ footer .clear-fix {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 footer .clear-fix:before, footer .clear-fix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 footer .clear-fix:after {
   clear: both;
 }
@@ -2216,14 +2298,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2328,14 +2410,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2520,83 +2602,89 @@ input.valid:focus {
   }
 }
 
-/* line 26, _modules/_badges.scss */
+/* line 25, _modules/_badges.scss */
+h1 {
+  margin-bottom: 1rem;
+}
+/* line 28, _modules/_badges.scss */
 h1 .t_badge {
   padding: .5rem 1.1rem .2rem 1.2rem;
   margin: 0 2rem;
 }
-/* line 30, _modules/_badges.scss */
+/* line 32, _modules/_badges.scss */
 h1 .t_badge_icon {
-  padding: .5rem .8rem .2rem;
+  width: 4rem;
+  height: 4rem;
+  padding: .6rem .8rem .5rem .8rem;
   font-size: 1.6rem;
 }
 
-/* line 36, _modules/_badges.scss */
+/* line 40, _modules/_badges.scss */
 .t_badge__gene {
   background: #d33682;
 }
 
-/* line 40, _modules/_badges.scss */
+/* line 44, _modules/_badges.scss */
 .t_badge__gene:after {
   content: "G";
 }
 
-/* line 44, _modules/_badges.scss */
+/* line 48, _modules/_badges.scss */
 .t_badge__donor {
   background: #6d72c5;
 }
 
-/* line 48, _modules/_badges.scss */
+/* line 52, _modules/_badges.scss */
 .t_badge__donor:after {
   content: "D";
 }
 
-/* line 52, _modules/_badges.scss */
+/* line 56, _modules/_badges.scss */
 .t_badge__mutation {
   background: #1693c0;
 }
 
-/* line 56, _modules/_badges.scss */
+/* line 60, _modules/_badges.scss */
 .t_badge__mutation:after {
   content: "M";
 }
 
-/* line 60, _modules/_badges.scss */
+/* line 64, _modules/_badges.scss */
 .t_badge__pathway {
   background: #166aa2;
 }
 
-/* line 64, _modules/_badges.scss */
+/* line 68, _modules/_badges.scss */
 .t_badge__pathway:after {
   content: "P";
 }
 
-/* line 69, _modules/_badges.scss */
+/* line 73, _modules/_badges.scss */
 .t_badge__geneset {
   background: #166aa2;
 }
 
-/* line 73, _modules/_badges.scss */
+/* line 77, _modules/_badges.scss */
 .t_badge__geneset:after {
   content: "S";
 }
 
-/* line 77, _modules/_badges.scss */
+/* line 81, _modules/_badges.scss */
 .t_badge__compound {
   background: #5a0720;
 }
 
-/* line 81, _modules/_badges.scss */
+/* line 85, _modules/_badges.scss */
 .t_badge__compound:after {
   content: "C";
 }
 
-/* line 85, _modules/_badges.scss */
+/* line 89, _modules/_badges.scss */
 .t_badge__file {
   background: #638f56;
 }
 
-/* line 89, _modules/_badges.scss */
+/* line 93, _modules/_badges.scss */
 .t_badge__file:after {
   content: "F";
 }
@@ -2605,42 +2693,42 @@ h1 .t_badge_icon {
 .t_badge__geneset::first-letter {
   vertical-align: super;
 } */
-/* line 101, _modules/_badges.scss */
+/* line 105, _modules/_badges.scss */
 .t_badge__project, .t_badge__projects {
   background: #e9931c;
 }
 
-/* line 105, _modules/_badges.scss */
+/* line 109, _modules/_badges.scss */
 .t_badge__project:after {
   content: "P";
 }
 
-/* line 109, _modules/_badges.scss */
+/* line 113, _modules/_badges.scss */
 .t_badge__advanced {
   background: #166aa2;
 }
 
-/* line 113, _modules/_badges.scss */
+/* line 117, _modules/_badges.scss */
 .t_badge__analysis {
   background: #9b315b;
 }
 
-/* line 117, _modules/_badges.scss */
+/* line 121, _modules/_badges.scss */
 .t_badge__download {
   background: #1693c0;
 }
 
-/* line 121, _modules/_badges.scss */
+/* line 125, _modules/_badges.scss */
 .t_badge__data_repositories {
   background: #638f56;
 }
 
-/* line 125, _modules/_badges.scss */
+/* line 129, _modules/_badges.scss */
 .t_badge__q {
   background: #d33682;
 }
 
-/* line 130, _modules/_badges.scss */
+/* line 134, _modules/_badges.scss */
 .pcawg-badge {
   font-size: 0.5rem;
 }
@@ -2658,14 +2746,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2830,14 +2918,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -4397,14 +4485,14 @@ td {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:before, #pathways .pathway-filter-container .pathway-item-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:after {
   clear: both;
 }
@@ -4451,14 +4539,14 @@ td {
   padding-top: 0.2rem;
   padding-bottom: 0.6rem;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:before, #pathways .pathways-content .pathway-analysis-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:after {
   clear: both;
 }
