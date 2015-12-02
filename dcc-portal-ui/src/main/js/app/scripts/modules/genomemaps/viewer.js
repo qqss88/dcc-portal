@@ -594,7 +594,9 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
             str += 'id:&nbsp;<span style="color:#166aa2">' + f.stableId + '</span><br>';
             str += 'biotype:&nbsp;<span style="font-weight: bold;color:' + color + ';">' + f.biotype + '</span><br>';
             str += FEATURE_TYPES.getTipCommons(f);
-            str += '<br>description:&nbsp;<span style="font-weight: bold;">' + f.description + '</span><br>';
+            str += '<br>description:&nbsp;<span style="font-weight: bold;">' +
+                     (f.description ? f.description : 'none') + '</span><br>';
+
             return str;
           },
           color: function (f) {

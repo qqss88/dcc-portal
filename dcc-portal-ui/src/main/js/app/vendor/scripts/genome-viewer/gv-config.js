@@ -197,8 +197,8 @@ FEATURE_TYPES = {
             return 'id:&nbsp;<span class="ssel">' + f.id + '</span><br>' +
                 'biotype:&nbsp;<span class="emph" style="color:' + color + ';">' + f.biotype + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f) +
-                'source:&nbsp;<span class="ssel">' + f.source + '</span><br><br>' +
-                'description:&nbsp;<span class="emph">' + f.description + '</span><br>';
+                'source:&nbsp;<span class="ssel">' + (f.source ? f.source : 'unknown')  + '</span><br><br>' +
+                'description:&nbsp;<span class="emph">' + (f.description ? f.description : 'none') + '</span><br>';
         },
         color: function (f) {
             return GENE_BIOTYPE_COLORS[f.biotype];
@@ -228,7 +228,7 @@ FEATURE_TYPES = {
             var color = GENE_BIOTYPE_COLORS[f.biotype];
             return 'id:&nbsp;<span class="ssel">' + f.id + '</span><br>' +
                 'biotype:&nbsp;<span class="emph" style="color:' + color + ';">' + f.biotype + '</span><br>' +
-                'description:&nbsp;<span class="emph">' + f.description + '</span><br>' +
+                'description:&nbsp;<span class="emph">' + (f.description ? f.description : 'none') + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f);
         },
         color: function (f) {
