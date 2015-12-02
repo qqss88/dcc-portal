@@ -24,8 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.springframework.stereotype.Service;
 
 import com.google.common.cache.CacheBuilder;
@@ -68,16 +67,15 @@ public class IndexService {
 
   @SneakyThrows
   public Map<String, String> getIndexMetaData(Client client, String indexName) {
-    ImmutableOpenMap<String, MappingMetaData> mappings;
 
-    try {
-      mappings = getIndexMappings(client, indexName);
-    } catch (NullPointerException e) {
+    IndexMetaData indexMetaData = getIndexMappings(client, indexName);
+    if (indexMetaData == null) {
       clearCache();
-      mappings = getIndexMappings(client, indexName);
+      indexMetaData = getIndexMappings(client, indexName);
     }
 
-    log.info("Size of index meta data mappings: " + mappings.values().size());
+    val mappings = indexMetaData.mappings();
+    log.info("Size of index meta data mappings: {}", mappings.values().size());
     val mappingIterator = mappings.values().iterator();
     val mappingMetaData = mappingIterator.next().value;
     val source = mappingMetaData.sourceAsMap();
@@ -88,7 +86,7 @@ public class IndexService {
     return (meta == null) ? emptyMap() : meta;
   }
 
-  private ImmutableOpenMap<String, MappingMetaData> getIndexMappings(Client client, String indexName) {
+  private IndexMetaData getIndexMappings(Client client, String indexName) {
     val state = client.admin().cluster().prepareState().setIndices(indexName).execute().actionGet().getState();
 
     String realIndex;
@@ -108,9 +106,7 @@ public class IndexService {
     }
 
     val stateMetaData = state.getMetaData();
-    val indexMetaData = stateMetaData.index(realIndex);
-
-    return indexMetaData.getMappings();
+    return stateMetaData.index(realIndex);
   }
 
 }
