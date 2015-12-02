@@ -94,9 +94,9 @@ public class IndexService {
     String realIndex;
     if (cache.containsKey(indexName)) {
       realIndex = (String) cache.get(indexName);
-      log.info(String.format("Cache hit for index name: '%s' with value: '%s'", indexName, realIndex));
+      log.info("Cache hit for index name: '{}' with value: '{}'", indexName, realIndex);
     } else {
-      log.info("Cache miss for index name: " + indexName);
+      log.info("Cache miss for index name: {}", indexName);
       val aliases = state.getMetaData().getAliases().get(indexName);
 
       if (aliases != null) {
