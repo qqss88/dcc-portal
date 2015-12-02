@@ -27,6 +27,8 @@ import static org.icgc.dcc.portal.model.IndexModel.Type.REPOSITORY_FILE_DONOR_TE
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.toBoolFilterFrom;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.toDonorBoolFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
+import static org.icgc.dcc.portal.util.SearchResponses.getHitIdsSet;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.Collections;
 import java.util.Map;
@@ -48,7 +50,6 @@ import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.icgc.dcc.portal.model.UnionUnit;
-import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -245,11 +246,11 @@ public class TermsLookupRepository {
     val boolFilter = toDonorBoolFilter(unionDefinition);
     val response = donorSearchRequest(boolFilter);
 
-    return SearchResponses.getHitIdsSet(response).size();
+    return getHitIdsSet(response).size();
   }
 
   private long getCountFrom(@NonNull final SearchResponse response, final long max) {
-    val result = SearchResponses.getTotalHitCount(response);
+    val result = getTotalHitCount(response);
     return min(max, result);
   }
 
