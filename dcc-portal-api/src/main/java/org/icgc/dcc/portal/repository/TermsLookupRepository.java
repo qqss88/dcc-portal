@@ -31,10 +31,12 @@ import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Min;
 
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -104,7 +106,10 @@ public class TermsLookupRepository {
   @RequiredArgsConstructor(access = PRIVATE)
   public enum TermLookupType {
 
-    GENE_IDS("gene-ids"), MUTATION_IDS("mutation-ids"), DONOR_IDS("donor-ids"), FILE_IDS("file-ids");
+    GENE_IDS("gene-ids"),
+    MUTATION_IDS("mutation-ids"),
+    DONOR_IDS("donor-ids"),
+    FILE_IDS("file-ids");
 
     @NonNull
     private final String name;
@@ -190,45 +195,25 @@ public class TermsLookupRepository {
         .lookupPath(TERMS_LOOKUP_PATH);
   }
 
-  public SearchResponse runUnionEsQuery(
-      final String indexTypeName,
-      @NonNull final SearchType searchType,
-      @NonNull final BoolFilterBuilder boolFilter,
-      final int max) {
-
+  public SearchResponse runUnionEsQuery(final String indexTypeName, @NonNull final SearchType searchType,
+      @NonNull final BoolFilterBuilder boolFilter, final int max) {
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
-
-    val search = client
-        .prepareSearch(indexName)
+    return execute("Union ES Query", false, (request) -> request
         .setTypes(indexTypeName)
         .setSearchType(searchType)
         .setQuery(query)
         .setSize(max)
-        .setNoFields();
-
-    log.debug("ElasticSearch query is: '{}'", search);
-    val response = search.execute().actionGet();
-    log.debug("ElasticSearch result is: '{}'", response);
-
-    return response;
+        .setNoFields());
   }
 
   public SearchResponse donorSearchRequest(final BoolFilterBuilder boolFilter) {
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
-
-    val search = client
-        .prepareSearch(repoIndexName, indexName)
+    return execute("Terms Lookup - Donor Search", true, (request) -> request
         .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
         .setQuery(query)
         .setSize(maxUnionCount)
         .setNoFields()
-        .setSearchType(SearchType.DEFAULT);
-
-    log.debug("ElasticSearch query is: '{}'", search);
-    val response = search.execute().actionGet();
-    log.debug("ElasticSearch result is: '{}'", response);
-
-    return response;
+        .setSearchType(SearchType.DEFAULT));
   }
 
   public long getUnionCount(
@@ -263,17 +248,25 @@ public class TermsLookupRepository {
 
   private long getCountFrom(@NonNull final SearchResponse response, final long max) {
     val result = SearchResponses.getTotalHitCount(response);
-
     return min(max, result);
   }
 
   private String createSettings() {
-    // Ensure that we fully replicate across cluster
     val settings = MAPPER.createObjectNode();
     settings.put("index.auto_expand_replicas", "0-all");
     settings.put("index.number_of_shards", "1");
 
     return settings.toString();
+  }
+
+  private SearchResponse execute(String message, Boolean multiIndex, Consumer<SearchRequestBuilder> customizer) {
+    val request = multiIndex ? client.prepareSearch(repoIndexName, indexName) : client.prepareSearch(indexName);
+    customizer.accept(request);
+
+    log.debug("{}: {}", message, request);
+    val response = request.execute().actionGet();
+    log.debug("ElasticSearch result is: '{}'", response);
+    return response;
   }
 
 }

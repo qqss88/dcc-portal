@@ -118,7 +118,7 @@ public class EntityListService {
     if (null == list) {
       log.error("No list is found for id: '{}'.", entitySetId);
     } else {
-      log.debug("Got enity list: '{}'.", list);
+      log.debug("Got entity list: '{}'.", list);
     }
 
     return list;
@@ -186,8 +186,6 @@ public class EntityListService {
     try {
       newEntity = entityListRepository.find(newEntityId);
       val dataVersion = newEntity.getVersion();
-
-      // Set status to 'in progress' for browser polling
       entityListRepository.update(newEntity.updateStateToInProgress(), dataVersion);
 
       val max = entitySetDefinition.getLimit(maxNumberOfHits);
@@ -200,7 +198,6 @@ public class EntityListService {
       termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       val count = getCountFrom(response, max);
-      // Done - update status to finished
       entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
     } catch (Exception e) {
       log.error("Error while materializing list for {}: {}", newEntityId, e);
@@ -256,7 +253,6 @@ public class EntityListService {
     termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, repoList.get(0).asText());
 
     val count = entityIds.size();
-    // Done - update status to finished
     entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
   }
 
@@ -325,7 +321,6 @@ public class EntityListService {
   }
 
   private SearchResponse executeFilterQuery(@NonNull final EntitySetDefinition definition, final int max) {
-
     log.debug("List def is: " + definition);
 
     val query = Query.builder()
@@ -333,8 +328,6 @@ public class EntityListService {
         .filters(definition.getFilters())
         .sort(definition.getSortBy())
         .order(definition.getSortOrder().getName())
-        // .size(max)
-        // .limit(max)
         .build();
 
     val type = getRepositoryByEntityType(definition.getType());
@@ -350,9 +343,7 @@ public class EntityListService {
     val setOpSettings = properties.getSetOperation();
     maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
     maxMultiplier = setOpSettings.getMaxMultiplier();
-
     maxUnionCount = maxNumberOfHits * maxMultiplier;
-
     maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
   }
 

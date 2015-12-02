@@ -115,8 +115,6 @@ public class UnionAnalyzer {
     try {
       analysis = unionAnalysisRepository.find(id);
       val dataVersion = analysis.getVersion();
-
-      // Set status to 'in progress' for browser polling
       unionAnalysisRepository.update(analysis.updateStateToInProgress(), dataVersion);
 
       val entityType = request.getType();
@@ -137,8 +135,6 @@ public class UnionAnalyzer {
       }
 
       log.debug("Result of Union Analysis is: '{}'", result);
-
-      // Done - update status to finished
       unionAnalysisRepository.update(analysis.updateStateToFinished(result), dataVersion);
     } catch (Exception e) {
       log.error("Error while calculating UnionUnitCounts for {}: {}", id, e);
@@ -171,8 +167,6 @@ public class UnionAnalyzer {
     try {
       newEntity = entityListRepository.find(newEntityId);
       val dataVersion = newEntity.getVersion();
-
-      // Set status to 'in progress' for browser polling
       entityListRepository.update(newEntity.updateStateToInProgress(), dataVersion);
 
       val definitions = entitySetDefinition.getUnion();
@@ -193,7 +187,6 @@ public class UnionAnalyzer {
       log.debug("Union result is: '{}'", entityIds);
 
       if (totalHits > maxUnionCount) {
-        // If the total hit count exceeds the allowed maximum, flag this list and quit.
         log.info(
             "Because the total hit count ({}) exceeds the allowed maximum ({}), this set operation is aborted.",
             totalHits, maxUnionCount);
@@ -204,8 +197,6 @@ public class UnionAnalyzer {
 
       val lookupType = entityType.toLookupType();
       termsLookupRepository.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
-
-      // Done - update status to finished
       entityListRepository.update(newEntity.updateStateToFinished(totalHits), dataVersion);
     } catch (Exception e) {
       log.error("Error while combining lists for {}. See exception below.", newEntityId);
@@ -230,7 +221,6 @@ public class UnionAnalyzer {
   }
 
   public Map<String, String> retrieveGeneIdsAndSymbolsByListId(final UUID listId) {
-
     return geneRepository.findGeneSymbolsByGeneListId(listId);
   }
 
@@ -251,9 +241,7 @@ public class UnionAnalyzer {
     val setOpSettings = properties.getSetOperation();
     maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
     maxMultiplier = setOpSettings.getMaxMultiplier();
-
     maxUnionCount = maxNumberOfHits * maxMultiplier;
-
     maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
   }
 
