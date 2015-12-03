@@ -192,6 +192,7 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
 
                     <!-- <th data-sortable data-type="files" data-field="fileSize">Size</th> -->
                     <th>Size</th>
+                    <th></th>
 
                 </thead>
 
@@ -233,7 +234,14 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
                     <td class="text-right" style="min-width: 6rem;">
                       {{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}
                     </td>
-
+                    
+                    <td class="text-center" valign="middle" style="min-width: 1.6rem;">
+                      <img tooltip="BAM statistics" class="iobio-popup" src="styles/images/more_sampling-orange.png" data-ng-if="ExternalRepoController.fileFormats (row.fileCopies) == 'BAM' &&
+                                                                             ExternalRepoController.awsOrCollab(row.fileCopies)"
+                          data-ng-click="ExternalRepoController.showIobioModal(row.objectId)">
+                      </img>
+                    </td>
+                    
                   </tr>
                 </tbody>
             </table>

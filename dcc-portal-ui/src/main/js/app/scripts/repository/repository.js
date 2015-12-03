@@ -169,6 +169,20 @@
 
   });
 
+  module.controller('ExternalIobioController', 
+    function($scope, $document, $modalInstance, params) {
+    
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+    
+    $scope.$on('bamready.event', function() {
+      $scope.bamId = params.fileObjectId;
+      $scope.$apply();
+    });
+    
+  });
+
   module.controller('ExternalFileDownloadController',
     function($scope, $window, $document, $modalInstance, ExternalRepoService, SetService, LocationService, params) {
 
@@ -264,7 +278,7 @@
     };
 
   });
-
+  
   /**
    * Controller for File Entity page
    */
@@ -387,7 +401,7 @@
    * External repository controller
    */
   module.controller ('ExternalRepoController', function ($scope, $window, $modal, LocationService, Page,
-    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService) {
+    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService, $rootScope) {
 
     var dataRepoTitle = RouteInfoService.get ('dataRepositories').title;
 
@@ -505,6 +519,11 @@
     _ctrl.repoNamesInTooltip = function (fileCopies) {
       return tooltipList (fileCopies, 'repoName', '');
     };
+    
+    _ctrl.awsOrCollab = function(fileCopies) {
+       return _.includes(_.pluck(fileCopies, 'repoCode'), 'aws-virginia') ||
+         _.includes(_.pluck(fileCopies, 'repoCode'), 'collaboratory');
+    };
 
     _ctrl.fileAverageSize = function (fileCopies) {
       var count = _.size (fileCopies);
@@ -595,6 +614,25 @@
             };
           }
         }
+      });
+    };
+    
+    _ctrl.showIobioModal = function(objectId) {
+      var fileObjectId = objectId;
+      var modal = $modal.open ({
+        controller: 'ExternalIobioController',
+        template: '<section style="width:1150px;" id="bam-statistics"><bamstats bam-id="bamId" on-modal=true data-ng-if="bamId"></bamstats></section>',
+        windowClass: 'iobio-modal',
+        resolve: {
+          params: function() {
+            return {
+              fileObjectId: fileObjectId
+            };
+          }
+        }
+      }).opened.then(function() {
+        setTimeout(function() { $rootScope.$broadcast('bamready.event', {});}, 300);
+        
       });
     };
 
