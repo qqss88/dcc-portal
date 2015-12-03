@@ -23,9 +23,6 @@ import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
@@ -34,6 +31,9 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.junit.Before;
 import org.junit.Test;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AggregationFiltersVisitorTest {
@@ -108,7 +108,7 @@ public class AggregationFiltersVisitorTest {
 
     // QueryNode - FilterNode - BoolNode - MustBoolNode
     // Make a clean copy of the must node
-    val mustNode = Nodes.cloneNode(filterNode.getFirstChild().getFirstChild().getFirstChild());
+    val mustNode = Nodes.cloneNode(filterNode.getFirstChild());
 
     return mustNode;
   }
