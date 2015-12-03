@@ -22,10 +22,12 @@ import static org.dcc.portal.pql.ast.function.FunctionBuilders.limit;
 import static org.dcc.portal.pql.utils.Tests.initQueryContext;
 
 import org.dcc.portal.pql.ast.StatementNode;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
@@ -38,24 +40,23 @@ public class QueryEngineTest {
   /**
    * Dependencies
    */
-  Client client = new TransportClient();
-  QueryContext context = initQueryContext();
-  QueryEngine queryEngine = new QueryEngine(client, context.getIndex());
-  ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper MAPPER = new ObjectMapper();
+  private Client client = new TransportClient();
+  private QueryContext context = initQueryContext();
+  private QueryEngine queryEngine = new QueryEngine(client, context.getIndex());
 
   @Test
   public void typesTest() {
     val query = "select(id, gender)";
-    val request = queryEngine.execute(query, context.getType()).getRequestBuilder().request();
+    val request = executeQuery(query).request();
     assertThat(request.types()).isEqualTo(new Object[] { "donor-centric" });
   }
 
   @Test
-  @SneakyThrows
   public void testSimpleSource() {
     val query = "in(gender, 'male', 'female')";
-    val request = queryEngine.execute(query, context.getType()).getRequestBuilder();
-    val sourceTree = mapper.readTree(request.toString());
+    val request = executeQuery(query);
+    val sourceTree = getSource(request);
     val mustNode = sourceTree.path("query").path("bool").path("must");
     assertThat(mustNode).isNotExactlyInstanceOf(MissingNode.class);
 
@@ -66,19 +67,18 @@ public class QueryEngineTest {
   }
 
   @Test
-  @SneakyThrows
   public void testSourceFromPqlAst() {
     val query = "in(gender, 'male', 'female')";
     StatementNode pqlAst = PqlParser.parse(query);
 
     val requestNoLimit = queryEngine.execute(pqlAst, context.getType()).getRequestBuilder();
-    val sourceTree = mapper.readTree(requestNoLimit.toString());
+    val sourceTree = getSource(requestNoLimit);
     assertThat(sourceTree.path("from")).isExactlyInstanceOf(MissingNode.class);
     assertThat(sourceTree.path("size")).isExactlyInstanceOf(MissingNode.class);
 
     pqlAst.setLimit(limit(100));
     val requestWithLimit = queryEngine.execute(pqlAst, context.getType()).getRequestBuilder();
-    val limitSourceTree = mapper.readTree(requestWithLimit.toString());
+    val limitSourceTree = getSource(requestWithLimit);
     assertThat(limitSourceTree.path("from").asText()).isEqualTo("0");
     assertThat(limitSourceTree.path("size").asText()).isEqualTo("100");
 
@@ -92,13 +92,12 @@ public class QueryEngineTest {
   }
 
   @Test
-  @SneakyThrows
   public void testSource() {
     val query = "or(gt(ageAtDiagnosis, 10), ge(ageAtEnrollment, 20.2)), "
         + "eq(diseaseStatusLastFollowup, 100), ne(relapseInterval, 200), "
         + "and(lt(ageAtLastFollowup, 30), le(intervalOfLastFollowup, 40)), in(gender, 'male', 'female')";
-    val request = queryEngine.execute(query, context.getType()).getRequestBuilder();
-    val sourceTree = mapper.readTree(request.toString());
+    val request = executeQuery(query);
+    val sourceTree = getSource(request);
     val mustNode = sourceTree.path("query").path("bool").path("must").get(0);
     assertThat(mustNode).isNotExactlyInstanceOf(MissingNode.class);
 
@@ -138,6 +137,15 @@ public class QueryEngineTest {
     assertThat(termsNode).isNotExactlyInstanceOf(MissingNode.class);
     assertThat(termsNode.path("donor_sex").get(0).asText()).isEqualTo("male");
     assertThat(termsNode.path("donor_sex").get(1).asText()).isEqualTo("female");
+  }
+
+  private SearchRequestBuilder executeQuery(String query) {
+    return queryEngine.execute(query, context.getType()).getRequestBuilder();
+  }
+
+  @SneakyThrows
+  private static JsonNode getSource(SearchRequestBuilder request) {
+    return MAPPER.readTree(request.toString());
   }
 
 }
