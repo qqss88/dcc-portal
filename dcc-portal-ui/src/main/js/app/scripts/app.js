@@ -270,7 +270,7 @@
     .config(function($provide) {
 
       // Let's decorate our $state object to inline it with this functionality
-      $provide.decorator('$state', function ($delegate, $stateParams) {
+      $provide.decorator('$state', ['$delegate', '$stateParams', function ($delegate, $stateParams) {
         $delegate.forceReload = function () {
           return $delegate.go($delegate.current, $stateParams, {
             reload: true,
@@ -279,7 +279,7 @@
           });
         };
         return $delegate;
-      });
+      }]);
 
     })
     .run(function($state, $location, $window, $timeout, $rootScope) {
@@ -313,7 +313,6 @@
           }
 
 
-          console.log('Scrolling to position: ', to);
 
           jQuery(window).scrollTop( to );
         }
@@ -349,8 +348,10 @@
 
         $window.window.history[method] = function() {
 
-          if (! $location.hash()) {
-            console.log('Restoring scroll top to original position of: 0');
+          var _h = $location.hash();
+
+          if (! _h || ! _h.match(/^!([\w\-]+)$/i)) {
+            //console.log('Restoring scroll top to original position of: 0');
             jQuery(window).scrollTop(0);
           }
 

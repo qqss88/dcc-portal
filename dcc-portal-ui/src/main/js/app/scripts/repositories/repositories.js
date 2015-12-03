@@ -39,9 +39,8 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
               isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
 
             if (isICGCCloudFunctionlityEnabled) {
-              _templateStr = '<div data-ui-view="home" data-reset-scroll="top"></div>' +
-              '<div data-ui-view="cloud-repo-content" class="cloud-repository-container" ' +
-              ' data-reset-scroll="top"></div>';
+              _templateStr = '<div data-ui-view="home"></div>' +
+                             '<div data-ui-view="cloud-repo-content" class="cloud-repository-container"></div>';
             }
 
             return _templateStr;
