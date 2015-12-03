@@ -95,6 +95,12 @@
     font-size: 1.7rem;
     font-weight: lighter;
   }
+  .test-class {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: auto;
+  }
   .panel#depth-distribution {
     -webkit-flex: 1 1 auto;
     flex: 1 1 auto;
@@ -113,7 +119,7 @@
     margin-top: 30px;
     color: #2687BE;
     img {
-      height:18px;
+      height: 18px;
     }
   }
   .panel #seq-list {
@@ -132,7 +138,6 @@
   }
   .panel #base {
     font-size: 1.5rem;
-    padding-left: 10px;
     letter-spacing: 3px;
     color: #2687BE;
     text-align: center;
@@ -145,9 +150,10 @@
     margin-right: 20px;
     min-width: 130px;
     img {
-      width:20px;
-      margin:auto;
-      cursor:pointer;
+      padding-top: 0.2rem;
+      width: 20px;
+      margin: auto;
+      cursor: pointer;
     }
   }
   #percents {
@@ -411,7 +417,7 @@
     text-decoration: underline;
   }
   .powered-by {
-    float:right;
+    float: right;
   }
   /* For mobile phones in portrait view */
   @media screen and (max-device-width:640px),
@@ -481,6 +487,23 @@
       height: 15rem;
     }
   }
+}
+
+.iobio-modal .modal-dialog .modal-content {
+  width: 1150px;
+  position: absolute;
+  left: -46%;
+  margin: auto;
+  height: 90%;
+  overflow: scroll;
+}
+
+.iobio-modal .modal-dialog {
+  height:90%;
+  -webkit-transition: width 300ms ease-in-out, height 300ms ease-in-out;
+  -moz-transition: width 300ms ease-in-out, height 300ms ease-in-out;
+  -o-transition: width 300ms ease-in-out, height 300ms ease-in-out;
+  transition: width 300ms ease-in-out, height 300ms ease-in-out;
 }
 
 #iobio-tooltip {
