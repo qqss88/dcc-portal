@@ -48,7 +48,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class PqlParseListenerTest {
+public class QueryContextTest {
 
   QueryContext context = initQueryContext();
 
