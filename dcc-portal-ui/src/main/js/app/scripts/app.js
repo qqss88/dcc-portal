@@ -265,15 +265,28 @@
   // https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
   // modified for our needs
   module
-    //.value('$anchorScroll', angular.noop)
+    .value('$anchorScroll', angular.noop)
+    // Offer a means of forcing a reload of the current state when necessary
+    .config(function($provide) {
+
+      // Let's decorate our $state object to inline it with this functionality
+      $provide.decorator('$state', function ($delegate, $stateParams) {
+        $delegate.forceReload = function () {
+          return $delegate.go($delegate.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+        };
+        return $delegate;
+      });
+
+    })
     .run(function($state, $location, $window, $timeout, $rootScope) {
 
       var _scrollTimeoutHandle = null;
 
       function scroll() {
-         //var state = $state.$current, offset, to;
-        
-        
 
         function _doInlineScroll(hash) {
           // Give angular some time to do digests then check for a
@@ -300,19 +313,19 @@
           }
 
 
+          console.log('Scrolling to position: ', to);
 
-          jQuery('body,html').scrollTop( to );
+          jQuery(window).scrollTop( to );
         }
         
         /////
-        
-        
+
+        var _hash = $location.hash();
+
         // Prevents browser window from jumping around while navigating analysis
         if (['analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
-
-        var _hash = $location.hash();
 
         // Prevent the timeout from being fired multiple times if called before previous
         // timeout is complete. Make the last request the most valid.
@@ -329,6 +342,26 @@
 
       $rootScope.$on('$viewContentLoaded', scroll);
       $rootScope.$on('$stateChangeSuccess', scroll);
+
+      function _wrapHistoryAPI(method) {
+
+        var _originalHistoryMethod = $window.window.history[method];
+
+        $window.window.history[method] = function() {
+
+          if (! $location.hash()) {
+            console.log('Restoring scroll top to original position of: 0');
+            jQuery(window).scrollTop(0);
+          }
+
+          return _originalHistoryMethod.apply(this, Array.prototype.slice.call(arguments));
+        };
+
+      }
+
+      _.map(['pushState', 'replaceState'], _wrapHistoryAPI);
+
+
       
       // Add UI Router Debug if there is a fatal state change error
       $rootScope.$on('$stateChangeError', function () { 

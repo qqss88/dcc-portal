@@ -194,7 +194,6 @@ angular.module('icgc.repositories.controllers', [])
       function _refreshData() {
          _repoDataCollectionManager.getFileSummary()
             .then(function(repoSummaryData) {
-               console.log(repoSummaryData);
                _repoSummaryData = repoSummaryData;
             });
 
@@ -203,8 +202,6 @@ angular.module('icgc.repositories.controllers', [])
             var chartProvider = RepositoriesService.getChartProvider();
             _repoStats.repoDataTypes = _repoDataCollectionManager.orderDataTypes(repoStats.stats);
               _repoStats.primarySites = chartProvider.getSiteProjectDonorChart(repoStats.donorPrimarySite);
-
-            console.log(repoStats, _repoStats.repoDataTypes, _repoStats.primarySites);
          });
 
 
