@@ -22,6 +22,7 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.ast.visitor.Visitors.createEsAstVisitor;
 import static org.dcc.portal.pql.es.utils.ParseTrees.getParser;
+import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 
 import java.util.Optional;
 
@@ -34,10 +35,8 @@ import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
-import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
-import org.dcc.portal.pql.query.PqlParseListener;
 import org.dcc.portal.pql.query.PqlParser;
 import org.dcc.portal.pql.query.QueryContext;
 
@@ -65,23 +64,17 @@ public class Tests {
     return esAst;
   }
 
-  @Deprecated
-  public static ExpressionNode createEsAst(@NonNull String query, PqlParseListener listener) {
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-    val esAst = listener.getEsAst();
-    log.debug("ES AST: - {}", esAst);
-
-    return esAst;
-  }
-
   public static ExpressionNode createEsAst(@NonNull String query) {
-    return createEsAst(query, new PqlParseListener(initQueryContext()));
+    val context = initQueryContext();
+    val pqlAst = PqlParser.parse(query);
+
+    return pqlAst.accept(createEsAstVisitor(), Optional.of(getTypeModel(context.getType())));
   }
 
   public static ExpressionNode createEsAst(@NonNull String query, @NonNull Type type) {
-    return createEsAst(query, new PqlParseListener(initQueryContext(type)));
+    val pqlAst = PqlParser.parse(query);
+
+    return pqlAst.accept(createEsAstVisitor(), Optional.of(getTypeModel(type)));
   }
 
   public static QueryContext initQueryContext() {
