@@ -71,7 +71,7 @@
   module.controller('AdvancedCtrl',
     function ($scope, $rootScope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
               AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings,
-              RouteInfoService, FacetConstants) {
+              RouteInfoService, FacetConstants, Restangular) {
 
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
@@ -89,6 +89,9 @@
         _locationFilterCache.filters(LocationService.filters());
       }
 
+      $scope.$on('$destroy', function() {
+        Restangular.abortAllHTTPRequests();
+      });
 
 
       // Cache the filters so we can use them during the several layers of promises

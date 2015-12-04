@@ -233,13 +233,14 @@
       }
     }
 
-    var aggregationAjaxAbort = null;
+    var geneDonorCountsRestangular = null;
 
     function cancelInFlightAggregationAjax () {
-      if (aggregationAjaxAbort) {
-        aggregationAjaxAbort.resolve();
-        aggregationAjaxAbort = null;
+
+      if (geneDonorCountsRestangular) {
+        geneDonorCountsRestangular.cancelRequest();
       }
+
     }
 
     function success (data) {
@@ -301,11 +302,14 @@
 
           Page.stopWork();
 
-          aggregationAjaxAbort = $q.defer();
+          geneDonorCountsRestangular = Restangular
+                                        .one('ui')
+                                        .one('search')
+                                        .one('gene-project-donor-counts', _.pluck (genes.hits, 'id'));
+
           _ctrl.isLoadingData = true;
 
-          Restangular.one ('ui').one('search').one('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
-            .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
+          geneDonorCountsRestangular
             .get ({'filters': mutationFilter})
             .then (function (geneProjectFacets) {
 
@@ -331,7 +335,7 @@
 
               _ctrl.isLoadingData = false;
               _ctrl.stacked = transform (genes.hits);
-              aggregationAjaxAbort = null;
+              geneDonorCountsRestangular = null;
             });
         });
 

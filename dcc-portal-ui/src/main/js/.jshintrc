@@ -16,7 +16,7 @@
   "unused": true,
   "strict": true,
   "trailing": true,
-  "maxparams": 15,
+  "maxparams": 16,
   "maxdepth": 5,
   "maxcomplexity": 13,
   "maxlen": 120,
