@@ -619,9 +619,10 @@
     
     _ctrl.showIobioModal = function(objectId) {
       var fileObjectId = objectId;
-      var modal = $modal.open ({
+      $modal.open ({
         controller: 'ExternalIobioController',
-        template: '<section style="width:1150px;" id="bam-statistics"><bamstats bam-id="bamId" on-modal=true data-ng-if="bamId"></bamstats></section>',
+        template: '<section style="width:1150px;" id="bam-statistics">'+
+          '<bamstats bam-id="bamId" on-modal=true data-ng-if="bamId"></bamstats></section>',
         windowClass: 'iobio-modal',
         resolve: {
           params: function() {
