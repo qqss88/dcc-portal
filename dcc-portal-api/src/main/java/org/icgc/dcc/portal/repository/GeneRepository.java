@@ -358,7 +358,7 @@ public class GeneRepository implements Repository {
     val request = client.prepareSearch(index).setTypes(indexType);
     customizer.accept(request);
 
-    log.debug(logMessage + "; ES query is: '{}'", request);
+    log.debug("{}; ES query is: '{}'", logMessage, request);
     return request.execute().actionGet();
   }
 

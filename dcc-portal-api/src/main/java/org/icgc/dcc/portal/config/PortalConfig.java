@@ -116,7 +116,7 @@ public class PortalConfig {
   @PostConstruct
   public void initCache() {
     occurrenceService.init();
-    geneService.initializeEnsemblIdGeneSymbolMap();
+    geneService.init();
   }
 
   @Bean

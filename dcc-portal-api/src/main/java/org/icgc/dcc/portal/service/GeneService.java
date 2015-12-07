@@ -244,7 +244,7 @@ public class GeneService {
   }
 
   @Async
-  public void initializeEnsemblIdGeneSymbolMap() {
+  public void init() {
     try {
       log.debug("Building EnsemblId-to-GeneSymbol lookup table...");
 
