@@ -1,8 +1,8 @@
-<div data-ng-if="!AdvancedCtrl.Donor.donors || ! AdvancedCtrl.Donor.donors.hitsLoaded" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
+<div data-ng-if="!AdvancedCtrl.Donor.donors || ! AdvancedCtrl.Donor.hitsLoaded" class="loading loading-text"><h3><i class="icon-spinner icon-spin"></i>
     Loading Donors...
 </h3></div>
-<div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0 && AdvancedCtrl.Donor.donors.hitsLoaded" class="empty loading-text"><h3>No Donors Found.</h3></div>
-<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length && AdvancedCtrl.Donor.donors.hitsLoaded">
+<div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0 && AdvancedCtrl.Donor.hitsLoaded" class="empty loading-text"><h3>No Donors Found.</h3></div>
+<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length && AdvancedCtrl.Donor.hitsLoaded">
     <section style="position: relative">
         <div data-ng-class="{'graphs-collapsed': !donorExpand}" class="graphs">
             <pie items='AdvancedCtrl.Donor.pieProjectId' heading="Project" label="Donors" type="pie" width="195" group-percent="3"

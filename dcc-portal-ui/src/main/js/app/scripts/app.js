@@ -284,7 +284,8 @@
 
       $provide.decorator('Restangular', ['$delegate', '$q',  function($delegate, $q) {
 
-        var _cancellableRequests = {};
+        var _cancellableRequests = {},
+            _withHttpConfigFnCache = null;
 
         function _deletePromiseAbortCache(deferredKey) {
 
@@ -398,14 +399,21 @@
 
 
         function _wrapRestangular(restangularObj) {
+
+
+          // Keep the original untouched function
+          if (angular.isDefined(restangularObj.withHttpConfig) && ! _withHttpConfigFnCache) {
+            _withHttpConfigFnCache = restangularObj.withHttpConfig;
+          }
+
           restangularObj.one = _.bind(_wrapRequest(restangularObj.one), restangularObj);
           restangularObj.all = _.bind(_wrapRequest(restangularObj.all), restangularObj);
 
-          var withHttpConfigFn = restangularObj.withHttpConfig;
+
 
           // Wrap the config
           restangularObj.withHttpConfig = function() {
-            var restangularObject = withHttpConfigFn.apply(this, Array.prototype.slice.call(arguments));
+            var restangularObject = _withHttpConfigFnCache.apply(this, Array.prototype.slice.call(arguments));
 
             _wrapRestangular(restangularObject);
 
@@ -413,7 +421,6 @@
           };
 
         }
-
 
         function _init() {
           _wrapRestangular($delegate);
