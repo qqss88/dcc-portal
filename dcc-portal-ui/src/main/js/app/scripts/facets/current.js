@@ -21,12 +21,12 @@
   var module = angular.module ('icgc.facets.current', []);
 
   module.controller('currentCtrl',
-    function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page) {
-    
+    function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page, GeneSymbols) {
+
     $scope.Page = Page;
     $scope.Facets = Facets;
     $scope.Extensions = Extensions;
-   
+
     var donorSetFiltersInRepositoryFile = [{
       term: 'Uploaded donor set',
       controlTerm: 'Uploaded donor set',
@@ -70,16 +70,43 @@
     };
 
 
+    function resolveActiveGeneIds (filters) {
+      var activeGeneIds = _(_.get (filters, 'gene.id.is', []))
+        .filter ({controlFacet: 'id', controlType: 'gene'})
+        .map ('term')
+        .value();
+
+      if (_.isEmpty (activeGeneIds)) {
+        $scope.ensemblIdGeneSymbolMap = {};
+        return;
+      }
+
+      GeneSymbols.resolve (activeGeneIds).then (function (ensemblIdGeneSymbolMap) {
+        $scope.ensemblIdGeneSymbolMap = ensemblIdGeneSymbolMap.plain();
+      });
+    }
+
+    $scope.resolveGeneSymbols = function (type, term) {
+      if ('gene' !== type) {
+        return term;
+      }
+
+      return _.get ($scope.ensemblIdGeneSymbolMap, term, term);
+    };
+
     function refresh() {
       var currentFilters = LocationService.filters();
       var ids = LocationService.extractSetIds(currentFilters);
 
       if (ids.length > 0) {
         SetService.getMetaData(ids).then(function(results) {
-          $scope.filters = FiltersUtil.buildUIFilters(currentFilters, SetService.lookupTable(results));
+          $scope.filters = FiltersUtil.buildUIFilters (currentFilters,
+            SetService.lookupTable (results.plain()));
+          resolveActiveGeneIds ($scope.filters);
         });
       } else {
         $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
+        resolveActiveGeneIds ($scope.filters);
       }
 
       // If we have filters then show the filter query directive

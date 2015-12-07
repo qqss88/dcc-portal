@@ -26,6 +26,10 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.common.client.api.ICGCClient;
@@ -56,6 +60,7 @@ import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.icgc.dcc.portal.repository.PhenotypeAnalysisRepository;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
+import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.service.SessionService;
 import org.openid4java.consumer.ConsumerManager;
@@ -77,10 +82,6 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-
 @Lazy
 @EnableAsync
 @Configuration
@@ -90,7 +91,10 @@ public class PortalConfig {
   private PortalProperties properties;
 
   @Autowired
-  private OccurrenceService service;
+  private OccurrenceService occurrenceService;
+
+  @Autowired
+  private GeneService geneService;
 
   @Bean
   public DownloaderClient dynamicDownloader() {
@@ -111,8 +115,8 @@ public class PortalConfig {
 
   @PostConstruct
   public void initCache() {
-    service.init();
-
+    occurrenceService.init();
+    geneService.initializeEnsemblIdGeneSymbolMap();
   }
 
   @Bean
