@@ -366,9 +366,14 @@ a.no-style {
 }
 
 .iobio-popup {
+  color:#e9931c;
+  transition: color .5s, border .5s;
   width:18px;
   vertical-align:middle;
   cursor: pointer;
+  &:hover {
+    color:#ce6503;
+  }
 }
 
 /******/

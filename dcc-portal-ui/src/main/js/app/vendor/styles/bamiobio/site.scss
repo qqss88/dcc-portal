@@ -1,7 +1,13 @@
 #bam-statistics {
+  $primary-text-color: #2687BE;
+  $primary-color: #2d8fc1;
+  $primary-rgba-color: rgba(45, 143, 193, 0.2);
+  //  $primary-text-color: #638f56;
+  //  $primary-color: #638f56;
+  //  $primary-rgba-color: rgba(99, 143, 86, 0.2);  
   header {
     font-size: 46px;
-    color: #2d8fc1;
+    color: $primary-color;
     text-align: left;
   }
   header a:visited {
@@ -9,24 +15,11 @@
   }
   header a {
     text-decoration: none;
-    color: #2d8fc1;
+    color: $primary-color;
   }
   a {
     text-decoration: none;
-    color: #2d8fc1;
-  }
-  header .iobio-project {
-    font-size: 18px;
-    letter-spacing: 6px;
-    margin-top: 8px;
-    margin-right: 33px;
-    color: rgb(120, 120, 120)
-  }
-  header .iobio-project a {
-    color: rgb(120, 120, 120)
-  }
-  header .iobio-project a:hover {
-    color: #2d8fc1;
+    color: $primary-color;
   }
   .file {
     width: 250px;
@@ -36,7 +29,7 @@
     border-radius: 4px;
     width: 250px;
     float: right;
-    background: #2d8fc1;
+    background: $primary-color;
     padding: 22px 30px;
     color: #fff;
     font-size: 24px;
@@ -117,7 +110,7 @@
   .panel #readDepthLoadingMsg {
     font-size: 50px;
     margin-top: 30px;
-    color: #2687BE;
+    color: $primary-text-color;
     img {
       height: 18px;
     }
@@ -139,7 +132,7 @@
   .panel #base {
     font-size: 1.5rem;
     letter-spacing: 3px;
-    color: #2687BE;
+    color: $primary-text-color;
     text-align: center;
   }
   .panel#total-reads {
@@ -150,6 +143,7 @@
     margin-right: 20px;
     min-width: 130px;
     img {
+      visibility: hidden;
       padding-top: 0.2rem;
       width: 20px;
       margin: auto;
@@ -210,11 +204,11 @@
   }
   #percents .percent {
     -webkit-flex: 1 1 39%;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: lighter;
     flex: 1 1 30%;
     position: relative;
-    min-width: 148px;
+    min-width: 142px;
     min-height: 160px;
   }
   #percents .percent text {
@@ -241,7 +235,7 @@
     /*padding: 0px 15px 0px 15px*/
   }
   .bar rect {
-    fill: #2d8fc1;
+    fill: $primary-color;
     shape-rendering: crispEdges;
   }
   .bar rect.unselected {
@@ -273,10 +267,10 @@
     fill: rgb(180, 180, 180);
   }
   .arc .fill {
-    fill: #2d8fc1
+    fill: $primary-color
   }
   .alpha {
-    fill: rgba(45, 143, 193, 0.2);
+    fill: $primary-rgba-color;
   }
   .arc .percent {
     fill: rgb(100, 100, 100);
@@ -289,47 +283,6 @@
     font-weight: 400;
     fill: rgb(200, 200, 200);
     color: rgb(200, 200, 200);
-  }
-  .arrow_box {
-    position: relative;
-    background: #ffffff;
-    border: 2px solid #2d8fc1;
-    border-radius: 4px;
-  }
-  .arrow_box:after,
-  .arrow_box:before {
-    bottom: 100%;
-    border: solid transparent;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-  }
-  .arrow_box:after {
-    border-color: rgba(255, 255, 255, 0);
-    border-bottom-color: #ffffff;
-    border-width: 20px;
-    left: 78%;
-    margin-left: -20px;
-  }
-  .arrow_box:before {
-    border-color: rgba(45, 143, 193, 0);
-    border-bottom-color: #2d8fc1;
-    border-width: 23px;
-    left: 78%;
-    margin-left: -23px;
-  }
-  .arrow_box input {
-    border: none;
-    outline: none;
-    width: 610px;
-    margin: 8px;
-    color: #2d8fc1;
-    font: 300 30px quicksand;
-  }
-  .arrow_box button {
-    font: 300 28px quicksand;
   }
   .brush .extent {
     stroke: #000;
@@ -347,8 +300,8 @@
     /*                text-align: right;*/
   }
   .chart-chooser .selected {
-    color: #2d8fc1;
-    border-bottom: 1px solid #2d8fc1
+    color: $primary-color;
+    border-bottom: 1px solid $primary-color
   }
   .chart-chooser span {
     margin: 0px 5px 0px 5px;
@@ -364,21 +317,21 @@
     margin-right: 6px;
     padding: 0px 20px 0px 20px;
     border-radius: 3px;
-    color: #2d8fc1;
+    color: $primary-color;
     font-family: helvetica;
     font-size: 0.6em;
-    border: 1px solid #2d8fc1;
+    border: 1px solid $primary-color;
     cursor: pointer;
     cursor: hand;
   }
   .seq-buttons.selected {
-    background: #2d8fc1;
+    background: $primary-color;
     color: white;
   }
   .samplingLoader {
     font-size: 14px;
     font-weight: lighter;
-    color: #2687BE;
+    color: $primary-text-color;
     position: absolute;
     width: 100%;
     margin-top: 70px;
@@ -413,8 +366,28 @@
   }
   #footer a {
     color: rgb(110, 110, 110);
-    color: #2d8fc1;
+    color: $primary-color;
     text-decoration: underline;
+  }
+  .checkbox.checked,
+  .radio.checked {
+    color: $primary-color;
+    transition: color 0.5s;
+  }
+  .read-depth-path {
+    stroke: $primary-color;
+    fill: none;
+  }
+  #value {
+    position: relative;
+    font-size: 4rem;
+    color: $primary-text-color;
+    text-align: center;
+    padding-top: 2rem;
+  }
+  .anchor {
+    position: relative;
+    top: -10px;
   }
   .powered-by {
     float: right;
@@ -494,12 +467,16 @@
   position: absolute;
   left: -46%;
   margin: auto;
-  height: 90%;
-  overflow: scroll;
+  height: 95%;
+  overflow: hidden;
+  .modal-body {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+  }
 }
 
 .iobio-modal .modal-dialog {
-  height:90%;
+  height: 95%;
   -webkit-transition: width 300ms ease-in-out, height 300ms ease-in-out;
   -moz-transition: width 300ms ease-in-out, height 300ms ease-in-out;
   -o-transition: width 300ms ease-in-out, height 300ms ease-in-out;
@@ -509,7 +486,6 @@
 #iobio-tooltip {
   position: absolute;
   text-align: center;
-  z-index: 20;
   color: white;
   padding: 4px 6px 4px 6px;
   font: 11px arial;
@@ -517,4 +493,5 @@
   border: 0px;
   border-radius: 4px;
   pointer-events: none;
+  z-index: 1061;
 }

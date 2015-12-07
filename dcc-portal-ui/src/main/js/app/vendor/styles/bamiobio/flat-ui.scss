@@ -115,11 +115,6 @@
   cursor:pointer;
   filter: alpha(opacity=100);
 }
-.checkbox.checked,
-.radio.checked {
-  color: #1693c0;
-  transition: color 0.5s;
-}
 .checkbox.checked .icons,
 .radio.checked .icons {
   color: #166aa2;

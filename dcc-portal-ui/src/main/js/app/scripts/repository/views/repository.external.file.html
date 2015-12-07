@@ -293,7 +293,8 @@
   </div>
 </section>
 <section id="bam-statistics" data-ng-if="fileCopies[0].fileFormat == 'BAM' && fileCtrlr.awsOrCollab(fileCopies)">
-  <bamstats bam-id="info.objectId" data-ng-if="fileCopies[0].fileFormat == 'BAM' && fileCtrlr.awsOrCollab(fileCopies)"></bamstats>
+    <h3>BAM Stats</h3>
+    <bamstats bam-id="info.objectId" on-modal="false" data-ng-if="fileCopies[0].fileFormat == 'BAM' && fileCtrlr.awsOrCollab(fileCopies)"></bamstats>
 </section>
 </article>
 </div>

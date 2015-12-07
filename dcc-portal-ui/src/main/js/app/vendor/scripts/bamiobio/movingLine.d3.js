@@ -87,8 +87,6 @@ function movingLineD3(container) {
          var path = svg.append("path")
            .attr('class', "read-depth-path")
            .attr("d", line(data))
-           .attr("stroke", "steelblue")
-           .attr("fill", "none");
 
          var totalLength = path.node().getTotalLength();
 
