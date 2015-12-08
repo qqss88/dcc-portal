@@ -444,9 +444,6 @@
           _cancellableRequests = {};
         };
 
-
-
-
         return $delegate;
       }]);
 

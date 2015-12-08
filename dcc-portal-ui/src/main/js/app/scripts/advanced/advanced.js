@@ -168,7 +168,8 @@ angular.module('icgc.advanced.controllers', [
 
               serviceObj.service.isRendered = true;
 
-              if (_controller.loadingFacet && serviceObj.controllerUIActive) {
+              if (serviceObj.controllerUIActive) {
+                serviceObj.service.renderBodyTab();
                 _controller.loadingFacet = false;
               }
              
@@ -211,7 +212,7 @@ angular.module('icgc.advanced.controllers', [
         _controller.hasGeneFilter = angular.isObject(filters) ?  filters.hasOwnProperty('gene') : false;
       }
 
-      function _renderTab(tab) {
+      function _renderTab(tab, forceFullRefresh) {
         var service = null;
 
         switch(tab) {
@@ -224,8 +225,12 @@ angular.module('icgc.advanced.controllers', [
             break;
         }
 
-        if (! _.get(service, 'isRendered', false) ) {
-          service.renderBodyTab.apply(_controller);
+        if (forceFullRefresh === true) {
+          service.isRendered = false;
+          _refresh();
+        }
+        else {
+          service.renderBodyTab();
         }
       }
 
@@ -235,13 +240,11 @@ angular.module('icgc.advanced.controllers', [
 
       function _resetServices() {
         var serviceIds = _.keys(_serviceMap);
-        console.log(serviceIds);
 
         for (var i = 0; i < serviceIds.length; i++) {
           _serviceMap[serviceIds[i]].isRendered = false;
         }
 
-        console.log(_serviceMap);
       }
 
 
@@ -258,6 +261,23 @@ angular.module('icgc.advanced.controllers', [
         // we perform
         _refreshFilterCache();
 
+        $scope.$watch(function() {
+          var queryParams = LocationService.search(),
+              pagingTypes = ['donors', 'genes', 'mutations'];
+
+          var str = _.reduce(pagingTypes, function(concatStr, type) {
+            return concatStr + (queryParams[type] ?  (type + queryParams[type]) : '');
+          }, '');
+
+          return str;
+        },
+          function(newVal, oldVal) {
+          if (newVal !== oldVal) {
+              _renderTab($state.current.data.tab, true);
+            console.log('paging!');
+          }
+        });
+
         $scope.$watch(
           function() {
             return JSON.stringify(LocationService.filters());
@@ -269,6 +289,7 @@ angular.module('icgc.advanced.controllers', [
 
             _refreshFilterCache();
             _resetServices();
+            _refresh();
           }
 
         );
@@ -291,9 +312,6 @@ angular.module('icgc.advanced.controllers', [
 
           _controller.loadingFacet = true;
 
-
-          _resetServices();
-          _refresh();
         });
 
         Settings.get().then(function(settings) {
@@ -303,11 +321,12 @@ angular.module('icgc.advanced.controllers', [
         // Refresh when filters change
         // Data is cached so refreshing on tab switch
         // should be free
-        $scope.$on('$locationChangeSuccess', function (event, next) {
+        /*$scope.$on('$locationChangeSuccess', function (event, next) {
           if (next.indexOf('search') !== -1) {
+            _resetServices();
             _refresh();
           }
-        });
+        });*/
 
         $scope.$on('$destroy', function() {
           Restangular.abortAllHTTPRequests();
@@ -322,6 +341,7 @@ angular.module('icgc.advanced.controllers', [
         $scope.$watch(function () {
           return $state.current.data.tab;
         }, function () {
+          //alert($state.current.data.tab);
           _controller.setTab($state.current.data.tab);
         });
         $scope.$watch(function () {
@@ -522,73 +542,12 @@ angular.module('icgc.advanced.controllers', [
         });
       }
 
+      function _processDonorHits() {
 
+        if (! _.get(_ASDonorService, 'donors.hits.length', false)) {
+          return;
+        }
 
-      function _initDonors(donors) {
-        var filters =_locationFilterCache.filters();
-        //Page.stopWork();
-        _ASDonorService.isLoading = false;
-
-         //console.log('Stop Donor Work!');
-
-        donors.hits.forEach(function (donor) {
-          donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
-
-          // Remove donor entity set because donor id is the key
-          if (donor.embedQuery.hasOwnProperty('donor')) {
-            var donorFilters = donor.embedQuery.donor;
-            delete donorFilters[Extensions.ENTITY];
-          }
-
-        // Proper encode
-        donor.embedQuery = encodeURIComponent(JSON.stringify(donor.embedQuery));
-
-      });
-
-
-
-      _ASDonorService.donors = donors;
-
-    }
-
-    ///////////////////////////////////////////////////////////////////////
-    // Donor Public API
-    ///////////////////////////////////////////////////////////////////////
-    _ASDonorService.init = function () {
-      var deferred = $q.defer();
-      _ASDonorService.isLoading = true;
-      _ASDonorService.hitsLoaded = false;
-
-      //console.log('Start Donor Work!');
-      var params = LocationService.getJsonParam('donors');
-      params.include = 'facets';
-      params.facetsOnly = true;
-      params.filters = _locationFilterCache.filters();
-
-      Donors.getList(params).then(function (facetDonorList) {
-
-        deferred.resolve();
-
-        delete params.facetsOnly;
-        delete params.include;
-        _initFacets(facetDonorList.facets);
-
-        Donors.getList(params).then(function(hitsDonorList) {
-          facetDonorList.hits =  hitsDonorList.hits;
-          _ASDonorService.hitsLoaded = true;
-          _initDonors(facetDonorList);
-
-          if (_.get(facetDonorList, 'hits.length', false)) {
-            _ASDonorService.renderBodyTab();
-          }
-        });
-      });
-
-      return deferred.promise;
-    };
-
-    _ASDonorService.renderBodyTab = function () {
-      if (AdvancedSearchTabs.isTab('donor') && _.get(_ASDonorService, 'donors.hits.length', false)) {
         _ASDonorService.mutationCounts = null;
 
         Donors
@@ -601,6 +560,82 @@ angular.module('icgc.advanced.controllers', [
           });
 
       }
+
+      function _initDonors() {
+        var params = LocationService.getJsonParam('donors'),
+            filters = _locationFilterCache.filters() || {},
+            deferred = $q.defer();
+
+        params.filters = filters;
+        _ASDonorService.isLoading = true;
+
+
+        Donors.getList(params).then(function(hitsDonorList) {
+          _ASDonorService.donors.hits = hitsDonorList.hits;
+          _ASDonorService.hitsLoaded = true;
+
+          _ASDonorService.donors.hits.forEach(function (donor) {
+            donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
+
+            // Remove donor entity set because donor id is the key
+            if (donor.embedQuery.hasOwnProperty('donor')) {
+              var donorFilters = donor.embedQuery.donor;
+              delete donorFilters[Extensions.ENTITY];
+            }
+
+            // Proper encode
+            donor.embedQuery = encodeURIComponent(JSON.stringify(donor.embedQuery));
+
+          });
+
+          console.log(_ASDonorService.donors);
+
+        })
+        .finally(function() {
+          _ASDonorService.isLoading = false;
+          deferred.resolve();
+        });
+
+      return deferred.promise;
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Donor Public API
+    ///////////////////////////////////////////////////////////////////////
+    _ASDonorService.init = function () {
+
+      var deferred = $q.defer();
+
+      _ASDonorService.isLoading = true;
+
+      if (angular.isDefined(_ASDonorService.donors)) {
+        _ASDonorService.donors.hits = [];
+        _ASDonorService.hitsLoaded = false;
+      }
+
+      var params = LocationService.getJsonParam('donors');
+
+      params.include = 'facets';
+      params.facetsOnly = true;
+      params.filters = _locationFilterCache.filters();
+
+      Donors.getList(params).then(function (facetDonorList) {
+        _ASDonorService.isLoading = false;
+
+        _initFacets(facetDonorList.facets);
+
+        _ASDonorService.donors = facetDonorList.plain(); // Build the partial object
+
+        deferred.resolve();
+      });
+
+      return deferred.promise;
+    };
+
+
+
+    _ASDonorService.renderBodyTab = function () {
+        _initDonors().then(_processDonorHits);
     };
 
   })
@@ -611,7 +646,7 @@ angular.module('icgc.advanced.controllers', [
       var _ASGeneService = this;
 
       _ASGeneService.projectGeneQuery = function(projectId, geneId) {
-        var filters = _locationFilterCache.filters();
+        var filters = _locationFilterCache.filters() || {};
 
         if (filters.hasOwnProperty('gene')) {
           delete filters.gene.id;
@@ -636,195 +671,177 @@ angular.module('icgc.advanced.controllers', [
       };
 
 
+    function _processGeneHits() {
+
+      if (! _.get(_ASGeneService, 'genes.hits.length', false)) {
+        return;
+      }
+
+      _ASGeneService.mutationCounts = null;
+
+      var geneIds = _.pluck(_ASGeneService.genes.hits, 'id').join(',');
+      var projectCachePromise = ProjectCache.getData();
 
 
-    function _initGenes(genes) {
-      _ASGeneService.isLoading = false;
-      _ASGeneService.genes = null;
-     
-      //console.log('Stop Gene Work!');
-      
-      genes.hits.forEach(function (gene) {
-        var filters = _locationFilterCache.filters();
-        gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
+      // Get Mutations counts
+      Genes.one(geneIds).handler
+        .one('mutations', 'counts')
+        .get({filters: _locationFilterCache.filters()})
+        .then(function (data) {
+          _ASGeneService.mutationCounts = data;
+        });
 
-        // Remove gene entity set because gene id is the key
-        if (gene.embedQuery.hasOwnProperty('gene')) {
-          var geneFilters = gene.embedQuery.gene;
-          delete geneFilters[Extensions.ENTITY];
-        }
 
-        // Proper encode
-        gene.embedQuery = encodeURIComponent(JSON.stringify(gene.embedQuery));
+      // Need to get SSM Test Donor counts from projects
+      Projects.getList().then(function (projects) {
+        _ASGeneService.genes.hits.forEach(function (gene) {
 
+          var geneFilter = _locationFilterCache.filters();
+          if (geneFilter.hasOwnProperty('gene')) {
+            delete geneFilter.gene[ Extensions.ENTITY ];
+            delete geneFilter.gene.id;
+            geneFilter.gene.id = {
+              is: [gene.id]
+            };
+          } else {
+            geneFilter.gene = {
+              id: {
+                is: [gene.id]
+              }
+            };
+          }
+
+          Donors
+            .getList({
+              size: 0,
+              include: 'facets',
+              filters: geneFilter
+            })
+            .then(function (data) {
+              gene.uiDonors = [];
+              if (data.facets.projectId.terms) {
+
+                var _f = _locationFilterCache.filters();
+                if (_f.hasOwnProperty('donor')) {
+                  delete _f.donor.projectId;
+                  if (_.isEmpty(_f.donor)) {
+                    delete _f.donor;
+                  }
+                }
+                if (_f.hasOwnProperty('gene')) {
+                  delete _f.gene[ Extensions.ENTITY ];
+                  if (_.isEmpty(_f.gene)) {
+                    delete _f.gene;
+                  }
+                }
+
+
+                gene.uiDonorsLink = LocationService.toURLParam(
+                  LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet')
+                );
+
+                gene.uiDonors = data.facets.projectId.terms;
+                gene.uiDonors.forEach(function (facet) {
+                  var p = _.find(projects.hits, function (item) {
+                    return item.id === facet.term;
+                  });
+
+                  projectCachePromise.then(function(lookup) {
+                    facet.projectName = lookup[facet.term] || facet.term;
+                  });
+
+                  facet.countTotal = p.ssmTestedDonorCount;
+                  facet.percentage = facet.count / p.ssmTestedDonorCount;
+                });
+
+                // This is just used for gene CSV export, it is unwieldly to do it in the view
+                gene.uiDonorsExportString = gene.uiDonors.map(function(d) {
+                  return d.term + ':' + d.count + '/' +  d.countTotal;
+                }).join('|');
+              }
+            });
+        });
+      });
+    }
+
+    function _initGenes() {
+
+      var params = LocationService.getJsonParam('genes'),
+          filters = _locationFilterCache.filters() || {},
+          deferred = $q.defer();
+
+      _ASGeneService.isLoading = true;
+
+      Genes.getList(params).then(function(hitsGenesList) {
+
+        _ASGeneService.genes.hits = hitsGenesList.hits;
+        _ASGeneService.hitsLoaded = true;
+
+        _ASGeneService.genes.hits.forEach(function (gene) {
+
+          gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
+
+          // Remove gene entity set because gene id is the key
+          if (gene.embedQuery.hasOwnProperty('gene')) {
+            var geneFilters = gene.embedQuery.gene;
+            delete geneFilters[Extensions.ENTITY];
+          }
+
+          // Proper encode
+          gene.embedQuery = encodeURIComponent(JSON.stringify(gene.embedQuery));
+
+        });
+
+      })
+      .finally(function() {
+        _ASGeneService.isLoading = false;
+        deferred.resolve();
       });
 
-      _ASGeneService.genes = genes;
-
+      return deferred.promise;
     }
 
       ///////////////////////////////////////////////////////////////////////
       // Genes Public API
       ///////////////////////////////////////////////////////////////////////
       _ASGeneService.init = function () {
+
         var deferred = $q.defer();
 
         _ASGeneService.isLoading = true;
-        _ASGeneService.hitsLoaded = false;
-        //console.log('Start Gene Work!');
+
+        if (angular.isDefined(_ASGeneService.genes)) {
+          _ASGeneService.genes.hits = [];
+          _ASGeneService.hitsLoaded = false;
+        }
+
         var params = LocationService.getJsonParam('genes');
+
         params.include = 'facets';
         params.facetsOnly = true;
 
         Genes.getList(params).then(function (facetGeneList) {
+          _ASGeneService.isLoading = false;
+          _ASGeneService.genes = facetGeneList.plain(); // Build the partial object
+
           deferred.resolve();
-
-          delete params.facetsOnly;
-          delete params.include;
-          console.log(facetGeneList.facets);
-
-
-          Genes.getList(params).then(function(hitsGenesList) {
-
-            facetGeneList.hits =  hitsGenesList.hits;
-            _ASGeneService.hitsLoaded = true;
-
-            _initGenes(facetGeneList);
-            var geneHitsLength = _.get(facetGeneList, 'hits.length', false);
-
-            if (geneHitsLength) {
-              _ASGeneService.renderBodyTab();
-            }
-          });
         });
       
         return deferred.promise;
     };
 
       _ASGeneService.renderBodyTab = function () {
-
-        if (AdvancedSearchTabs.isTab('gene') && _.get(_ASGeneService, 'genes.hits.length', false)) {
-          _ASGeneService.mutationCounts = null;
-          var geneIds = _.pluck(_ASGeneService.genes.hits, 'id').join(',');
-          var projectCachePromise = ProjectCache.getData();
-
-
-          // Get Mutations counts
-          Genes.one(geneIds).handler
-            .one('mutations', 'counts')
-            .get({filters: _locationFilterCache.filters()})
-            .then(function (data) {
-              _ASGeneService.mutationCounts = data;
-            });
-
-
-          // Need to get SSM Test Donor counts from projects
-          Projects.getList().then(function (projects) {
-            _ASGeneService.genes.hits.forEach(function (gene) {
-
-              var geneFilter = _locationFilterCache.filters();
-              if (geneFilter.hasOwnProperty('gene')) {
-                delete geneFilter.gene[ Extensions.ENTITY ];
-                delete geneFilter.gene.id;
-                geneFilter.gene.id = {
-                  is: [gene.id]
-                };
-              } else {
-                geneFilter.gene = {
-                  id: {
-                    is: [gene.id]
-                  }
-                };
-              }
-
-              Donors
-                .getList({
-                  size: 0,
-                  include: 'facets',
-                  filters: geneFilter
-                })
-                .then(function (data) {
-                  gene.uiDonors = [];
-                  if (data.facets.projectId.terms) {
-
-                    var _f = _locationFilterCache.filters();
-                    if (_f.hasOwnProperty('donor')) {
-                      delete _f.donor.projectId;
-                      if (_.isEmpty(_f.donor)) {
-                        delete _f.donor;
-                      }
-                    }
-                    if (_f.hasOwnProperty('gene')) {
-                      delete _f.gene[ Extensions.ENTITY ];
-                      if (_.isEmpty(_f.gene)) {
-                        delete _f.gene;
-                      }
-                    }
-
-
-                    gene.uiDonorsLink = LocationService.toURLParam(
-                      LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet')
-                    );
-
-                    gene.uiDonors = data.facets.projectId.terms;
-                    gene.uiDonors.forEach(function (facet) {
-                      var p = _.find(projects.hits, function (item) {
-                        return item.id === facet.term;
-                      });
-
-                      projectCachePromise.then(function(lookup) {
-                        facet.projectName = lookup[facet.term] || facet.term;
-                      });
-
-                      facet.countTotal = p.ssmTestedDonorCount;
-                      facet.percentage = facet.count / p.ssmTestedDonorCount;
-                    });
-
-                    // This is just used for gene CSV export, it is unwieldly to do it in the view
-                    gene.uiDonorsExportString = gene.uiDonors.map(function(d) {
-                      return d.term + ':' + d.count + '/' +  d.countTotal;
-                    }).join('|');
-                  }
-                });
-            });
-          });
-        }
+          _initGenes().then(_processGeneHits);
       };
   })
   .service('AdvancedMutationService', function (Page, LocationService, HighchartsService, Mutations,
     Occurrences, Projects, Donors, AdvancedSearchTabs, Extensions, ProjectCache, $q) {
 
-      var _ASMutationService = this,
-          _projectCachePromise = ProjectCache.getData();
+    var _ASMutationService = this,
+        _projectCachePromise = ProjectCache.getData();
 
 
-      function _initMutations(mutations) {
-        _ASMutationService.isLoading = false;
-        //console.log('Stop Mutation Work!');
-         
-        mutations.hits.forEach(function (mutation) {
-          var filters = _locationFilterCache.filters();
-          mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
 
-          // Remove mutation entity set because mutation id is the key
-          if (mutation.embedQuery.hasOwnProperty('mutation')) {
-            var mutationFilters = mutation.embedQuery.mutation;
-            delete mutationFilters[Extensions.ENTITY];
-          }
-
-          // Proper encode
-          mutation.embedQuery = encodeURIComponent(JSON.stringify(mutation.embedQuery));
-
-        });
-
-        _ASMutationService.mutations = mutations;
-
-        var mutationHitsLength = _.get(mutations, 'hits.length', false);
-
-        if (mutationHitsLength) {
-          _ASMutationService.renderBodyTab();
-        }
-      }
 
     function _initOccurrences(occurrences) {
         occurrences.hits.forEach(function(occurrence) {
@@ -832,6 +849,7 @@ angular.module('icgc.advanced.controllers', [
             occurrence.projectName = lookup[occurrence.projectId] || occurrence.projectId;
           });
         });
+
       _ASMutationService.occurrences = occurrences;
     }
 
@@ -858,123 +876,159 @@ angular.module('icgc.advanced.controllers', [
       });
     }
 
+    function _processMutationHits() {
+      if (! _.get(_ASMutationService, 'mutations.hits.length', false)) {
+        return;
+      }
+
+      // Need to get SSM Test Donor counts from projects
+      Projects.getList().then(function (projects) {
+        _ASMutationService.mutations.hits.forEach(function (mutation) {
+
+          var mutationFilter = _locationFilterCache.filters();
+          if (mutationFilter.hasOwnProperty('mutation')) {
+            delete mutationFilter.mutation[ Extensions.ENTITY ];
+            delete mutationFilter.mutation.id;
+            mutationFilter.mutation.id = {
+              is: [mutation.id]
+            };
+          } else {
+            mutationFilter.mutation = {
+              id: {
+                is: [mutation.id]
+              }
+            };
+          }
+
+          Donors.getList({
+            size: 0,
+            include: 'facets',
+            filters: mutationFilter
+          }).then(function (data) {
+            mutation.uiDonors = [];
+            if (data.facets.projectId.terms) {
+              var _f = _locationFilterCache.filters();
+              if (_f.hasOwnProperty('donor')) {
+                delete _f.donor.projectId;
+                if (_.isEmpty(_f.donor)) {
+                  delete _f.donor;
+                }
+              }
+              if (_f.hasOwnProperty('mutation')) {
+                delete _f.mutation[ Extensions.ENTITY ];
+                if (_.isEmpty(_f.mutation)) {
+                  delete _f.mutation;
+                }
+              }
+
+              mutation.uiDonorsLink = LocationService.toURLParam(
+                LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet')
+              );
+              mutation.uiDonors = data.facets.projectId.terms;
+              mutation.uiDonors.forEach(function (facet) {
+                var p = _.find(projects.hits, function (item) {
+                  return item.id === facet.term;
+                });
+
+                _projectCachePromise.then(function(lookup) {
+                  facet.projectName = lookup[facet.term] || facet.term;
+                });
+
+                facet.countTotal = p.ssmTestedDonorCount;
+                facet.percentage = facet.count / p.ssmTestedDonorCount;
+              });
+
+              // This is just used for mutation CSV export, it is unwieldly to do it in the view
+              mutation.uiDonorsExportString = mutation.uiDonors.map(function(d) {
+                return d.term + ':' + d.count + '/' + d.countTotal;
+              }).join('|');
+            }
+          });
+        });
+      });
+    }
+
+    function _initMutations() {
+      var params = LocationService.getJsonParam('mutations'),
+        filters = _locationFilterCache.filters() || {},
+        deferred = $q.defer();
+
+      _ASMutationService.isLoading = true;
+
+      params.include = ['consequences'];
+      params.filters = filters;
+
+
+      Mutations.getList(params)
+        .then(function(hitsMutationsList) {
+          _ASMutationService.mutations.hits = hitsMutationsList.hits;
+          _ASMutationService.hitsLoaded = true;
+
+          _ASMutationService.mutations.hits.forEach(function (mutation) {
+            mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
+
+            // Remove mutation entity set because mutation id is the key
+            if (mutation.embedQuery.hasOwnProperty('mutation')) {
+              var mutationFilters = mutation.embedQuery.mutation;
+              delete mutationFilters[Extensions.ENTITY];
+            }
+
+            // Proper encode
+            mutation.embedQuery = encodeURIComponent(JSON.stringify(mutation.embedQuery));
+
+          });
+        })
+        .finally(function() {
+          _ASMutationService.isLoading = false;
+          deferred.resolve();
+        });
+
+      Occurrences.getList(LocationService.getJsonParam('occurrences'))
+        .then(function(occurrencesList) {
+          _initOccurrences(occurrencesList);
+        });
+
+      return deferred.promise;
+    }
+
 
 
       ///////////////////////////////////////////////////////////////////////
       // Mutations Public API
       ///////////////////////////////////////////////////////////////////////
       _ASMutationService.init = function () {
-        //Page.startWork();
-        var deferred = $q.defer();
-        _ASMutationService.isLoading = true;
-        _ASMutationService.hitsLoaded = false;
 
-        //console.log('Start Mutation Work!');
+        var deferred = $q.defer();
+
+        _ASMutationService.isLoading = true;
+
+        if (angular.isDefined(_ASMutationService.genes)) {
+          _ASMutationService.mutations.hits = [];
+          _ASMutationService.hitsLoaded = false;
+        }
 
         var mParams = LocationService.getJsonParam('mutations');
+
         mParams.include = ['facets', 'consequences'];
         mParams.facetsOnly = true;
-        mParams.filters = _locationFilterCache.filters();
+        mParams.filters = _locationFilterCache.filters() || {};
 
-        Mutations.getList(mParams).then(function (mutationsFacetsList) {
-            deferred.resolve();
-
+        Mutations.getList(mParams)
+          .then(function (mutationsFacetsList) {
+            _ASMutationService.isLoading = false;
             _initFacets(mutationsFacetsList.facets);
 
-            delete mParams.facetsOnly;
-            mParams.include.shift();
+            _ASMutationService.mutations = mutationsFacetsList.plain(); // Build partial object
 
-            _initMutations(mutationsFacetsList);
-
-            Mutations.getList(mParams).then(function(hitsMutationsList) {
-              mutationsFacetsList.hits = hitsMutationsList.hits;
-              _ASMutationService.hitsLoaded = true;
-              _initMutations( mutationsFacetsList );
-            });
-
-          }
-        );
-        Occurrences.getList(LocationService.getJsonParam('occurrences'))
-          .then(function(occurrencesList) {
-            _initOccurrences(occurrencesList);
+            deferred.resolve();
           });
 
         return deferred.promise;
       };
 
-    _ASMutationService.renderBodyTab = function() {
-      if (AdvancedSearchTabs.isTab('mutation') && _.get(_ASMutationService, 'mutations.hits.length', false)) {
-
-
-
-        // Need to get SSM Test Donor counts from projects
-        Projects.getList().then(function (projects) {
-          _ASMutationService.mutations.hits.forEach(function (mutation) {
-
-            var mutationFilter = _locationFilterCache.filters();
-            if (mutationFilter.hasOwnProperty('mutation')) {
-              delete mutationFilter.mutation[ Extensions.ENTITY ];
-              delete mutationFilter.mutation.id;
-              mutationFilter.mutation.id = {
-                is: [mutation.id]
-              };
-            } else {
-              mutationFilter.mutation = {
-                id: {
-                  is: [mutation.id]
-                }
-              };
-            }
-
-            Donors.getList({
-              size: 0,
-              include: 'facets',
-              filters: mutationFilter
-            }).then(function (data) {
-              mutation.uiDonors = [];
-              if (data.facets.projectId.terms) {
-                var _f = _locationFilterCache.filters();
-                if (_f.hasOwnProperty('donor')) {
-                  delete _f.donor.projectId;
-                  if (_.isEmpty(_f.donor)) {
-                    delete _f.donor;
-                  }
-                }
-                if (_f.hasOwnProperty('mutation')) {
-                  delete _f.mutation[ Extensions.ENTITY ];
-                  if (_.isEmpty(_f.mutation)) {
-                    delete _f.mutation;
-                  }
-                }
-
-                mutation.uiDonorsLink = LocationService.toURLParam(
-                  LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet')
-                );
-                mutation.uiDonors = data.facets.projectId.terms;
-                mutation.uiDonors.forEach(function (facet) {
-                  var p = _.find(projects.hits, function (item) {
-                    return item.id === facet.term;
-                  });
-
-                  _projectCachePromise.then(function(lookup) {
-                    facet.projectName = lookup[facet.term] || facet.term;
-                  });
-
-                  facet.countTotal = p.ssmTestedDonorCount;
-                  facet.percentage = facet.count / p.ssmTestedDonorCount;
-                });
-
-                // This is just used for mutation CSV export, it is unwieldly to do it in the view
-                mutation.uiDonorsExportString = mutation.uiDonors.map(function(d) {
-                  return d.term + ':' + d.count + '/' + d.countTotal;
-                }).join('|');
-              }
-            });
-          });
-        });
-
-      }
-    };
+      _ASMutationService.renderBodyTab = function() {
+        _initMutations().then(_processMutationHits);
+      };
 
       _ASMutationService.projectMutationQuery = function(projectId, mutationId) {
 
