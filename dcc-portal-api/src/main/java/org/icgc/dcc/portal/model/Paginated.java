@@ -2,8 +2,9 @@ package org.icgc.dcc.portal.model;
 
 import java.util.Map;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import org.elasticsearch.search.facet.Facet;
 import org.elasticsearch.search.facet.Facets;
@@ -12,8 +13,9 @@ import org.elasticsearch.search.facet.terms.TermsFacet;
 import com.google.common.collect.ImmutableMap;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
-@Data
-public class Paginated {
+@Setter
+@Getter
+public abstract class Paginated {
 
   @ApiModelProperty(value = "EnrichmentSearchResponses")
   private Map<String, TermFacet> facets;

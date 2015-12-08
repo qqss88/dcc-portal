@@ -1,5 +1,9 @@
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Throwables.propagate;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
@@ -10,9 +14,11 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +26,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.common.lang3.tuple.Pair;
 import org.elasticsearch.search.SearchHit;
 import org.icgc.dcc.portal.model.Gene;
 import org.icgc.dcc.portal.model.Genes;
@@ -30,12 +37,14 @@ import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -49,6 +58,8 @@ public class GeneService {
   private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
 
   private final GeneRepository geneRepository;
+  private final AtomicReference<Map<String, String>> ensemblIdGeneSymbolMap =
+      new AtomicReference<Map<String, String>>();
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
@@ -231,4 +242,63 @@ public class GeneService {
   public List<String> getAffectedTranscripts(String geneId) {
     return geneRepository.getAffectedTranscripts(geneId);
   }
+
+  @Async
+  public void init() {
+    try {
+      log.debug("Building EnsemblId-to-GeneSymbol lookup table...");
+
+      // The key is a gene symbol and the value is an ensembl ID.
+      val groupedByGeneSymbol = geneRepository.getGeneSymbolEnsemblIdMap();
+      val lookupTable = groupedByGeneSymbol.keySet().parallelStream()
+          .map(geneSymbol -> ensemblAliasPairs(geneSymbol, groupedByGeneSymbol))
+          .flatMap(Collection::stream)
+          // TODO: use dcc.common.core.util.stream.Collectors#toImmutableMap once the pom.xml is updated.
+          .collect(toMap(Pair::getKey, Pair::getValue));
+
+      log.debug("EnsemblId-to-GeneSymbol lookup table ({} entries) is: {}", lookupTable.size(), lookupTable);
+
+      ensemblIdGeneSymbolMap.set(lookupTable);
+
+      log.debug("Finished building EnsemblId-to-GeneSymbol lookup table.");
+    } catch (Exception e) {
+      log.error("Error building EnsemblId-to-GeneSymbol lookup table.", e);
+      propagate(e);
+    }
+  }
+
+  public Map<String, String> getEnsemblIdGeneSymbolMap() {
+    val result = ensemblIdGeneSymbolMap.get();
+
+    if (null == result) {
+      throw new NotAvailableException(
+          "The EnsemblId-to-GeneSymbol lookup table is currently not available yet. Please retry later.");
+    }
+
+    return result;
+  }
+
+  @NonNull
+  public Map<String, String> getEnsemblIdGeneSymbolMap(List<String> ensemblIds) {
+    val map = getEnsemblIdGeneSymbolMap();
+
+    // Returns a value of gene symbol if there is a match; otherwise returns the ensemblId itself.
+    return ImmutableSet.copyOf(ensemblIds).stream().collect(
+        toMap(identity(), ensemblId -> map.getOrDefault(ensemblId, ensemblId)));
+  }
+
+  @NonNull
+  private static List<Pair<String, String>> ensemblAliasPairs(String geneSymbol,
+      Multimap<String, String> groupedByGeneSymbols) {
+    val oneToManyIndicator = "*";
+    val ensemblIds = groupedByGeneSymbols.get(geneSymbol);
+    val suffix = (ensemblIds.size() > 1) ? oneToManyIndicator : "";
+    val symbol = geneSymbol + suffix;
+
+    // The key is an ensembl ID and the value is a gene symbol.
+    return ensemblIds.stream()
+        .map(id -> Pair.of(id, symbol))
+        .collect(toList());
+  }
+
 }
