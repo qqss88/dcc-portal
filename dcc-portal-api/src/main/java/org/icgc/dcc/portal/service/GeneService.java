@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.repository.GeneRepository.GENE_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
@@ -19,11 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.common.lang3.tuple.Pair;
@@ -43,25 +37,37 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class GeneService {
 
+  /**
+   * Constants.
+   */
   private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
   private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
 
+  /**
+   * Dependencies.
+   */
   private final GeneRepository geneRepository;
+
+  /**
+   * State.
+   */
   private final AtomicReference<Map<String, String>> ensemblIdGeneSymbolMap =
       new AtomicReference<Map<String, String>>();
-
-  ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
   /**
    * Convert result from gene-text to a gene model
@@ -103,20 +109,16 @@ public class GeneService {
    * 
    * Example output:<br>
    * <ul>
-   * <li>
-   * symbol:
+   * <li>symbol:
    * <ul>
    * <li>id1: [G1]</li>
    * <li>id2: [G2]</li>
    * </ul>
    * </li>
-   * <li>
-   * uniprot:
+   * <li>uniprot:
    * <ul>
-   * <li>
-   * id3: [G3, G4]</li>
-   * <li>
-   * id:4: [G5]</li>
+   * <li>id3: [G3, G4]</li>
+   * <li>id:4: [G5]</li>
    * </ul>
    * </li>
    * </ul>

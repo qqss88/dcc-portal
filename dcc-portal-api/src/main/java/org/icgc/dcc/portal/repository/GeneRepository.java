@@ -41,10 +41,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -70,6 +66,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 public class GeneRepository implements Repository {
@@ -84,8 +84,8 @@ public class GeneRepository implements Repository {
   private static final String ENSEMBL_ID_FIELD_NAME = "id";
   private static final String[] GENE_SYMBOL_ENSEMBL_ID_FIELDS = { GENE_SYMBOL_FIELD_NAME, ENSEMBL_ID_FIELD_NAME };
 
-  public static final Map<String, String> GENE_ID_SEARCH_FIELDS = ImmutableMap.<String, String>
-      of("id.search", "_gene_id",
+  public static final Map<String, String> GENE_ID_SEARCH_FIELDS =
+      ImmutableMap.<String, String> of("id.search", "_gene_id",
           "symbol.search", "symbol",
           "uniprotkbSwissprot.search", "external_db_ids.uniprotkb_swissprot");
 
