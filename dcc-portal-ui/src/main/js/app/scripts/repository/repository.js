@@ -178,6 +178,7 @@
     
     $scope.$on('bamready.event', function() {
       $scope.bamId = params.fileObjectId;
+      $scope.bamName = params.fileObjectName;
       $scope.$apply();
     });
     
@@ -617,17 +618,19 @@
       });
     };
     
-    _ctrl.showIobioModal = function(objectId) {
+    _ctrl.showIobioModal = function(objectId, objectName) {
       var fileObjectId = objectId;
+      var fileObjectName = objectName;
       $modal.open ({
         controller: 'ExternalIobioController',
         template: '<section style="width:1150px;" id="bam-statistics">'+
-          '<bamstats bam-id="bamId" on-modal=true data-ng-if="bamId"></bamstats></section>',
+          '<bamstats bam-id="bamId" on-modal=true bam-name="bamName" data-ng-if="bamId"></bamstats></section>',
         windowClass: 'iobio-modal',
         resolve: {
           params: function() {
             return {
-              fileObjectId: fileObjectId
+              fileObjectId: fileObjectId,
+              fileObjectName: fileObjectName
             };
           }
         }

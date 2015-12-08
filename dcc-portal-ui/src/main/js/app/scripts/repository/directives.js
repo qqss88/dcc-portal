@@ -26,6 +26,7 @@
       scope: {
         bamId: '=',
         onModal:'=',
+        bamName: '='
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
       link: function (scope, element) {
