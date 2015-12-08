@@ -623,7 +623,7 @@
       var fileObjectName = objectName;
       $modal.open ({
         controller: 'ExternalIobioController',
-        template: '<section style="width:1150px;" id="bam-statistics">'+
+        template: '<section id="bam-statistics" class="bam-statistics-modal">'+
           '<bamstats bam-id="bamId" on-modal=true bam-name="bamName" data-ng-if="bamId"></bamstats></section>',
         windowClass: 'iobio-modal',
         resolve: {
