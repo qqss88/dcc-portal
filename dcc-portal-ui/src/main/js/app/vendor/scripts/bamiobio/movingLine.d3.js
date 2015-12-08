@@ -41,13 +41,17 @@ function movingLineD3(container) {
              return d;            
           })
           .orient("bottom");
-      
-      var div = d3.select('body')
-      .append("div")
-      .attr('class', 'iobio-tooltip')
-      .style('left', '0px')
-      .style('top', '0px')
-      .style('opacity', 0);
+     
+     if (d3.select('#iobio-tooltip')[0][0] !== null) {
+       var div = d3.select('#iobio-tooltip');
+     } else {
+       var div = d3.select('body')
+        .append("div")
+        .attr('id', 'iobio-tooltip')
+        .style('left', '0px')
+        .style('top', '0px')
+        .style('opacity', 0);
+     }
       
       //.style("visibility", "hidden");
       
@@ -83,8 +87,6 @@ function movingLineD3(container) {
          var path = svg.append("path")
            .attr('class', "read-depth-path")
            .attr("d", line(data))
-           .attr("stroke", "steelblue")
-           .attr("fill", "none");
 
          var totalLength = path.node().getTotalLength();
 

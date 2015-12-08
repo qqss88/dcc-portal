@@ -24,7 +24,9 @@
       replace: true,
       restrict: 'AE',
       scope: {
-        bamId: '='
+        bamId: '=',
+        onModal: '=',
+        bamName: '='
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
       link: function (scope, element) {
@@ -36,6 +38,11 @@
 
         // Viewboxes
         var dists = $('.focus', element);
+
+        // Need to be set at runtime to get accurate height/width
+        for (var i = 0; i < dists.length; i++) {
+          dists[i].setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        }
 
         // Setup donut chart
         var sampleDonutChart = donutD3().radius(100).klass(
@@ -60,18 +67,16 @@
         // Setup read coverage histogram chart
         var readCoverageChart = histogramViewFinderD3().width(width).height(height);
 
-        readCoverageChart.yAxis().tickFormat(function (d) {
-          return d * 100 + '%';
+        readCoverageChart.yAxis().tickFormat(function (tickValue) {
+          return tickValue * 100 + '%';
         });
 
         scope.toggleOutliers = function () {
           scope.showOutliers = !scope.showOutliers;
-          var h = sampleStats[scope.lengthChartDataId],
-            d = Object.keys(h).map(function (k) {
-              return [+k, +h[k]];
-            }),
+          var histDataObject = sampleStats[scope.lengthChartDataId],
+            histData = pivot(histDataObject),
             selection = d3.select('#length-distribution svg');
-          selection.datum(d);
+          selection.datum(histData);
           charts.lengthChart(selection, {
             'outliers': scope.showOutliers
           });
@@ -143,21 +148,23 @@
           $(pair).toggleClass('selected');
 
           // Redraw chart
-          var h;
+          var histDataObject;
           if (elem.getAttribute('data-id') === 'frag_hist' || elem.getAttribute('data-id') === 'length_hist') {
             scope.lengthChartDataId = elem.getAttribute('data-id');
-            h = sampleStats[scope.lengthChartDataId];
+            histDataObject = sampleStats[scope.lengthChartDataId];
           } else {
             scope.qualityChartDataId = elem.getAttribute('data-id');
-            h = sampleStats[scope.qualityChartDataId];
+            histDataObject = sampleStats[scope.qualityChartDataId];
           }
-          var d = Object.keys(h).map(function (k) {
-            return [+k, +h[k]];
-          });
+          var histData = pivot(histDataObject);
           var selection = d3.select($(elem).parent().parent().parent()
             .find('svg')[0]);
-          selection.datum(d);
+          selection.datum(histData);
           charts[chartId](selection);
+        };
+
+        scope.cancel = function () {
+          scope.$parent.cancel();
         };
 
         function goBam() {
@@ -171,6 +178,7 @@
             if ($('.seq-buttons').length === 0) {
               // Turn off read depth loading msg
               $('#ref-label').css('visibility', 'visible');
+              $('#total-reads img').css('visibility', 'visible');
               $('#readDepthLoadingMsg').css('display', 'none');
               // Turn on sampling message
               $('.samplingLoader').css('display', 'block');
@@ -192,14 +200,17 @@
 
                 goSampling(options);
               });
-
-              if (scope.region && scope.region.chr === id) {
-                scope.setSelectedSeq($('.seq-buttons[data-id=\'' + scope.region.chr + '\']')[0],
-                  scope.region.start, scope.region.end);
-              }
             }
             $timeout($.noop, 0);
           });
+        }
+
+        function pivot(hist) {
+          var histData = Object.keys(hist).map(
+            function (key) {
+              return [+key, +hist[key]];
+            });
+          return histData;
         }
 
         function resetBrush() {
@@ -275,7 +286,7 @@
             // Update charts
             updatePercentCharts(data, sampleDonutChart);
             updateTotalReads(data.total_reads);
-            updateHistogramCharts(data, undefined, 'sampleBar');
+            updateHistogramCharts(data);
           }, options);
         }
 
@@ -300,15 +311,15 @@
             histograms.coverage_hist[0] = '1.0';
           }
           // Update read coverage histogram
-          var d, selection;
-          d = Object.keys(histograms.coverage_hist).filter(
+          var histData, selection;
+          histData = Object.keys(histograms.coverage_hist).filter(
             function (i) {
               return histograms.coverage_hist[i] !== '0';
-            }).map(function (k) {
-            return [+k, +histograms.coverage_hist[k]];
+            }).map(function (key) {
+            return [+key, +histograms.coverage_hist[key]];
           });
 
-          selection = d3.select('#read-coverage-distribution-chart').datum(d);
+          selection = d3.select('#read-coverage-distribution-chart').datum(histData);
           readCoverageChart(selection);
           if (histograms.coverage_hist[0] > 0.65) {
             // Exclude <5 values b\c they are not informative dominating the chart
@@ -320,45 +331,38 @@
 
           // Update read length distribution
           if (scope.lengthChartDataId === 'frag_hist') {
-            d = Object.keys(histograms.frag_hist).filter(
+            histData = Object.keys(histograms.frag_hist).filter(
               function (i) {
                 return histograms.frag_hist[i] !== '0';
-              }).map(function (k) {
-              return [+k, +histograms.frag_hist[k]];
+              }).map(function (key) {
+              return [+key, +histograms.frag_hist[key]];
             });
           } else {
-            d = Object.keys(histograms.length_hist).map(
-              function (k) {
-                return [+k, +histograms.length_hist[k]];
-              });
+            histData = pivot(histograms.length_hist);
           }
           // Remove outliers if outliers checkbox isn't explicity checked
-          selection = d3.select('#length-distribution-chart').datum(d);
+          selection = d3.select('#length-distribution-chart').datum(histData);
           charts.lengthChart(selection, {
             'outliers': scope.showOutliers
           });
 
           // Update map quality distribution
           if (scope.qualityChartDataId === 'mapq_hist') {
-            d = Object.keys(histograms.mapq_hist).map(function (k) {
-              return [+k, +histograms.mapq_hist[k]];
-            });
+            histData = pivot(histograms.mapq_hist);
           } else {
-            d = Object.keys(histograms.baseq_hist).map(function (k) {
-              return [+k, +histograms.baseq_hist[k]];
-            });
+            histData = pivot(histograms.baseq_hist);
           }
-          selection = d3.select('#mapping-quality-distribution-chart').datum(d);
+          selection = d3.select('#mapping-quality-distribution-chart').datum(histData);
           charts.qualityChart(selection);
         }
 
-        function tickFormatter(d) {
-          if ((d / 1000000) >= 1) {
-            d = d / 1000000 + 'M';
-          } else if ((d / 1000) >= 1) {
-            d = d / 1000 + 'K';
+        function tickFormatter(tickValue) {
+          if ((tickValue / 1000000) >= 1) {
+            tickValue = tickValue / 1000000 + 'M';
+          } else if ((tickValue / 1000) >= 1) {
+            tickValue = tickValue / 1000 + 'K';
           }
-          return d;
+          return tickValue;
         }
 
         // Setup length histrogram chart
@@ -378,15 +382,11 @@
         scope.lengthChartDataId = 'frag_hist';
         scope.qualityChartDataId = 'mapq_hist';
 
-        // Need to be set at runtime to get accurate height/width
-        for (var i = 0; i < dists.length; i++) {
-          dists[i].setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-        }
-
         scope.$on('$destroy', function () {
           if (bam.sampleClient !== undefined) {
             bam.sampleClient.close(1000);
           }
+          cfpLoadingBar.complete();
         });
         goBam();
       }
