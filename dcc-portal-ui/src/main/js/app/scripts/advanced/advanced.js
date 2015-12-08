@@ -263,7 +263,7 @@ angular.module('icgc.advanced.controllers', [
 
         $scope.$watch(function() {
           var queryParams = LocationService.search(),
-              pagingTypes = ['donors', 'genes', 'mutations'];
+              pagingTypes = ['donors', 'genes', 'mutations', 'occurrences'];
 
           var str = _.reduce(pagingTypes, function(concatStr, type) {
             return concatStr + (queryParams[type] ?  (type + queryParams[type]) : '');
