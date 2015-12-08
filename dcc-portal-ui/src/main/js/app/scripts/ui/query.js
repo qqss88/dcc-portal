@@ -22,7 +22,7 @@
    * Display the JSON filter in more user friendly format
    */
   angular.module('icgc.ui.query', []).directive('queryDisplay',
-    function(FiltersUtil, LocationService, SetService, Extensions) {
+    function(FiltersUtil, LocationService, SetService, Extensions, GeneSymbols) {
 
     return {
       restrict: 'E',
@@ -33,9 +33,34 @@
       templateUrl: 'scripts/ui/views/query.html',
       link: function(scope) {
 
+        function resolveGeneIds (filters) {
+          var activeGeneIds = _(_.get (filters, 'gene.id.is', []))
+            .filter ({controlFacet: 'id', controlType: 'gene'})
+            .map ('term')
+            .value();
+
+          if (_.isEmpty (activeGeneIds)) {
+            scope.ensemblIdGeneSymbolMap = {};
+            return;
+          }
+
+          GeneSymbols.resolve (activeGeneIds).then (function (ensemblIdGeneSymbolMap) {
+            scope.ensemblIdGeneSymbolMap = ensemblIdGeneSymbolMap.plain();
+          });
+        }
+
+        scope.resolveGeneSymbols = function (type, term) {
+          if ('gene' !== type) {
+            return term;
+          }
+
+          return _.get (scope.ensemblIdGeneSymbolMap, term, term);
+        };
+
         function refresh() {
           // Make a copy and clean up any non-meaningful fields
           var uiFilters = angular.copy(scope.filters);
+
           ['gene', 'donor', 'mutation'].forEach(function(type) {
             if (uiFilters.hasOwnProperty(type) && _.isEmpty(uiFilters[type])) {
               delete uiFilters[type];
@@ -49,10 +74,13 @@
 
             if (ids.length > 0) {
               SetService.getMetaData(ids).then(function(results) {
-                scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, SetService.lookupTable(results));
+                scope.uiFilters = FiltersUtil.buildUIFilters (uiFilters,
+                  SetService.lookupTable (results.plain()));
+                resolveGeneIds (scope.uiFilters);
               });
             } else {
               scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, {});
+              resolveGeneIds (scope.uiFilters);
             }
           }
         }
@@ -67,6 +95,6 @@
 
       }
     };
+
   });
 })();
-
