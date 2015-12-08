@@ -17,8 +17,6 @@
 
 package org.icgc.dcc.portal.config;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
 import org.icgc.dcc.common.client.api.cms.CMSClient;
@@ -26,7 +24,6 @@ import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -37,15 +34,8 @@ import lombok.val;
 @Configuration
 public class ICGCConfig {
 
-  /**
-   * Dependencies.
-   */
-  @Autowired
-  private PortalProperties properties;
-
   @Bean
-  public ShortURLClient shortURLClient() {
-    val icgc = checkNotNull(properties.getIcgc());
+  public ShortURLClient shortURLClient(ICGCProperties icgc) {
     val icgcConfig = ICGCClientConfig.builder()
         .shortServiceUrl(icgc.getShortUrl())
         .consumerKey(icgc.getConsumerKey())

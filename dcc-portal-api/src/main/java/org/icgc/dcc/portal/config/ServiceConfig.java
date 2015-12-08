@@ -17,45 +17,34 @@
 
 package org.icgc.dcc.portal.config;
 
-import org.icgc.dcc.downloader.client.DownloaderClient;
-import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
-import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
-import org.springframework.context.annotation.Bean;
+import javax.annotation.PostConstruct;
+
+import org.icgc.dcc.portal.service.GeneService;
+import org.icgc.dcc.portal.service.OccurrenceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import lombok.SneakyThrows;
-import lombok.val;
-
 @Lazy
 @Configuration
-public class DownloadConfig {
+public class ServiceConfig {
 
-  @Bean
-  public DownloaderClient dynamicDownloader(DownloadProperties download) {
-    if (!download.isEnabled()) {
-      return null;
-    }
+  /**
+   * Dependencies.
+   */
 
-    return new DownloaderClient(
-        download.getUri() + download.getDynamicRootPath(),
-        download.getQuorum(),
-        download.getOozieUrl(),
-        download.getAppPath(),
-        download.getSupportEmailAddress(),
-        download.getCapacityThreshold(),
-        download.getReleaseName());
-  }
+  @Autowired
+  private OccurrenceService occurrenceService;
+  @Autowired
+  private GeneService geneService;
 
-  @Bean
-  @SneakyThrows
-  public ExportedDataFileSystem exportedDataFileSystem(DownloadProperties download) {
-    if (!download.isEnabled()) {
-      return null;
-    }
-
-    val rootDir = download.getUri() + download.getStaticRootPath();
-    return new ExportedDataFileSystem(rootDir, download.getCurrentReleaseSymlink());
+  /**
+   * Initialization.
+   */
+  @PostConstruct
+  public void initCache() {
+    occurrenceService.init();
+    geneService.init();
   }
 
 }

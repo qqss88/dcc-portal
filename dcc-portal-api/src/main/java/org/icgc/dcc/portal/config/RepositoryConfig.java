@@ -27,6 +27,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import com.yammer.dropwizard.config.Environment;
+import com.yammer.dropwizard.db.DatabaseConfiguration;
+import com.yammer.dropwizard.jdbi.DBIFactory;
+
+import lombok.SneakyThrows;
+import lombok.val;
+
 @Lazy
 @Configuration
 public class RepositoryConfig {
@@ -42,18 +49,27 @@ public class RepositoryConfig {
   }
 
   @Bean
-  public EntityListRepository entityListRepository(final DBI dbi) {
+  public EntityListRepository entityListRepository(DBI dbi) {
     return dbi.open(EntityListRepository.class);
   }
 
   @Bean
-  public UnionAnalysisRepository unionAnalysisRepository(final DBI dbi) {
+  public UnionAnalysisRepository unionAnalysisRepository(DBI dbi) {
     return dbi.open(UnionAnalysisRepository.class);
   }
 
   @Bean
-  public PhenotypeAnalysisRepository phenotypeAnalysisRepository(final DBI dbi) {
+  public PhenotypeAnalysisRepository phenotypeAnalysisRepository(DBI dbi) {
     return dbi.open(PhenotypeAnalysisRepository.class);
+  }
+
+  @Bean
+  @SneakyThrows
+  public DBI dbi(PortalProperties properties, Environment environment, DatabaseConfiguration database) {
+    val name = "postgresql";
+    val factory = new DBIFactory();
+
+    return factory.build(environment, database, name);
   }
 
 }

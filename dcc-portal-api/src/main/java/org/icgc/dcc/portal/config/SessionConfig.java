@@ -53,12 +53,12 @@ public class SessionConfig {
    * Dependencies.
    */
   @Autowired
-  private PortalProperties properties;
+  private HazelcastProperties hazelcast;
 
   @Bean
   public HazelcastInstance hazelcastInstance() {
     if (isDistributed()) {
-      return Hazelcast.newHazelcastInstance(getHazelcastConfig(properties.getHazelcast()));
+      return Hazelcast.newHazelcastInstance(getHazelcastConfig(hazelcast));
     } else {
       return null;
     }
@@ -95,11 +95,11 @@ public class SessionConfig {
   }
 
   /**
-   * Utilties.
+   * Utilities.
    */
 
   private boolean isDistributed() {
-    return properties.getHazelcast().isEnabled();
+    return hazelcast.isEnabled();
   }
 
   private static Config getHazelcastConfig(HazelcastProperties hazelcastConfig) {

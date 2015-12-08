@@ -69,16 +69,28 @@ public class GeneService {
   private final AtomicReference<Map<String, String>> ensemblIdGeneSymbolMap =
       new AtomicReference<Map<String, String>>();
 
-  /**
-   * Convert result from gene-text to a gene model
-   */
-  private Gene geneText2Gene(SearchHit hit) {
-    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
-    Map<String, Object> geneMap = Maps.newHashMap();
-    for (val key : fieldMap.keySet()) {
-      geneMap.put(GENE_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
+  @Async
+  public void init() {
+    try {
+      log.debug("Building EnsemblId-to-GeneSymbol lookup table...");
+  
+      // The key is a gene symbol and the value is an ensembl ID.
+      val groupedByGeneSymbol = geneRepository.getGeneSymbolEnsemblIdMap();
+      val lookupTable = groupedByGeneSymbol.keySet().parallelStream()
+          .map(geneSymbol -> ensemblAliasPairs(geneSymbol, groupedByGeneSymbol))
+          .flatMap(Collection::stream)
+          // TODO: use dcc.common.core.util.stream.Collectors#toImmutableMap once the pom.xml is updated.
+          .collect(toMap(Pair::getKey, Pair::getValue));
+  
+      log.debug("EnsemblId-to-GeneSymbol lookup table ({} entries) is: {}", lookupTable.size(), lookupTable);
+  
+      ensemblIdGeneSymbolMap.set(lookupTable);
+  
+      log.debug("Finished building EnsemblId-to-GeneSymbol lookup table.");
+    } catch (Exception e) {
+      log.error("Error building EnsemblId-to-GeneSymbol lookup table.", e);
+      propagate(e);
     }
-    return new Gene(geneMap);
   }
 
   /**
@@ -245,30 +257,6 @@ public class GeneService {
     return geneRepository.getAffectedTranscripts(geneId);
   }
 
-  @Async
-  public void init() {
-    try {
-      log.debug("Building EnsemblId-to-GeneSymbol lookup table...");
-
-      // The key is a gene symbol and the value is an ensembl ID.
-      val groupedByGeneSymbol = geneRepository.getGeneSymbolEnsemblIdMap();
-      val lookupTable = groupedByGeneSymbol.keySet().parallelStream()
-          .map(geneSymbol -> ensemblAliasPairs(geneSymbol, groupedByGeneSymbol))
-          .flatMap(Collection::stream)
-          // TODO: use dcc.common.core.util.stream.Collectors#toImmutableMap once the pom.xml is updated.
-          .collect(toMap(Pair::getKey, Pair::getValue));
-
-      log.debug("EnsemblId-to-GeneSymbol lookup table ({} entries) is: {}", lookupTable.size(), lookupTable);
-
-      ensemblIdGeneSymbolMap.set(lookupTable);
-
-      log.debug("Finished building EnsemblId-to-GeneSymbol lookup table.");
-    } catch (Exception e) {
-      log.error("Error building EnsemblId-to-GeneSymbol lookup table.", e);
-      propagate(e);
-    }
-  }
-
   public Map<String, String> getEnsemblIdGeneSymbolMap() {
     val result = ensemblIdGeneSymbolMap.get();
 
@@ -301,6 +289,18 @@ public class GeneService {
     return ensemblIds.stream()
         .map(id -> Pair.of(id, symbol))
         .collect(toList());
+  }
+
+  /**
+   * Convert result from gene-text to a gene model
+   */
+  private Gene geneText2Gene(SearchHit hit) {
+    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
+    Map<String, Object> geneMap = Maps.newHashMap();
+    for (val key : fieldMap.keySet()) {
+      geneMap.put(GENE_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
+    }
+    return new Gene(geneMap);
   }
 
 }

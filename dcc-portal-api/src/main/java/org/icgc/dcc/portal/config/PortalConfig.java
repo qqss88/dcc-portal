@@ -17,8 +17,6 @@
 
 package org.icgc.dcc.portal.config;
 
-import javax.annotation.PostConstruct;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.common.core.mail.Mailer;
@@ -27,26 +25,25 @@ import org.icgc.dcc.portal.auth.UserAuthenticator;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
+import org.icgc.dcc.portal.config.PortalProperties.ElasticSearchProperties;
+import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
-import org.icgc.dcc.portal.service.GeneService;
-import org.icgc.dcc.portal.service.OccurrenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.google.inject.Stage;
+import com.yammer.dropwizard.db.DatabaseConfiguration;
 
 import lombok.NonNull;
 import lombok.val;
 
-@Lazy
 @EnableAsync
 @Configuration
 public class PortalConfig {
@@ -56,22 +53,9 @@ public class PortalConfig {
    */
   @Autowired
   private PortalProperties properties;
-  @Autowired
-  private OccurrenceService occurrenceService;
-  @Autowired
-  private GeneService geneService;
 
   /**
-   * Initialization.
-   */
-  @PostConstruct
-  public void initCache() {
-    occurrenceService.init();
-    geneService.init();
-  }
-
-  /**
-   * Other
+   * Infrastructure.
    */
 
   @Bean
@@ -144,6 +128,16 @@ public class PortalConfig {
   }
 
   @Bean
+  public ElasticSearchProperties elasticSearchProperties() {
+    return properties.getElastic();
+  }
+
+  @Bean
+  public DatabaseConfiguration databaseProperties() {
+    return properties.getDatabase();
+  }
+
+  @Bean
   public CrowdProperties crowdProperties() {
     return properties.getCrowd();
   }
@@ -156,6 +150,11 @@ public class PortalConfig {
   @Bean
   public WebProperties webProperties() {
     return properties.getWeb();
+  }
+
+  @Bean
+  public HazelcastProperties hazelcastProperties() {
+    return properties.getHazelcast();
   }
 
   @Bean
