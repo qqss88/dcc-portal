@@ -60,7 +60,7 @@ public class DiagramRepository {
 
   public SearchResponse findAll(Query query) {
     val pql = CONVERTER.convert(query, DIAGRAM);
-    log.info("pql of findAllCentric is: {}", pql);
+    log.info("pql of findAll is: {}", pql);
 
     val request = queryEngine.execute(pql, DIAGRAM);
     val response = request.getRequestBuilder().execute().actionGet();
