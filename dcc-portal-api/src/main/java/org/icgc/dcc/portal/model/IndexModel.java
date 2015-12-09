@@ -11,12 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +20,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @Component
 public class IndexModel {
@@ -51,31 +52,11 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Kind {
-    PROJECT("project"),
-    DONOR("donor"),
-    GENE("gene"),
-    MUTATION("mutation"),
-    PATHWAY("pathway"),
+    PROJECT("project"), DONOR("donor"), GENE("gene"), MUTATION("mutation"), PATHWAY("pathway"),
 
-    GENE_SET("geneSet"),
-    REPOSITORY_FILE("file"),
+    GENE_SET("geneSet"), REPOSITORY_FILE("file"),
 
-    CONSEQUENCE("consequence"),
-    TRANSCRIPT("transcript"),
-    OCCURRENCE("occurrence"),
-    EMB_OCCURRENCE("embOccurrence"),
-    OBSERVATION("observation"),
-    RELEASE("release"),
-    KEYWORD(""),
-    SPECIMEN(""),
-    SAMPLE(""),
-    SEQ_DATA(""),
-    DOMAIN(""),
-    EXON(""),
-    DIAGRAM("diagram"),
-    FAMILY(""),
-    EXPOSURE(""),
-    THERAPY("");
+    CONSEQUENCE("consequence"), TRANSCRIPT("transcript"), OCCURRENCE("occurrence"), EMB_OCCURRENCE("embOccurrence"), OBSERVATION("observation"), RELEASE("release"), KEYWORD(""), SPECIMEN(""), SAMPLE(""), SEQ_DATA(""), DOMAIN(""), EXON(""), DIAGRAM("diagram"), FAMILY(""), EXPOSURE(""), THERAPY("");
 
     private final String id;
   }
@@ -84,31 +65,9 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Type {
-    PROJECT("project"),
-    DONOR("donor"),
-    GENE("gene"),
-    DRUG("drug"),
-    MUTATION("mutation"),
-    RELEASE("release"),
-    PATHWAY("pathway"),
-    GENE_SET("gene-set"),
-    DONOR_CENTRIC("donor-centric"),
-    GENE_CENTRIC("gene-centric"),
-    MUTATION_CENTRIC("mutation-centric"),
-    OCCURRENCE_CENTRIC("observation-centric"),
-    REPOSITORY_FILE("file"),
-    REPOSITORY_FILE_CENTRIC("file-centric"),
+    PROJECT("project"), DONOR("donor"), GENE("gene"), DRUG("drug"), MUTATION("mutation"), RELEASE("release"), PATHWAY("pathway"), GENE_SET("gene-set"), DONOR_CENTRIC("donor-centric"), GENE_CENTRIC("gene-centric"), MUTATION_CENTRIC("mutation-centric"), OCCURRENCE_CENTRIC("observation-centric"), REPOSITORY_FILE("file"), REPOSITORY_FILE_CENTRIC("file-centric"),
 
-    DONOR_TEXT("donor-text"),
-    GENE_TEXT("gene-text"),
-    MUTATION_TEXT("mutation-text"),
-    PATHWAY_TEXT("pathway-text"),
-    GENESET_TEXT("gene-set-text"),
-    DIAGRAM("diagram"),
-    REPOSITORY_FILE_TEXT("file-text"),
-    REPOSITORY_FILE_DONOR_TEXT("donor-text"),
-    DRUG_TEXT("drug-text"),
-    PROJECT_TEXT("project-text");
+    DONOR_TEXT("donor-text"), GENE_TEXT("gene-text"), MUTATION_TEXT("mutation-text"), PATHWAY_TEXT("pathway-text"), GENESET_TEXT("gene-set-text"), DIAGRAM("diagram"), REPOSITORY_FILE_TEXT("file-text"), REPOSITORY_FILE_DONOR_TEXT("donor-text"), DRUG_TEXT("drug-text"), PROJECT_TEXT("project-text");
 
     @NonNull
     private final String id;
@@ -537,10 +496,7 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum GeneSetType {
-    GENE_SET_TYPE_ALL("geneSetId"),
-    GENE_SET_TYPE_GO("go_term"),
-    GENE_SET_TYPE_PATHWAY("pathway"),
-    GENE_SET_TYPE_CURATED("curated_set");
+    GENE_SET_TYPE_ALL("geneSetId"), GENE_SET_TYPE_GO("go_term"), GENE_SET_TYPE_PATHWAY("pathway"), GENE_SET_TYPE_CURATED("curated_set");
 
     private final String type;
   }
@@ -578,6 +534,52 @@ public class IndexModel {
 
   public String getRepoIndex() {
     return this.repoIndexName;
+  }
+
+  public static String[] getFields(Query query, Kind kind) {
+    val typeFieldsMap = FIELDS_MAPPING.get(kind);
+    val result = Lists.<String> newArrayList();
+
+    if (query.hasFields()) {
+      for (val field : query.getFields()) {
+        if (typeFieldsMap.containsKey(field)) {
+          result.add(typeFieldsMap.get(field));
+        }
+      }
+    } else {
+      result.addAll(typeFieldsMap.values().asList());
+    }
+    clearInvalidFields(result, kind);
+    return result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * Remove fields that are objects in ES. They must be retrieved from source
+   */
+  private static void clearInvalidFields(List<String> fields, Kind kind) {
+    val typeFieldsMap = FIELDS_MAPPING.get(kind);
+
+    switch (kind) {
+    case GENE:
+      fields.remove(typeFieldsMap.get("externalDbIds"));
+      fields.remove(typeFieldsMap.get("pathways"));
+      break;
+    case PROJECT:
+      fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedDonorCounts"));
+      fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedSampleCounts"));
+      break;
+    case OCCURRENCE:
+      fields.remove(typeFieldsMap.get("observation"));
+      break;
+    case GENE_SET:
+      fields.remove(typeFieldsMap.get("hierarchy"));
+      fields.remove(typeFieldsMap.get("inferredTree"));
+      fields.remove(typeFieldsMap.get("synonyms"));
+      fields.remove(typeFieldsMap.get("altIds"));
+      break;
+    default:
+      break;
+    }
   }
 
   private static ImmutableMap<String, String> createFieldsMapping(Kind kind) {
