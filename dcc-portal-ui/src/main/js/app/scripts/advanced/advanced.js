@@ -225,11 +225,16 @@ angular.module('icgc.advanced.controllers', [
             break;
         }
 
+        if (service.isHitsInitialized && forceFullRefresh !== true) {
+          console.info('Tab already rendered skipping rendering phase...');
+          return;
+        }
+
         if (forceFullRefresh === true) {
           _resetService(service);
           _refresh();
         }
-        else {
+        else if (service.isFacetsInitialized) {
           service.isHitsInitialized = true;
           service.renderBodyTab();
         }
@@ -597,9 +602,6 @@ angular.module('icgc.advanced.controllers', [
             donor.embedQuery = encodeURIComponent(JSON.stringify(donor.embedQuery));
 
           });
-
-          console.log(_ASDonorService.donors);
-
         })
         .finally(function() {
           _ASDonorService.isLoading = false;
