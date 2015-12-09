@@ -20,6 +20,7 @@ package org.dcc.portal.pql.query;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.ast.visitor.Visitors.createEsAstVisitor;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
+import static org.dcc.portal.pql.meta.Type.DIAGRAM;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
@@ -30,15 +31,15 @@ import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 
 import java.util.Optional;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformer;
 import org.dcc.portal.pql.meta.Type;
 import org.elasticsearch.client.Client;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class QueryEngine {
@@ -53,6 +54,7 @@ public class QueryEngine {
   private final QueryContext projectContext;
   private final QueryContext repositoryFileContext;
   private final QueryContext drugContext;
+  private final QueryContext diagramContext;
 
   public QueryEngine(@NonNull Client client, @NonNull String index) {
     this.requestBuilder = new EsRequestBuilder(client);
@@ -64,6 +66,7 @@ public class QueryEngine {
     this.projectContext = new QueryContext(index, PROJECT);
     this.repositoryFileContext = new QueryContext(index, REPOSITORY_FILE);
     this.drugContext = new QueryContext(index, DRUG);
+    this.diagramContext = new QueryContext(index, DIAGRAM);
   }
 
   public QueryRequest execute(@NonNull String pql, @NonNull Type type) {
@@ -103,6 +106,8 @@ public class QueryEngine {
       return repositoryFileContext;
     case DRUG:
       return drugContext;
+    case DIAGRAM:
+      return diagramContext;
     default:
       throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
     }

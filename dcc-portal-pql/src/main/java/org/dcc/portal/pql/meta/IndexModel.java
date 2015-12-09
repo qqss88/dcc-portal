@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.meta;
 
 import static java.lang.String.format;
+
 import lombok.Value;
 
 @Value
@@ -31,6 +32,7 @@ public class IndexModel {
   private static final RepositoryFileTypeModel REPO_FILE_TYPE_MODEL = new RepositoryFileTypeModel();
   private static final GeneSetTypeModel GENE_SET_TYPE_MODEL = new GeneSetTypeModel();
   private static final DrugTypeModel DRUG_TYPE_MODEL = new DrugTypeModel();
+  private static final DiagramTypeModel DIAGRAM_TYPE_MODEL = new DiagramTypeModel();
 
   public static TypeModel getTypeModel(Type type) {
     switch (type) {
@@ -50,6 +52,8 @@ public class IndexModel {
       return GENE_SET_TYPE_MODEL;
     case DRUG:
       return DRUG_TYPE_MODEL;
+    case DIAGRAM:
+      return DIAGRAM_TYPE_MODEL;
     }
 
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
@@ -85,6 +89,10 @@ public class IndexModel {
 
   public static TypeModel getDrugTypeModel() {
     return DRUG_TYPE_MODEL;
+  }
+
+  public static TypeModel getDiagramTypeModel() {
+    return DIAGRAM_TYPE_MODEL;
   }
 
 }

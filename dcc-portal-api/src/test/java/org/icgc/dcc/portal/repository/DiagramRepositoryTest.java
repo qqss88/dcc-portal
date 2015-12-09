@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
@@ -42,7 +43,8 @@ public class DiagramRepositoryTest extends BaseElasticSearchTest {
     es.execute(
         createIndexMapping(Type.DIAGRAM)
             .withData(bulkFile(getClass())));
-    diagramRepository = new DiagramRepository(es.client(), testIndex.getName());
+    diagramRepository =
+        new DiagramRepository(es.client(), testIndex.getName(), new QueryEngine(es.client(), testIndex.getName()));
   }
 
   @Test
