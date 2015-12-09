@@ -296,10 +296,10 @@
 
           //console.log('Removing deferred from abort cache: ', deferredKey);
 
-         /*
-          if (s === 0) {
-            console.info('Request abort cache is empty!');
-          }*/
+          /*
+           if (s === 0) {
+           console.info('Request abort cache is empty!');
+           }*/
         }
 
         // Create a wrapped request function that will allow us to create http requests that
@@ -315,11 +315,11 @@
           return function() {
 
             var deferred = $q.defer(),
-                abortDeferred = $q.defer();
+              abortDeferred = $q.defer();
 
             /*if ( ! _cancellableRequests[deferredKey]) {
-              console.log('Added deferred "' + deferredKey + '" to abort cache.');
-            }*/
+             console.log('Added deferred "' + deferredKey + '" to abort cache.');
+             }*/
 
             // Save the deferred object so we may cancel it all later
             _cancellableRequests[deferredKey] = abortDeferred;
@@ -347,9 +347,9 @@
 
         function _createCancelableRequest(restangularCollectionFunction, args) {
           var callingArgs =  Array.prototype.slice.call(args),
-              deferredKey = callingArgs[0],
-              /*jshint validthis:true */
-              _this = this;
+            deferredKey = callingArgs[0],
+          /*jshint validthis:true */
+            _this = this;
 
           if (! deferredKey) {
             console.warn('Restangular function called with no arguments!');

@@ -29,9 +29,6 @@ import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
@@ -39,6 +36,9 @@ import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
 import org.junit.Test;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EntitySetVisitorTest {
@@ -125,8 +125,6 @@ public class EntitySetVisitorTest {
     val termsNode = (TermsNode) result.get()
         .getFirstChild() // Query
         .getFirstChild() // Filter
-        .getFirstChild() // Bool
-        .getFirstChild() // Must
         .getFirstChild(); // Terms
     assertThat(termsNode.childrenCount()).isEqualTo(1);
     assertThat(termsNode.getField()).isEqualTo(expectedField);

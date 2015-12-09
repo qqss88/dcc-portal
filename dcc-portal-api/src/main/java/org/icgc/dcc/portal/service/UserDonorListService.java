@@ -18,7 +18,7 @@
 
 package org.icgc.dcc.portal.service;
 
-import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType.DONOR_IDS;
 
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +28,7 @@ import org.icgc.dcc.portal.model.BaseEntitySet.Type;
 import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.icgc.dcc.portal.repository.EntityListRepository;
+import org.icgc.dcc.portal.repository.TermsLookupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +50,7 @@ public class UserDonorListService {
   @NonNull
   private final EntityListRepository repository;
   @NonNull
-  private final TermsLookupService termsLookupService;
+  private final TermsLookupRepository termsLookupRepository;
   @NonNull
   private final PortalProperties properties;
 
@@ -64,7 +65,7 @@ public class UserDonorListService {
         EntitySet.createForStatusFinished(id, "Uploaded donor set", "", Type.DONOR, donorIds.size(), version);
     newEntitySet.setSubtype(SubType.UPLOAD);
 
-    termsLookupService.createTermsLookup(DONOR_IDS, id, donorIds);
+    termsLookupRepository.createTermsLookup(DONOR_IDS, id, donorIds);
     repository.save(newEntitySet, version);
 
     return id;

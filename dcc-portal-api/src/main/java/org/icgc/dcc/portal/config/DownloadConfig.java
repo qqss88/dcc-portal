@@ -17,28 +17,45 @@
 
 package org.icgc.dcc.portal.config;
 
-import lombok.val;
-
-import org.skife.jdbi.v2.DBI;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.yammer.dropwizard.config.Environment;
-import com.yammer.dropwizard.jdbi.DBIFactory;
+import lombok.SneakyThrows;
+import lombok.val;
 
-/**
- * Configuration relating to data access.
- */
+@Lazy
 @Configuration
-public class DataSourceConfig {
+public class DownloadConfig {
 
-  @Lazy
   @Bean
-  public DBI dbi(PortalProperties properties, Environment environment) throws Exception {
-    val name = "postgresql";
-    val factory = new DBIFactory();
+  public DownloaderClient dynamicDownloader(DownloadProperties download) {
+    if (!download.isEnabled()) {
+      return null;
+    }
 
-    return factory.build(environment, properties.getDatabase(), name);
+    return new DownloaderClient(
+        download.getUri() + download.getDynamicRootPath(),
+        download.getQuorum(),
+        download.getOozieUrl(),
+        download.getAppPath(),
+        download.getSupportEmailAddress(),
+        download.getCapacityThreshold(),
+        download.getReleaseName());
   }
+
+  @Bean
+  @SneakyThrows
+  public ExportedDataFileSystem exportedDataFileSystem(DownloadProperties download) {
+    if (!download.isEnabled()) {
+      return null;
+    }
+
+    val rootDir = download.getUri() + download.getStaticRootPath();
+    return new ExportedDataFileSystem(rootDir, download.getCurrentReleaseSymlink());
+  }
+
 }

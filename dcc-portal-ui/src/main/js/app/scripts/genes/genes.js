@@ -316,4 +316,13 @@
       return this.handler.one('mutations', '').get(angular.extend(defaults, params));
     };
   });
+
+  module.service ('GeneSymbols', function (Restangular) {
+    var apiUrl = 'ui/search/gene-symbols';
+
+    this.resolve = function (ensemblIds) {
+      return Restangular.one (apiUrl, ensemblIds).get();
+    };
+  });
+
 })();

@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.springframework.stereotype.Service;
 
 import com.google.common.cache.CacheBuilder;
@@ -66,14 +67,34 @@ public class IndexService {
 
   @SneakyThrows
   public Map<String, String> getIndexMetaData(Client client, String indexName) {
+
+    IndexMetaData indexMetaData = getIndexMappings(client, indexName);
+    if (indexMetaData == null) {
+      clearCache();
+      indexMetaData = getIndexMappings(client, indexName);
+    }
+
+    val mappings = indexMetaData.mappings();
+    log.info("Size of index meta data mappings: {}", mappings.values().size());
+    val mappingIterator = mappings.values().iterator();
+    val mappingMetaData = mappingIterator.next().value;
+    val source = mappingMetaData.sourceAsMap();
+
+    @SuppressWarnings("unchecked")
+    val meta = (Map<String, String>) source.get("_meta");
+
+    return (meta == null) ? emptyMap() : meta;
+  }
+
+  private IndexMetaData getIndexMappings(Client client, String indexName) {
     val state = client.admin().cluster().prepareState().setIndices(indexName).execute().actionGet().getState();
 
     String realIndex;
     if (cache.containsKey(indexName)) {
       realIndex = (String) cache.get(indexName);
-      log.info(String.format("Cache hit for index name: '%s' with value: '%s'", indexName, realIndex));
+      log.info("Cache hit for index name: '{}' with value: '{}'", indexName, realIndex);
     } else {
-      log.info("Cache miss for index name: " + indexName);
+      log.info("Cache miss for index name: {}", indexName);
       val aliases = state.getMetaData().getAliases().get(indexName);
 
       if (aliases != null) {
@@ -85,18 +106,7 @@ public class IndexService {
     }
 
     val stateMetaData = state.getMetaData();
-    val indexMetaData = stateMetaData.index(realIndex);
-
-    val mappings = indexMetaData.getMappings();
-    log.info("Size of index meta data mappings: " + mappings.values().size());
-    val mappingIterator = mappings.values().iterator();
-    val mappingMetaData = mappingIterator.next().value;
-    val source = mappingMetaData.sourceAsMap();
-
-    @SuppressWarnings("unchecked")
-    val meta = (Map<String, String>) source.get("_meta");
-
-    return (meta == null) ? emptyMap() : meta;
+    return stateMetaData.index(realIndex);
   }
 
 }

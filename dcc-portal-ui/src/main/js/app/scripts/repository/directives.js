@@ -17,198 +17,72 @@
 (function ($) {
   'use strict';
 
-  var module = angular.module('icgc.repository.directives', []);
+  var module = angular.module('icgc.repository.directives', ['cfp.loadingBar']);
 
-  module.directive('bamstats', function () {
+  module.directive('bamstats', function ($timeout, cfpLoadingBar) {
     return {
       replace: true,
       restrict: 'AE',
       scope: {
-        bamId: '='
+        bamId: '=',
+        onModal: '=',
+        bamName: '='
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
-      link: function (scope) {
+      link: function (scope, element) {
+        // Initialize charts
+        // Get height width of histogram charts and set viewboxes
+        var readCoverageSvg = $('#read-coverage-distribution-chart');
+        var width = readCoverageSvg.width();
+        var height = readCoverageSvg.height();
 
-        $('#length-distribution input[type=\'checkbox\']').change(
-          function () {
-            var outliers = $(this).parent().hasClass('checked'),
-              dataId = $(
-                '#length-distribution .chart-chooser .selected')
-              .attr('data-id'),
-              h = window.sampleStats[dataId],
-              d = Object.keys(h).map(function (k) {
-                return [+k, +h[k]];
-              }),
-              selection = d3.select('#length-distribution svg');
-            selection.datum(d);
-            window.lengthChart(selection, {
-              'outliers': outliers
-            });
-          });
+        // Viewboxes
+        var dists = $('.focus', element);
 
-        $('#depth-distribution input[type=\'checkbox\']').change(
-          function () {
-            goSampling({
-              sequenceNames: [getSelectedSeqId()]
-            });
-          });
-
-        // initialize charts
-        // get height width of histogram charts and set viewboxes
-        var width = $('#read-coverage-distribution-chart').width();
-        var height = $('#read-coverage-distribution-chart').height();
-        var dists = document.getElementsByClassName('focus'); // viewboxes
-        // need to
-        // be
-        // set at runtime to get
-        // accurate height/width
+        // Need to be set at runtime to get accurate height/width
         for (var i = 0; i < dists.length; i++) {
           dists[i].setAttribute('viewBox', '0 0 ' + width + ' ' + height);
         }
 
-        // setup main window read depth chart
-        window.depthChart = movingLineD3('#read-depth-container');
-
-        // setup read coverage histogram chart
-        window.readCoverageChart = histogramViewFinderD3().width(width)
-          .height(height);
-        window.readCoverageChart.yAxis().tickFormat(function (d) {
-          return d * 100 + '%';
-        });
-
-        function tickFormatter(d) {
-          if ((d / 1000000) >= 1){
-            d = d / 1000000 + 'M';
-          }
-          else if ((d / 1000) >= 1){
-            d = d / 1000 + 'K';
-          }
-          return d;
-        }
-        
-        // setup length histrogram chart
-        // window.lengthChart = histogramD3()
-        window.lengthChart = histogramViewFinderD3().width(width)
-          .height(height);
-        window.lengthChart.xAxis().tickFormat(tickFormatter);
-        window.lengthChart.yAxis().tickFormat(tickFormatter);
-
-        // setup quality histogram chart
-        window.qualityChart = histogramD3().width(width).height(height);
-        window.qualityChart.xAxis().tickFormat(tickFormatter);
-        window.qualityChart.yAxis().tickFormat(tickFormatter);
-
-//        // setup main panel read chart
-//        window.readRegionChart = bamD3('#read-depth', 0.85, '#33A7E4');
-
-        // setup donut chart
-        window.sampleDonutChart = donutD3().radius(100).klass(
+        // Setup donut chart
+        var sampleDonutChart = donutD3().radius(100).klass(
           'sampleArc');
 
-        // hold onto stats
-        window.sampleStats = undefined;
+        // Hold onto stats
+        var sampleStats;
 
-        // default sampling values
-        window.samplingBinSize = 40000;
-        window.binNumber = 20;
-        window.binSize = 40000;
-        window.sampleMultiplier = 1;
-        window.sampleMultiplierLimit = 4;
+        // Default sampling values
+        var binNumber = 20;
+        var binSize = 40000;
+        var sampleMultiplier = 1;
+        var sampleMultiplierLimit = 4;
 
-        window.bam = undefined;
+        var bam = new Bam(scope.bamId);
 
-        function getUrlParameter(sParam) {
-          var sPageURL = window.location.search.substring(1);
-          var sURLVariables = sPageURL.split('&');
-          for (var i = 0; i < sURLVariables.length; i++) {
-            var sParameterName = sURLVariables[i].split('=');
-            if (sParameterName[0] === sParam) {
-              return sParameterName[1];
-            }
-          }
-        }
+        var charts = {};
 
-        window.sampling = getUrlParameter('sampling');
+        // Setup main window read depth chart
+        charts.depthChart = movingLineD3('#read-depth-container');
 
+        // Setup read coverage histogram chart
+        var readCoverageChart = histogramViewFinderD3().width(width).height(height);
 
-        scope.chromosomes = [];
+        readCoverageChart.yAxis().tickFormat(function (tickValue) {
+          return tickValue * 100 + '%';
+        });
 
-        function goBam() {
-          // get read depth
-          window.bam
-            .estimateBaiReadDepth(function (id) {
-              scope.chromosomes.push({
-                id: id,
-                selected: false
-              });
-              // setup first time and sample
-              if ($('.seq-buttons').length === 0) {
-                // turn off read depth loading msg
-                $('#ref-label').css('visibility', 'visible');
-                $('#readDepthLoadingMsg').css('display', 'none');
-                // turn on sampling message
-                $('.samplingLoader').css('display', 'block');
-
-                // update depth distribution
-                window.depthChart.on('brushend', function (x, brush) {
-                  var options = {
-                    sequenceNames: [getSelectedSeqId()]
-                  };
-                  if (!brush.empty()) {
-                    options.start = parseInt(brush.extent()[0]);
-                    options.end = parseInt(brush.extent()[1]);
-                    scope.region = {
-                      chr: getSelectedSeqId(),
-                      'start': options.start,
-                      'end': options.end
-                    };
-                  }
-
-                  goSampling(options);
-                });
-
-                if (scope.region && scope.region.chr === id) {
-                  scope.setSelectedSeq($('.seq-buttons[data-id=\'' + scope.region.chr + '\']')[0],
-                    scope.region.start, scope.region.end);
-                }
-              }
-              scope.$apply();
-            });
-        }
-        var bamId = scope.bamId;
-        // check if url to bam file is supplied in url and sample it
-        if (bamId !== undefined) {
-          window.bam = new Bam(bamId);
-          var r = getUrlParameter('region');
-          var region;
-          if (r !== undefined) {
-            if (r.split(':').length === 1) {
-              region = {
-                chr: r.split(':')[0]
-              };
-            } else {
-              region = {
-                chr: r.split(':')[0],
-                start: parseInt(r.split(':')[1].split('-')[0]),
-                end: parseInt(r.split(':')[1].split('-')[1])
-              };
-            }
-          }
-
-          goBam(region);
-        }
-
-        scope.checkboxCheck = function (event) {
-          var checkbox = $(event.target);
-          if (checkbox.hasClass('checked')) {
-            checkbox.removeClass('icon-ok');
-            checkbox.addClass('icon-check-empty');
-          } else {
-            checkbox.removeClass('icon-check-empty');
-            checkbox.addClass('icon-ok');
-          }
+        scope.toggleOutliers = function () {
+          scope.showOutliers = !scope.showOutliers;
+          var histDataObject = sampleStats[scope.lengthChartDataId],
+            histData = pivot(histDataObject),
+            selection = d3.select('#length-distribution svg');
+          selection.datum(histData);
+          charts.lengthChart(selection, {
+            'outliers': scope.showOutliers
+          });
         };
-        
+
+        // Highlights the selected chromosome button
         scope.highlightSelectedSeq = function (chrId) {
           scope.chromosomes.forEach(function (chr) {
             if (chr.id === chrId) {
@@ -220,128 +94,205 @@
           scope.setSelectedSeq(chrId);
         };
 
-        function resetBrush() {
-          var brush = window.depthChart.brush();
-          var g = d3.selectAll('#depth-distribution .brush');
-          brush.clear();
-          brush(g);
-        }
-        
-        function updateTotalReads(totalReads, rand) {
-          // update total reads
-          console.log(rand + '::::: ' + getSelectedSeqId());
-          
-          var reads = shortenNumber(totalReads);
-          $('#total-reads>#value').html(reads[0]);
-          $('#total-reads>#base>#number').html(reads[1] || '');
-        }
-
-        scope.setSelectedSeq = function (selected, start, end) {
-          var dataId = selected;
-          window.depthChart(window.bam.readDepth[dataId]);
-          // reset brush
+        scope.setSelectedSeq = function (selectedChrId, start, end) {
+          scope.chromosomeId = selectedChrId;
+          charts.depthChart(bam.readDepth[scope.chromosomeId]);
+          // Reset brush
           resetBrush();
-          // start sampling
+          // Start sampling
           if (start !== undefined && end !== undefined) {
             goSampling({
-              sequenceNames: [dataId],
+              sequenceNames: [scope.chromosomeId],
               'start': start,
               'end': end
             });
-            var brush = window.depthChart.brush();
-            // set brush region
+            var brush = charts.depthChart.brush();
+            // Set brush region
             d3.select('#depth-distribution .brush').call(
               brush.extent([start, end]));
           } else {
             goSampling({
-              sequenceNames: [dataId]
+              sequenceNames: [scope.chromosomeId]
             });
           }
         };
 
-        function goSampling(options) {
-          // add default options
-          options = $.extend({
-            exomeSampling: 'checked' === $('#depth-distribution input')
-              .attr('checked'),
-            bed: window.bed,
-            onEnd: function () {
-              NProgress.done();
-            }
-          }, options);
-          var rand = Math.random().toString(36).substr(2, 9);
-          // turn on sampling message and off svg
-          $('section#middle svg').css('display', 'none');
-          $('.samplingLoader').css('display', 'block');
-          updateTotalReads(0);
-          NProgress.start();
-          // update selected stats
-          window.bam
-            .sampleStats(
-              function (data, seq) {
-                if (getSelectedSeqId() !== seq) {
-                  return;
-                }
-                // turn off sampling message
-                $('.samplingLoader').css('display', 'none');
-                $('section#middle svg').css('display', 'block');
-                $('section#middle svg').css('margin', 'auto');
-                window.sampleStats = data;
-                // update progress bar
-                var length, percentDone;
-                if (options.start !== null && options.end !== null) {
-                  length = options.end - options.start;
-                  percentDone = Math
-                    .round(((data.last_read_position - options.start) / length) * 100) / 100;
-                } else {
-                  length = window.bam.header.sq.reduce(
-                    function (prev, curr) {
-                      if (prev){
-                        return prev;
-                      }
-                      if (curr.name === options.sequenceNames[0]){
-                        return curr;
-                      }
-                    }, false).end;
-                  percentDone = Math
-                    .round((data.last_read_position / length) * 100) / 100;
-                }
-                if (NProgress.status < percentDone){
-                  NProgress.set(percentDone);
-                }
-                // update charts
-                updatePercentCharts(data, window.sampleDonutChart);
-                updateTotalReads(data.total_reads, rand);
-                updateHistogramCharts(data, undefined, 'sampleBar');
-              }, options);
-        }
-
         scope.sampleMore = function () {
-          if (window.sampleMultiplier >= window.sampleMultiplierLimit) {
+          if (sampleMultiplier >= sampleMultiplierLimit) {
             window.alert('You\'ve reached the sampling limit');
             return;
           }
-          window.sampleMultiplier += 1;
+          sampleMultiplier += 1;
           var options = {
-            sequenceNames: [getSelectedSeqId()],
-            binNumber: window.binNumber + parseInt(window.binNumber / 4 * window.sampleMultiplier),
-            binSize: window.binSize + parseInt(window.binSize / 4 * window.sampleMultiplier)
+            sequenceNames: [scope.chromosomeId],
+            binNumber: binNumber + parseInt(binNumber / 4 * sampleMultiplier),
+            binSize: binSize + parseInt(binSize / 4 * sampleMultiplier)
           };
-          if (window.depthChart.brush().extent().length !== 0 &&
-              window.depthChart.brush().extent().toString() !== '0,0') {
-            options.start = parseInt(window.depthChart.brush().extent()[0]);
-            options.end = parseInt(window.depthChart.brush().extent()[1]);
+          // Sets new options and samples for new statistics
+          var lengthExtent = charts.depthChart.brush().extent();
+          if (lengthExtent.length !== 0 &&
+            lengthExtent.toString() !== '0,0') {
+            options.start = parseInt(lengthExtent[0]);
+            options.end = parseInt(lengthExtent[1]);
           }
           goSampling(options);
         };
 
-        function getSelectedSeqId() {
-          return $('.seq-buttons.selected').attr('data-id');
+        scope.toggleChart = function (event, chartId) {
+          var elem = event.target;
+          if ($(elem).hasClass('selected')) {
+            return;
+          }
+          // Toggle selected
+          var pair = [elem, $(elem).siblings()[0]];
+          $(pair).toggleClass('selected');
+
+          // Redraw chart
+          var histDataObject;
+          if (elem.getAttribute('data-id') === 'frag_hist' || elem.getAttribute('data-id') === 'length_hist') {
+            scope.lengthChartDataId = elem.getAttribute('data-id');
+            histDataObject = sampleStats[scope.lengthChartDataId];
+          } else {
+            scope.qualityChartDataId = elem.getAttribute('data-id');
+            histDataObject = sampleStats[scope.qualityChartDataId];
+          }
+          var histData = pivot(histDataObject);
+          var selection = d3.select($(elem).parent().parent().parent()
+            .find('svg')[0]);
+          selection.datum(histData);
+          charts[chartId](selection);
+        };
+
+        scope.cancel = function () {
+          scope.$parent.cancel();
+        };
+
+        function goBam() {
+          // Get read depth
+          bam.estimateBaiReadDepth(function (id) {
+            scope.chromosomes.push({
+              id: id,
+              selected: false
+            });
+            // Setup first time and sample
+            if ($('.seq-buttons').length === 0) {
+              // Turn off read depth loading msg
+              $('#ref-label').css('visibility', 'visible');
+              $('#total-reads img').css('visibility', 'visible');
+              $('#readDepthLoadingMsg').css('display', 'none');
+              // Turn on sampling message
+              $('.samplingLoader').css('display', 'block');
+
+              // Update depth distribution
+              charts.depthChart.on('brushend', function (x, brush) {
+                var options = {
+                  sequenceNames: [scope.chromosomeId]
+                };
+                if (!brush.empty()) {
+                  options.start = parseInt(brush.extent()[0]);
+                  options.end = parseInt(brush.extent()[1]);
+                  scope.region = {
+                    chr: scope.chromosomeId,
+                    'start': options.start,
+                    'end': options.end
+                  };
+                }
+
+                goSampling(options);
+              });
+            }
+            $timeout($.noop, 0);
+          });
+        }
+
+        function pivot(hist) {
+          var histData = Object.keys(hist).map(
+            function (key) {
+              return [+key, +hist[key]];
+            });
+          return histData;
+        }
+
+        function resetBrush() {
+          var brush = charts.depthChart.brush();
+          var g = d3.selectAll('#depth-distribution .brush');
+          brush.clear();
+          brush(g);
+        }
+
+        // Determines the format of the current total reads sampled and shortens if necessary
+        function updateTotalReads(totalReads) {
+          var numOfReadDigits = totalReads.toString().length;
+          if (numOfReadDigits <= 3) {
+            scope.readsSampled.value = totalReads;
+            scope.readsSampled.units = '';
+          } else if (numOfReadDigits <= 6) {
+            scope.readsSampled.value = Math.round(totalReads / 1000);
+            scope.readsSampled.units = 'thousand';
+          } else {
+            scope.readsSampled.value = Math.round(totalReads / 1000000);
+            scope.readsSampled.units = 'million';
+          }
+          // Need to trigger a digest cycle if one is not already in progress
+          // Timeout needs a function as a parameter, passed in empty function
+          $timeout($.noop, 0);
+        }
+
+        function goSampling(options) {
+          // Add default options
+          options = $.extend({
+            bed: window.bed,
+            onEnd: function () {
+              cfpLoadingBar.complete();
+            }
+          }, options);
+          // Turn on sampling message and off svg
+          $('section#middle svg').css('display', 'none');
+          $('.samplingLoader').css('display', 'block');
+          updateTotalReads(0);
+          cfpLoadingBar.start();
+          // Sets progress bar to 0 because of existing progress bar on page
+          cfpLoadingBar.set(0);
+          // Update selected stats
+          bam.sampleStats(function (data, seq) {
+            if (scope.chromosomeId !== seq) {
+              return;
+            }
+            // Turn off sampling message
+            $('.samplingLoader').css('display', 'none');
+            $('section#middle svg').css('display', 'block');
+            $('section#middle svg').css('margin', 'auto');
+            sampleStats = data;
+            // Update progress bar
+            var length, percentDone;
+            if (options.start !== null && options.end !== null) {
+              length = options.end - options.start;
+              percentDone = Math.round(((data.last_read_position - options.start) / length) * 100) / 100;
+            } else {
+              length = bam.header.sq.reduce(
+                function (prev, curr) {
+                  if (prev) {
+                    return prev;
+                  }
+                  if (curr.name === options.sequenceNames[0]) {
+                    return curr;
+                  }
+                }, false).end;
+              percentDone = Math.round((data.last_read_position / length) * 100) / 100;
+            }
+            if (cfpLoadingBar.status < percentDone) {
+              cfpLoadingBar.set(percentDone);
+            }
+            // Update charts
+            updatePercentCharts(data, sampleDonutChart);
+            updateTotalReads(data.total_reads);
+            updateHistogramCharts(data);
+          }, options);
         }
 
         function updatePercentCharts(stats, donutChart) {
           var pie = d3.layout.pie().sort(null);
-          // update percent charts
+          // Update percent charts
           var keys = ['mapped_reads', 'proper_pairs',
                       'forward_strands', 'singletons', 'both_mates_mapped',
                       'duplicates'];
@@ -355,106 +306,89 @@
         }
 
         function updateHistogramCharts(histograms) {
-
-          // check if coverage is zero
-          if (Object.keys(histograms.coverage_hist).length === 0){
+          // Check if coverage is zero
+          if (Object.keys(histograms.coverage_hist).length === 0) {
             histograms.coverage_hist[0] = '1.0';
           }
-          // update read coverage histogram
-          var d, selection;
-          d = Object.keys(histograms.coverage_hist).filter(
+          // Update read coverage histogram
+          var histData, selection;
+          histData = Object.keys(histograms.coverage_hist).filter(
             function (i) {
               return histograms.coverage_hist[i] !== '0';
-            }).map(function (k) {
-            return [+k, +histograms.coverage_hist[k]];
+            }).map(function (key) {
+            return [+key, +histograms.coverage_hist[key]];
           });
-          selection = d3
-            .select('#read-coverage-distribution-chart').datum(d);
-          window.readCoverageChart(selection);
+
+          selection = d3.select('#read-coverage-distribution-chart').datum(histData);
+          readCoverageChart(selection);
           if (histograms.coverage_hist[0] > 0.65) {
-            // most likely exome
-            // exclude <5 values b\c they are not informative dominating
-            // the chart
+            // Exclude <5 values b\c they are not informative dominating the chart
             var min = 5;
-            var max = window.readCoverageChart.globalChart().x()
+            var max = readCoverageChart.globalChart().x()
               .domain()[1];
-            window.readCoverageChart.setBrush([min, max]);
+            readCoverageChart.setBrush([min, max]);
           }
 
-          // update read length distribution
-          if ($('#length-distribution .selected').attr('data-id') === 'frag_hist'){
-            d = Object.keys(histograms.frag_hist).filter(
+          // Update read length distribution
+          if (scope.lengthChartDataId === 'frag_hist') {
+            histData = Object.keys(histograms.frag_hist).filter(
               function (i) {
                 return histograms.frag_hist[i] !== '0';
-              }).map(function (k) {
-              return [+k, +histograms.frag_hist[k]];
+              }).map(function (key) {
+              return [+key, +histograms.frag_hist[key]];
             });
+          } else {
+            histData = pivot(histograms.length_hist);
           }
-          else {
-            d = Object.keys(histograms.length_hist).map(
-              function (k) {
-                return [+k, +histograms.length_hist[k]];
-              });
-          }
-          // remove outliers if outliers checkbox isn't explicity
-          // checked
-          var outliers = $('#length-distribution .checkbox').hasClass(
-            'checked');
-          selection = d3.select('#length-distribution-chart')
-            .datum(d);
-          window.lengthChart(selection, {
-            'outliers': outliers
+          // Remove outliers if outliers checkbox isn't explicity checked
+          selection = d3.select('#length-distribution-chart').datum(histData);
+          charts.lengthChart(selection, {
+            'outliers': scope.showOutliers
           });
 
-          // update map quality distribution
-          if ($('#mapping-quality-distribution .selected').attr(
-              'data-id') === 'mapq_hist') {
-            d = Object.keys(histograms.mapq_hist).map(function (k) {
-              return [+k, +histograms.mapq_hist[k]];
-            });
+          // Update map quality distribution
+          if (scope.qualityChartDataId === 'mapq_hist') {
+            histData = pivot(histograms.mapq_hist);
+          } else {
+            histData = pivot(histograms.baseq_hist);
           }
-          else {
-            d = Object.keys(histograms.baseq_hist).map(function (k) {
-              return [+k, +histograms.baseq_hist[k]];
-            });
-          }
-          selection = d3.select(
-            '#mapping-quality-distribution-chart').datum(d);
-          window.qualityChart(selection);
+          selection = d3.select('#mapping-quality-distribution-chart').datum(histData);
+          charts.qualityChart(selection);
         }
 
-        scope.toggleChart = function (event, chartId) {
-          var elem = event.target;
-          if ($(elem).hasClass('selected')){
-            return;
+        function tickFormatter(tickValue) {
+          if ((tickValue / 1000000) >= 1) {
+            tickValue = tickValue / 1000000 + 'M';
+          } else if ((tickValue / 1000) >= 1) {
+            tickValue = tickValue / 1000 + 'K';
           }
-          // toggle selected
-          var pair = [elem, $(elem).siblings()[0]];
-          $(pair).toggleClass('selected');
-
-          // redraw chart
-          var dataId = elem.getAttribute('data-id');
-          var h = window.sampleStats[dataId];
-          var d = Object.keys(h).map(function (k) {
-            return [+k, +h[k]];
-          });
-          var selection = d3.select($(elem).parent().parent().parent()
-            .find('svg')[0]);
-          selection.datum(d);
-          window[chartId](selection);
-        };
-
-        function shortenNumber(num) {
-          if (num.toString().length <= 3) {
-            return [num];
-          }
-          else if (num.toString().length <= 6) {
-            return [Math.round(num / 1000), 'thousand'];
-          }
-          else {
-            return [Math.round(num / 1000000), 'million'];
-          }
+          return tickValue;
         }
+
+        // Setup length histrogram chart
+        charts.lengthChart = histogramViewFinderD3().width(width)
+          .height(height);
+        charts.lengthChart.xAxis().tickFormat(tickFormatter);
+        charts.lengthChart.yAxis().tickFormat(tickFormatter);
+
+        // Setup quality histogram chart
+        charts.qualityChart = histogramD3().width(width).height(height);
+        charts.qualityChart.xAxis().tickFormat(tickFormatter);
+        charts.qualityChart.yAxis().tickFormat(tickFormatter);
+
+        scope.chromosomes = [];
+        scope.showOutliers = false;
+        scope.readsSampled = {};
+        scope.lengthChartDataId = 'frag_hist';
+        scope.qualityChartDataId = 'mapq_hist';
+
+        scope.$on('$destroy', function () {
+          if (bam.sampleClient !== undefined) {
+            bam.sampleClient.close(1000);
+          }
+          cfpLoadingBar.complete();
+        });
+        goBam();
       }
     };
   });
