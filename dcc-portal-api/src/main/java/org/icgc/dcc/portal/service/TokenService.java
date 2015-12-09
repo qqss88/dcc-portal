@@ -69,7 +69,7 @@ public class TokenService {
   public String create(User user, String scope, String description) {
     log.debug("Creating access token of scope '{}' for user '{}'...", scope, user);
     val userId = user.getEmailAddress();
-    if (user.getDaco() == FALSE) {
+    if (user.getDaco().equals(FALSE)) {
       throwForbiddenException("The user is not DACO approved",
           format("User %s is not DACO approved to access the create access token resource", userId));
     }
