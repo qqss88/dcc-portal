@@ -284,8 +284,7 @@
 
       $provide.decorator('Restangular', ['$delegate', '$q',  function($delegate, $q) {
 
-        var _cancellableRequests = {},
-            _withHttpConfigFnCache = null;
+        var _cancellableRequests = {};
 
         function _deletePromiseAbortCache(deferredKey) {
 
@@ -297,10 +296,10 @@
 
           //console.log('Removing deferred from abort cache: ', deferredKey);
 
-         /*
-          if (s === 0) {
-            console.info('Request abort cache is empty!');
-          }*/
+          /*
+           if (s === 0) {
+           console.info('Request abort cache is empty!');
+           }*/
         }
 
         // Create a wrapped request function that will allow us to create http requests that
@@ -316,11 +315,11 @@
           return function() {
 
             var deferred = $q.defer(),
-                abortDeferred = $q.defer();
+              abortDeferred = $q.defer();
 
             /*if ( ! _cancellableRequests[deferredKey]) {
-              console.log('Added deferred "' + deferredKey + '" to abort cache.');
-            }*/
+             console.log('Added deferred "' + deferredKey + '" to abort cache.');
+             }*/
 
             // Save the deferred object so we may cancel it all later
             _cancellableRequests[deferredKey] = abortDeferred;
@@ -348,9 +347,9 @@
 
         function _createCancelableRequest(restangularCollectionFunction, args) {
           var callingArgs =  Array.prototype.slice.call(args),
-              deferredKey = callingArgs[0],
-              /*jshint validthis:true */
-              _this = this;
+            deferredKey = callingArgs[0],
+          /*jshint validthis:true */
+            _this = this;
 
           if (! deferredKey) {
             console.warn('Restangular function called with no arguments!');
@@ -398,26 +397,35 @@
         }
 
 
-        function _wrapRestangular(restangularObj) {
+        function _wrapRequestFunctions(restangularObj) {
 
-
-          // Keep the original untouched function
-          if (angular.isDefined(restangularObj.withHttpConfig) && ! _withHttpConfigFnCache) {
-            _withHttpConfigFnCache = restangularObj.withHttpConfig;
+          if (! angular.isDefined(restangularObj.one)) {
+            return;
           }
 
           restangularObj.one = _.bind(_wrapRequest(restangularObj.one), restangularObj);
           restangularObj.all = _.bind(_wrapRequest(restangularObj.all), restangularObj);
+        }
 
 
+        function _wrapRestangular(restangularObj) {
+
+          _wrapRequestFunctions(restangularObj);
+
+
+          if (! angular.isDefined(restangularObj.withHttpConfig)) {
+            return;
+          }
+
+          var withHttpConfigFn = restangularObj.withHttpConfig;
 
           // Wrap the config
           restangularObj.withHttpConfig = function() {
-            var restangularObject = _withHttpConfigFnCache.apply(this, Array.prototype.slice.call(arguments));
+            var withHttpConfigRestangularObject = withHttpConfigFn.apply(this, Array.prototype.slice.call(arguments));
 
-            _wrapRestangular(restangularObject);
+            _wrapRequestFunctions(withHttpConfigRestangularObject);
 
-            return restangularObject;
+            return withHttpConfigRestangularObject;
           };
 
         }
