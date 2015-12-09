@@ -21,9 +21,11 @@ import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.elasticsearch.action.search.SearchType.COUNT;
+import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.List;
@@ -34,8 +36,12 @@ import org.dcc.portal.pql.meta.TypeModel;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.UnionUnit;
+import org.icgc.dcc.portal.repository.TermsLookupRepository;
 
 import com.google.common.collect.Lists;
 
@@ -50,6 +56,7 @@ public class ElasticsearchRequestUtils {
 
   private static final String FILE_INDEX_TYPE = REPOSITORY_FILE.getId();
   private static final TypeModel TYPE_MODEL = IndexModel.getRepositoryFileTypeModel();
+  private final static String FIELD_NAME = "_id";
 
   public static final String[] EMPTY_SOURCE_FIELDS = null;
 
@@ -93,6 +100,61 @@ public class ElasticsearchRequestUtils {
   @NonNull
   public static boolean isRepositoryDonorInProject(Client client, String projectId, String repoIndexName) {
     return isRepositoryDonorExecute(client, Fields.PROJECT_CODE, projectId, repoIndexName);
+  }
+
+  @NonNull
+  public static BoolFilterBuilder toBoolFilterFrom(final UnionUnit unionDefinition,
+      final BaseEntitySet.Type entityType) {
+    val lookupType = entityType.toLookupType();
+    val boolFilter = boolFilter();
+
+    // Adding Musts
+    val intersectionUnits = unionDefinition.getIntersection();
+    for (val mustId : intersectionUnits) {
+      boolFilter.must(createTermsLookupFilter(FIELD_NAME, lookupType, mustId));
+    }
+
+    // Adding MustNots
+    val exclusionUnits = unionDefinition.getExclusions();
+    for (val notId : exclusionUnits) {
+      boolFilter.mustNot(createTermsLookupFilter(FIELD_NAME, lookupType, notId));
+    }
+    return boolFilter;
+  }
+
+  @NonNull
+  public static BoolFilterBuilder toBoolFilterFrom(final Iterable<UnionUnit> definitions,
+      final BaseEntitySet.Type entityType) {
+    val boolFilter = boolFilter();
+
+    for (val def : definitions) {
+      boolFilter.should(toBoolFilterFrom(def, entityType));
+    }
+    return boolFilter;
+  }
+
+  public static BoolFilterBuilder toDonorBoolFilter(final UnionUnit unionDefinition) {
+
+    val boolFilter = boolFilter();
+
+    // Adding Musts
+    val intersectionUnits = unionDefinition.getIntersection();
+    for (val mustId : intersectionUnits) {
+      val mustTerms =
+          TermsLookupRepository.createTermsLookupFilter(FIELD_NAME, TermsLookupRepository.TermLookupType.DONOR_IDS,
+              mustId);
+      boolFilter.must(mustTerms);
+    }
+
+    // Adding MustNots
+    val exclusionUnits = unionDefinition.getExclusions();
+    for (val notId : exclusionUnits) {
+      val mustNotTerms =
+          TermsLookupRepository.createTermsLookupFilter(FIELD_NAME, TermsLookupRepository.TermLookupType.DONOR_IDS,
+              notId);
+      boolFilter.mustNot(mustNotTerms);
+    }
+    return boolFilter;
   }
 
   private static boolean isRepositoryDonorExecute(Client client, String fieldAlias, String value,

@@ -192,6 +192,7 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
 
                     <!-- <th data-sortable data-type="files" data-field="fileSize">Size</th> -->
                     <th>Size</th>
+                    <th></th>
 
                 </thead>
 
@@ -201,7 +202,7 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
                      <i class="{{ ExternalRepoController.isSelected (row) ? 'icon-check' : 'icon-check-empty' }}" />
                     </td>
 
-                    <td style="min-width: 6rem; max-width: 8rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
+                    <td style="white-space:nowrap;max-width: 8rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
                        <i class="{{ row.access === 'open' ? 'icon-lock-open' : 'icon-lock' }}" />
                        <a href="{{:: ExternalRepoController.dataRepoFileUrl }}{{ row.id }}"
                         tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}"
@@ -230,10 +231,15 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
 
                     <td>{{ ExternalRepoController.fileFormats (row.fileCopies) }}</td>
 
-                    <td class="text-right" style="min-width: 6rem;">
+                    <td class="text-right" style="white-space:nowrap">
                       {{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}
                     </td>
-
+                    
+                    <td class="text-center" valign="middle" style="min-width: 1.6rem;">
+                      <i class="icon-chart-bar iobio-popup" tooltip="BAM statistics" data-ng-if="ExternalRepoController.fileFormats (row.fileCopies) == 'BAM' && ExternalRepoController.awsOrCollab(row.fileCopies)" data-ng-click="ExternalRepoController.showIobioModal(row.objectId, row.id)">
+                      </i>
+                    </td>
+                    
                   </tr>
                 </tbody>
             </table>

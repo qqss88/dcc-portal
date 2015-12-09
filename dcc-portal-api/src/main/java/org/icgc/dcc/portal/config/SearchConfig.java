@@ -37,6 +37,7 @@ import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.icgc.dcc.portal.config.PortalProperties.ElasticSearchProperties;
 import org.icgc.dcc.portal.model.Versions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -52,15 +53,17 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 public class SearchConfig {
 
+  /**
+   * Dependencies
+   */
   @Autowired
-  private PortalProperties properties;
+  private ElasticSearchProperties elastic;
 
   @Bean(destroyMethod = "close")
   public Client client() {
     // TransportClient is thread-safe so @Singleton is appropriate
-    val configuration = properties.getElastic();
-    val client = createTransportClient(configuration.getClient());
-    for (val nodeAddress : configuration.getNodeAddresses()) {
+    val client = createTransportClient(elastic.getClient());
+    for (val nodeAddress : elastic.getNodeAddresses()) {
       client.addTransportAddress(new InetSocketTransportAddress(
           nodeAddress.getHost(),
           nodeAddress.getPort()));
@@ -71,13 +74,29 @@ public class SearchConfig {
 
   @Bean
   public String indexName() {
-    String indexName = properties.getElastic().getIndexName();
+    String indexName = elastic.getIndexName();
     return resolveIndexName(indexName);
   }
 
   @Bean
   public String repoIndexName() {
-    return properties.getElastic().getRepoIndexName();
+    return elastic.getRepoIndexName();
+  }
+
+  @Bean
+  public Map<String, String> releaseIndexMetadata() {
+    String indexStr = resolveIndexName(elastic.getIndexName());
+    return indexMetadata(indexStr);
+  }
+
+  @Bean
+  public Versions versions() {
+    return new Versions(
+        getApiVersion(),
+        getApplicationVersion(),
+        getCommitId(),
+        firstNonNull(releaseIndexMetadata().get("git.commit.id.abbrev"), "unknown"),
+        indexName());
   }
 
   private String resolveIndexName(String indexName) {
@@ -101,12 +120,6 @@ public class SearchConfig {
     }
 
     return indexName;
-  }
-
-  @Bean
-  public Map<String, String> releaseIndexMetadata() {
-    String indexStr = resolveIndexName(properties.getElastic().getIndexName());
-    return indexMetadata(indexStr);
   }
 
   @SneakyThrows
@@ -133,16 +146,6 @@ public class SearchConfig {
     }
 
     return meta;
-  }
-
-  @Bean
-  public Versions versions() {
-    return new Versions(
-        getApiVersion(),
-        getApplicationVersion(),
-        getCommitId(),
-        firstNonNull(releaseIndexMetadata().get("git.commit.id.abbrev"), "unknown"),
-        indexName());
   }
 
   private static TransportClient createTransportClient(Map<String, String> clientSettings) {

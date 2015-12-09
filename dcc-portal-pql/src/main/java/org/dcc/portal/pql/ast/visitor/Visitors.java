@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 public final class Visitors {
 
   private static final CreatePqlStringVisitor PQL_STRING_VISITOR = new CreatePqlStringVisitor();
-  private static final CreatePqlAstVisitor CRESTE_PQL_AST_VISITOR = new CreatePqlAstVisitor();
+  private static final CreatePqlAstVisitor CREATE_PQL_AST_VISITOR = new CreatePqlAstVisitor();
   private static final CreateEsAstVisitor CREATE_ES_AST_VISITOR = new CreateEsAstVisitor();
 
   public static CreatePqlStringVisitor createPqlStringVisitor() {
@@ -32,7 +32,7 @@ public final class Visitors {
   }
 
   public static CreatePqlAstVisitor createPqlAstVisitor() {
-    return CRESTE_PQL_AST_VISITOR;
+    return CREATE_PQL_AST_VISITOR;
   }
 
   public static CreateEsAstVisitor createEsAstVisitor() {

@@ -22,7 +22,10 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_GENE_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_GENE_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
+import static org.icgc.dcc.portal.resource.ResourceUtils.MULTIPLE_IDS;
 import static org.icgc.dcc.portal.util.JsonUtils.merge;
 
 import java.io.InputStream;
@@ -38,12 +41,17 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
+import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.MutationService;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,15 +66,11 @@ import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Component
 @Path("/v1/ui/search")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UISearchResource {
 
   /**
@@ -80,11 +84,11 @@ public class UISearchResource {
   private final DonorService donorService;
   private final OccurrenceService occurrenceService;
   private final MutationService mutationService;
+  private final GeneService geneService;
 
   /**
    * Resource - Search.
    */
-
   @Path("/donor-mutations")
   @GET
   public Mutations getDonorMutations(
@@ -146,6 +150,14 @@ public class UISearchResource {
     val content = CharStreams.toString(new InputStreamReader(inputStream, UTF_8));
 
     return ImmutableMap.of("data", content);
+  }
+
+  @Path("/gene-symbols/{" + API_GENE_PARAM + "}")
+  @GET
+  public Map<String, String> ensemblIdGeneSymbolMappings(
+      @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS + " (e.g. ENSG00000155657,ENSG00000141510).", required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds
+      ) {
+    return geneService.getEnsemblIdGeneSymbolMap(geneIds.get());
   }
 
 }

@@ -3,12 +3,10 @@ package org.icgc.dcc.portal.test;
 import java.io.File;
 import java.io.IOException;
 
-import lombok.val;
-
 import org.icgc.dcc.portal.PortalMain;
-import org.icgc.dcc.portal.config.DataSourceConfig;
 import org.icgc.dcc.portal.config.PortalConfig;
 import org.icgc.dcc.portal.config.PortalProperties;
+import org.icgc.dcc.portal.config.RepositoryConfig;
 import org.icgc.dcc.portal.config.SearchConfig;
 import org.icgc.dcc.portal.test.AbstractSpringIntegrationTest.TestConfig;
 import org.junit.runner.RunWith;
@@ -22,8 +20,10 @@ import com.yammer.dropwizard.config.ConfigurationException;
 import com.yammer.dropwizard.config.ConfigurationFactory;
 import com.yammer.dropwizard.validation.Validator;
 
+import lombok.val;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestConfig.class, PortalConfig.class, DataSourceConfig.class, SearchConfig.class })
+@ContextConfiguration(classes = { TestConfig.class, PortalConfig.class, RepositoryConfig.class, SearchConfig.class })
 public abstract class AbstractSpringIntegrationTest {
 
   @Configuration

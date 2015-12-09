@@ -44,8 +44,8 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.createTermsLookupFilter;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
@@ -61,11 +61,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
@@ -93,7 +88,7 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
-import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
+import org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType;
 import org.icgc.dcc.portal.util.ForwardingTermsFacet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -102,6 +97,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -416,8 +416,8 @@ public class DonorRepository implements Repository {
     }
 
     val mustFilterFieldName = "_id";
-    // Note: We should not reference TermsLookupService here but for now we'll wait for the PQL module and see how we
-    // can move the createTermsLookupFilter() routine out of TermsLookupService.
+    // Note: We should not reference TermsLookupRepository here but for now we'll wait for the PQL module and see how we
+    // can move the createTermsLookupFilter() routine out of TermsLookupRepository.
     val termsLookupFilter = createTermsLookupFilter(mustFilterFieldName, TermLookupType.DONOR_IDS, donorId);
 
     return boolFilter().must(termsLookupFilter);

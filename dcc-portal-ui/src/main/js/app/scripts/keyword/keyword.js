@@ -40,8 +40,26 @@
     return _.isString (string) ? string.trim() : '';
   }
 
-  function caseInsensitivelyContains (word, partial) {
-    return _.contains (word.toUpperCase(), partial.toUpperCase());
+  function words (phrase) {
+    return _.words (phrase, /[^, ]+/g);
+  }
+
+  function partiallyContainsIgnoringCase (phrase, keyword) {
+    if (_.isEmpty (phrase)) {
+      return false;
+    }
+
+    var phrase2 = phrase.toUpperCase();
+    var keyword2 = keyword.toUpperCase();
+
+    var tokens = [keyword2].concat (words (keyword2));
+    var matchKeyword = _(tokens)
+      .unique()
+      .find (function (token) {
+        return _.contains (phrase2, token);
+      });
+
+    return ! _.isUndefined (matchKeyword);
   }
 
 
@@ -91,34 +109,20 @@
         var target = $scope.query;
         var matches = _(ensureArray (array))
           .filter (function (element) {
-            return caseInsensitivelyContains (ensureString (element), target);
+            return partiallyContainsIgnoringCase (ensureString (element), target);
           })
           .take (maxConcat);
 
         return matches.join (', ');
       };
 
-      $scope.concatIfContains = function (array) {
-        array = ensureArray (array);
-
-        var target = $scope.query;
-        var contains = _.any (array, function (element) {
-          return caseInsensitivelyContains (ensureString (element), target);
-        });
-
-        return contains ? array.join (', ') : '';
-      };
-
       var maxAbrigementLength = 120;
-      var abridger = new Abridger.Abridger (maxAbrigementLength);
+      var abridger = Abridger.of (maxAbrigementLength);
 
       $scope.abridge = function (array) {
         var target = $scope.query;
-        var match = _.find (ensureArray (array), function (sentence) {
-          return caseInsensitivelyContains (ensureString (sentence), target);
-        });
 
-        return match ? abridger.abridge (match, target) : '';
+        return abridger.abridge (array, target);
       };
 
       $scope.quickFn = function () {
@@ -143,7 +147,8 @@
 
         Keyword.getList({q: $scope.query, type: $scope.type, size: pageSize, from: $scope.from})
           .then(function (response) {
-            $scope.isFinished = response.pagination.total - $scope.from < pageSize;
+            var total = _.get (response, 'pagination', 0);
+            $scope.isFinished = (total < 1) || total - $scope.from < pageSize;
             $scope.isBusy = false;
             $scope.activeQuery = saved;
 

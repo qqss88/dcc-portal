@@ -22,8 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.dcc.portal.pql.utils.Tests.createEsAst;
 import static org.dcc.portal.pql.utils.Tests.initQueryContext;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -43,14 +41,16 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
-import org.dcc.portal.pql.query.PqlParseListener;
 import org.dcc.portal.pql.utils.Tests;
 import org.junit.Test;
 
-@Slf4j
-public class PqlParseListenerTest {
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-  PqlParseListener listener = new PqlParseListener(initQueryContext());
+@Slf4j
+public class QueryContextTest {
+
+  QueryContext context = initQueryContext();
 
   @Test
   public void filtersTest() {
@@ -125,7 +125,7 @@ public class PqlParseListenerTest {
 
   @Test
   public void selectTest() {
-    val esAst = createEsAst("select(id, gender)", listener);
+    val esAst = createEsAst("select(id, gender)", context);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     val fieldsNode = (FieldsNode) esAst.getFirstChild();
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
@@ -134,7 +134,7 @@ public class PqlParseListenerTest {
 
   @Test
   public void multiSelectTest() {
-    val esAst = createEsAst("select(id),select(gender)", listener);
+    val esAst = createEsAst("select(id),select(gender)", context);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     val fieldsNode = (FieldsNode) esAst.getFirstChild();
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
@@ -143,7 +143,7 @@ public class PqlParseListenerTest {
 
   @Test
   public void countTest() {
-    val esAst = createEsAst("count()", listener);
+    val esAst = createEsAst("count()", context);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.getFirstChild()).isExactlyInstanceOf(CountNode.class);
@@ -151,7 +151,7 @@ public class PqlParseListenerTest {
 
   @Test
   public void countTest_withFilters() {
-    val esAst = createEsAst("count(),eq(id, 10)", listener);
+    val esAst = createEsAst("count(),eq(id, 10)", context);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.getFirstChild()).isExactlyInstanceOf(CountNode.class);
 
@@ -159,29 +159,32 @@ public class PqlParseListenerTest {
     assertThat(queryNode.childrenCount()).isEqualTo(1);
 
     val filterNode = queryNode.getFirstChild();
-    assertThat(filterNode.getFirstChild()).isExactlyInstanceOf(BoolNode.class);
-    assertThat(filterNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
-    val mustNode = filterNode.getFirstChild().getFirstChild();
-    assertThat(mustNode.getFirstChild().childrenCount()).isEqualTo(2);
-    childrenContainValue(mustNode, "_donor_id");
-    childrenContainValue(mustNode, 10);
+    assertThat(filterNode.getFirstChild()).isExactlyInstanceOf(TermNode.class);
+    assertThat(filterNode.getFirstChild().childrenCount()).isEqualTo(2);
+    assertThat(filterNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(TerminalNode.class);
+    val terminalNode = (TerminalNode) filterNode.getFirstChild().getFirstChild();
+    assertThat(terminalNode.getValueAsString()).isEqualToIgnoringCase("_donor_id");
   }
 
   @Test
   public void nestedTest() {
-    val esAst = createEsAst("nested(gene, eq(projectId, 'D01'))", listener);
+    val esAst = createEsAst("nested(gene, eq(projectId, 'D01'))", context);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     val queryNode = (QueryNode) esAst.getFirstChild();
 
     assertThat(queryNode.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
     assertThat(queryNode.getFirstChild().childrenCount()).isEqualTo(1);
-    assertThat(queryNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
+    assertThat(queryNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(NestedNode.class);
     assertThat(queryNode.getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
-    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
     assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
-    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(
-        NestedNode.class);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().getFirstChild())
+        .isExactlyInstanceOf(MustBoolNode.class);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild())
+        .isExactlyInstanceOf(
+            TermNode.class);
   }
 
   private static void assertFilterStructure(ExpressionNode esAst) {
@@ -209,8 +212,7 @@ public class PqlParseListenerTest {
         if (termNodeContainsValue((TermNode) child, value, found)) {
           found = true;
         }
-      }
-      else if (child instanceof NotNode) {
+      } else if (child instanceof NotNode) {
         if (termNodeContainsValue((TermNode) child.getFirstChild(), value, found)) {
           found = true;
         }
