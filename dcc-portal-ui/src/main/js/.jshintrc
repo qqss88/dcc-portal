@@ -57,8 +57,8 @@
     "movingLineD3": false,
     "histogramViewFinderD3": false,
     "histogramD3": false,
-    "bamD3": false,
     "donutD3": false,
-    "Bam": false
+    "Bam": false,
+    "iobioGoogleAnalytics": false
   }
 }

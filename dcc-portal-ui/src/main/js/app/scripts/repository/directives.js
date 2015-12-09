@@ -30,6 +30,12 @@
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
       link: function (scope, element) {
+
+        // iobio team wanted analytics of when their app is being loaded
+        if (iobioGoogleAnalytics !== undefined) {
+          iobioGoogleAnalytics('send', 'pageview');
+        }
+
         // Initialize charts
         // Get height width of histogram charts and set viewboxes
         var readCoverageSvg = $('#read-coverage-distribution-chart');
