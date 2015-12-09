@@ -281,6 +281,180 @@
         return $delegate;
       }]);
 
+
+      $provide.decorator('Restangular', ['$delegate', '$q',  function($delegate, $q) {
+
+        var _cancellableRequests = {};
+
+        function _deletePromiseAbortCache(deferredKey) {
+
+          if (! angular.isDefined(_cancellableRequests[deferredKey])) {
+            return;
+          }
+
+          delete _cancellableRequests[deferredKey];
+
+          //console.log('Removing deferred from abort cache: ', deferredKey);
+
+          /*
+           if (s === 0) {
+           console.info('Request abort cache is empty!');
+           }*/
+        }
+
+        // Create a wrapped request function that will allow us to create http requests that
+        // can timeout when the abort promise is resolved.
+        function _createWrappedRequestFunction(restangularObject, deferredKey, requestFunction) {
+
+          if (! angular.isDefined(requestFunction) || ! angular.isFunction(requestFunction)) {
+            console.warn('Restangular REST function not defined cannot wrap!');
+            return false;
+          }
+
+          // Function to wrap the call in which removes the abort promise from the queue on resolve/reject
+          return function() {
+
+            var deferred = $q.defer(),
+              abortDeferred = $q.defer();
+
+            /*if ( ! _cancellableRequests[deferredKey]) {
+             console.log('Added deferred "' + deferredKey + '" to abort cache.');
+             }*/
+
+            // Save the deferred object so we may cancel it all later
+            _cancellableRequests[deferredKey] = abortDeferred;
+
+
+            restangularObject.withHttpConfig({timeout: abortDeferred.promise});
+
+            var requestPromise = requestFunction.apply(restangularObject, Array.prototype.slice.call(arguments));
+
+            requestPromise.then(
+              function(data) {
+                _deletePromiseAbortCache(deferredKey);
+                deferred.resolve(data);
+              },
+              function(error) {
+                _deletePromiseAbortCache(deferredKey);
+                deferred.reject(error);
+              }
+            );
+
+            return deferred.promise;
+          };
+
+        }
+
+        function _createCancelableRequest(restangularCollectionFunction, args) {
+          var callingArgs =  Array.prototype.slice.call(args),
+            deferredKey = callingArgs[0],
+          /*jshint validthis:true */
+            _this = this;
+
+          if (! deferredKey) {
+            console.warn('Restangular function called with no arguments!');
+            deferredKey = '*' + (new Date()).getTime();
+          }
+
+          var restangularObject = restangularCollectionFunction.apply(_this, callingArgs);
+
+          // Wrap the request items
+          restangularObject.get = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.get
+          );
+
+          restangularObject.getList = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.getList
+          );
+          restangularObject.post = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.post
+          );
+
+          // Add an auxiliary method to cancel an individual request if one exists
+          restangularObject.cancelRequest = function() {
+
+            var deferredAbort = _.get(_cancellableRequests, deferredKey, false);
+
+            if (deferredAbort) {
+              deferredAbort.resolve();
+              delete _cancellableRequests[deferredKey];
+            }
+          };
+
+          _wrapRestangular(restangularObject);
+
+
+          return restangularObject;
+        }
+
+
+        function _wrapRequest(fn) {
+
+          return function() {
+            return _createCancelableRequest.call(this, fn, arguments);
+          };
+
+        }
+
+
+        function _wrapRequestFunctions(restangularObj) {
+
+          if (! angular.isDefined(restangularObj.one)) {
+            return;
+          }
+
+          restangularObj.one = _.bind(_wrapRequest(restangularObj.one), restangularObj);
+          restangularObj.all = _.bind(_wrapRequest(restangularObj.all), restangularObj);
+        }
+
+
+        function _wrapRestangular(restangularObj) {
+
+          _wrapRequestFunctions(restangularObj);
+
+
+          if (! angular.isDefined(restangularObj.withHttpConfig)) {
+            return;
+          }
+
+          var withHttpConfigFn = restangularObj.withHttpConfig;
+
+          // Wrap the config
+          restangularObj.withHttpConfig = function() {
+            var withHttpConfigRestangularObject = withHttpConfigFn.apply(this, Array.prototype.slice.call(arguments));
+
+            _wrapRequestFunctions(withHttpConfigRestangularObject);
+
+            return withHttpConfigRestangularObject;
+          };
+
+        }
+
+        function _init() {
+          _wrapRestangular($delegate);
+        }
+
+        _init();
+
+        ///////////////
+
+        $delegate.abortAllHTTPRequests = function() {
+          var requestUrls = _.keys(_cancellableRequests);
+          var abortRequestLength = requestUrls.length;
+
+          for (var i = 0; i < abortRequestLength; i++) {
+            var requestURL = requestUrls[i];
+            console.log('Cancelling HTTP Request: ', requestURL);
+            _cancellableRequests[requestURL].resolve();
+          }
+
+          // Reset the deferred abort list
+          _cancellableRequests = {};
+        };
+
+        return $delegate;
+      }]);
+
     })
     .run(function($state, $location, $window, $timeout, $rootScope) {
 
@@ -311,7 +485,6 @@
             to += Math.round(parseFloat(el.offset().top));
             to = Math.max(0, to);
           }
-
 
 
           jQuery(window).scrollTop( to );
