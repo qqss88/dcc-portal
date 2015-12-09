@@ -24,6 +24,7 @@
     'icgc.common.version',
     'icgc.common.notify',
     'icgc.common.location',
+    'icgc.common.filters',
     'icgc.common.display',
     'icgc.common.external',
     'icgc.common.text.utils',
