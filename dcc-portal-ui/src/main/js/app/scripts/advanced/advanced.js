@@ -102,7 +102,7 @@ angular.module('icgc.advanced.controllers', [
         
         // Based on the tab we are on make sure we exec
         // our refreshes in the correct order.
-        switch (_controller.state.tab) {
+        switch (_controller.getActiveTab()) {
           case 'mutation':
             refreshOrder = _services.reverse();
             break;
@@ -126,7 +126,7 @@ angular.module('icgc.advanced.controllers', [
 
           var service = serviceObj.service;
 
-          if (_.get(service, 'isRendered', false)) {
+          if (_.get(service, 'isFacetsInitialized', false)) {
             Page.stopWork();
             return true;
           }
@@ -166,10 +166,10 @@ angular.module('icgc.advanced.controllers', [
                           serviceObj.id + '" refreshed in ' +
                           (nowTime - serviceObj.startRunTime) + 'ms...');
 
-              serviceObj.service.isRendered = true;
+              serviceObj.service.isFacetsInitialized = true;
 
               if (serviceObj.controllerUIActive) {
-                serviceObj.service.renderBodyTab();
+                _renderTab(_controller.getActiveTab());
                 _controller.loadingFacet = false;
               }
              
@@ -184,7 +184,7 @@ angular.module('icgc.advanced.controllers', [
             _pageUnblockedTime = null,
             _MAX_REFRESH_BLOCK_TIME = 500, // Block for 500ms max
             _nonRefreshedServices = _.filter(refreshOrder, function(serviceObj) {
-              return _.get(serviceObj, 'service.isRendered', false) === false ;
+              return _.get(serviceObj, 'service.isFacetsInitialized', false) === false ;
             }),
           _refreshServicesLength = _nonRefreshedServices.length;
 
@@ -226,10 +226,11 @@ angular.module('icgc.advanced.controllers', [
         }
 
         if (forceFullRefresh === true) {
-          service.isRendered = false;
+          _resetService(service);
           _refresh();
         }
         else {
+          service.isHitsInitialized = true;
           service.renderBodyTab();
         }
       }
@@ -238,11 +239,16 @@ angular.module('icgc.advanced.controllers', [
         return _.isString (string) ? string.trim() : '';
       }
 
+      function _resetService(service) {
+        service.isFacetsInitialized = false;
+        service.isHitsInitialized = false;
+      }
+
       function _resetServices() {
         var serviceIds = _.keys(_serviceMap);
 
         for (var i = 0; i < serviceIds.length; i++) {
-          _serviceMap[serviceIds[i]].isRendered = false;
+          _resetService(_serviceMap[serviceIds[i]]);
         }
 
       }
@@ -254,7 +260,7 @@ angular.module('icgc.advanced.controllers', [
         Page.setPage('advanced');
 
         // Setup
-        _controller.setTab($state.current.data.tab);
+        _controller.setActiveTab($state.current.data.tab);
         _controller.setSubTab($state.current.data.subTab);
 
         // Cache the filters so we can use them during the several layers of promises
@@ -271,11 +277,12 @@ angular.module('icgc.advanced.controllers', [
 
           return str;
         },
-          function(newVal, oldVal) {
+        function(newVal, oldVal) {
+
           if (newVal !== oldVal) {
-              _renderTab($state.current.data.tab, true);
-            console.log('paging!');
+            _renderTab(_controller.getActiveTab(), true);
           }
+
         });
 
         $scope.$watch(
@@ -291,7 +298,6 @@ angular.module('icgc.advanced.controllers', [
             _resetServices();
             _refresh();
           }
-
         );
 
         $rootScope.$on('$stateChangeStart', function(e, toState) {
@@ -342,7 +348,7 @@ angular.module('icgc.advanced.controllers', [
           return $state.current.data.tab;
         }, function () {
           //alert($state.current.data.tab);
-          _controller.setTab($state.current.data.tab);
+          _controller.setActiveTab($state.current.data.tab);
         });
         $scope.$watch(function () {
           return $state.current.data.subTab;
@@ -450,9 +456,13 @@ angular.module('icgc.advanced.controllers', [
         return 'flag flag-' + CodeTable.translateCountryCode (last2.toLowerCase());
       };
 
-      _controller.setTab = function (tab) {
+      _controller.setActiveTab = function (tab) {
         _controller.state.setTab(tab);
         _renderTab(tab);
+      };
+
+      _controller.getActiveTab = function() {
+        return _controller.state.getTab();
       };
 
       _controller.setSubTab = function (tab) {
