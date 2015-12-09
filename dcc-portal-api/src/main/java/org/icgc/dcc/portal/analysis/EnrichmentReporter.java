@@ -17,20 +17,14 @@
  */
 package org.icgc.dcc.portal.analysis;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.util.Map;
-
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.repository.GeneRepository;
@@ -41,9 +35,15 @@ import org.supercsv.io.CsvListWriter;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class EnrichmentReporter {
 
   /**
@@ -51,8 +51,7 @@ public class EnrichmentReporter {
    */
   private static final Joiner REPORT_GENES_JOINER = COMMA;
   private static final String[] REPORT_HEADERS =
-      {
-          "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
+      { "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
       };
 
   /**
@@ -65,7 +64,7 @@ public class EnrichmentReporter {
     val results = analysis.getResults();
 
     @Cleanup
-    val writer = new CsvListWriter(new OutputStreamWriter(outputStream, Charset.forName("UTF-8")), TAB_PREFERENCE);
+    val writer = new CsvListWriter(new OutputStreamWriter(outputStream, UTF_8), TAB_PREFERENCE);
     writer.writeHeader(REPORT_HEADERS);
 
     // Shorthands
@@ -75,7 +74,8 @@ public class EnrichmentReporter {
       val result = results.get(i);
 
       log.info("[{}/{}] Reporting {}", new Object[] { i + 1, results.size(), result.getGeneSetId() });
-      val overlapGeneSetGeneIds = geneRepository.findGeneSymbolsByGeneListIdAndGeneSetId(inputGeneListId, result.getGeneSetId());
+      val overlapGeneSetGeneIds =
+          geneRepository.findGeneSymbolsByGeneListIdAndGeneSetId(inputGeneListId, result.getGeneSetId());
 
       writer.write(new Object[] {
           result.getGeneSetId(),

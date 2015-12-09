@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.writer;
 
-import static java.nio.charset.Charset.forName;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
@@ -46,14 +46,14 @@ public class ErrorMessageBodyWriter implements MessageBodyWriter<Error> {
 
   @Override
   public long getSize(Error error, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return error.toString().getBytes(forName("UTF-8")).length;
+    return error.toString().getBytes(UTF_8).length;
   }
 
   @Override
   public void writeTo(Error error, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
           WebApplicationException {
-    entityStream.write(error.toString().getBytes(forName("UTF-8")));
+    entityStream.write(error.toString().getBytes(UTF_8));
   }
 
 }

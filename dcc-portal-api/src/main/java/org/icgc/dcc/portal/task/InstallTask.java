@@ -21,11 +21,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -104,7 +104,7 @@ public class InstallTask extends Task {
         .start();
 
     @Cleanup
-    val reader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.forName("UTF-8")));
+    val reader = new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8));
     String line = null;
     while ((line = reader.readLine()) != null) {
       log.info("'install': {}", line);

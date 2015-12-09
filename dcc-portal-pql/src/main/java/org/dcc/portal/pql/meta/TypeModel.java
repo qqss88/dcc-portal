@@ -25,10 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.exception.SemanticException;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.visitor.CreateAliasVisitor;
@@ -38,6 +34,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class TypeModel {
@@ -208,8 +208,7 @@ public abstract class TypeModel {
   }
 
   public final boolean isAliasDefined(String alias) {
-    return (null == alias) ? false :
-        fieldsByAlias.containsKey(alias);
+    return (null == alias) ? false : fieldsByAlias.containsKey(alias);
   }
 
   /**
@@ -268,11 +267,11 @@ public abstract class TypeModel {
   private List<String> split(String fullyQualifiedName) {
     val result = ImmutableList.<String> builder();
     val list = FIELD_SEPARATOR_SPLITTER.splitToList(fullyQualifiedName);
-    String prefix = "";
+    val prefix = new StringBuilder();
 
     for (int i = 0; i < list.size(); i++) {
-      result.add(prefix + list.get(i));
-      prefix = prefix + list.get(i) + FIELD_SEPARATOR;
+      result.add(prefix.toString() + list.get(i));
+      prefix.append(list.get(i) + FIELD_SEPARATOR);
     }
 
     return result.build().reverse();

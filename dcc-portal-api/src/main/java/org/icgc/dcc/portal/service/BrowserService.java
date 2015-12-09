@@ -19,8 +19,9 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -102,10 +103,10 @@ public class BrowserService {
 
   private List<Object> getSegmentMutation(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
     val consequenceValue = queryMap.get("consequence_type");
-    val consequenceTypes = consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : null;
+    val consequenceTypes = parseList(consequenceValue);
 
     val projectFilterValue = queryMap.get("consequence_type");
-    val projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
+    val projectFilters = parseList(projectFilterValue);
 
     val searchResponse = browserRepository.getMutation(segmentId, start, stop, consequenceTypes, projectFilters);
     return BrowserParsers.parseMutations(segmentId, start, stop, consequenceTypes, projectFilters, searchResponse);
@@ -114,12 +115,10 @@ public class BrowserService {
   private List<Object> getHistogramSegmentMutation(String segmentId, Long start, Long stop,
       Map<String, String> queryMap) {
     val consequenceValue = queryMap.get("consequence_type");
-    val consequenceTypes =
-        consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : Arrays.<String> asList();
+    val consequenceTypes = parseList(consequenceValue);
 
     val projectFilterValue = queryMap.get("consequence_type");
-    val projectFilters =
-        projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : Arrays.<String> asList();
+    val projectFilters = parseList(projectFilterValue);
 
     val intervalValue = queryMap.get("interval");
     val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : 0;
@@ -132,7 +131,7 @@ public class BrowserService {
 
   private List<Object> getSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
     val biotypeValue = queryMap.get("biotype");
-    val biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : null;
+    val biotypes = parseList(biotypeValue);
 
     val withTranscripts = nullToEmpty(queryMap.get("dataType")).equals("withTranscripts");
 
@@ -142,7 +141,7 @@ public class BrowserService {
 
   private List<Object> getHistogramSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
     val biotypeValue = queryMap.get("biotype");
-    val biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : Arrays.<String> asList();
+    val biotypes = parseList(biotypeValue);
 
     val intervalValue = queryMap.get("interval");
     val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : 0;
@@ -158,6 +157,14 @@ public class BrowserService {
       val message = "Value of the '" + ParameterNames.SEGMENT +
           "' parameter (" + segmentRegion + ") is not valid. Reason: " + e.getMessage();
       throw new BadRequestException(message);
+    }
+  }
+
+  private static List<String> parseList(String value) {
+    if (value != null) {
+      return asList(value.split(","));
+    } else {
+      return emptyList();
     }
   }
 
