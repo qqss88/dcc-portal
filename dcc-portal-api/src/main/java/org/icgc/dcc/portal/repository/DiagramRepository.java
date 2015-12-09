@@ -42,10 +42,16 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DiagramRepository {
 
+  /**
+   * Constants.
+   */
   private static final Type TYPE = Type.DIAGRAM;
   private static final Kind KIND = Kind.DIAGRAM;
   private static final Jql2PqlConverter CONVERTER = Jql2PqlConverter.getInstance();
 
+  /**
+   * Dependencies.
+   */
   private final Client client;
   private final String indexName;
   private final QueryEngine queryEngine;
