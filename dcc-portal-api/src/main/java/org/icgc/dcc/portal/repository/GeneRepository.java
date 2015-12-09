@@ -37,6 +37,7 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -89,6 +90,7 @@ public class GeneRepository implements Repository {
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
 
     // Converter does not handle limits
@@ -105,6 +107,13 @@ public class GeneRepository implements Repository {
     log.info(" find all centric {}", search);
 
     return search.getRequestBuilder().execute().actionGet();
+  }
+
+  @NonNull
+  public SearchResponse findAllCentric(StatementNode pqlAst) {
+    val request = queryEngine.execute(pqlAst, GENE_CENTRIC);
+
+    return request.getRequestBuilder().execute().actionGet();
   }
 
   private Map<String, String> findGeneSymbolsByFilters(@NonNull ObjectNode filters) {

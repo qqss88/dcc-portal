@@ -180,9 +180,17 @@
             var indexOffset = config.xaxis.ticksValueRange[0];
             var index = Math.round(xReverser(coords[0])) - indexOffset;
             var actualIndex = index + indexOffset;
+
+            // Edge Case: where you are at the right most edge of the x-axis
+            // get the last value count for the project. Rather than assuming
+            // it exists prior to the release as the above formula does.
+            if (actualIndex === config.xaxis.ticksValueRange[1]) {
+              index = d.values.length - 1;
+            }
+
             config.tooltipShowFunc(this,d.key,d.values[index].value, actualIndex);
-            hintLine.transition().duration(80).attr('x1',x(index + indexOffset)).attr('x2',x(actualIndex));
-            hintHighlighter.transition().duration(80).attr('x',x(index + indexOffset)-gridBlockWidth/2);
+            hintLine.transition().duration(80).attr('x1',x(actualIndex)).attr('x2',x(actualIndex));
+            hintHighlighter.transition().duration(80).attr('x',x(actualIndex)-gridBlockWidth/2);
           })
       .on('mouseout', function() {
             config.tooltipHideFunc();

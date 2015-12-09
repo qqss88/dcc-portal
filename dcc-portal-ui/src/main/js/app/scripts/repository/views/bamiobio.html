@@ -1,0 +1,85 @@
+<div id="showData">
+  <h3>BAM Stats</h3>
+  <section id="top">
+    <div id="depth-distribution" class="panel">
+      <div class="title">Read Coverage</div>
+      <div class="hint">(drag to select region)</div>
+      <!-- <label class="checkbox" for="checkbox2" style="position:absolute;right:15px;top:21px;cursor:pointer" title="Turn on Exome Sampling - use the read coverage data to sample only regions with non-zero read depth">
+                <input type="checkbox"value="" class="outlier" data-toggle="checkbox" >
+                Exome
+            </label> -->
+      <div id="read-depth-container" style="height:70%; margin-bottom:-2%">
+        <div id="readDepthLoadingMsg" style="font-size:50px;margin-top:30px;color:#2687BE">Initializing data <img style="height:18px" src="styles/images/loading_dots.gif" /></div>
+      </div>
+      <div style='width: 100%; overflow-x: scroll;' id='seq-list'>
+        <span ng-repeat='chr in chromosomes track by chr.id' class='seq-buttons' data-ng-class="{selected: chr.selected}" data-ng-click='highlightSelectedSeq(chr.id)' data-id='{{chr.id}}' data-ng-init='!$first || highlightSelectedSeq(chr.id)'>{{chr.id}}</span>
+      </div>
+      <div id='ref-label' style='font-size:13px;color:rgb(80,80,80);font-weight:400;margin-top:2px; width:100px;margin-left:auto;margin-right:auto; visibility:hidden;'>Reference(s)</div>
+      <!-- <ul id="sequences"></ul> -->
+    </div>
+    <div id="total-reads" class="panel">
+      <div class="title">Reads Sampled</div>
+      <div id="value">0</div>
+      <div id="base" style="font-size:1.5rem;padding-left:10px; letter-spacing:3px; color:#2687BE; text-align:center;">
+        <span id="number"></span>
+        <img title="Sample More" class="sample-more" data-ng-click="sampleMore()" style="width:20px;margin:auto;cursor:pointer" src="styles/images/more_sampling.png"></img>
+      </div>
+
+    </div>
+  </section>
+  <section id="middle">
+    <div id="percents">
+      <div id="mapped_reads" class="percent panel">Mapped Reads
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg viewBox="0 0 225 149" preserveAspectRatio="xMidYMid"></svg>
+      </div>
+      <div id="forward_strands" class="percent panel">Forward Strand
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg viewBox="0 0 225 149" preserveAspectRatio="xMidYMid"></svg>
+      </div>
+      <div id="proper_pairs" class="percent panel">Proper Pairs
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg viewBox="0 0 225 149" preserveAspectRatio="xMidYMid"></svg>
+      </div>
+      <div id="singletons" class="percent panel">Singletons
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg viewBox="0 0 225 149" preserveAspectRatio="xMidYMid"></svg>
+      </div>
+      <div id="both_mates_mapped" class="percent panel">Both Pairs Mapped
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg viewBox="0 0 225 149" preserveAspectRatio="xMidYMid"></svg>
+      </div>
+      <div id="duplicates" class="percent panel">Duplicates
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg viewBox="0 0 225 149" preserveAspectRatio="xMidYMid"></svg>
+      </div>
+    </div>
+    <div id="distributions">
+      <div id="read-coverage-distribution" class="distribution panel">
+        <div id="read-coverage">Read Coverage Distribution</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg id="read-coverage-distribution-chart" class="focus" preserveAspectRatio="none" style="width:98%;height:85%"></svg>
+      </div>
+      <div id="length-distribution" class="distribution panel">
+        <div>
+          <div class="chart-chooser"><span class="selected length-chart" data-outlier="false" data-id="frag_hist" data-ng-click="toggleChart($event, 'lengthChart')">Insert Length</span> | <span class="length-chart" data-id="length_hist" data-outlier="true" data-ng-click="toggleChart($event, 'lengthChart')">Read Length</span></div>
+        </div>
+        <label class="checkbox icon-check-empty" data-ng-click="checkboxCheck($event)" for="checkbox2" style="position:absolute;right:10px;top:24px;cursor:pointer">
+          <input type="checkbox" value="" class="outlier" data-toggle="checkbox"> Outliers
+        </label>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg id="length-distribution-chart" class="focus" preserveAspectRatio="none" style="width:98%;height:85%"></svg>
+      </div>
+      <div id="mapping-quality-distribution" class="distribution panel">
+        <div>
+          <div class="chart-chooser"><span data-id="mapq_hist" class="selected quality-chart" data-ng-click="toggleChart($event, 'qualityChart')">Mapping Quality</span> | <span class="quality-chart" data-id="baseq_hist" data-ng-click="toggleChart($event, 'qualityChart')">Base Quality</span></div>
+        </div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg id="mapping-quality-distribution-chart" class="focus" preserveAspectRatio="none" style="width:98%;height:85%"></svg>
+      </div>
+    </div>
+  </section>
+  <div style="float:right">
+    <p>Powered by <a href="http://iobio.io/">iobio</a></p>
+  </div>
+</div>

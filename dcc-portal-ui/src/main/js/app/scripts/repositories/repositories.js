@@ -39,9 +39,8 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
               isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
 
             if (isICGCCloudFunctionlityEnabled) {
-              _templateStr = '<div data-ui-view="home" data-reset-scroll="top"></div>' +
-              '<div data-ui-view="cloud-repo-content" class="cloud-repository-container" ' +
-              ' data-reset-scroll="top"></div>';
+              _templateStr = '<div data-ui-view="home"></div>' +
+                             '<div data-ui-view="cloud-repo-content" class="cloud-repository-container"></div>';
             }
 
             return _templateStr;
@@ -194,7 +193,6 @@ angular.module('icgc.repositories.controllers', [])
       function _refreshData() {
          _repoDataCollectionManager.getFileSummary()
             .then(function(repoSummaryData) {
-               console.log(repoSummaryData);
                _repoSummaryData = repoSummaryData;
             });
 
@@ -203,8 +201,6 @@ angular.module('icgc.repositories.controllers', [])
             var chartProvider = RepositoriesService.getChartProvider();
             _repoStats.repoDataTypes = _repoDataCollectionManager.orderDataTypes(repoStats.stats);
               _repoStats.primarySites = chartProvider.getSiteProjectDonorChart(repoStats.donorPrimarySite);
-
-            console.log(repoStats, _repoStats.repoDataTypes, _repoStats.primarySites);
          });
 
 

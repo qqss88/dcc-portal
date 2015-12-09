@@ -18,26 +18,29 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.dcc.portal.pql.ast.builder.PqlBuilders.count;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 
 import java.util.List;
-
-import org.dcc.portal.pql.ast.builder.PqlBuilders;
-import org.dcc.portal.pql.exception.SemanticException;
-import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.query.PqlParser;
-import org.elasticsearch.search.sort.SortOrder;
-import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.collect.Lists;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+
+import org.dcc.portal.pql.exception.SemanticException;
+import org.dcc.portal.pql.meta.Type;
+import org.elasticsearch.search.sort.SortOrder;
+import org.icgc.dcc.common.core.util.Joiners;
+import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.base.Joiner;
 
 /**
  * Converts JSON-like queries to PQL ones.
@@ -49,6 +52,8 @@ public class Jql2PqlConverter {
 
   private final static FiltersConverter FILTERS_CONVERTER = new FiltersConverter();
   private final static ObjectMapper MAPPER = createObjectMapper();
+
+  private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
   private final static String SEPARATOR = ",";
 
   private final static String LIMIT_NO_FROM_TEMPLATE = "limit(%d)";
@@ -57,14 +62,17 @@ public class Jql2PqlConverter {
   private final static String SORT_TEMPLATE = "sort(%s%s)";
   private final static String ASC_SORT = "+";
   private final static String DESC_SORT = "-";
+  private final static String FACETS = "facets";
 
   public String convert(@NonNull Query query, @NonNull Type type) {
     val result = new StringBuilder();
     result.append(parseFields(query.getFields()));
 
-    if (query.getIncludes() != null && !query.getIncludes().isEmpty()) {
+    val includes = query.getIncludes();
+
+    if (!isEmpty(includes)) {
       result.append(SEPARATOR);
-      result.append(parseIncludes(query.getIncludes()));
+      result.append(parseIncludes(includes));
     }
 
     if (query.hasFilters()) {
@@ -110,40 +118,45 @@ public class Jql2PqlConverter {
   }
 
   public String convertCount(@NonNull Query query, @NonNull Type type) {
-    val pql = this.convert(query, type);
-    val pqlNode = PqlParser.parse(pql);
+    val pql = convert(query, type);
+    log.debug("Converted PQL (as a regular Select query): {}", pql);
 
-    log.debug("Input pql {}", pql);
-    log.debug("PQL Node {}", pqlNode);
-    log.debug("PQL Node filters {}", pqlNode.getFilters());
+    val pqlAst = parse(pql);
+    val countQuery = count().build();
 
-    val root = PqlBuilders.count().build();
-    if (query.getFilters().elements().hasNext()) {
-      log.debug(" +++ {}", query.getFilters());
-      val curFilters = pqlNode.getFilters();
-      if (curFilters != null) {
-        root.setFilters(curFilters);
+    if (query.hasFilters()) {
+      if (pqlAst.hasFilters()) {
+        countQuery.setFilters(pqlAst.getFilters());
       } else {
-        throw new SemanticException("Filter contains an invalid value: %s", query.getFilters());
+        throw new SemanticException("Filter contains an invalid value: '%s'", query.getFilters());
       }
     }
 
-    log.debug("Converted count PQL query: {}", root.toString());
+    if (query.hasInclude(FACETS)) {
+      if (pqlAst.hasFacets()) {
+        countQuery.setFacets(pqlAst.getFacets());
+      } else {
+        throw new SemanticException("Include contains an invalid value: '%s'", query.getIncludes());
+      }
+    }
 
-    return root.toString();
+    val result = countQuery.toString();
+    log.debug("Converted Count PQL: {}", result);
+
+    return result;
   }
 
   private static String parseIncludes(List<String> queryIncludes) {
-    val includes = Lists.newArrayList(queryIncludes);
+    val includes = newArrayList(queryIncludes);
     val result = new StringBuilder();
-    if (includes.contains("facets")) {
-      includes.remove("facets");
+
+    if (includes.contains(FACETS)) {
+      includes.removeAll(newArrayList(FACETS));
       result.append(parseFacets());
     }
 
     if (!includes.isEmpty()) {
-      // Added facets
-      if (result.length() != 0) {
+      if (result.length() > 0) {
         result.append(SEPARATOR);
       }
 
@@ -166,22 +179,9 @@ public class Jql2PqlConverter {
   }
 
   private static String parseFields(List<String> fields) {
-    if (fields == null || fields.isEmpty()) {
-      return "select(*)";
-    }
+    val fieldString = isEmpty(fields) ? "*" : COMMA_JOINER.join(fields);
 
-    val result = new StringBuilder();
-    result.append("select(");
-    for (int i = 0; i < fields.size(); i++) {
-      result.append(fields.get(i));
-      if (i != fields.size() - 1) {
-        result.append(",");
-      }
-    }
-
-    result.append(")");
-
-    return result.toString();
+    return format("select(%s)", fieldString);
   }
 
   @SneakyThrows

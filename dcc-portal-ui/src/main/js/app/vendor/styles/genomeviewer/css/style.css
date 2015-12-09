@@ -241,17 +241,19 @@ ul.ocb-app-menu > li:hover {
 
 /*Network viewer*/
 .ocb-nv-editionbar {
+    box-sizing: border-box;
+    height: 32px;
     font-size: 13px;
     padding: 4px 8px;
-    height: 23px;
     background-color: #FAFAFA;
     border-bottom: 1px solid #D9D9D9;
 }
 
 .ocb-nv-toolbar {
+    box-sizing: border-box;
+    height: 32px;
     font-size: 13px;
     padding: 4px 8px;
-    height: 23px;
     background-color: #FAFAFA;
     border-bottom: 1px solid #D9D9D9;
 }
@@ -435,8 +437,8 @@ ul.ocb-app-menu > li:hover {
 }
 
 /*.ocb-gv-track-title-el:hover {*/
-    /*background-image: linear-gradient(to bottom, #f2f2f2, #e4e4e4);*/
-    /*background-image: -webkit-linear-gradient(top, #f2f2f2, #e4e4e4);*/
+/*background-image: linear-gradient(to bottom, #f2f2f2, #e4e4e4);*/
+/*background-image: -webkit-linear-gradient(top, #f2f2f2, #e4e4e4);*/
 /*}*/
 
 .ocb-gv-track-title-el:focus {
@@ -448,6 +450,7 @@ ul.ocb-app-menu > li:hover {
 .ocb-gv-track-title-histogram {
     margin-right: 10px;
 }
+
 .ocb-gv-track-title-toggle {
     margin-right: 5px;
 }
@@ -545,6 +548,15 @@ ul.ocb-app-menu > li:hover {
     background-repeat: repeat-x;
 }
 
+.ocb-codon {
+    display: none;
+}
+
+.ocb-coding:hover .ocb-codon {
+    display: inherit;
+    cursor: pointer;
+}
+
 /**/
 
 .ocb-pointer {
@@ -604,7 +616,7 @@ CONTROLS
 }
 
 .ocb-ctrl-text {
-    border-color:transparent;
+    border-color: transparent;
     background-color: transparent;
 }
 
@@ -697,11 +709,25 @@ ul.ocb-context ul {
     left: 0;
     top: 100%;
 }
-div.ocb-dropdown ul[data-upward]{
-    top:inherit;
-    bottom:100%;
+
+div.ocb-dropdown ul[data-right] {
+    right: 0;
+    left: auto;
+}
+
+div.ocb-dropdown ul[data-upward] {
+    top: inherit;
+    bottom: 100%;
     margin-bottom: 2px;
     left: 0;
+}
+
+div.ocb-dropdown ul[data-upward][data-right] {
+    top: inherit;
+    bottom: 100%;
+    margin-bottom: 2px;
+    left: auto;
+    right: 0;
 }
 
 div.ocb-dropdown ul ul {
@@ -726,7 +752,6 @@ ul.ocb-context li[data-divider] {
     overflow: hidden;
     background-color: #DEDEDE;
 }
-
 
 div.ocb-dropdown ul li[data-sub]:after,
 ul.ocb-context li[data-sub]:after {
@@ -755,7 +780,6 @@ ul.ocb-context li[data-text]:hover {
     color: inherit;
 }
 
-
 div.ocb-dropdown > div:focus + ul,
 div.ocb-dropdown > div:focus + ul li:hover > ul {
     visibility: visible;
@@ -765,26 +789,47 @@ div.ocb-dropdown > div:focus + ul li:hover > ul {
 .ocb-zoom-bar {
     position: relative;
     float: left;
-    width: 120px;
+    width: 100px;
     height: 23px;
     box-sizing: border-box;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    background-color: #FFFFFF;
+    /*border-top: 1px solid #ccc;*/
+    /*border-bottom: 1px solid #ccc;*/
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
-.ocb-zoom-bar > div {
+.ocb-zoom-bar > div.back {
+    position: absolute;
+    background-color: #aaa;
+    box-sizing: border-box;
+    height: 5px;
+    top: 8px;
+    width: 100%;
+}
+
+.ocb-zoom-bar > div.rect {
+    position: absolute;
     background-color: #2F65F4;
     /*background-color: #DCDCDC;*/
     box-sizing: border-box;
-    height: 100%;
-    transition: all 0.2s;
+    height: 5px;
+    top: 8px;
+    transition: all 0.1s;
+}
+
+.ocb-zoom-bar > div.ball {
+    position: absolute;
+    background-color: #2046aa;
+    top: 3px;
+    margin-left: -8px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
 }
 
 /*
 END CONTROLS
 */
-
 @font-face {
     font-family: 'Ubuntu';
     font-style: normal;
@@ -810,7 +855,7 @@ END CONTROLS
     font-family: 'Lato';
     font-style: normal;
     font-weight: 300;
-    src: local('Lato Light'), local('Lato-Light'), url(../fonts/lato-light.woff2) format('woff2');
+    src: local('Lato Light'), local('Lato-Light'), url(../fonts/lato-light.woff) format('woff');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
 
@@ -818,7 +863,7 @@ END CONTROLS
     font-family: 'Lato';
     font-style: normal;
     font-weight: 400;
-    src: local('Lato Regular'), local('Lato-Regular'), url(../fonts/lato-regular.woff2) format('woff2');
+    src: local('Lato Regular'), local('Lato-Regular'), url(../fonts/lato-regular.woff) format('woff');
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
 
@@ -826,28 +871,14 @@ END CONTROLS
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 300;
-    src: local('Roboto Light'), local('Roboto-Light'), url(../fonts/roboto-light.woff2) format('woff2');
+    src: local('Roboto Light'), local('Roboto-Light'), url(../fonts/roboto-light.woff) format('woff');
 }
 
 @font-face {
     font-family: 'Roboto';
     font-style: normal;
     font-weight: 400;
-    src: local('Roboto Regular'), local('Roboto-Regular'), url(../fonts/roboto-regular.woff2) format('woff2');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: italic;
-    font-weight: 300;
-    src: local('Roboto Light Italic'), local('Roboto-LightItalic'), url(../fonts/roboto-light-italic.woff2) format('woff2');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: italic;
-    font-weight: 400;
-    src: local('Roboto Italic'), local('Roboto-Italic'), url(../fonts/roboto-italic.woff2) format('woff2');
+    src: local('Roboto'), local('Roboto'), url(../fonts/roboto.woff) format('woff');
 }
 
 .ocb-tooltip-font {
@@ -908,41 +939,6 @@ END CONTROLS
 
 .ocb-font-size-8 {
     font-size: 8px;
-}
-
-.ocb-border-bot-lightgrey {
-    border-bottom: 1px solid lightgrey;
-}
-
-.ocb-border-top-lightgrey {
-    border-top: 1px solid lightgrey;
-}
-
-.ocb-border-left-lightgrey {
-    border-left: 1px solid lightgrey;
-}
-
-.ocb-border-right-lightgrey {
-    border-right: 1px solid lightgrey;
-}
-
-.ocb-border-all-lightgrey {
-    border: 1px solid lightgrey;
-}
-
-/*************************/
-/*************************/
-/*************************/
-.ocb-panel-title {
-    font-size: 16px;
-    line-height: 20px;
-    padding: 4px 6px;
-    border: 1px solid #fff;
-    background-color: #fff;
-}
-
-.ocb-background-black {
-    background: #000000;
 }
 
 .ocb-icon {

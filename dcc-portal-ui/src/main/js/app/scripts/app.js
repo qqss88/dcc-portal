@@ -108,7 +108,7 @@
              provider = _angularInjector.get(dependencyName);
           }
           catch (e) {
-            console.error('Cannot find dependeny with name: ' + dependencyName);
+            console.error('Cannot find dependency with name: ' + dependencyName);
             provider = null;
           }
 
@@ -119,7 +119,15 @@
           return _APIInterface.setDebugEnabled(isAPIDebugEnabled);
         }
 
+        function __getQualifiedHost() {
+          var url = '';
 
+          if ( _isLocalUIRun === true ) {
+            url = window.location.protocol + '//' + _defaultDevHost + ':' + _defaultDevPort;
+          }
+
+          return url;
+        }
 
         ///////////////////////////////////////////////////////
         // Public API
@@ -164,6 +172,8 @@
         this.getAngularInjector = __getAngularInjector;
 
         this.getAngularProvider = __getAngularProvider;
+
+        this.getQualifiedHost = __getQualifiedHost;
 
 
       return this;
@@ -218,6 +228,7 @@
     'icgc.projects',
     'icgc.donors',
     'icgc.genes',
+    'icgc.compounds',
     'icgc.mutations',
     'icgc.advanced',
     'icgc.releases',
@@ -254,85 +265,277 @@
   // https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
   // modified for our needs
   module
-    //.value('$anchorScroll', angular.noop)
+    .value('$anchorScroll', angular.noop)
+    // Offer a means of forcing a reload of the current state when necessary
+    .config(function($provide) {
+
+      // Let's decorate our $state object to inline it with this functionality
+      $provide.decorator('$state', ['$delegate', '$stateParams', function ($delegate, $stateParams) {
+        $delegate.forceReload = function () {
+          return $delegate.go($delegate.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+        };
+        return $delegate;
+      }]);
+
+
+      $provide.decorator('Restangular', ['$delegate', '$q',  function($delegate, $q) {
+
+        var _cancellableRequests = {};
+
+        function _deletePromiseAbortCache(deferredKey) {
+
+          if (! angular.isDefined(_cancellableRequests[deferredKey])) {
+            return;
+          }
+
+          delete _cancellableRequests[deferredKey];
+
+          //console.log('Removing deferred from abort cache: ', deferredKey);
+
+         /*
+          if (s === 0) {
+            console.info('Request abort cache is empty!');
+          }*/
+        }
+
+        // Create a wrapped request function that will allow us to create http requests that
+        // can timeout when the abort promise is resolved.
+        function _createWrappedRequestFunction(restangularObject, deferredKey, requestFunction) {
+
+          if (! angular.isDefined(requestFunction) || ! angular.isFunction(requestFunction)) {
+            console.warn('Restangular REST function not defined cannot wrap!');
+            return false;
+          }
+
+          // Function to wrap the call in which removes the abort promise from the queue on resolve/reject
+          return function() {
+
+            var deferred = $q.defer(),
+                abortDeferred = $q.defer();
+
+            /*if ( ! _cancellableRequests[deferredKey]) {
+              console.log('Added deferred "' + deferredKey + '" to abort cache.');
+            }*/
+
+            // Save the deferred object so we may cancel it all later
+            _cancellableRequests[deferredKey] = abortDeferred;
+
+
+            restangularObject.withHttpConfig({timeout: abortDeferred.promise});
+
+            var requestPromise = requestFunction.apply(restangularObject, Array.prototype.slice.call(arguments));
+
+            requestPromise.then(
+              function(data) {
+                _deletePromiseAbortCache(deferredKey);
+                deferred.resolve(data);
+              },
+              function(error) {
+                _deletePromiseAbortCache(deferredKey);
+                deferred.reject(error);
+              }
+            );
+
+            return deferred.promise;
+          };
+
+        }
+
+        function _createCancelableRequest(restangularCollectionFunction, args) {
+          var callingArgs =  Array.prototype.slice.call(args),
+              deferredKey = callingArgs[0],
+              /*jshint validthis:true */
+              _this = this;
+
+          if (! deferredKey) {
+            console.warn('Restangular function called with no arguments!');
+            deferredKey = '*' + (new Date()).getTime();
+          }
+
+          var restangularObject = restangularCollectionFunction.apply(_this, callingArgs);
+
+          // Wrap the request items
+          restangularObject.get = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.get
+          );
+
+          restangularObject.getList = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.getList
+          );
+          restangularObject.post = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.post
+          );
+
+          // Add an auxiliary method to cancel an individual request if one exists
+          restangularObject.cancelRequest = function() {
+
+            var deferredAbort = _.get(_cancellableRequests, deferredKey, false);
+
+            if (deferredAbort) {
+              deferredAbort.resolve();
+              delete _cancellableRequests[deferredKey];
+            }
+          };
+
+          _wrapRestangular(restangularObject);
+
+
+          return restangularObject;
+        }
+
+
+        function _wrapRequest(fn) {
+
+          return function() {
+            return _createCancelableRequest.call(this, fn, arguments);
+          };
+
+        }
+
+
+        function _wrapRequestFunctions(restangularObj) {
+
+          if (! angular.isDefined(restangularObj.one)) {
+            return;
+          }
+
+          restangularObj.one = _.bind(_wrapRequest(restangularObj.one), restangularObj);
+          restangularObj.all = _.bind(_wrapRequest(restangularObj.all), restangularObj);
+        }
+
+
+        function _wrapRestangular(restangularObj) {
+
+          _wrapRequestFunctions(restangularObj);
+
+
+          if (! angular.isDefined(restangularObj.withHttpConfig)) {
+            return;
+          }
+
+          var withHttpConfigFn = restangularObj.withHttpConfig;
+
+          // Wrap the config
+          restangularObj.withHttpConfig = function() {
+            var withHttpConfigRestangularObject = withHttpConfigFn.apply(this, Array.prototype.slice.call(arguments));
+
+            _wrapRequestFunctions(withHttpConfigRestangularObject);
+
+            return withHttpConfigRestangularObject;
+          };
+
+        }
+
+        function _init() {
+          _wrapRestangular($delegate);
+        }
+
+        _init();
+
+        ///////////////
+
+        $delegate.abortAllHTTPRequests = function() {
+          var requestUrls = _.keys(_cancellableRequests);
+          var abortRequestLength = requestUrls.length;
+
+          for (var i = 0; i < abortRequestLength; i++) {
+            var requestURL = requestUrls[i];
+            console.log('Cancelling HTTP Request: ', requestURL);
+            _cancellableRequests[requestURL].resolve();
+          }
+
+          // Reset the deferred abort list
+          _cancellableRequests = {};
+        };
+
+        return $delegate;
+      }]);
+
+    })
     .run(function($state, $location, $window, $timeout, $rootScope) {
+
+      var _scrollTimeoutHandle = null;
+
       function scroll() {
-         //var state = $state.$current, offset, to;
-        
-        
 
         function _doInlineScroll(hash) {
           // Give angular some time to do digests then check for a
           // in page scroll
           
-          var match = hash.match(/^!([\w\-]+)$/i),
+          var match = hash ? hash.match(/^!([\w\-]+)$/i) : false,
             to = 0,
-            HEADER_HEIGHT = 79; 
-          
+            HEADER_HEIGHT = 49 + 10, // Height of header + some nice looking offset.
+            el = null;
           
           if (match && match.length > 1) {
             hash = match[1];
             //$location.hash(hash);
             to = - HEADER_HEIGHT;
           }
-          
-          var el = jQuery('#' + hash);
-          
-          if (el.length === 0) {
-            console.warn('Could not find inline anchor with id ' + hash +
-              '\nAborting inline scroll...');
-            return;
+
+          if (hash) {
+             el = jQuery('#' + hash);
           }
-          console.log(to);
-          to += el.offset().top;
-          console.log(to);
-          jQuery('body,html').scrollTop( to );
+          
+          if (el && el.length > 0) {
+            to += Math.round(parseFloat(el.offset().top));
+            to = Math.max(0, to);
+          }
+
+
+          jQuery(window).scrollTop( to );
         }
         
         /////
-        
-        
+
+        var _hash = $location.hash();
+
         // Prevents browser window from jumping around while navigating analysis
         if (['analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
 
-        var _hash = $location.hash();
-        
-        if (_hash) {
-          $timeout(function () { 
+        // Prevent the timeout from being fired multiple times if called before previous
+        // timeout is complete. Make the last request the most valid.
+        if (_scrollTimeoutHandle) {
+          clearTimeout(_scrollTimeoutHandle);
+        }
+
+        _scrollTimeoutHandle = setTimeout(function () {
             _doInlineScroll(_hash);
-          }, 200);
-          return;
-        }
-        else {
-          $window.scrollTo(0, 0);
-        }
-
-        
-
-        
-        /* Don't see this code ever referenced so I am temporarily disabling
-         * it to see if there are any adverse affects 
-         * */
-         
-        // Default behaviour is to scroll to top
-        // Any string that isn't [top,none] is treated as a jq selector
-        // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
-        /* if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
-          $window.scrollTo(0, 0);
-        } else {
-          offset = jQuery(state.scrollTo).offset();
-          if (offset) {
-            to = offset.top - 40;
-            jQuery('body,html').animate({ scrollTop: to }, 800);
-          }
-        } */
+            _scrollTimeoutHandle = null;
+          }, 500);
 
       }
 
       $rootScope.$on('$viewContentLoaded', scroll);
       $rootScope.$on('$stateChangeSuccess', scroll);
+
+      function _wrapHistoryAPI(method) {
+
+        var _originalHistoryMethod = $window.window.history[method];
+
+        $window.window.history[method] = function() {
+
+          var _h = $location.hash();
+
+          if (! _h || ! _h.match(/^!([\w\-]+)$/i)) {
+            //console.log('Restoring scroll top to original position of: 0');
+            jQuery(window).scrollTop(0);
+          }
+
+          return _originalHistoryMethod.apply(this, Array.prototype.slice.call(arguments));
+        };
+
+      }
+
+      _.map(['pushState', 'replaceState'], _wrapHistoryAPI);
+
+
       
       // Add UI Router Debug if there is a fatal state change error
       $rootScope.$on('$stateChangeError', function () { 

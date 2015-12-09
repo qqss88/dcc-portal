@@ -150,7 +150,12 @@
         delete s[param];
         $location.search(s);
       },
+      goToPath: function(path, search, hash) {
+        var searchParams = search || {},
+            hashParam = hash || '';
 
+        $location.path(path).search(searchParams).hash(hashParam);
+      },
       // Extract UUIDs from filters
       extractSetIds: function(filters) {
         var result = [];

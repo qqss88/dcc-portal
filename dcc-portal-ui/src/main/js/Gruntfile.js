@@ -42,6 +42,35 @@ function ICGCGruntConfigProvider() {
     
     
     function _initTasks() {
+
+      grunt.registerTask('fixSourceMaps', 'Fixes the generated source maps.', function() {
+        /*var options = this.options(),
+            mapFileExt = options.mapFileExtension || '.map',
+            mapperFunction = options.sourceMapperFunction || function(srcFileName) {
+
+          };*/
+
+        // Iterate over all src-dest file pairs.
+        this.files.forEach(function(file) {
+          var srcMapFile = file.src.filter(function (filepath) {
+
+            // Warn on and remove invalid source files (if nonull was set).
+            if (! grunt.file.exists(filepath)) {
+              grunt.log.warn('Source file ' + filepath + ' not found.');
+              return false;
+            }
+
+            return true;
+          });
+
+          if (srcMapFile.length === 0) {
+            grunt.log.warn('Destination ' + (file.dest) + ' not written because src files were empty.');
+            return;
+          }
+        });
+
+      });
+
     
        grunt.registerTask('ICGC-setBuildEnv', 'Sets the target build environment (default: ' +
                            _CONFIG_CONSTANTS.BUILD_ENV.DEV + ')', function(env) {
@@ -205,7 +234,8 @@ function ICGCGruntConfigProvider() {
     yeoman: yeomanConfig,
     watch: {
       compass: {
-        files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+        files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}',
+                '<%= yeoman.app %>/vendor/styles/{,*/}*.{scss,sass}'],
         tasks: ['compass:server']
       },
       injector: {
@@ -470,7 +500,7 @@ function ICGCGruntConfigProvider() {
             dot: true,
             cwd: '<%= yeoman.app %>',
             dest: '<%= yeoman.dist %>/styles/fonts/',
-            src: ['vendor/scripts/genome-viewer/vendor/font-awesome/fonts/*' ]
+            src: ['vendor/scripts/genome-viewer/vendor/fontawesome/fonts/*' ]
           }
         ]
       }

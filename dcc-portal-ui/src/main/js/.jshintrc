@@ -16,7 +16,7 @@
   "unused": true,
   "strict": true,
   "trailing": true,
-  "maxparams": 15,
+  "maxparams": 16,
   "maxdepth": 5,
   "maxcomplexity": 13,
   "maxlen": 120,
@@ -53,6 +53,12 @@
     "X2JS": false,
     "dcc": false,
     "d3": false,
-    "PqlPegParser": false
+    "PqlPegParser": false,
+    "movingLineD3": false,
+    "histogramViewFinderD3": false,
+    "histogramD3": false,
+    "bamD3": false,
+    "donutD3": false,
+    "Bam": false
   }
 }

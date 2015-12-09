@@ -1,6 +1,6 @@
 {
   "index": {
-    "_index": "test_index",
+    "_index": "test-icgc-release",
     "_type": "mutation-centric",
     "_id": "MU498"
   }

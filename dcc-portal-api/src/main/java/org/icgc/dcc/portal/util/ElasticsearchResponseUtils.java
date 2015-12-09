@@ -21,6 +21,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
@@ -30,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -187,8 +187,19 @@ public final class ElasticsearchResponseUtils {
       log.info("{} {} not found.", type, id);
 
       val message = format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(NOT_FOUND).entity(message).build());
+      throw new WebApplicationException(status(NOT_FOUND).entity(message).build());
     }
+  }
+
+  public static GetResponse sanityCheck(GetResponse response, String indexType, String id) {
+    if (response.isExists()) {
+      return response;
+    }
+
+    log.info("ID {} was NOT found in {} index type.", id, indexType);
+
+    val message = format("{\"code\": 404, \"message\":\"ID %s was NOT found.\"}", id);
+    throw new WebApplicationException(status(NOT_FOUND).entity(message).build());
   }
 
   private static Map<String, Object> processSource(Map<String, Object> source, Query query, Kind kind) {

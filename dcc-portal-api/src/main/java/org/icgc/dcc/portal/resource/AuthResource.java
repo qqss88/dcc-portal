@@ -30,7 +30,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.icgc.dcc.common.client.api.ICGCEntityNotFoundException;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
@@ -186,19 +185,18 @@ public class AuthResource extends BaseResource {
     log.debug("[{}] Created user: {}", sessionTokenString, user);
 
     try {
-      log.debug("[{}] Checking if the user has DACO access", sessionTokenString);
-      if (authService.hasDacoAccess(userName, userType)) {
+      log.debug("[{}] Checking if the user has DACO and cloud access", sessionTokenString);
+      val dacoUserOpt = authService.getDacoUser(userType, userName);
+      if (dacoUserOpt.isPresent()) {
+        val dacoUser = dacoUserOpt.get();
         log.info("[{}] Granted DACO access to the user", sessionTokenString);
         user.setDaco(true);
-      }
 
-      log.debug("[{}] Checking if the user has DACO cloud access", sessionTokenString);
-      if (authService.hasDacoCloudAccess(userName)) {
-        log.info("[{}] Granted DACO access to the user", sessionTokenString);
-        user.setCloudAccess(true);
+        if (dacoUser.isCloudAccess()) {
+          log.info("[{}] Granted DACO cloud access to the user", sessionTokenString);
+          user.setCloudAccess(true);
+        }
       }
-    } catch (ICGCEntityNotFoundException e) {
-      log.debug("[{}] User '{}' is not granted the DACO access", sessionTokenString, userName);
     } catch (ICGCException e) {
       throwAuthenticationException("Failed to grant DACO access to the user",
           format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
@@ -218,7 +216,7 @@ public class AuthResource extends BaseResource {
   @POST
   @Path("/login")
   public Response login(Map<String, String> creds) {
-    checkRequest((creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
+    checkRequest((creds == null || creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
     val username = creds.get(USERNAME_KEY);
     log.info("Logging into CUD as {}", username);
 

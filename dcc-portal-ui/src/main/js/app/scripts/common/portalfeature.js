@@ -1,7 +1,8 @@
 (function() {
     'use strict';
-
-    function PortalFeatureConstructor(features, $state, LocationService) {
+    
+    function PortalFeatureConstructor(features, $state, LocationService, Settings) {
+      
 
       function _enable(feature) {
         if (features.hasOwnProperty(feature) === false) { return; }
@@ -19,19 +20,20 @@
         }
       }
 
-      function init() {
-        var enable = LocationService.getParam('enable');
-        if (_.isEmpty(enable)) {
-          return;
+  
+      function init(settingsJson) {
+        for (var featureName in settingsJson.featureFlags) {
+          if (settingsJson.featureFlags[featureName] === true) {
+            _enable(featureName);
+          } else if (settingsJson.featureFlags[featureName] === false) {
+            _disable(featureName);
+          }
         }
-        enable.split(',').forEach(function(feature) {
-          _enable(feature.trim());
-        });
       }
 
       // Allow features to be turned on via query param on application load
-      init();
 
+      Settings.get().then(init);
 
       this.get = function(s) {
         if (features.hasOwnProperty(s) === false) { return false; }
@@ -70,9 +72,9 @@
       this.hasFeature = function(featureID) {
         return _.get(_enabledFeatures, featureID, false);
       };
-
-      this.$get = ['$state', 'LocationService', function($state, LocationService) {
-          return new PortalFeatureConstructor(_enabledFeatures, $state, LocationService);
+      
+      this.$get = ['$state', 'LocationService', 'Settings', function($state, LocationService, Settings) {
+          return new PortalFeatureConstructor(_enabledFeatures, $state, LocationService, Settings);
       }];
   });
 

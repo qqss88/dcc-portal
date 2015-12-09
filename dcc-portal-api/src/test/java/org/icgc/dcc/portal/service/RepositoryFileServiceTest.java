@@ -47,6 +47,7 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.BaseElasticSearchTest;
 import org.icgc.dcc.portal.repository.RepositoryFileRepository;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -111,10 +112,13 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() {
+    this.testIndex = TestIndex.REPOSITORY;
+
     // This creates and populates the test index with fixture data.
     es.execute(createIndexMapping(Type.REPOSITORY_FILE_CENTRIC)
         .withData(bulkFile(getClass())));
-    service = new RepositoryFileService(new RepositoryFileRepository(es.client(), REPO_INDEX_NAME, new IndexService()));
+    service =
+        new RepositoryFileService(new RepositoryFileRepository(es.client(), testIndex.getName(), new IndexService()));
   }
 
   @Test

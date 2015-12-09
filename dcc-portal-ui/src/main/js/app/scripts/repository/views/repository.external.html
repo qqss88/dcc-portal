@@ -1,5 +1,5 @@
 <div class="h1-wrap">
-    <h1 data-ui-scrollfix=79>
+    <h1 data-ui-scrollfix="79" class="sticky-scrollfix">
         <span class="t_badge t_badge_icon t_badge__data_repositories">
           <span class="icon-download-cloud" />
         </span>
@@ -49,7 +49,7 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
         <terms data-type="file"
           data-facet-name="dataType"
           data-label="Data Type"
-          data-facet="ExternalRepoController.files.termFacets.dataType" 
+          data-facet="ExternalRepoController.files.termFacets.dataType"
           data-defined="true" />
         <terms data-type="file"
           data-facet-name="experimentalStrategy"
@@ -96,7 +96,7 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
              data-facet="ExternalRepoController.files.termFacets.primarySite"></terms>
       <terms data-type="file" data-facet-name="specimenType"
              data-facet="ExternalRepoController.files.termFacets.specimenType"
-             data-label="Specimen Type"></terms>
+             data-label="Specimen Type"
              data-defined="true"></terms>
       <terms data-type="file" data-facet-name="donorStudy"
              data-label="Only Donors in Study"
@@ -104,7 +104,8 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
              data-facet="ExternalRepoController.files.termFacets.donorStudy"></terms>
     </ul>
     <section>
-        For more complex queries, use <a href="{{:: ExternalRepoController.advancedSearchInfo.href }}">
+        For more complex queries, use <a href=""
+        ng-click="ExternalRepoController.viewInSearch (ExternalRepoController.summary.fileCount)">
           {{:: ExternalRepoController.advancedSearchInfo.title}}</a> and
           click on "View in {{:: ExternalRepoController.dataRepoTitle }}"
       </section>
@@ -229,7 +230,9 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
 
                     <td>{{ ExternalRepoController.fileFormats (row.fileCopies) }}</td>
 
-                    <td style="min-width: 6rem;">{{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}</td>
+                    <td class="text-right" style="min-width: 6rem;">
+                      {{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}
+                    </td>
 
                   </tr>
                 </tbody>

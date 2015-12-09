@@ -42,6 +42,7 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.TermsLookupService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -80,6 +81,7 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {
+    this.testIndex = TestIndex.RELEASE;
     val set = new EntitySet(UUID.randomUUID(), State.FINISHED, 200l, "test", "test", BaseEntitySet.Type.DONOR, 1);
     Mockito.when(entityListRepository.find(Matchers.any())).thenReturn(set);
 
@@ -88,7 +90,8 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
         // This is needed because the DonorRepository now does a 'secondary' search on icgc-repository index.
         .withData(bulkFile("RepositoryFileServiceTest.json")));
     donorRepository =
-        new DonorRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME), entityListRepository);
+        new DonorRepository(es.client(), testIndex.getModel(), new QueryEngine(es.client(), testIndex.getName()),
+            entityListRepository);
   }
 
   @Test

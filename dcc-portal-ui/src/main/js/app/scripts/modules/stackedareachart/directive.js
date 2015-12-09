@@ -34,7 +34,8 @@
       16:'May-14',
       17:'Sep-14',
       18:'Feb-15',
-      19:'Jun-15'
+      19:'Jun-15',
+      20: 'Nov-16'
     };
 
   module.directive('donorHistory', function ($location, HighchartsService) {
@@ -76,7 +77,7 @@
           yaxis:{label:'# of Donors',ticks:8},
           xaxis: {
             label:'Release',
-            ticksValueRange: [4, 19],
+            ticksValueRange: [4, 20],
             secondaryLabel: function(data){return releaseDates[data];}
           },
           onClick: function(project){

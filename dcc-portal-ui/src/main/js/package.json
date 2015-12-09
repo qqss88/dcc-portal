@@ -1,6 +1,12 @@
 {
   "name": "dcc-portal-ui",
-  "version": "1.10.0",
+  "description": "ICGC DCC Data Portal UI",
+  "version": "3.8.21.x",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:icgc-dcc/dcc-portal.git"
+  },
   "devDependencies": {
     "connect-livereload": "0.5.0",
     "connect-modrewrite": "0.5.6",

@@ -15,7 +15,7 @@ footer {
   }
   
   .footer-caption {
-    margin-top: 0.1rem;
+    margin-top: 1rem;
   }
 
   a {
@@ -44,6 +44,8 @@ footer {
       margin-top: 1rem;
       width: 116px;
       height: 84px;
+      -webkit-filter: grayscale(100%);
+      filter: grayscale(100%);
 
       @include breakpoint($break-tablet) {
         width: 155px;
@@ -78,4 +80,19 @@ footer {
   }
 
   @include grid-span(12, 1);
+}
+@media screen and (max-width: 721px) {
+  footer {
+     .logo {
+      display: block;
+      //margin-top: -6rem;
+      width: 100%;
+      text-align: right;
+
+       img {
+         -webkit-filter: grayscale(100%);
+         filter: grayscale(100%);
+       }
+    }
+  }
 }
