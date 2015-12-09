@@ -136,6 +136,7 @@
     letter-spacing: 3px;
     color: $primary-text-color;
     text-align: center;
+    margin-bottom:1.5rem
   }
   .panel#total-reads {
     -webkit-flex: 1 1 150px;
@@ -145,12 +146,18 @@
     margin-right: 20px;
     min-width: 130px;
     min-height: 175px;
-    img {
+    #sample-more {
       visibility: hidden;
-      padding-top: 0.2rem;
-      width: 20px;
+      color: #e9931c;
+      transition: color .5s, border .5s;
       margin: auto;
       cursor: pointer;
+      font-size:1.5rem;
+      border-radius:50%;
+      border:2px solid #e9931c;
+      &:hover {
+        color:#ce6503;
+      }
     }
   }
   #percents {

@@ -184,7 +184,7 @@
             if ($('.seq-buttons').length === 0) {
               // Turn off read depth loading msg
               $('#ref-label').css('visibility', 'visible');
-              $('#total-reads img').css('visibility', 'visible');
+              $('#total-reads #sample-more').css('visibility', 'visible');
               $('#readDepthLoadingMsg').css('display', 'none');
               // Turn on sampling message
               $('.samplingLoader').css('display', 'block');
