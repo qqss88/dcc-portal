@@ -1,12 +1,10 @@
 package org.dcc.portal.pql.meta;
 
-import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
 import java.util.Map;
 
-import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 
 import com.google.common.collect.ImmutableList;
@@ -45,10 +43,6 @@ public class DiagramTypeModel extends TypeModel {
     public static String HIGHLIGHTS = "highlights";
     public static String XML = "xml";
     public static String PROTEIN_MAP = "protein_map";
-
-    private ArrayFieldModel highlights() {
-      return arrayOfStrings(EsFields.HIGHLIGHTS, HIGHLIGHTS);
-    }
 
     // Main mapping
     private final List<FieldModel> MAPPINGS = ImmutableList.<FieldModel> builder()

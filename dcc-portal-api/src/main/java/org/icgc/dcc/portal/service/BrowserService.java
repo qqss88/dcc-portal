@@ -114,13 +114,15 @@ public class BrowserService {
   private List<Object> getHistogramSegmentMutation(String segmentId, Long start, Long stop,
       Map<String, String> queryMap) {
     val consequenceValue = queryMap.get("consequence_type");
-    val consequenceTypes = consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : null;
+    val consequenceTypes =
+        consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : Arrays.<String> asList();
 
     val projectFilterValue = queryMap.get("consequence_type");
-    val projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
+    val projectFilters =
+        projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : Arrays.<String> asList();
 
     val intervalValue = queryMap.get("interval");
-    val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
+    val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : 0;
 
     val searchResponse =
         browserRepository.getMutationHistogram(interval, segmentId, start, stop, consequenceTypes, projectFilters);
@@ -140,10 +142,10 @@ public class BrowserService {
 
   private List<Object> getHistogramSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
     val biotypeValue = queryMap.get("biotype");
-    val biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : null;
+    val biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : Arrays.<String> asList();
 
     val intervalValue = queryMap.get("interval");
-    val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
+    val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : 0;
 
     val searchResponse = browserRepository.getGeneHistogram(interval, segmentId, start, stop, biotypes);
     return BrowserParsers.parseHistogramGene(segmentId, start, stop, interval, biotypes, searchResponse);

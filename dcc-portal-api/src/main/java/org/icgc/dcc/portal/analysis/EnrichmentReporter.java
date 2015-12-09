@@ -23,6 +23,7 @@ import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import lombok.Cleanup;
@@ -64,7 +65,7 @@ public class EnrichmentReporter {
     val results = analysis.getResults();
 
     @Cleanup
-    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
+    val writer = new CsvListWriter(new OutputStreamWriter(outputStream, Charset.forName("UTF-8")), TAB_PREFERENCE);
     writer.writeHeader(REPORT_HEADERS);
 
     // Shorthands
