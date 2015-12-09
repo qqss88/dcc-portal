@@ -21,11 +21,11 @@
         </div>
         <div id="total-reads" class="panel">
           <div class="title">Reads Sampled</div>
-          <div id="value" data-ng-bind="readsSampled.value"></div>
+          <div id="value" data-ng-bind="readsSampled.value">0</div>
           <div id="base">
             <span id="number" data-ng-bind="readsSampled.units"></span>
           </div>
-          <img title="Sample More" data-ng-click="sampleMore()" src="styles/images/more_sampling-orange.png"></img>
+          <i class="icon-cw" id="sample-more" title="Sample More" data-ng-click="sampleMore()"></i>
         </div>
       </section>
       <section id="middle">

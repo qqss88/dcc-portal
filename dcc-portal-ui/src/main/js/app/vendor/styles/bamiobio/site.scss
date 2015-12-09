@@ -1,10 +1,12 @@
 #bam-statistics {
-  //  $primary-text-color: #2687BE;
-  //  $primary-color: #2d8fc1;
-  //  $primary-rgba-color: rgba(45, 143, 193, 0.2);
-  $primary-text-color: #638f56;
-  $primary-color: $primary-text-color;
-  $primary-rgba-color: rgba(99, 143, 86, 0.2);
+  $primary-text-color: #2687BE;
+  $primary-color: rgba(45, 143, 193, 1);
+  $button-color: $primary-color;
+  $primary-faded-color: rgba(45, 143, 193, 0.2);
+  //  $primary-text-color: rgb(36, 178, 229);
+  //  $primary-color: $primary-text-color;
+  //  $primary-faded-color: rgba(99, 143, 86, 0.2);
+  //  $primary-faded-color: rgba(36, 178, 229, 0.2);
   header {
     font-size: 46px;
     color: $primary-color;
@@ -134,6 +136,7 @@
     letter-spacing: 3px;
     color: $primary-text-color;
     text-align: center;
+    margin-bottom:1.5rem
   }
   .panel#total-reads {
     -webkit-flex: 1 1 150px;
@@ -143,12 +146,18 @@
     margin-right: 20px;
     min-width: 130px;
     min-height: 175px;
-    img {
+    #sample-more {
       visibility: hidden;
-      padding-top: 0.2rem;
-      width: 20px;
+      color: #e9931c;
+      transition: color .5s, border .5s;
       margin: auto;
       cursor: pointer;
+      font-size:1.5rem;
+      border-radius:50%;
+      border:2px solid #e9931c;
+      &:hover {
+        color:#ce6503;
+      }
     }
   }
   #percents {
@@ -271,7 +280,7 @@
     fill: $primary-color
   }
   .alpha {
-    fill: $primary-rgba-color;
+    fill: $primary-faded-color;
   }
   .arc .percent {
     fill: rgb(100, 100, 100);
@@ -318,15 +327,15 @@
     margin-right: 6px;
     padding: 0px 20px 0px 20px;
     border-radius: 3px;
-    color: $primary-color;
+    color: $button-color;
     font-family: helvetica;
     font-size: 0.6em;
-    border: 1px solid $primary-color;
+    border: 1px solid $button-color;
     cursor: pointer;
     cursor: hand;
   }
   .seq-buttons.selected {
-    background: $primary-color;
+    background: $button-color;
     color: white;
   }
   .samplingLoader {
