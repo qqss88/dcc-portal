@@ -34,7 +34,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Genes extends Paginated {
 
-  @ApiModelProperty(value = "List of Genes", required = true)
+  @ApiModelProperty(value = "List of matching genes", required = true)
   List<Gene> hits;
 
   @JsonCreator

@@ -1,0 +1,67 @@
+header {
+  border-bottom: 1px solid #e6e6e6;
+  background: #fafafa;
+  margin-bottom: 1rem;
+  padding: .9rem 2rem;
+  position: relative;
+}
+
+header #brand {
+  width: 27%;
+  white-space: nowrap;
+  display: table-cell;
+  vertical-align: middle;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: .8rem;
+}
+
+header #brand #icgc {
+  color: #283e5d;
+  font-weight: bold;
+  letter-spacing: -2px;
+}
+
+header #brand a {
+  color: #333333;
+  font-size: 2.6rem;
+  font-weight: 300;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-transform: none;
+  text-decoration: none;
+}
+
+header #brand a:hover {
+  text-decoration: none;
+  background: none;
+}
+
+header #brand img {
+  height: 2.8rem;
+  width: 2.8rem;
+  vertical-align: top;
+}
+
+header .header-container {
+    display: table;
+    width: 100%;
+}
+
+section {
+  padding-left: 2rem;
+  padding-top: 1rem;
+  margin: 0;
+}
+
+h2 {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.5em;
+  font-weight: 200;
+}
+
+summary {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 1em;
+  font-weight: 100;
+  padding-top: 1rem;
+  padding-right: 1rem;
+}
