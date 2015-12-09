@@ -73,7 +73,7 @@ public class GeneService {
   public void init() {
     try {
       log.debug("Building EnsemblId-to-GeneSymbol lookup table...");
-  
+
       // The key is a gene symbol and the value is an ensembl ID.
       val groupedByGeneSymbol = geneRepository.getGeneSymbolEnsemblIdMap();
       val lookupTable = groupedByGeneSymbol.keySet().parallelStream()
@@ -81,11 +81,11 @@ public class GeneService {
           .flatMap(Collection::stream)
           // TODO: use dcc.common.core.util.stream.Collectors#toImmutableMap once the pom.xml is updated.
           .collect(toMap(Pair::getKey, Pair::getValue));
-  
+
       log.debug("EnsemblId-to-GeneSymbol lookup table ({} entries) is: {}", lookupTable.size(), lookupTable);
-  
+
       ensemblIdGeneSymbolMap.set(lookupTable);
-  
+
       log.debug("Finished building EnsemblId-to-GeneSymbol lookup table.");
     } catch (Exception e) {
       log.error("Error building EnsemblId-to-GeneSymbol lookup table.", e);
@@ -297,9 +297,10 @@ public class GeneService {
   private Gene geneText2Gene(SearchHit hit) {
     val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
     Map<String, Object> geneMap = Maps.newHashMap();
-    for (val key : fieldMap.keySet()) {
-      geneMap.put(GENE_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
-    }
+    fieldMap.forEach((k, v) -> {
+      geneMap.put(GENE_ID_SEARCH_FIELDS.get(k), v);
+    });
+
     return new Gene(geneMap);
   }
 

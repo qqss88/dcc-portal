@@ -235,7 +235,7 @@ public class RepositoryFileService {
   @SneakyThrows
   private void generateTabDelimitedData(OutputStream output, SearchResponse prepResponse, String[] keys) {
     @Cleanup
-    val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(output)), TAB_PREFERENCE);
+    val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(output, UTF_8)), TAB_PREFERENCE);
     writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
 
     String scrollId = prepResponse.getScrollId();
@@ -608,8 +608,9 @@ public class RepositoryFileService {
     endXmlDocument(writer);
   }
 
+  @SneakyThrows
   private static CsvListWriter createTsv(OutputStream stream) {
-    return new CsvListWriter(new OutputStreamWriter(stream), TAB_PREFERENCE);
+    return new CsvListWriter(new OutputStreamWriter(stream, UTF_8), TAB_PREFERENCE);
   }
 
   @SneakyThrows
