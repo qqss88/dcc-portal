@@ -17,54 +17,59 @@
 
 package org.icgc.dcc.portal.repository;
 
-import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.dcc.portal.pql.meta.Type.DIAGRAM;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class DiagramRepository {
 
+  /**
+   * Constants.
+   */
   private static final Type TYPE = Type.DIAGRAM;
   private static final Kind KIND = Kind.DIAGRAM;
+  private static final Jql2PqlConverter CONVERTER = Jql2PqlConverter.getInstance();
 
+  /**
+   * Dependencies.
+   */
   private final Client client;
   private final String indexName;
+  private final QueryEngine queryEngine;
 
   @Autowired
-  public DiagramRepository(@NonNull Client client, @Value("#{indexName}") String indexName) {
+  public DiagramRepository(@NonNull Client client, @Value("#{indexName}") String indexName,
+      @NonNull QueryEngine queryEngine) {
     this.indexName = indexName;
     this.client = client;
+    this.queryEngine = queryEngine;
   }
 
   public SearchResponse findAll(Query query) {
-    val search = client.prepareSearch(indexName)
-        .setTypes(TYPE.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(query.getFrom())
-        .setSize(query.getSize());
+    val pql = CONVERTER.convert(query, DIAGRAM);
+    log.info("pql of findAll is: {}", pql);
 
-    search.addFields(getFields(query, KIND));
-    log.debug("{}", search);
-
-    val response = search.execute().actionGet();
-    log.debug("{}", response);
+    val request = queryEngine.execute(pql, DIAGRAM);
+    val response = request.getRequestBuilder().execute().actionGet();
 
     return response;
   }

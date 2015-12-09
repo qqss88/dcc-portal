@@ -3,7 +3,7 @@ package org.icgc.dcc.portal.repository;
 import static java.util.Collections.singletonMap;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonorInProject;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
@@ -61,7 +61,6 @@ public class ProjectRepository {
     return search.getRequestBuilder().execute().actionGet().getHits().getTotalHits();
   }
 
-  @SuppressWarnings("deprecation")
   public Map<String, Object> findOne(String id, Query query) {
     val search = client.prepareGet(index, TYPE_ID, id)
         .setFields(getFields(query, KIND));

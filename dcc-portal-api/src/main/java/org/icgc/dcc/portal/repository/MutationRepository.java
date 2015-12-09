@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.repository;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
@@ -29,10 +29,6 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponse
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
@@ -52,6 +48,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

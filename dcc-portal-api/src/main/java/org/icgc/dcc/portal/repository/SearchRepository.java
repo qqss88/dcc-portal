@@ -30,22 +30,17 @@ import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.EXACT_MATCH_SUFFIX;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.LOWERCASE_MATCH_SUFFIX;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.PARTIAL_MATCH_SUFFIX;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.boost;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -63,6 +58,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -170,7 +170,6 @@ public class SearchRepository {
   public SearchResponse findAll(Query query, String type) {
     log.debug("Requested search type is: '{}'.", type);
 
-    @SuppressWarnings("deprecation")
     val search = createSearch(type)
         .setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
