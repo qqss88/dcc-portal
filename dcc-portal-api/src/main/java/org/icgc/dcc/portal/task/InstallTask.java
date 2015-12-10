@@ -21,22 +21,23 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
 
-import lombok.Cleanup;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.yammer.dropwizard.tasks.Task;
+
+import lombok.Cleanup;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Task that works in concert with the {@code install} script to install the application.
@@ -103,7 +104,7 @@ public class InstallTask extends Task {
         .start();
 
     @Cleanup
-    val reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    val reader = new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8));
     String line = null;
     while ((line = reader.readLine()) != null) {
       log.info("'install': {}", line);

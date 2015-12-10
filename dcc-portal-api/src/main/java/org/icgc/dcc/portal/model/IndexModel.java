@@ -11,12 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +20,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @Component
 public class IndexModel {
@@ -578,6 +579,52 @@ public class IndexModel {
 
   public String getRepoIndex() {
     return this.repoIndexName;
+  }
+
+  public static String[] getFields(Query query, Kind kind) {
+    val typeFieldsMap = FIELDS_MAPPING.get(kind);
+    val result = Lists.<String> newArrayList();
+
+    if (query.hasFields()) {
+      for (val field : query.getFields()) {
+        if (typeFieldsMap.containsKey(field)) {
+          result.add(typeFieldsMap.get(field));
+        }
+      }
+    } else {
+      result.addAll(typeFieldsMap.values().asList());
+    }
+    clearInvalidFields(result, kind);
+    return result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * Remove fields that are objects in ES. They must be retrieved from source
+   */
+  private static void clearInvalidFields(List<String> fields, Kind kind) {
+    val typeFieldsMap = FIELDS_MAPPING.get(kind);
+
+    switch (kind) {
+    case GENE:
+      fields.remove(typeFieldsMap.get("externalDbIds"));
+      fields.remove(typeFieldsMap.get("pathways"));
+      break;
+    case PROJECT:
+      fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedDonorCounts"));
+      fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedSampleCounts"));
+      break;
+    case OCCURRENCE:
+      fields.remove(typeFieldsMap.get("observation"));
+      break;
+    case GENE_SET:
+      fields.remove(typeFieldsMap.get("hierarchy"));
+      fields.remove(typeFieldsMap.get("inferredTree"));
+      fields.remove(typeFieldsMap.get("synonyms"));
+      fields.remove(typeFieldsMap.get("altIds"));
+      break;
+    default:
+      break;
+    }
   }
 
   private static ImmutableMap<String, String> createFieldsMapping(Kind kind) {

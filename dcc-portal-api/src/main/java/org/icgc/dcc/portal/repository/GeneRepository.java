@@ -28,7 +28,7 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
@@ -238,9 +238,7 @@ public class GeneRepository implements Repository {
   public Map<String, Object> findOne(String id, Query query) {
     val search = client.prepareGet(index, TYPE.getId(), id);
 
-    @SuppressWarnings("deprecation")
     val sourceFields = prepareSourceFields(query, getFields(query, KIND));
-
     String[] excludeFields = null;
     search.setFetchSource(sourceFields, excludeFields);
 

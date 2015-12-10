@@ -72,6 +72,9 @@ function histogramViewFinderD3() {
            var x2 = globalChart.x(), brush = globalChart.brush();
            var x = brush.empty() ? x2.domain() : brush.extent();
            var datum = gGlobal.datum().filter(function(d) { return (d[0] >= x[0] && d[0] <= x[1]) });
+           if (_.isEmpty(datum)) {
+             datum.push([x[0], 0]);
+           }
            focalChart(gFocus.datum(datum));
         });             
      })
