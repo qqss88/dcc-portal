@@ -241,6 +241,11 @@
     _ctrl.PCAWG = PCAWG;
 
     _ctrl.isPCAWG = function(specimen) {
+
+      if (! specimen) {
+        return false;
+      }
+
       return _.any(_.pluck(specimen.samples, 'study'), PCAWG.isPCAWGStudy);
     };
 
