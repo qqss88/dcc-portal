@@ -19,6 +19,8 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** DEPRECATED **/
+
 'use strict';
 
 IcgcMutationTrack.prototype = new Track({});
@@ -33,12 +35,69 @@ function IcgcMutationTrack(args) {
   //save default render reference;
   this.defaultRenderer = this.renderer;
   this.histogramRenderer = new HistogramRenderer();
+  this.resource = this.dataAdapter.resource;
 
   this.chunksDisplayed = {};
 
   //set instantiation args, must be last
   _.extend(this, args);
 }
+
+
+IcgcMutationTrack.prototype.updateHeight = function () {
+  //this._updateHeight();
+  if (this.histogram) {
+    this.contentDiv.style.height = this.histogramRenderer.histogramHeight + 5 + 'px';
+    this.main.setAttribute('height', this.histogramRenderer.histogramHeight);
+    return;
+  }
+
+  var renderedHeight = this.svgCanvasFeatures.getBoundingClientRect().height;
+  this.main.setAttribute('height', renderedHeight);
+
+  if (this.resizable) {
+    if (this.autoHeight == false) {
+      this.contentDiv.style.height = this.height + 10 + 'px';
+    } else if (this.autoHeight == true) {
+      var x = this.pixelPosition;
+      var width = this.width;
+      var lastContains = 0;
+      for (var i in this.renderedArea) {
+        if (this.renderedArea[i].contains({
+            start: x,
+            end: x + width
+          })) {
+          lastContains = i;
+        }
+      }
+      var visibleHeight = parseInt(lastContains) + 30;
+      this.contentDiv.style.height = visibleHeight + 10 + 'px';
+      this.main.setAttribute('height', visibleHeight);
+    }
+  }
+};
+
+IcgcMutationTrack.prototype.setWidth = function(width) {
+  this._setWidth(width);
+  this.main.setAttribute("width", this.width);
+};
+
+IcgcMutationTrack.prototype.initializeDom = function(targetId) {
+  this._initializeDom(targetId);
+
+  this.main = SVG.addChild(this.contentDiv, 'svg', {
+    'class': 'trackSvg',
+    'x': 0,
+    'y': 0,
+    'width': this.width
+  });
+  this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+    'class': 'features',
+    'x': -this.pixelPosition,
+    'width': this.svgCanvasWidth
+  });
+  this.updateHeight();
+};
 
 IcgcMutationTrack.prototype.render = function (targetId) {
   var _this = this;
@@ -76,12 +135,21 @@ IcgcMutationTrack.prototype.render = function (targetId) {
   jQuery('body').append(this.modalDiv);
 };
 
+IcgcMutationTrack.prototype.clean = function() {
+  //    console.time("-----------------------------------------empty");
+  while (this.svgCanvasFeatures.firstChild) {
+    this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+  }
+  //    console.timeEnd("-----------------------------------------empty");
+  this._clean();
+};
+
 IcgcMutationTrack.prototype.draw = function () {
   this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
   this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
 
   this.updateHistogramParams();
-  this.cleanSvg();
+  this.clean();
 
   if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
     this.setLoading(true);
@@ -92,9 +160,9 @@ IcgcMutationTrack.prototype.draw = function () {
       histogram: this.histogram,
       interval: this.interval
     });
-    this.invalidZoomText.setAttribute('visibility', 'hidden');
+    //this.invalidZoomText.setAttribute('visibility', 'hidden');
   } else {
-    this.invalidZoomText.setAttribute('visibility', 'visible');
+    //this.invalidZoomText.setAttribute('visibility', 'visible');
   }
 };
 

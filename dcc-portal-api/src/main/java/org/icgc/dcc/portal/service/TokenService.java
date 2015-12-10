@@ -28,11 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.model.AccessTokenScopes;
@@ -46,20 +41,27 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * OAuth access tokens management service.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class TokenService {
 
-  private static final Map<String, String> SCOPE_DESCRIPTIONS = ImmutableMap.of(
-      "s3.upload", "Allows to upload to the AWS S3",
-      "s3.download", "Allows to download from the AWS S3",
-      "collab.upload", "Allows to upload to the Collaboratory cloud",
-      "collab.download", "Allows to download from the Collaboratory cloud",
-      "id.create", "Allows to create new ICGC IDs at https://id.icgc.org");
+  private static final Map<String, String> SCOPE_DESCRIPTIONS = ImmutableMap.<String, String> builder()
+      .put("portal.download", "Allows secure downloads from the Data Portal")
+      .put("aws.upload", "Allows uploads to AWS S3")
+      .put("aws.download", "Allows secure downloads from AWS S3")
+      .put("collab.upload", "Allows uploads to the Collaboratory cloud")
+      .put("collab.download", "Allows secure downloads from the Collaboratory cloud")
+      .put("id.create", "Allows to create new ICGC IDs at https://id.icgc.org")
+      .build();
 
   @NonNull
   private final OAuthClient client;
@@ -67,7 +69,7 @@ public class TokenService {
   public String create(User user, String scope, String description) {
     log.debug("Creating access token of scope '{}' for user '{}'...", scope, user);
     val userId = user.getEmailAddress();
-    if (user.getDaco() == FALSE) {
+    if (user.getDaco().equals(FALSE)) {
       throwForbiddenException("The user is not DACO approved",
           format("User %s is not DACO approved to access the create access token resource", userId));
     }

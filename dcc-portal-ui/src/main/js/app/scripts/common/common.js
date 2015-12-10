@@ -19,12 +19,15 @@
 
   var module = angular.module('app.common', [
     'app.common.services',
+    'app.common.header',
     'app.common.footer',
     'icgc.common.version',
     'icgc.common.notify',
     'icgc.common.location',
+    'icgc.common.filters',
     'icgc.common.display',
     'icgc.common.external',
+    'icgc.common.text.utils',
 
     // UI
     'icgc.common.codetable',
@@ -200,4 +203,26 @@
       return Number(bytes).toFixed(precision) + ' ' + sizes[postTxt];
     };
   });
+
+  module.filter('projectCode', function () {
+    return function (input) {
+      return input.toString().replace(/[\[\"][\"\]]/g, '');
+    };
+  });
+
+  module.filter('withoutFirst', function () {
+    return function (input) {
+      return input.slice(1,input.length).toString();
+    };
+  });
+
+  // TODO: Ideally this should be done during the ETL phase.
+  module.filter ('formatCompoundClass', function () {
+    var fda = 'fda';
+
+    return function (compoundClass) {
+      return (fda === compoundClass) ? compoundClass.toUpperCase() : _.capitalize (compoundClass);
+    };
+  });
+
 })();

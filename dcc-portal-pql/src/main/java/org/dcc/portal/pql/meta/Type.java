@@ -18,7 +18,9 @@
 package org.dcc.portal.pql.meta;
 
 import static lombok.AccessLevel.PRIVATE;
+
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @Getter
@@ -30,10 +32,15 @@ public enum Type {
   MUTATION_CENTRIC("mutation-centric", "mutation"),
   OBSERVATION_CENTRIC("observation-centric", "observation"),
   PROJECT("project", "project"),
-  REPOSITORY_FILE("file", "file"),
-  GENE_SET("gene-set", "gene-set");
+  REPOSITORY_FILE("file-centric", "file"),
+  GENE_SET("gene-set", "gene-set"),
+  DRUG("drug-centric", "drug"),
+  DIAGRAM("diagram", "diagram");
 
+  @NonNull
   private final String id;
+
+  @NonNull
   private final String prefix;
 
 }

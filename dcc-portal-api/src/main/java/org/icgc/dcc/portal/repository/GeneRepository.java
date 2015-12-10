@@ -17,35 +17,38 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.collect.Lists.transform;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
+import static org.elasticsearch.action.search.SearchType.SCAN;
+import static org.elasticsearch.index.query.FilterBuilders.termFilter;
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
+import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.NestedQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -58,20 +61,31 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@SuppressWarnings("deprecation")
 public class GeneRepository implements Repository {
 
   private static final Type CENTRIC_TYPE = Type.GENE_CENTRIC;
+  private static final String GENE_TEXT = Type.GENE_TEXT.getId();
   private static final Type TYPE = Type.GENE;
   private static final Kind KIND = Kind.GENE;
 
-  public static final Map<String, String> GENE_ID_SEARCH_FIELDS = ImmutableMap.<String, String>
-      of("id.search", "_gene_id",
+  private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
+  private static final String GENE_SYMBOL_FIELD_NAME = "symbol";
+  private static final String ENSEMBL_ID_FIELD_NAME = "id";
+  private static final String[] GENE_SYMBOL_ENSEMBL_ID_FIELDS = { GENE_SYMBOL_FIELD_NAME, ENSEMBL_ID_FIELD_NAME };
+
+  public static final Map<String, String> GENE_ID_SEARCH_FIELDS =
+      ImmutableMap.<String, String> of("id.search", "_gene_id",
           "symbol.search", "symbol",
           "uniprotkbSwissprot.search", "external_db_ids.uniprotkb_swissprot");
 
@@ -89,6 +103,7 @@ public class GeneRepository implements Repository {
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
 
     // Converter does not handle limits
@@ -105,6 +120,13 @@ public class GeneRepository implements Repository {
     log.info(" find all centric {}", search);
 
     return search.getRequestBuilder().execute().actionGet();
+  }
+
+  @NonNull
+  public SearchResponse findAllCentric(StatementNode pqlAst) {
+    val request = queryEngine.execute(pqlAst, GENE_CENTRIC);
+
+    return request.getRequestBuilder().execute().actionGet();
   }
 
   private Map<String, String> findGeneSymbolsByFilters(@NonNull ObjectNode filters) {
@@ -140,6 +162,7 @@ public class GeneRepository implements Repository {
     return findGeneSymbolsByFilters(filters);
   }
 
+  @SuppressWarnings("deprecation")
   public SearchResponse findGeneSetCounts(Query query) {
     log.info(" My Query {} ", query.getFilters());
 
@@ -214,6 +237,7 @@ public class GeneRepository implements Repository {
 
   public Map<String, Object> findOne(String id, Query query) {
     val search = client.prepareGet(index, TYPE.getId(), id);
+
     val sourceFields = prepareSourceFields(query, getFields(query, KIND));
     String[] excludeFields = null;
     search.setFetchSource(sourceFields, excludeFields);
@@ -251,7 +275,7 @@ public class GeneRepository implements Repository {
    * @returns a map of matched identifiers
    */
   public SearchResponse validateIdentifiers(List<String> input) {
-    val boolQuery = QueryBuilders.boolQuery();
+    val boolQuery = boolQuery();
 
     val search = client.prepareSearch(index)
         .setTypes("gene-text")
@@ -259,15 +283,16 @@ public class GeneRepository implements Repository {
         .setSize(5000);
 
     for (val searchField : GENE_ID_SEARCH_FIELDS.keySet()) {
-      boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
+      boolQuery.should(termsQuery(searchField, input.toArray()));
+
       search.addHighlightedField(searchField);
       search.addField(searchField);
     }
+
     search.setQuery(boolQuery);
     log.info("Search is {}", search);
 
-    val response = search.execute().actionGet();
-    return response;
+    return search.execute().actionGet();
   }
 
   /**
@@ -276,27 +301,80 @@ public class GeneRepository implements Repository {
    * @return unique list of transcript ids
    */
   public List<String> getAffectedTranscripts(String geneId) {
-    val transcriptField = "donor.ssm.consequence.transcript_affected";
-    val result = Lists.<String> newArrayList();
-    val search =
-        client
-            .prepareSearch(index)
-            .setTypes(CENTRIC_TYPE.getId())
-            .setSearchType(QUERY_THEN_FETCH)
-            .setSize(0)
-            .addFacet(
-                FacetBuilders.termsFacet("affectedTranscript")
-                    .nested("donor.ssm.consequence")
-                    .size(IndexModel.MAX_FACET_TERM_COUNT)
-                    .field(transcriptField)
-                    .facetFilter(FilterBuilders.termFilter("donor.ssm.consequence._gene_id", geneId)));
+    val ssmConsequence = "donor.ssm.consequence";
+    val transcriptField = ssmConsequence + ".transcript_affected";
+    val geneIdField = ssmConsequence + "._gene_id";
+    val facetName = "affectedTranscript";
 
-    val response = search.execute().actionGet();
-    val facet = (InternalStringTermsFacet) response.getFacets().facet("affectedTranscript");
+    @SuppressWarnings("deprecation")
+    val response = searchGenes(CENTRIC_TYPE.getId(), "getAffectedTranscripts", request -> {
+      request
+          .setTypes(CENTRIC_TYPE.getId())
+          .setSearchType(QUERY_THEN_FETCH)
+          .setSize(0)
+          .addFacet(termsFacet(facetName)
+              .nested(ssmConsequence)
+              .size(MAX_FACET_TERM_COUNT)
+              .field(transcriptField)
+              .facetFilter(termFilter(geneIdField, geneId)));
+    });
 
-    for (val entry : facet.getEntries()) {
-      result.add(entry.getTerm().toString());
-    }
-    return result;
+    val facet = (InternalStringTermsFacet) response.getFacets().facet(facetName);
+
+    return transform(facet.getEntries(),
+        entry -> entry.getTerm().toString());
   }
+
+  public Multimap<String, String> getGeneSymbolEnsemblIdMap() {
+    val result = ImmutableMultimap.<String, String> builder();
+    String scrollId = prepareScrollSearch(GENE_SYMBOL_ENSEMBL_ID_FIELDS).getScrollId();
+
+    while (true) {
+      val response = fetchScrollData(scrollId);
+
+      if (!hasHits(response)) {
+        break;
+      }
+
+      for (val hit : response.getHits()) {
+        val values = hit.getFields();
+        val ensemblId = values.get(ENSEMBL_ID_FIELD_NAME).getValue().toString();
+        val geneSymbol = values.get(GENE_SYMBOL_FIELD_NAME).getValue().toString();
+
+        result.put(geneSymbol, ensemblId);
+      }
+
+      scrollId = response.getScrollId();
+    }
+
+    return result.build();
+  }
+
+  @NonNull
+  private SearchResponse searchGenes(String indexType, String logMessage,
+      Consumer<SearchRequestBuilder> customizer) {
+    val request = client.prepareSearch(index).setTypes(indexType);
+    customizer.accept(request);
+
+    log.debug("{}; ES query is: '{}'", logMessage, request);
+    return request.execute().actionGet();
+  }
+
+  private SearchResponse prepareScrollSearch(String[] fields) {
+    val batchSize = 5000;
+
+    return searchGenes(GENE_TEXT, "prepareScrollSearch", request -> {
+      request.setSearchType(SCAN)
+          .setSize(batchSize)
+          .setScroll(KEEP_ALIVE)
+          .addFields(fields);
+    });
+  }
+
+  private SearchResponse fetchScrollData(String scrollId) {
+    return client.prepareSearchScroll(scrollId)
+        .setScroll(KEEP_ALIVE)
+        .execute().actionGet();
+  }
+
 }

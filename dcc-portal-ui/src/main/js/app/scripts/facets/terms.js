@@ -127,6 +127,11 @@
       return {width: (count / ($scope.facet.total + $scope.facet.missing) * 100) + '%'};
     };
 
+    $scope.iconClass = function (data) {
+      var f = $scope.iconGetter();
+      return _.isFunction (f) ? f (data) : '';
+    };
+
     $scope.toggle = function() {
       $scope.expanded = !$scope.expanded;
       if (!$scope.collapsed) {
@@ -156,7 +161,9 @@
 
         facet: '=',
         defined: '@',
-        collapsed: '@'
+        collapsed: '@',
+
+        iconGetter: '&iconGetter'
       },
       transclude: true,
       templateUrl: '/scripts/facets/views/terms.html',

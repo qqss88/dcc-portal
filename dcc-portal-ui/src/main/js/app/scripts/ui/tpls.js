@@ -36,6 +36,7 @@ angular.module('template/lists', []).run(function ($templateCache) {
     '<i class="icon-external-link"></i>{{item.name}}</a>');
 
 
+  $templateCache.put('template/compoundList.html', '<span data-ng-bind="item.name"></span>');
   // Display a list of gene set annotations
   // { name: xyz, id: xyz, qualifiers:[ xyz, xyz] }
   $templateCache.put('template/geneGeneSetList.html',
@@ -88,7 +89,7 @@ angular.module('template/pagination.html', []).run(function ($templateCache) {
     '<span ng-if="data.pagination.pages > 1" class="pull-right">' +
     '<div><ul class="pagination">' +
     '<li ng-repeat="page in pages" ng-class="{active: page.active, disabled: page.disabled}">' +
-    '<a ng-click="selectPage(page.number)">{{page.text}}</a></li>' +
+    '<a ng-click="selectPage(page.number)" tooltip="{{:: page.tooltip }}">{{page.text}}</a></li>' +
     '</ul></div>' +
     '</span></div></div>'
   );

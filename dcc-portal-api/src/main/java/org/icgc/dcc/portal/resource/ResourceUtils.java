@@ -1,6 +1,8 @@
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.yammer.dropwizard.jersey.params.IntParam;
 
 @Slf4j
 public class ResourceUtils {
@@ -106,6 +109,10 @@ public class ResourceUtils {
   static final String API_FILE_IDS_VALUE = "Limits the file manifest archive to this list of file IDs";
   static final String API_FILE_REPOS_PARAM = "repositories";
   static final String API_FILE_REPOS_VALUE = "Limits the file manifest archive to this list of file repositories";
+  static final String API_FILE_REPO_CODE_PARAM = "repoCode";
+  static final String API_FILE_REPO_CODE_VALUE = "File Repository Code";
+  static final String API_FACETS_ONLY_PARAM = "facetsOnly";
+  static final String API_FACETS_ONLY_DESCRIPTION = "Retrieves facet results only";
 
   static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
   static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
@@ -117,6 +124,7 @@ public class ResourceUtils {
   static final String API_ASYNC = "Asyncronous API Request";
 
   private static final Joiner COMMA_JOINER = COMMA.skipNulls();
+  private static final List<String> EMPTY_VALUES = newArrayList("", null);
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();
@@ -195,4 +203,30 @@ public class ResourceUtils {
       throw new BadRequestException(errorMessageProvider.get());
     }
   }
+
+  static List<String> removeNullAndEmptyString(List<String> source) {
+    if (isEmpty(source)) {
+      return source;
+    }
+
+    source.removeAll(EMPTY_VALUES);
+
+    return source;
+  }
+
+  static Query regularFindAllJqlQuery(List<String> fields, List<String> include, ObjectNode filters,
+      IntParam from, IntParam size, String sort, String order) {
+    val query = query()
+        .fields(fields).filters(filters)
+        .from(from.get()).size(size.get())
+        .sort(sort).order(order);
+
+    removeNullAndEmptyString(include);
+    if (!include.isEmpty()) {
+      query.includes(include);
+    }
+
+    return query.build();
+  }
+
 }

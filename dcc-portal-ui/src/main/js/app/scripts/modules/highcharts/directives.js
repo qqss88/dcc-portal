@@ -22,6 +22,11 @@ angular.module('highcharts', ['highcharts.directives', 'highcharts.services']);
 angular.module('highcharts.directives', []);
 
 angular.module('highcharts.directives').directive('pie', function (Facets, $filter, ValueTranslator) {
+  function ensureArray (array) {
+    return _.isArray (array) ? array : [];
+  }
+  var isEmptyArray = _.flow (ensureArray, _.isEmpty);
+
   return {
     restrict: 'E',
     replace: true,
@@ -31,60 +36,71 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
     },
     template: '<span style="margin: 0 auto">not working</span>',
     link: function ($scope, $element, $attrs) {
-      var i, c, formatSeriesData, max, othersGroupCnt, otherGroup, newData, type, facet, chartsDefaults;
+      // Defaults to 5%
+      $scope.groupPercent = $scope.groupPercent || 5;
 
-      formatSeriesData = function (data) {
-        // Default to 5%
-        $scope.groupPercent = $scope.groupPercent || 5;
+      var enrichDatum = function (datum) {
+        datum.term = datum.name;
 
-        if (angular.isDefined(data) && data.length > 0) {
-          max = 0;
-          othersGroupCnt = 0;
-          otherGroup = [];
-          newData = [];
-          type = data[0].type;
-          facet = data[0].facet;
-
-          for (i = 0; i < data.length; i++) {
-            if (data[i].name !== null) {
-              data[i].term = data[i].name;
-              max = data[i].y > max ? data[i].y : max;
-            } else {
-              data[i].term = null;
-            }
-          }
-
-          // Aggregate the interactive terms together so they can be applied on click event.
-          for (i = 0; i < data.length; i++) {
-            if (data[i].term !== null) {
-              if (data[i].y / max < $scope.groupPercent / 100) {
-                othersGroupCnt += data[i].y;
-                otherGroup.push(data[i].term);
-              } else {
-                newData.push(data[i]);
-              }
-            } else {
-              data[i].color = '#E0E0E0';
-              newData.push(data[i]);
-            }
-          }
-
-          // Replace series if 'others' has 2 or more, and less than data.length items
-          if (otherGroup.length > 1 && otherGroup.length < data.length) {
-            newData.push({
-              name: 'Others (' + otherGroup.length + ' ' + $attrs.heading + ')',
-              color: '#999',
-              y: othersGroupCnt,
-              type: type,
-              facet: facet,
-              term: otherGroup
-            });
-          }
-        }
-        return newData;
+        return datum;
       };
 
-      chartsDefaults = {
+      var summarize = function (items) {
+        var count = _.size (items);
+
+        if (count < 2) {
+          return items.map (enrichDatum);
+        }
+
+        var firstItem = _.first (items);
+
+        return {
+          name: 'Others (' + count + ' ' + $attrs.heading + 's)',
+          color: '#999',
+          y: _.sum (items, 'y'),
+          type: firstItem.type,
+          facet: firstItem.facet,
+          term: _.map (items, 'name')
+        };
+      };
+
+      var transformSeriesData = function (data) {
+        if (isEmptyArray (data)) {
+          return [];
+        }
+
+        // Separates data into two groups, one with a defined 'name' attribute & one without.
+        var separated = _.partition (data, 'name');
+        var withName = _.first (separated);
+        var withoutName = _.last (separated).map (function (datum) {
+          datum.color = '#E0E0E0';
+          datum.term = null;
+
+          return datum;
+        });
+
+        var max = _.max (withName, function (datum) {
+          return datum.y;
+        });
+
+        var isBelowGroupPercent = function (datum) {
+          return (datum.y / max.y) < ($scope.groupPercent / 100);
+        };
+
+        // Further separatation per the rule of isBelowGroupPercent()
+        separated = _.partition (withName, isBelowGroupPercent);
+        var belowGroupPercent = _.first (separated);
+        var regular = _.last (separated);
+
+        // Combines all the groups into one collection.
+        var result = regular.map (enrichDatum)
+          .concat (withoutName)
+          .concat (summarize (belowGroupPercent));
+
+        return result;
+      };
+
+      var chartsDefaults = {
         credits: {enabled: false},
         chart: {
           renderTo: $element[0],
@@ -166,14 +182,14 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
             }
           },
           tooltip: {
-            enabled: false,
+            enabled: false
           },
           series: [
             {
               type: 'pie',
               size: '90%',
               name: $attrs.label,
-              data: formatSeriesData($scope.items)
+              data: transformSeriesData ($scope.items)
             }
           ]
         };
@@ -183,9 +199,9 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
         if (!newValue) {
           return;
         }
-        c.series[0].setData(formatSeriesData(newValue), true);
+        c.series[0].setData (transformSeriesData (newValue), true);
       });
-      c = new Highcharts.Chart(chartsDefaults);
+      var c = new Highcharts.Chart (chartsDefaults);
 
       $scope.$on('$destroy', function () {
         c.destroy();
@@ -294,7 +310,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           }
         },
         tooltip: {
-          enabled: false,
+          enabled: false
         },
         series: [
           {

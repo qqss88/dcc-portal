@@ -2,22 +2,75 @@
 
 angular.module('icgc.ui.scroll', [
   'icgc.ui.scroll.scrollto',
-  'icgc.ui.scroll.scrollSpy'
+  'icgc.ui.scroll.scrollSpy',
+  'icgc.ui.scroll.resetScroll'
 ]);
 
+
+angular.module('icgc.ui.scroll.resetScroll', []).directive('resetScroll', function($location, $timeout) {
+  return {
+    restrict: 'A',
+    scope: {
+      resetScroll: '@'
+    },
+    link: function (scope, elem) {
+      var _scrollOffset = scope.resetScroll, 
+          _top = 0;
+      
+      // Do not scroll if we are trying to anchor within another page.    
+      if ($location.hash()) {
+        return;
+      }
+      
+      if (! isNaN(_scrollOffset)) {
+        _top = Math.round(elem.offset().top + parseInt(_scrollOffset, 10));
+      }
+      else if (angular.isString(_scrollOffset)) {        
+        
+        switch (_scrollOffset.toLowerCase()) {  
+          case 'top':
+           _top = 0;
+          break;
+          
+          default:
+            _top = 0;
+          break;
+        }
+        
+      }
+      
+      $timeout(function() { 
+        jQuery('body,html').scrollTop(_top); 
+        }, 100);
+    }
+  };
+});
 
 angular.module('icgc.ui.scroll.scrollto', []).directive('scrollto', function () {
   return function (scope, elm, attrs) {
     elm.bind('click', function (e) {
-      var top;
+      var top,
+          scrollOffset = 40,
+          animationSpeed = 800;
+          
+          if (angular.isDefined(attrs.scrollOffset) && angular.isNumber(parseInt(attrs.scrollOffset, 10))) {
+            scrollOffset = parseInt(attrs.scrollOffset, 10);
+          }
+          
+           if (angular.isDefined(attrs.animationSpeed) && angular.isNumber(parseInt(attrs.animationSpeed, 10))) {
+            animationSpeed = parseInt(attrs.animationSpeed, 10);
+          }
 
       e.preventDefault();
+      
       if (attrs.href) {
         attrs.scrollto = attrs.href;
       }
-
-      top = jQuery(attrs.scrollto).offset().top - 40;
-      jQuery('body,html').animate({ scrollTop: top }, 800);
+      
+      
+      // scrollOffset is the offset to scroll bay
+      top = jQuery(attrs.scrollto).offset().top - scrollOffset;
+      jQuery('body,html').animate({ scrollTop: top }, animationSpeed);
     });
   };
 });

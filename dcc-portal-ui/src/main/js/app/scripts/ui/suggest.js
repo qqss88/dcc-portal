@@ -17,9 +17,10 @@
 
 'use strict';
 
-angular.module('icgc.ui.suggest', ['ngSanitize']);
+angular.module('icgc.ui.suggest', ['ngSanitize', 'icgc.common.text.utils']);
 
-angular.module('icgc.ui.suggest').controller('suggestController', function ($scope, debounce, Keyword) {
+angular.module('icgc.ui.suggest').controller('suggestController',
+  function ($scope, debounce, Keyword, Abridger) {
   var pageSize = 5, inactive = -1;
 
   $scope.active = inactive;
@@ -74,10 +75,117 @@ angular.module('icgc.ui.suggest').controller('suggestController', function ($sco
     }
   };
 
+  $scope.badgeStyleClass = function (type) {
+    var definedType = _.contains (['pathway', 'go_term', 'curated_set'], type) ? 'geneset' : type;
+    return 't_badge t_badge__' + definedType;
+  };
+
+  function ensureArray (array) {
+    return _.isArray (array) ? array : [];
+  }
+  function ensureString (string) {
+    return _.isString (string) ? string.trim() : '';
+  }
+
+  function words (phrase) {
+    return _.words (phrase, /[^, ]+/g);
+  }
+
+  function partiallyContainsIgnoringCase (phrase, keyword) {
+    if (_.isEmpty (phrase)) {
+      return false;
+    }
+
+    var phrase2 = phrase.toUpperCase();
+    var keyword2 = keyword.toUpperCase();
+
+    var tokens = [keyword2].concat (words (keyword2));
+    var matchKeyword = _(tokens)
+      .unique()
+      .find (function (token) {
+        return _.contains (phrase2, token);
+      });
+
+    return ! _.isUndefined (matchKeyword);
+  }
+
+  var maxAbrigementLength = 80;
+  var abridger = Abridger.of (maxAbrigementLength);
+
+  function abridge (array) {
+    var target = $scope.query;
+
+    return abridger.abridge (array, target);
+  }
+
+  var maxConcat = 3;
+
+  function concatMatches (array, target) {
+    var matches = _(ensureArray (array))
+      .filter (function (element) {
+        return partiallyContainsIgnoringCase (ensureString (element), target);
+      })
+      .take (maxConcat);
+
+    return matches.join (', ');
+  }
+
+  function reducedToMatchString (result, value) {
+    if (_.isEmpty (result)) {
+      result = concatMatches (value, $scope.query);
+    }
+    return result;
+  }
+
+  $scope.findFirstMatch = function (compound) {
+    var singleValueFields = ['id', 'drugClass', 'inchikey'];
+    var match = _(singleValueFields)
+      .map (function (field) {
+        return [_.get (compound, field, '')];
+      })
+      .reduce (reducedToMatchString, '')
+      .trim();
+
+    if (! _.isEmpty (match)) {
+      return match;
+    }
+
+    var shortStringArrayFields = ['synonyms', 'atcCodes', 'atcLevel5Codes', 'trialConditionNames',
+      'externalReferencesDrugbank', 'externalReferencesChembl'];
+    match = _(shortStringArrayFields)
+      .map (function (field) {
+        return _.get (compound, field, []);
+      })
+      .reduce (reducedToMatchString, '')
+      .trim();
+
+    if (! _.isEmpty (match)) {
+      return match;
+    }
+
+    var longStringArrayFields = ['atcCodeDescriptions', 'trialDescriptions'];
+    match = _(longStringArrayFields)
+      .map (function (field) {
+        return _.get (compound, field, []);
+      })
+      .reduce (function (result, value) {
+        if (_.isEmpty (result)) {
+          result = abridge (value);
+        }
+        return result;
+      }, '')
+      .trim();
+
+    return match;
+  };
+
   $scope.onChange = debounce($scope.onChangeFn, 200, false);
 });
 
-angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $document, $location) {
+angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $document, $location, RouteInfoService) {
+  var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+  var compoundUrl = RouteInfoService.get ('drugCompound').href;
+
   return {
     restrict: 'A',
     replace: true,
@@ -117,10 +225,12 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
         function url(item) {
           var resourceType = item.type;
 
-          if (_.contains(['curated_set', 'go_term', 'pathway'], resourceType)) {
+          if (_.contains (['curated_set', 'go_term', 'pathway'], resourceType)) {
             resourceType = 'geneset';
           } else if ('file' === resourceType) {
-            resourceType = 'repository/external/file';
+            return dataRepoFileUrl + item.id;
+          } else if ('compound' === resourceType) {
+            return compoundUrl + item.id;
           }
 
           return '/' + resourceType + 's/' + item.id;
@@ -153,10 +263,15 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
       };
 
       function enter(e) {
-        if (suggest === 'tags') {
-          addId();
-        } else {
-          goTo(e);
+        if (scope.results === undefined) {
+          return;
+        }
+        else { 
+          if (suggest === 'tags') {
+            addId();
+          } else {
+            goTo(e);
+          }
         }
 
         scope.focus = false;
@@ -172,7 +287,10 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
   };
 });
 
-angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location) {
+angular.module('icgc.ui.suggest').directive('suggestPopup', function (LocationService, RouteInfoService) {
+  var dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+  var compoundUrl = RouteInfoService.get ('drugCompound').href;
+
   return {
     restrict: 'E',
     replace: true,
@@ -186,18 +304,35 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
         scope.clearActive();
       };
 
+
       scope.click = function (item) {
+        var url = '';
+
         if (item) {
           var resourceType = item.type;
-          if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
-            resourceType = 'geneset';
-          } else if (item.type === 'file') {
-            resourceType = 'repository/external/file';
+
+          switch(resourceType.toLowerCase()) {
+            case 'curated_set':
+            case 'go_term':
+            case 'pathway':
+              url = '/genesets/';
+              break;
+            case 'file':
+              url = dataRepoFileUrl;
+              break;
+            case 'compound':
+              url = compoundUrl;
+              break;
+            default:
+              url = '/' + resourceType + 's/';
+              break;
           }
 
-          $location.path('/' + resourceType + 's/' + item.id).search({});
-        } else {
-          $location.path('/q').search({q: scope.query});
+          LocationService.goToPath(url + item.id);
+
+        }
+        else {
+          LocationService.goToPath('/q', {q: scope.query});
         }
       };
     }

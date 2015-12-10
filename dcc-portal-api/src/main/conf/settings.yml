@@ -106,9 +106,16 @@ hazelcast:
 # ElasticSearch index and hosts
 elastic:
   indexName: "dcc-release-dcc-etl-cli"
+  repoIndexName: "icgc-repository"
   nodeAddresses:
      - host: "localhost"
        port: 9300
+       
+  # List of TransportClient settings. 
+  # E.g. 
+  # "client.transport.sniff": true 
+  client:
+    "client.transport.sniff": true
 
 # Mail
 mail:

@@ -21,6 +21,8 @@
       {id: 'jcn', shortLabel: 'JCN', label: 'Exon junctions'},
       {id: 'meth_array', shortLabel: 'METH-A', label: 'Array-based DNA Methylation'},
       {id: 'meth_seq', shortLabel: 'METH-S', label: 'Sequencing-based DNA Methylation'},
+      {id: 'aligned reads', shortLabel:'Aligned Reads', label:'Aligned Sequencing Reads'},
+      {id: 'stgv' , shortLabel: 'StGV', label:'Structural Germline Variants'}
     ];
 
     var shortLabelMap = {}, labelMap = {};
@@ -42,7 +44,7 @@
     };
 
     this.tooltip = function(id) {
-      return labelMap[id];
+      return labelMap[id.toLowerCase()];
     };
 
   });

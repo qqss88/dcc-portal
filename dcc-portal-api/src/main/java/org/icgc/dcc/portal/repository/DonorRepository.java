@@ -29,7 +29,9 @@ import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -41,10 +43,9 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
-import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
@@ -61,6 +62,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -86,7 +88,7 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
-import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
+import org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType;
 import org.icgc.dcc.portal.util.ForwardingTermsFacet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -160,27 +162,65 @@ public class DonorRepository implements Repository {
 
   private static final int SCAN_BATCH_SIZE = 1000;
 
-  private final static TimeValue KEEP_ALIVE = new TimeValue(10000);
+  private static final Jql2PqlConverter CONVERTER = Jql2PqlConverter.getInstance();
+  private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private final Client client;
   private final String index;
+  private final String repoIndexName;
   private final QueryEngine queryEngine;
-  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   @Autowired
   DonorRepository(Client client, IndexModel indexModel, QueryEngine queryEngine,
       EntityListRepository entityListRepository) {
     this.index = indexModel.getIndex();
+    this.repoIndexName = indexModel.getRepoIndex();
     this.client = client;
     this.queryEngine = queryEngine;
     this.entityListRepository = entityListRepository;
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
-    val pql = converter.convert(query, DONOR_CENTRIC);
+    val pql = CONVERTER.convert(query, DONOR_CENTRIC);
+    log.info("pql of findAllCentric is: {}", pql);
+
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     val response = request.getRequestBuilder().execute().actionGet();
+
+    return response;
+  }
+
+  @NonNull
+  public SearchResponse findAllCentric(StatementNode pqlAst) {
+    val request = queryEngine.execute(pqlAst, DONOR_CENTRIC);
+    val response = request.getRequestBuilder().execute().actionGet();
+
+    return response;
+  }
+
+  private SearchRequestBuilder projectDonorCountSearch(Query query, String facetName) {
+    val pqlAst = parse(CONVERTER.convert(query, DONOR_CENTRIC));
+    pqlAst.setFacets(facets(facetName));
+
+    val result = queryEngine.execute(pqlAst, DONOR_CENTRIC).getRequestBuilder().setNoFields();
+
+    log.debug("projectDonorCountSearch ES query is: '{}'.", result);
+    return result;
+  }
+
+  @NonNull
+  public MultiSearchResponse projectDonorCount(List<Query> queries, String facetName) {
+    val multiSearch = client.prepareMultiSearch();
+
+    for (val query : queries) {
+      multiSearch.add(projectDonorCountSearch(query, facetName));
+    }
+
+    val response = multiSearch.execute().actionGet();
+
+    log.debug("projectDonorCount ES response is: '{}'.", response);
     return response;
   }
 
@@ -376,8 +416,8 @@ public class DonorRepository implements Repository {
     }
 
     val mustFilterFieldName = "_id";
-    // Note: We should not reference TermsLookupService here but for now we'll wait for the PQL module and see how we
-    // can move the createTermsLookupFilter() routine out of TermsLookupService.
+    // Note: We should not reference TermsLookupRepository here but for now we'll wait for the PQL module and see how we
+    // can move the createTermsLookupFilter() routine out of TermsLookupRepository.
     val termsLookupFilter = createTermsLookupFilter(mustFilterFieldName, TermLookupType.DONOR_IDS, donorId);
 
     return boolFilter().must(termsLookupFilter);
@@ -397,7 +437,7 @@ public class DonorRepository implements Repository {
   public long count(Query query) {
     log.info("Converting {}", query.getFilters());
 
-    val pql = converter.convertCount(query, DONOR_CENTRIC);
+    val pql = CONVERTER.convertCount(query, DONOR_CENTRIC);
 
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     return request.getRequestBuilder().setSearchType(COUNT).execute().actionGet().getHits().getTotalHits();
@@ -409,7 +449,7 @@ public class DonorRepository implements Repository {
 
     for (val query : queries.values()) {
       log.info("Converting {}", query.getFilters());
-      val pql = converter.convertCount(query, DONOR_CENTRIC);
+      val pql = CONVERTER.convertCount(query, DONOR_CENTRIC);
       val request = queryEngine.execute(pql, DONOR_CENTRIC);
       search.add(request.getRequestBuilder());
     }
@@ -424,7 +464,7 @@ public class DonorRepository implements Repository {
       for (val innerQuery : nestedQuery.values()) {
         log.info("Nested converting {}", innerQuery);
 
-        val pql = converter.convertCount(innerQuery, DONOR_CENTRIC);
+        val pql = CONVERTER.convertCount(innerQuery, DONOR_CENTRIC);
         val request = queryEngine.execute(pql, DONOR_CENTRIC);
 
         search.add(request.getRequestBuilder());
@@ -448,13 +488,10 @@ public class DonorRepository implements Repository {
     val response = search.execute().actionGet();
 
     if (response.isExists()) {
-      val result = createResponseMap(response, query, KIND);
-      log.debug("Found donor: '{}'.", result);
-
-      return result;
+      return createResponseMap(response, query, KIND);
     }
 
-    if (!isRepositoryDonor(client, "donor_id", id)) {
+    if (!isRepositoryDonor(client, id, repoIndexName)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }
@@ -487,7 +524,7 @@ public class DonorRepository implements Repository {
     // TODO: Now assume 5000 ids at least
     Set<String> donorIds = newHashSetWithExpectedSize(5000);
 
-    val pql = converter.convert(query, DONOR_CENTRIC);
+    val pql = CONVERTER.convert(query, DONOR_CENTRIC);
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     val requestBuilder = request.getRequestBuilder()
         .setSearchType(SCAN)
@@ -525,7 +562,7 @@ public class DonorRepository implements Repository {
   public SearchResponse validateIdentifiers(@NonNull List<String> ids, boolean isForExternalFile) {
     val maxSize = 5000;
     val fields = isForExternalFile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
-    val indexName = isForExternalFile ? REPOSITORY_INDEX_NAME : index;
+    val indexName = isForExternalFile ? repoIndexName : index;
     val indexType = isForExternalFile ? Type.REPOSITORY_FILE_DONOR_TEXT : Type.DONOR_TEXT;
 
     val search = client.prepareSearch(indexName)

@@ -1,9 +1,9 @@
-<div data-ng-if="!AdvancedCtrl.Mutation.mutations" class="loading loading-text"><h3><i
+<div data-ng-if="! AdvancedCtrl.Mutation.mutations || ! AdvancedCtrl.Mutation.hitsLoaded || AdvancedCtrl.Mutation.isLoading" class="loading loading-text"><h3><i
         class="icon-spinner icon-spin"></i> Loading
     Mutations...</h3></div>
-<div data-ng-if="AdvancedCtrl.Mutation.mutations.hits.length == 0" class="empty loading-text"><h3>No Mutations
+<div data-ng-if="AdvancedCtrl.Mutation.mutations.hits.length == 0 && AdvancedCtrl.Mutation.hitsLoaded && ! AdvancedCtrl.Mutation.isLoading" class="empty loading-text"><h3>No Mutations
     Found.</h3></div>
-<div data-ng-show="AdvancedCtrl.Mutation.mutations.hits.length">
+<div data-ng-show="AdvancedCtrl.Mutation.mutations.hits.length && AdvancedCtrl.Mutation.hitsLoaded && ! AdvancedCtrl.Mutation.isLoading">
     <section>
         <div class="graphs">
             <div class="span">
@@ -37,10 +37,10 @@
              data-ng-click="AdvancedCtrl.state.setSubTab('mutation')"
              data-ng-class="{active: AdvancedCtrl.state.isSubTab('mutation')}">
             Mutations<br>
-            <small data-ng-hide="AdvancedCtrl.Mutation.loading">{{AdvancedCtrl.Mutation.mutations.pagination.total |
+            <small data-ng-hide="AdvancedCtrl.Mutation.isLoading">{{AdvancedCtrl.Mutation.mutations.pagination.total |
                 number}}
             </small>
-            <small data-ng-show="AdvancedCtrl.Mutation.loading"><i class="icon-spinner icon-spin"></i></small>
+            <small data-ng-show="AdvancedCtrl.Mutation.isLoading"><i class="icon-spinner icon-spin"></i></small>
         </div>
         <div class="t_tabs__tab"
              data-nested
@@ -48,10 +48,10 @@
              data-ng-click="AdvancedCtrl.state.setSubTab('occurrence')"
              data-ng-class="{active: AdvancedCtrl.state.isSubTab('occurrence')}">
             Mutation Occurrences<br>
-            <small data-ng-hide="AdvancedCtrl.Mutation.loading">{{AdvancedCtrl.Mutation.occurrences.pagination.total |
+            <small data-ng-hide="AdvancedCtrl.Mutation.isLoading">{{AdvancedCtrl.Mutation.occurrences.pagination.total |
                 number}}
             </small>
-            <small data-ng-show="AdvancedCtrl.Mutation.loading"><i class="icon-spinner icon-spin"></i></small>
+            <small data-ng-show="AdvancedCtrl.Mutation.isLoading"><i class="icon-spinner icon-spin"></i></small>
         </div>
     </div>
 

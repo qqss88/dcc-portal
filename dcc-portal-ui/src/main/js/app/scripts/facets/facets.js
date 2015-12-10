@@ -24,5 +24,15 @@
     'icgc.facets.current',
     'icgc.facets.location',
     'icgc.facets.tags'
-  ]);
+  ])
+  .constant('FacetConstants', {
+    EVENTS: {
+      FACET_STATUS_CHANGE: 'event.facet.statusUpdated'
+    },
+    FACET_CHANGE_TYPE: {
+      SINGLE: 'one-facet',
+      ALL: 'all-facets'
+    }
+  });
+
 })();

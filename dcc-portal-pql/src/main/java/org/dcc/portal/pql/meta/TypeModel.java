@@ -207,6 +207,10 @@ public abstract class TypeModel {
     return nestedPath.startsWith(path);
   }
 
+  public final boolean isAliasDefined(String alias) {
+    return (null == alias) ? false : fieldsByAlias.containsKey(alias);
+  }
+
   /**
    * Returns fully qualified name of the field that has {@code alias} defined.
    * @throws NoSuchElementException if there is a field with such an alias.
@@ -222,6 +226,16 @@ public abstract class TypeModel {
     }
 
     return alias;
+  }
+
+  public final FieldModel getFieldModelByAlias(@NonNull String alias) {
+    val result = fieldsByFullPath.get(getField(alias));
+
+    if (null == result) {
+      throw new SemanticException("Field %s does not have a matching field model.", alias);
+    }
+
+    return result;
   }
 
   /**
@@ -251,12 +265,13 @@ public abstract class TypeModel {
   }
 
   private List<String> split(String fullyQualifiedName) {
-    val result = new ImmutableList.Builder<String>();
+    val result = ImmutableList.<String> builder();
     val list = FIELD_SEPARATOR_SPLITTER.splitToList(fullyQualifiedName);
-    String prefix = "";
+    val prefix = new StringBuilder();
+
     for (int i = 0; i < list.size(); i++) {
-      result.add(prefix + list.get(i));
-      prefix = prefix + list.get(i) + FIELD_SEPARATOR;
+      result.add(prefix.toString() + list.get(i));
+      prefix.append(list.get(i) + FIELD_SEPARATOR);
     }
 
     return result.build().reverse();
@@ -322,8 +337,7 @@ public abstract class TypeModel {
   private String getFullName(String path) {
     val uiAlias = fieldsByAlias.get(path);
 
-    return uiAlias == null ? path : uiAlias;
-
+    return (uiAlias == null) ? path : uiAlias;
   }
 
   /**

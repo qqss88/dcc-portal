@@ -1,5 +1,9 @@
 .analysis {
-
+   display: table;
+   width: 100%;
+   padding-left: 1rem;
+   padding-right: 1rem;
+   
    h3 {
       margin-top: 0;
    }
@@ -62,15 +66,24 @@
    }
 
    .sidepanel {
-      float: left;
-      width: 20%;
+      //float: left;
+      //width: 20%;
+      //margin-right: 1rem;
+      //isplay: table-cell;
+      vertical-align: top;
       margin-right: 1rem;
+      min-width: 17rem;
+      max-width: 19rem;
+      height: 100%;
+      padding: 0rem 0rem 2rem 0rem;
    }
 
    .content {
-      float: left;
-      clear: right;
-      width: 77%;
+      //float: left;
+      //clear: right;
+      display: table-cell;
+      //width: 76%;
+      
       min-height: 20rem; // Prevent complete collapse when switching content
    }
 

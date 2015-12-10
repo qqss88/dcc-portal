@@ -84,7 +84,7 @@ public class DonorResourceTest extends ResourceTest {
 
   @Test
   public final void test_findAll() throws IOException {
-    when(donorService.findAllCentric(any(Query.class))).thenReturn(DONORS);
+    when(donorService.findAllCentric(any(Query.class), any(Boolean.class))).thenReturn(DONORS);
 
     val response = resource("");
 

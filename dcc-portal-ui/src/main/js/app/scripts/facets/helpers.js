@@ -17,9 +17,20 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.facets.helpers', []);
+  var toJson = angular.toJson;
+  var isDefined = angular.isDefined;
 
-  module.factory('Facets', function (LocationService) {
+  var module = angular.module('icgc.facets.helpers', ['icgc.facets']);
+
+  module.factory('Facets', function (LocationService, FacetConstants, $rootScope) {
+
+    function _broadcastFacetStatusChange(facet, isActive, changeType) {
+      $rootScope.$broadcast(FacetConstants.EVENTS.FACET_STATUS_CHANGE, {
+        facet: facet || '*',
+        isActive: isActive,
+        changeType: (changeType || FacetConstants.FACET_CHANGE_TYPE.SINGLE)
+      });
+    }
 
     function ensurePath(filters, params) {
       if (!filters.hasOwnProperty(params.type)) {
@@ -34,16 +45,11 @@
      * TODO Set Terms
      */
     function setTerms(params) {
-      var filters;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      ['type', 'facet', 'terms'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp) || !angular.isDefined(params[rp])) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       ensurePath(filters, params);
 
@@ -56,26 +62,23 @@
      * Add a Term
      */
     function addTerm(params) {
-      var filters;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      [ 'type', 'facet', 'term'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp)) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       ensurePath(filters, params);
 
       if (isNot(params)) {
         if (filters[params.type][params.facet].not.indexOf(params.term) === -1) {
           filters[params.type][params.facet].not.push(params.term);
+          _broadcastFacetStatusChange(params.term, true);
         }
       } else {
         if (filters[params.type][params.facet].is.indexOf(params.term) === -1) {
           filters[params.type][params.facet].is.push(params.term);
+          _broadcastFacetStatusChange(params.term, true);
         }
       }
 
@@ -141,8 +144,10 @@
     /*
      * Remove a Term
      */
-    function removeTerm(params) {
-      var filters, index;
+    function removeTerm (params) {
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
       // Check for required parameters
       [ 'type', 'facet', 'term'].forEach(function (rp) {
@@ -151,8 +156,8 @@
         }
       });
 
-      filters = LocationService.filters();
-      
+      var filters = LocationService.filters();
+      var index;
       if (isNot(params)) {
         index = filters[params.type][params.facet].not.indexOf(params.term);
         filters[params.type][params.facet].not.splice(index, 1);
@@ -170,6 +175,22 @@
           LocationService.setFilters(filters);
         }
       }
+    }
+
+    function invalidParams (params) {
+      var properties = ['type', 'facet', 'term'];
+
+      return anyIs (false, propertyValues (params, properties), isDefined);
+    }
+
+    function propertyValues (obj, properties) {
+      return _(obj).pick (properties)
+        .values().value();
+    }
+
+    function anyIs (truthy, collection, predicate) {
+      return _.some (collection,
+        truthy ? predicate : _.negate (predicate));
     }
 
     /*
@@ -191,6 +212,7 @@
       }
 
       delete filters[params.type][params.facet];
+      _broadcastFacetStatusChange(params.facet, false);
 
       if (_.isEmpty(filters[params.type])) {
         delete filters[params.type];
@@ -208,6 +230,7 @@
      */
     function removeAll() {
       LocationService.removeFilters();
+      _broadcastFacetStatusChange(null, FacetConstants.FACET_CHANGE_TYPE.ALL);
     }
 
     /*

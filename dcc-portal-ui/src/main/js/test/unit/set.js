@@ -15,6 +15,7 @@ describe('Test SetService', function() {
     // Not sure why these are needed
     httpMock.when('GET', API.BASE_URL + '/releases/current').respond({});
     httpMock.when('GET', '/scripts/releases/views/home.html').respond({});
+    httpMock.when('GET', '/scripts/releases/views/home-beta.html').respond({});
 
     httpMock.when('POST', API.BASE_URL + '/entityset').respond({
       id: 'uu-id-1',

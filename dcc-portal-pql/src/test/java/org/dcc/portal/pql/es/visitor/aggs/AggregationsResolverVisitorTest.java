@@ -27,12 +27,10 @@ import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
@@ -46,6 +44,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AggregationsResolverVisitorTest {
@@ -100,17 +101,19 @@ public class AggregationsResolverVisitorTest {
     val root = (RootNode) createEsAst("facets(chromosome), eq(id, 60)", Type.MUTATION_CENTRIC);
     val result = root.accept(resolver, CONTEXT).get();
 
-    val filterAgg = (FilterAggregationNode) result.getChild(1).getFirstChild();
+    val filterAgg = (FilterAggregationNode) result.getFirstChild().getFirstChild();
     assertThat(filterAgg.childrenCount()).isEqualTo(1);
     val filterNode = filterAgg.getFilters();
     assertThat(filterNode.childrenCount()).isEqualTo(1);
 
-    // FilterNode - BoolNode - MustNode
-    val mustNode = filterNode.getFirstChild().getFirstChild();
-    assertThat(mustNode.childrenCount()).isEqualTo(1);
-    val termNode = (TermNode) mustNode.getFirstChild();
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("_mutation_id");
-    assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
+    // FilterNode - TermNode
+    val termNode = filterNode.getFirstChild();
+    assertThat(termNode.childrenCount()).isEqualTo(2);
+
+    val terminalIdNode = (TerminalNode) termNode.getChild(0);
+    val terminalValueNode = (TerminalNode) termNode.getChild(1);
+    assertThat(terminalIdNode.getValue()).isEqualTo("_mutation_id");
+    assertThat(terminalValueNode.getValue()).isEqualTo(60);
   }
 
   @Test

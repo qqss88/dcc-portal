@@ -17,6 +17,8 @@
  */
 package org.icgc.dcc.portal.model;
 
+import java.util.Map;
+
 import lombok.Builder;
 import lombok.Value;
 
@@ -46,5 +48,10 @@ public class Settings {
    */
   int maxNumberOfHits;
   int maxMultiplier;
+
+  /**
+   * Feature Flags for enabling/disabling features.
+   */
+  Map<String, Boolean> featureFlags;
 
 }

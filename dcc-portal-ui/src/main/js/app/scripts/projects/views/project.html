@@ -9,10 +9,10 @@
   <section>
     <i class="icon-attention or icon-attention-1"></i>
     No data for this project has been submitted directly to ICGC DCC yet. However, go to the
-    <a href="{{ ProjectCtrl.urlToExternalRepository }}">
-      external repository browser
+    <a href="{{:: ProjectCtrl.urlToExternalRepository() }}">
+      {{:: ProjectCtrl.dataRepoTitle }} browser
     </a>
-     to see the list of data files hosted in external repositories for this project.
+     to see the list of data files hosted in {{:: ProjectCtrl.dataRepoTitle }} for this project.
   </section>
 </span>
 
@@ -85,6 +85,22 @@
                 </ul>
             </td>
         </tr>
+        <tr data-ng-if="ProjectCtrl.project.state === 'live' && ProjectCtrl.studies.length > 0">
+            <th>Number of donors in
+              <a href="/pcawg">PCAWG</a>
+            </th>
+            <td>
+                <ul>
+                    <li data-ng-repeat="study in ProjectCtrl.studies">
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
+                        <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
+                        <!--
+                        <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
+                        -->
+                    </li>
+                </ul>
+            </td>
+        </tr>
         <tr>
             <th>Number of donors with molecular data in DCC </th>
             <td>
@@ -102,20 +118,6 @@
                 <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]}}}"})'>
                     {{::ProjectCtrl.project.totalDonorCount | number}}
                 </a>
-            </td>
-        </tr>
-        <tr data-ng-if="ProjectCtrl.project.state === 'live' && ProjectCtrl.studies.length > 0">
-            <th>Number of donors in PCAWG</th>
-            <td>
-                <ul>
-                    <li data-ng-repeat="study in ProjectCtrl.studies">
-                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
-                        <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
-                        <!--
-                        <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
-                        -->
-                    </li>
-                </ul>
             </td>
         </tr>
 
@@ -293,8 +295,10 @@
             </td>
         </tr>
     </table>
-    <span class="open-in">Open in</span> <a href="/repository/icgc/current/Projects/{{ProjectCtrl.project.id}}"><i
-        class="icon-database"></i>Data Repository</a>
+    <span class="open-in">Open in</span>
+    <a href="{{:: ProjectCtrl.dataReleasesUrl }}/current/Projects/{{ProjectCtrl.project.id}}">
+      <i class="icon-database"></i>{{:: ProjectCtrl.dataReleasesTitle }}
+    </a>
 </div>
 </section>
 <section id="genes"

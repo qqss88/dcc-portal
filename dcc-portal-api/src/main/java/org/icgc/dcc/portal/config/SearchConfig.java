@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.icgc.dcc.portal.config.PortalProperties.ElasticSearchProperties.SNIFF_MODE_KEY;
 import static org.icgc.dcc.portal.util.VersionUtils.getApiVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getApplicationVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
@@ -29,36 +30,40 @@ import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.icgc.dcc.portal.config.PortalProperties.ElasticSearchProperties;
 import org.icgc.dcc.portal.model.Versions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Lazy
 @Configuration
 public class SearchConfig {
 
+  /**
+   * Dependencies
+   */
   @Autowired
-  private PortalProperties properties;
+  private ElasticSearchProperties elastic;
 
   @Bean(destroyMethod = "close")
   public Client client() {
     // TransportClient is thread-safe so @Singleton is appropriate
-    val configuration = properties.getElastic();
-    val client = new TransportClient();
-    for (val nodeAddress : configuration.getNodeAddresses()) {
+    val client = createTransportClient(elastic.getClient());
+    for (val nodeAddress : elastic.getNodeAddresses()) {
       client.addTransportAddress(new InetSocketTransportAddress(
           nodeAddress.getHost(),
           nodeAddress.getPort()));
@@ -69,8 +74,29 @@ public class SearchConfig {
 
   @Bean
   public String indexName() {
-    String indexName = properties.getElastic().getIndexName();
+    String indexName = elastic.getIndexName();
     return resolveIndexName(indexName);
+  }
+
+  @Bean
+  public String repoIndexName() {
+    return elastic.getRepoIndexName();
+  }
+
+  @Bean
+  public Map<String, String> releaseIndexMetadata() {
+    String indexStr = resolveIndexName(elastic.getIndexName());
+    return indexMetadata(indexStr);
+  }
+
+  @Bean
+  public Versions versions() {
+    return new Versions(
+        getApiVersion(),
+        getApplicationVersion(),
+        getCommitId(),
+        firstNonNull(releaseIndexMetadata().get("git.commit.id.abbrev"), "unknown"),
+        indexName());
   }
 
   private String resolveIndexName(String indexName) {
@@ -94,12 +120,6 @@ public class SearchConfig {
     }
 
     return indexName;
-  }
-
-  @Bean
-  public Map<String, String> releaseIndexMetadata() {
-    String indexStr = resolveIndexName(properties.getElastic().getIndexName());
-    return indexMetadata(indexStr);
   }
 
   @SneakyThrows
@@ -128,14 +148,30 @@ public class SearchConfig {
     return meta;
   }
 
-  @Bean
-  public Versions versions() {
-    return new Versions(
-        getApiVersion(),
-        getApplicationVersion(),
-        getCommitId(),
-        firstNonNull(releaseIndexMetadata().get("git.commit.id.abbrev"), "unknown"),
-        indexName());
+  private static TransportClient createTransportClient(Map<String, String> clientSettings) {
+    logClientSettings(clientSettings);
+    val settingsBuilder = ImmutableSettings.settingsBuilder();
+    if (!isSniffModeSet(clientSettings)) {
+      settingsBuilder.put(SNIFF_MODE_KEY, true);
+    }
+
+    clientSettings.entrySet().stream()
+        .forEach(s -> settingsBuilder.put(s.getKey(), s.getValue()));
+
+    return new TransportClient(settingsBuilder.build());
+  }
+
+  private static boolean isSniffModeSet(Map<String, String> clientSettings) {
+    return clientSettings.entrySet().stream()
+        .anyMatch(e -> e.getKey().equals(SNIFF_MODE_KEY));
+  }
+
+  private static void logClientSettings(Map<String, String> clientSettings) {
+    val settings = newHashMap(clientSettings);
+    if (!isSniffModeSet(clientSettings)) {
+      settings.put(SNIFF_MODE_KEY, String.valueOf(true));
+    }
+    log.info("Initializing Elasticsearch Transport Client with settings: {}", settings);
   }
 
 }

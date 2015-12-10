@@ -30,13 +30,17 @@ import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createResolveNestedFieldVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
+import static org.dcc.portal.pql.meta.IndexModel.getDiagramTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getDrugTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getRepositoryFileTypeModel;
+import static org.dcc.portal.pql.meta.Type.DIAGRAM;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
@@ -46,11 +50,6 @@ import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.aggs.Context;
@@ -59,6 +58,11 @@ import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
 
 import com.google.common.collect.ImmutableMap;
+
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Performs series of transformations to resolve different processing rules and to optimize the AST
@@ -75,6 +79,8 @@ public class EsAstTransformer {
           .put(OBSERVATION_CENTRIC, createFacetContext(getObservationCentricTypeModel()))
           .put(PROJECT, createFacetContext(getProjectTypeModel()))
           .put(REPOSITORY_FILE, createFacetContext(getRepositoryFileTypeModel()))
+          .put(DRUG, createFacetContext(getDrugTypeModel()))
+          .put(DIAGRAM, createFacetContext(getDiagramTypeModel()))
           .build();
 
   public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {

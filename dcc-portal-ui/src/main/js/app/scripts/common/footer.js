@@ -15,17 +15,43 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-'use strict';
+(function() {
+  'use strict';
 
-angular.module('app.common.footer', ['app.common.footer.controllers']);
+  angular.module('app.common.footer', ['app.common.footer.controllers']);
 
-angular.module('app.common.footer.controllers', []);
+  angular.module('app.common.footer.controllers', []);
 
-angular.module('app.common.footer.controllers').controller('FooterCtrl', function ($http) {
-  var _ctrl = this;
-  $http.get('/api/version').success(function(data) {
-    _ctrl.apiVersion = data.api;
-    _ctrl.portalVersion = data.portal;
-    _ctrl.portalCommit = data.portalCommit;
+  angular.module('app.common.footer.controllers').controller('FooterCtrl',
+    function ($scope, $http, PortalFeature, RouteInfoService) {
+    var _ctrl = this;
+
+    $http.get('/api/version').success(function(data) {
+      _ctrl.apiVersion = data.api;
+      _ctrl.portalVersion = data.portal;
+      _ctrl.portalCommit = data.portalCommit;
+    });
+
+    _ctrl.mainItems = _.map (['home', 'projects', 'advancedSearch', 'dataAnalysis',
+      'dataReleases', 'dataRepositories', 'pcawg'], RouteInfoService.get);
+
+   var cloudLinks = [
+            {'link': '/icgc-in-the-cloud', 'title': 'About'},
+            {'link': '/icgc-in-the-cloud/aws', 'title': 'Amazon'},
+            {'link': '/icgc-in-the-cloud/collaboratory', 'title': 'Collaboratory'},
+            {'link': '/icgc-in-the-cloud/guide', 'title': 'User Guide'}
+            //{'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'User Guide'}
+          ];
+
+    $scope.portalFeature = PortalFeature;
+
+    $scope.stagedFeatures = {
+      getCloudLinks: function() {
+        if (PortalFeature.get('ICGC_CLOUD')) {
+          return cloudLinks;
+        }
+      }
+    };
   });
-});
+
+})();

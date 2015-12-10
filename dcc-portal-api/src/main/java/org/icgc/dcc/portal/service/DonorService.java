@@ -1,8 +1,13 @@
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.range;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -14,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +29,7 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.dcc.portal.pql.meta.DonorCentricTypeModel.Fields;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -30,7 +37,9 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,29 +57,35 @@ import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DonorService {
 
   private final DonorRepository donorRepository;
-  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
+
+  private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
+  private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
 
   private Donors buildDonors(SearchResponse response, Query query) {
     val hits = response.getHits();
-
-    boolean includeScore = !query.hasFields() || query.getFields().contains("ssmAffectedGenes");
-
+    val includeScore = !query.hasFields() || query.getFields().contains("ssmAffectedGenes");
     val list = ImmutableList.<Donor> builder();
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.DONOR);
-      if (includeScore) fieldMap.put("_score", hit.getScore());
+
+      if (includeScore) {
+        fieldMap.put("_score", hit.getScore());
+      }
+
       list.add(new Donor(fieldMap));
     }
 
-    Donors donors = new Donors(list.build());
-    donors.addFacets(aggregationsConverter.convert(response.getAggregations()));
+    val donors = new Donors(list.build());
+    donors.addFacets(AGGS_TO_FACETS_CONVERTER.convert(response.getAggregations()));
     donors.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return donors;
@@ -116,8 +131,45 @@ public class DonorService {
     return result;
   }
 
+  @NonNull
   public Donors findAllCentric(Query query) {
-    return buildDonors(donorRepository.findAllCentric(query), query);
+    return findAllCentric(query, false);
+  }
+
+  @NonNull
+  public Donors findAllCentric(Query query, boolean facetsOnly) {
+    val pql =
+        facetsOnly ? QUERY_CONVERTER.convertCount(query, DONOR_CENTRIC) : QUERY_CONVERTER.convert(query, DONOR_CENTRIC);
+    log.info("PQL of findAllCentric is: {}", pql);
+
+    val pqlAst = parse(pql);
+
+    return buildDonors(donorRepository.findAllCentric(pqlAst), query);
+  }
+
+  @NonNull
+  public Map<String, TermFacet> projectDonorCount(List<String> geneIds, List<Query> queries) {
+    // The queries should be derived from geneIds, which means they are of the same size and order.
+    val geneCount = geneIds.size();
+    checkState(geneCount == queries.size(),
+        "The number of gene IDs ({}) does not match the number of queries.",
+        geneIds);
+
+    val facetName = Fields.PROJECT_ID;
+    val response = donorRepository.projectDonorCount(queries, facetName);
+    val responseItems = response.getResponses();
+    val responseItemCount = responseItems.length;
+
+    checkState(geneCount == responseItemCount,
+        "The number of gene IDs ({}) does not match the number of responses in a multi-search.",
+        geneIds);
+
+    return range(0, geneCount).boxed().collect(toMap(
+        i -> geneIds.get(i),
+        i -> {
+          final SearchResponse item = responseItems[i].getResponse();
+          return AGGS_TO_FACETS_CONVERTER.convert(item.getAggregations()).get(facetName);
+        }));
   }
 
   public long count(Query query) {
@@ -146,9 +198,9 @@ public class DonorService {
   }
 
   public Donors getDonorAndSampleByProject(String projectId) {
-    Query query = new Query();
-    query.setSort("_id");
-    query.setOrder("desc");
+    val query = new Query()
+        .setSort("_id")
+        .setOrder("desc");
     return buildDonors(donorRepository.getDonorSamplesByProject(projectId), query);
   }
 
@@ -210,7 +262,7 @@ public class DonorService {
 
         @Cleanup
         val writer =
-            new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
+            new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os, Charset.forName("UTF-8"))), TAB_PREFERENCE);
 
         final String[] headers =
             { "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id", "icgc_donor_id", "submitted_donor_id", "project_code", "specimen_type", "specimen_type_other", "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study" };

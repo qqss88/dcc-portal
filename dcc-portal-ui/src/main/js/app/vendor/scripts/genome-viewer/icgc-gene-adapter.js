@@ -18,16 +18,26 @@
  * You should have received a copy of the GNU General Public License
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
+/** DEPRECATED **/
 
 function IcgcGeneAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = '/api/browser';
+  this.host = window.$icgcApp.getQualifiedHost() + '/api/browser';
   this.gzip = true;
+
+  this.setSpecies = function(species) {
+    this.species = species;
+  };
+
+  this.chunksDisplayed = {};
 
   this.params = {};
   if (args != null) {
+
+    this.chromosomeLimitMap = args.chromosomeLimitMap || {};
+
     if (args.host != null) {
       this.host = args.host;
     }
@@ -150,7 +160,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
       jsonResponse = data;
 
     }
-    
+
     if (typeof jsonResponse !== 'undefined') {
       for (var i = 0; i < jsonResponse.length; i++) {
         var feature = jsonResponse[i];
@@ -159,7 +169,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
         feature.id = feature.stableId;
         delete feature.externalName;
         delete feature.stableId;
-  
+
         for (var j = 0; j < feature.transcripts.length; j++) {
           var transcript = feature.transcripts[j];
           transcript.exons = transcript.exonToTranscripts;
@@ -193,7 +203,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
     var k = segment.chromosome + ':' + fc;
 
     if (_this.featureCache.cache[key] == null || _this.featureCache.cache[key][dataType] == null) {
-      _this.featureCache.putFeaturesByRegion(jsonResponse, segment, 'gene', dataType);
+      _this.featureCache.putFeaturesByRegion(jsonResponse || {}, segment, 'gene', dataType);
     }
 //        }
 
@@ -213,7 +223,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
   var updateStart = true;
   var updateEnd = true;
   if (chunks.length > 0) {
-    //		console.log(chunks);
+    //    console.log(chunks);
 
     for (var i = 0; i < chunks.length; i++) {
 
@@ -230,19 +240,19 @@ IcgcGeneAdapter.prototype.getData = function (args) {
         if (chunks[i] + 1 == chunks[i + 1]) {
           updateEnd = true;
         } else {
-          var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+          var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
           queries.push(query);
           updateStart = true;
           updateEnd = true;
         }
       } else {
-        var query = args.chromosome + ':' + chunkStart + '-' + chunkEnd;
+        var query = args.chromosome + ':' + chunkStart + '-' + Math.min((this.chromosomeLimitMap[args.chromosome] || 0), chunkEnd);
         queries.push(query);
         updateStart = true;
         updateEnd = true;
       }
     }
-    //		console.log(querys);
+    //    console.log(querys);
     console.time(_this.resource + ' get and save ' + rnd);
 
     var queryCount = queries.length;

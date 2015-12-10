@@ -98,11 +98,12 @@
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
   module.service('SetService',
-    function($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions, Page) {
+    function ($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster,
+      Extensions, Page, RouteInfoService) {
 
     var LIST_ENTITY = 'entity';
+    var dataRepoUrl = RouteInfoService.get ('dataRepositories').href;
     var _this = this;
-
 
     // For application/json format
     function params2JSON(type, params) {
@@ -135,13 +136,11 @@
       return data;
     }
 
-
     /*
     this.saveAll = function(lists) {
       localStorageService.set(LIST_ENTITY, lists);
     };
     */
-
 
     this.createAdvLink = function(set) {
       var type = set.type.toLowerCase(), filters = {};
@@ -153,7 +152,6 @@
       } else {
         return '/search?filters=' + angular.toJson(filters);
       }
-
     };
 
     this.createRepoLink = function(set) {
@@ -161,10 +159,9 @@
     	var type = 'file';
       filters[type] = {};
       filters[type][Extensions.ENTITY] = {is: [set.id]};
-      return '/repository/external/?filters=' + angular.toJson(filters);
+
+      return dataRepoUrl + '?filters=' + angular.toJson(filters);
     };
-
-
 
     this.materialize = function(type, params) {
       var data = params2JSON(type, params);
@@ -217,7 +214,7 @@
 
       return promise;
     };
-    
+
     this.addExternalSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);
@@ -246,9 +243,22 @@
       return promise;
     };
 
+    this.createFileSet = function (params) {
+      params.name = 'File Set';
+      params.description = 'File Set for Manifest';
+      params.sortBy = 'id';
+      params.sortOrder = 'DESCENDING';
+      var promise = null;
+      var data = params2JSON('FILE', params);
+      promise = Restangular.one('entityset').one('file')
+        .post(undefined, data, {}, {'Content-Type': 'application/json'});
+
+      return promise;
+    };
+
     this.createForwardSet = function(type, params, forwardUrl) {
       Page.startWork();
-      params.name = 'Input Donor Set';
+      params.name = 'Input donor set';
       params.description = '';
       params.sortBy = 'ssmAffectedGenes';
       params.sortOrder = 'DESCENDING';
@@ -271,7 +281,7 @@
 
     this.createForwardRepositorySet = function(type, params, forwardUrl) {
       Page.startWork();
-      params.name = 'Input Donor Set';
+      params.name = 'Input donor set';
       params.description = '';
       params.sortBy = 'fileName';
       params.sortOrder = 'DESCENDING';
@@ -370,7 +380,7 @@
           var fileFilters = {};
           fileFilters.file = {};
           fileFilters.file[Extensions.ENTITY] = {is: [set.id]};
-          set.repoLink = '/repository/external?filters=' + JSON.stringify(fileFilters);
+          set.repoLink = dataRepoUrl + '?filters=' + JSON.stringify(fileFilters);
         }
       });
     };

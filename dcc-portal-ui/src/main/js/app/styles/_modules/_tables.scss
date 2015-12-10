@@ -1,3 +1,5 @@
+$table-th-fixed-width: 200px;
+
 .table {
   width: 100%;
   border: 1px solid $greyLighter;
@@ -24,6 +26,10 @@
         background: $greyLightest;
       }
     }
+
+    &.cell-vertically-centered tr td {
+      vertical-align: middle;
+    }
   }
 
   td, th {
@@ -35,6 +41,14 @@
   }
   th {
     white-space: nowrap;
+  }
+
+  &.fixed-width {
+    th {
+      max-width: $table-th-fixed-width;
+      min-width: $table-th-fixed-width;
+      width: $table-th-fixed-width;
+    }
   }
 
   td {
@@ -50,7 +64,6 @@
     //border: 1px solid $greyLighter;
   }
 
-  
   // Table with icon check-boxes
   &.table-selectable {
      thead {
@@ -99,7 +112,6 @@
   word-wrap:break-word;
   max-width:15em
 }
-
 
 /* IE has crummy support for table-cell overflow, so we need to apply this to the element in the cell instead */
 .t_cell_overflow {

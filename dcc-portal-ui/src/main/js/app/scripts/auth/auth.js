@@ -44,10 +44,11 @@
     function login(data) {
       delete $cookies.openid_error;
       user = {
-        email: data.username,
-        token: data.token,
-        daco: data.daco,
-        verifying: false
+        email: data.username || 'Unknown User',
+        token: data.token || false,
+        daco: data.daco || false,
+        verifying: false,
+        cloudAccess: data.cloudAccess || false
       };
     }
 
@@ -144,7 +145,7 @@
       $scope.params.cudUsername = null;
       $scope.params.cudPassword = null;
       $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
-
+    
 
 
       function setup() {
@@ -159,7 +160,9 @@
               Auth.login(data);
               $scope.params.user = Auth.getUser();
               $state.transitionTo($state.current, $stateParams,
-                { reload: true, inherit: false, notify: true });
+                { reload: true, inherit: true, notify: true, location: false });
+
+              $scope.closeLoginPopup();
               console.log('logged in as: ', $scope.params.user);
             });
         }
@@ -189,7 +192,7 @@
         }
       }
 
-      var loginInstance, logoutInstance, authInstance;
+      var loginInstance, logoutInstance;
 
       // Auth isn't technically a state, so the default state reload in PortalFeature won't work.
       // We get around this by using a watcher instead on the actual var.
@@ -232,20 +235,6 @@
         if (logoutInstance) {
           logoutInstance.dismiss('cancel');
           logoutInstance = null;
-        }
-      };
-
-      $scope.openAuthPopup = function() {
-        authInstance = $modal.open({
-          templateUrl: '/scripts/auth/views/auth.popup.html',
-          scope: $scope
-        });
-      };
-
-      $scope.closeAuthPopup = function() {
-        if (authInstance) {
-          authInstance.dismiss('cancel');
-          authInstance = null;
         }
       };
 

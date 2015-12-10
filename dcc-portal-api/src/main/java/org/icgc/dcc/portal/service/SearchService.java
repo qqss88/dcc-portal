@@ -17,11 +17,10 @@
 
 package org.icgc.dcc.portal.service;
 
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Keyword;
@@ -33,32 +32,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class SearchService {
 
+  private static final String DONOR_TYPE = "donor";
+
   private final SearchRepository searchRepository;
-  ImmutableMap<String, String> fields = FIELDS_MAPPING.get(Kind.KEYWORD);
 
+  @NonNull
   public Keywords findAll(Query query, String type) {
-    log.info("{}", query);
-
-    val response = searchRepository.findAll(query, type);
-    val hits = response.getHits();
-
-    val list = ImmutableList.<Keyword> builder();
+    val hits = searchRepository.findAll(query, type).getHits();
+    val donors = Lists.<String> newArrayList();
+    val results = ImmutableList.<Keyword> builder();
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.KEYWORD);
-      list.add(new Keyword(fieldMap));
+      val keyword = new Keyword(fieldMap);
+
+      if (keyword.getType().equals(DONOR_TYPE)) {
+        val donorId = keyword.getId();
+
+        // Unique donors only
+        if (donors.contains(donorId)) {
+          continue;
+        }
+
+        donors.add(donorId);
+      }
+
+      results.add(keyword);
     }
 
-    Keywords keywords = new Keywords(list.build());
+    val keywords = new Keywords(results.build());
+    // val count = keywords.getHits().size();
+    // FIXME: Fix the counts here now that we make the donor result unique.
     keywords.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return keywords;
   }
+
 }

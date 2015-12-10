@@ -19,7 +19,9 @@ package org.dcc.portal.pql.es.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.meta.Type.DIAGRAM;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.DRUG;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
@@ -27,10 +29,6 @@ import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 
 import java.util.Map;
-
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.CreateQueryBuilderVisitor;
@@ -65,6 +63,10 @@ import org.dcc.portal.pql.es.visitor.util.ToStringVisitor;
 import org.dcc.portal.pql.meta.Type;
 
 import com.google.common.collect.ImmutableMap;
+
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
 
 @NoArgsConstructor(access = PRIVATE)
 public final class Visitors {
@@ -125,6 +127,8 @@ public final class Visitors {
           .put(OBSERVATION_CENTRIC, DEFAULT_SCORE_QUERY_VISITOR)
           .put(PROJECT, DEFAULT_SCORE_QUERY_VISITOR)
           .put(REPOSITORY_FILE, DEFAULT_SCORE_QUERY_VISITOR)
+          .put(DRUG, DEFAULT_SCORE_QUERY_VISITOR)
+          .put(DIAGRAM, DEFAULT_SCORE_QUERY_VISITOR)
           .build();
 
   public static final VerifyNestedFilterVisitor createVerifyNestedFilterVisitor() {

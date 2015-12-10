@@ -1,22 +1,26 @@
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Throwables.propagate;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.repository.GeneRepository.GENE_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.common.lang3.tuple.Pair;
 import org.elasticsearch.search.SearchHit;
 import org.icgc.dcc.portal.model.Gene;
 import org.icgc.dcc.portal.model.Genes;
@@ -24,38 +28,69 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class GeneService {
 
-  private final GeneRepository geneRepository;
-  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
-
-  ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
+  /**
+   * Constants.
+   */
+  private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
+  private static final Jql2PqlConverter QUERY_CONVERTER = Jql2PqlConverter.getInstance();
 
   /**
-   * Convert result from gene-text to a gene model
+   * Dependencies.
    */
-  private Gene geneText2Gene(SearchHit hit) {
-    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
-    Map<String, Object> geneMap = Maps.newHashMap();
-    for (val key : fieldMap.keySet()) {
-      geneMap.put(GENE_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
+  private final GeneRepository geneRepository;
+
+  /**
+   * State.
+   */
+  private final AtomicReference<Map<String, String>> ensemblIdGeneSymbolMap =
+      new AtomicReference<Map<String, String>>();
+
+  @Async
+  public void init() {
+    try {
+      log.debug("Building EnsemblId-to-GeneSymbol lookup table...");
+
+      // The key is a gene symbol and the value is an ensembl ID.
+      val groupedByGeneSymbol = geneRepository.getGeneSymbolEnsemblIdMap();
+      val lookupTable = groupedByGeneSymbol.keySet().parallelStream()
+          .map(geneSymbol -> ensemblAliasPairs(geneSymbol, groupedByGeneSymbol))
+          .flatMap(Collection::stream)
+          // TODO: use dcc.common.core.util.stream.Collectors#toImmutableMap once the pom.xml is updated.
+          .collect(toMap(Pair::getKey, Pair::getValue));
+
+      log.debug("EnsemblId-to-GeneSymbol lookup table ({} entries) is: {}", lookupTable.size(), lookupTable);
+
+      ensemblIdGeneSymbolMap.set(lookupTable);
+
+      log.debug("Finished building EnsemblId-to-GeneSymbol lookup table.");
+    } catch (Exception e) {
+      log.error("Error building EnsemblId-to-GeneSymbol lookup table.", e);
+      propagate(e);
     }
-    return new Gene(geneMap);
   }
 
   /**
@@ -86,20 +121,16 @@ public class GeneService {
    * 
    * Example output:<br>
    * <ul>
-   * <li>
-   * symbol:
+   * <li>symbol:
    * <ul>
    * <li>id1: [G1]</li>
    * <li>id2: [G2]</li>
    * </ul>
    * </li>
-   * <li>
-   * uniprot:
+   * <li>uniprot:
    * <ul>
-   * <li>
-   * id3: [G3, G4]</li>
-   * <li>
-   * id:4: [G5]</li>
+   * <li>id3: [G3, G4]</li>
+   * <li>id:4: [G5]</li>
    * </ul>
    * </li>
    * </ul>
@@ -149,12 +180,19 @@ public class GeneService {
     return result;
   }
 
+  @NonNull
   public Genes findAllCentric(Query query) {
+    return findAllCentric(query, false);
+  }
+
+  @NonNull
+  public Genes findAllCentric(Query query, boolean facetsOnly) {
     val projectIds = Lists.<String> newArrayList();
 
     // Get a list of projectId to filter the projects sub-object in the gene model
     // FIXME This won't support NOT
     val path = query.getFilters().path("donor").path("projectId");
+
     if (path.path("is").isArray()) {
       for (JsonNode id : path.get("is")) {
         projectIds.add(String.valueOf(id).replaceAll("\"", ""));
@@ -164,24 +202,31 @@ public class GeneService {
       projectIds.add(String.valueOf(path.get("is")).replaceAll("\"", ""));
     }
 
-    val response = geneRepository.findAllCentric(query);
+    val pql =
+        facetsOnly ? QUERY_CONVERTER.convertCount(query, GENE_CENTRIC) : QUERY_CONVERTER.convert(query, GENE_CENTRIC);
+    log.info("PQL of findAllCentric is: {}", pql);
+
+    val pqlAst = parse(pql);
+    val response = geneRepository.findAllCentric(pqlAst);
     log.debug("Response: {}", response);
+
     val hits = response.getHits();
-
-    boolean includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
-
+    val includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
     val list = ImmutableList.<Gene> builder();
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.GENE);
-      if (includeScore) fieldMap.put("_score", hit.getScore());
+
+      if (includeScore) {
+        fieldMap.put("_score", hit.getScore());
+      }
+
       fieldMap.put("projectIds", projectIds);
       list.add(new Gene(fieldMap));
     }
 
-    Genes genes = new Genes(list.build());
-    genes.addFacets(aggregationsConverter.convert(response.getAggregations()));
-    // genes.setFacets(response.getFacets());
+    val genes = new Genes(list.build());
+    genes.addFacets(AGGS_TO_FACETS_CONVERTER.convert(response.getAggregations()));
     genes.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return genes;
@@ -211,4 +256,52 @@ public class GeneService {
   public List<String> getAffectedTranscripts(String geneId) {
     return geneRepository.getAffectedTranscripts(geneId);
   }
+
+  public Map<String, String> getEnsemblIdGeneSymbolMap() {
+    val result = ensemblIdGeneSymbolMap.get();
+
+    if (null == result) {
+      throw new NotAvailableException(
+          "The EnsemblId-to-GeneSymbol lookup table is currently not available yet. Please retry later.");
+    }
+
+    return result;
+  }
+
+  @NonNull
+  public Map<String, String> getEnsemblIdGeneSymbolMap(List<String> ensemblIds) {
+    val map = getEnsemblIdGeneSymbolMap();
+
+    // Returns a value of gene symbol if there is a match; otherwise returns the ensemblId itself.
+    return ImmutableSet.copyOf(ensemblIds).stream().collect(
+        toMap(identity(), ensemblId -> map.getOrDefault(ensemblId, ensemblId)));
+  }
+
+  @NonNull
+  private static List<Pair<String, String>> ensemblAliasPairs(String geneSymbol,
+      Multimap<String, String> groupedByGeneSymbols) {
+    val oneToManyIndicator = "*";
+    val ensemblIds = groupedByGeneSymbols.get(geneSymbol);
+    val suffix = (ensemblIds.size() > 1) ? oneToManyIndicator : "";
+    val symbol = geneSymbol + suffix;
+
+    // The key is an ensembl ID and the value is a gene symbol.
+    return ensemblIds.stream()
+        .map(id -> Pair.of(id, symbol))
+        .collect(toList());
+  }
+
+  /**
+   * Convert result from gene-text to a gene model
+   */
+  private Gene geneText2Gene(SearchHit hit) {
+    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
+    Map<String, Object> geneMap = Maps.newHashMap();
+    fieldMap.forEach((k, v) -> {
+      geneMap.put(GENE_ID_SEARCH_FIELDS.get(k), v);
+    });
+
+    return new Gene(geneMap);
+  }
+
 }

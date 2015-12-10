@@ -21,7 +21,7 @@
   var module = angular.module ('icgc.facets.current', []);
 
   module.controller('currentCtrl',
-    function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page) {
+    function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page, GeneSymbols) {
 
     $scope.Page = Page;
     $scope.Facets = Facets;
@@ -33,8 +33,8 @@
       controlFacet: 'donorId',
       controlType: 'file'
     }, {
-      term: 'Input Donor Set',
-      controlTerm: 'Input Donor Set',
+      term: 'Input donor set',
+      controlTerm: 'Input donor set',
       controlFacet: 'donorId',
       controlType: 'file'
     }];
@@ -81,20 +81,47 @@
       return isNot? 't_facets__facet__not' : '';
     };
 
+    function resolveActiveGeneIds (filters) {
+      var activeGeneIds = _(_.get (filters, 'gene.id.is', []))
+        .filter ({controlFacet: 'id', controlType: 'gene'})
+        .map ('term')
+        .value();
+
+      if (_.isEmpty (activeGeneIds)) {
+        $scope.ensemblIdGeneSymbolMap = {};
+        return;
+      }
+
+      GeneSymbols.resolve (activeGeneIds).then (function (ensemblIdGeneSymbolMap) {
+        $scope.ensemblIdGeneSymbolMap = ensemblIdGeneSymbolMap.plain();
+      });
+    }
+
+    $scope.resolveGeneSymbols = function (type, term) {
+      if ('gene' !== type) {
+        return term;
+      }
+
+      return _.get ($scope.ensemblIdGeneSymbolMap, term, term);
+    };
+
     function refresh() {
       var currentFilters = LocationService.filters();
       var ids = LocationService.extractSetIds(currentFilters);
 
       if (ids.length > 0) {
         SetService.getMetaData(ids).then(function(results) {
-          $scope.filters = FiltersUtil.buildUIFilters(currentFilters, SetService.lookupTable(results));
+          $scope.filters = FiltersUtil.buildUIFilters (currentFilters,
+            SetService.lookupTable (results.plain()));
+          resolveActiveGeneIds ($scope.filters);
         });
       } else {
         $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
+        resolveActiveGeneIds ($scope.filters);
       }
 
-      //$scope.isActive = _.keys($scope.filters).length;
-      $scope.isActive = _.keys(currentFilters).length;
+      // If we have filters then show the filter query directive
+      $scope.isActive = ! _.isEmpty(currentFilters);
     }
 
     /**
@@ -161,7 +188,7 @@
     refresh();
     $scope.$on('$locationChangeSuccess', function (evt, next) {
       // FIXME: Only applicable on search page. Should have a cleaner solution
-      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repository/external') ) {
+      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repositories') ) {
         refresh();
       }
     });

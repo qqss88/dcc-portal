@@ -30,19 +30,13 @@ import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.ERROR;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.POST_PROCESSING;
 import static org.icgc.dcc.portal.model.Query.idField;
-import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
+import static org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType.GENE_IDS;
 import static org.icgc.dcc.portal.util.Facets.getFacetCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Overview;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Result;
@@ -53,13 +47,19 @@ import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.repository.GeneSetRepository;
 import org.icgc.dcc.portal.repository.MutationRepository;
-import org.icgc.dcc.portal.service.TermsLookupService;
+import org.icgc.dcc.portal.repository.TermsLookupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Technical specification for this feature may be found here:
@@ -68,7 +68,7 @@ import com.google.common.collect.Lists;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class EnrichmentAnalyzer {
 
   /**
@@ -80,7 +80,7 @@ public class EnrichmentAnalyzer {
    * Dependencies.
    */
   @NonNull
-  private final TermsLookupService termLookupService;
+  private final TermsLookupRepository termsLookupRepository;
   @NonNull
   private final EnrichmentAnalysisRepository analysisRepository;
   @NonNull
@@ -255,8 +255,7 @@ public class EnrichmentAnalyzer {
           geneSetGeneCount,
           geneSetOverlapGeneCount,
           overlapGeneCount,
-          universeGeneCount
-          );
+          universeGeneCount);
 
       // Add result for the current gene-set
       results.add(result);
@@ -275,8 +274,8 @@ public class EnrichmentAnalyzer {
         geneSetOverlapGeneCount, overlapGeneCount, // The "four numbers"
         geneSetGeneCount, universeGeneCount);
 
-    log.debug("q = {}, k = {}, m = {}, n = {}, pValue = {}", new Object[] { geneSetOverlapGeneCount, overlapGeneCount,
-        geneSetGeneCount, universeGeneCount, pValue });
+    log.debug("q = {}, k = {}, m = {}, n = {}, pValue = {}",
+        new Object[] { geneSetOverlapGeneCount, overlapGeneCount, geneSetGeneCount, universeGeneCount, pValue });
 
     // Assemble
     return new Result()
@@ -384,7 +383,7 @@ public class EnrichmentAnalyzer {
 
   @SneakyThrows
   private void indexInputGeneList(UUID inputGeneListId, List<String> inputGeneList) {
-    termLookupService.createTermsLookup(GENE_IDS, inputGeneListId, inputGeneList);
+    termsLookupRepository.createTermsLookup(GENE_IDS, inputGeneListId, inputGeneList);
   }
 
 }

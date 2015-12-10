@@ -19,6 +19,8 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** DEPRECATED **/
+
 'use strict';
 
 IcgcGeneTrack.prototype = new Track({});
@@ -33,12 +35,77 @@ function IcgcGeneTrack(args) {
   //save default render reference;
   this.defaultRenderer = this.renderer;
   this.histogramRenderer = new HistogramRenderer();
+  this.resource = this.dataAdapter.resource;
 
   this.chunksDisplayed = {};
 
   //set instantiation args, must be last
   _.extend(this, args);
 }
+
+IcgcGeneTrack.prototype.updateHeight = function () {
+  //this._updateHeight();
+  if (this.histogram) {
+    this.contentDiv.style.height = this.histogramRenderer.histogramHeight + 5 + 'px';
+    this.main.setAttribute('height', this.histogramRenderer.histogramHeight);
+    return;
+  }
+
+  var renderedHeight = this.svgCanvasFeatures.getBoundingClientRect().height;
+  this.main.setAttribute('height', renderedHeight);
+
+  if (this.resizable) {
+    if (this.autoHeight == false) {
+      this.contentDiv.style.height = this.height + 10 + 'px';
+    } else if (this.autoHeight == true) {
+      var x = this.pixelPosition;
+      var width = this.width;
+      var lastContains = 0;
+      for (var i in this.renderedArea) {
+        if (this.renderedArea[i].contains({
+            start: x,
+            end: x + width
+          })) {
+          lastContains = i;
+        }
+      }
+      var visibleHeight = parseInt(lastContains) + 30;
+      this.contentDiv.style.height = visibleHeight + 10 + 'px';
+      this.main.setAttribute('height', visibleHeight);
+    }
+  }
+};
+
+IcgcGeneTrack.prototype.setWidth = function(width) {
+  this._setWidth(width);
+  this.main.setAttribute("width", this.width);
+};
+
+IcgcGeneTrack.prototype.initializeDom = function(targetId) {
+  this._initializeDom(targetId);
+
+  this.main = SVG.addChild(this.contentDiv, 'svg', {
+    'class': 'trackSvg',
+    'x': 0,
+    'y': 0,
+    'width': this.width
+  });
+  this.svgCanvasFeatures = SVG.addChild(this.main, 'svg', {
+    'class': 'features',
+    'x': -this.pixelPosition,
+    'width': this.svgCanvasWidth
+  });
+  this.updateHeight();
+};
+
+IcgcGeneTrack.prototype.clean = function() {
+  //    console.time("-----------------------------------------empty");
+  while (this.svgCanvasFeatures.firstChild) {
+    this.svgCanvasFeatures.removeChild(this.svgCanvasFeatures.firstChild);
+  }
+  //    console.timeEnd("-----------------------------------------empty");
+  this._clean();
+};
 
 IcgcGeneTrack.prototype.render = function (targetId) {
   var _this = this;
@@ -83,7 +150,7 @@ IcgcGeneTrack.prototype.draw = function () {
 
   this.updateTranscriptParams();
   this.updateHistogramParams();
-  this.cleanSvg();
+  this.clean();
 
   if (typeof this.visibleRegionSize === 'undefined' || this.region.length() < this.visibleRegionSize) {
     this.setLoading(true);
@@ -98,9 +165,9 @@ IcgcGeneTrack.prototype.draw = function () {
       transcript: this.transcript
     });
 
-    this.invalidZoomText.setAttribute('visibility', 'hidden');
+    //this.invalidZoomText.setAttribute('visibility', 'hidden');
   } else {
-    this.invalidZoomText.setAttribute('visibility', 'visible');
+    //this.invalidZoomText.setAttribute('visibility', 'visible');
   }
 
 };
@@ -207,5 +274,6 @@ IcgcGeneTrack.prototype._getFeaturesByChunks = function (response) {
       this.chunksDisplayed[chunks[i].key + dataType] = true;
     }
   }
+
   return features;
 };

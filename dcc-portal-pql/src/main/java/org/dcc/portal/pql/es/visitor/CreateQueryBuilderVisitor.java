@@ -22,9 +22,6 @@ import static java.lang.String.format;
 
 import java.util.Optional;
 
-import lombok.NonNull;
-import lombok.val;
-
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
@@ -40,6 +37,9 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+
+import lombok.NonNull;
+import lombok.val;
 
 /**
  * Creates QueryBuilder by visiting {@link QueryNode}
@@ -108,7 +108,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
 
   private static void verifyQueryChildren(QueryNode node) {
     checkState(node.childrenCount() < 3, format("The QueryNode has more than 2 children. Valid children: "
-        + "QueryNode, FilterNode. The QueryNode: \n%s", node));
+        + "QueryNode, FilterNode. The QueryNode: %n%s", node));
 
     if (node.childrenCount() > 1) {
       verifyProperChildren(node);
@@ -118,7 +118,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
   private static void verifyProperChildren(QueryNode node) {
     for (val child : node.getChildren()) {
       checkState(child instanceof QueryNode || child instanceof FilterNode,
-          format("Found non QueryNode or FilterNode child. The QueryNode: \n%s", node));
+          format("Found non QueryNode or FilterNode child. The QueryNode: %n%s", node));
     }
   }
 

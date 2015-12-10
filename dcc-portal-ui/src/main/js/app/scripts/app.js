@@ -18,6 +18,177 @@
 (function () {
   'use strict';
 
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Define global namespace for the icgc app to be used by third parties as well as in the console.
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  if (typeof window.$icgc === 'undefined') {
+    (function(devConfig) {
+      
+      // used to configure dev profile for the API class
+      var _defaultDevConfiguration = devConfig || {},
+          _defaultDevHost = _defaultDevConfiguration.HOST || 'localhost',
+          _defaultDevPort = _defaultDevConfiguration.API_PORT || '8080',
+          _developerLocalMode = _defaultDevConfiguration.DEVELOPER_LOCAL_MODE === true ? true : false;
+
+      // API Base class
+      function API(version, localUIDevRun, host, port, context) {
+        var _version = version || 1,
+            _host = host || (localUIDevRun === true ? _defaultDevHost : null),
+            _port =  port || (localUIDevRun === true ? _defaultDevPort : null),
+            _context = context || '/api',
+            _isDebugEnabled = false;
+
+
+        this.getVersion = function() {
+          return _version;
+        };
+
+
+        this.getBasePathURL = function() {
+          return  (_host ? '//' + _host : '') +
+              (_port ? ':' + _port : '')  +
+              (_context + '/v' + _version);
+        };
+
+        this.setDebugEnabled = function(isDebugEnabled) {
+          _isDebugEnabled = isDebugEnabled;
+          return this;
+        };
+
+
+        this.isDebugEnabled = function() {
+          return _isDebugEnabled;
+        };
+
+
+        return this;
+      }
+
+
+
+      // ICGC Constructor method which provides an access point for other JS logic to query rather than soley
+      // relying off of angular. This will be useful for setting debug state on the fly as well as offering
+      // an interface layer between the angular/non-angular worlds.
+      function ICGCApp() {
+
+        var _isDebugEnabled = false,
+            _currentAPIVersion = 1,
+            _APIInterface = null,
+            _isLocalUIRun = false,
+            _angularInjector = null;
+
+        ///////////////////////////////////////////////////////
+        // Private methods
+        ///////////////////////////////////////////////////////
+        // Default initializer
+        function __initDefaultAPI() {
+          _APIInterface = new API(_currentAPIVersion, _isLocalUIRun);
+        }
+
+        function __getAngularInjector() {
+          if (_angularInjector) {
+            return _angularInjector;
+          }
+
+          _angularInjector = angular.element(document.body).injector();
+
+          return _angularInjector;
+        }
+
+        function __getAngularProvider(dependencyName) {
+
+          if (__getAngularInjector) {
+            __getAngularInjector();
+          }
+
+         var provider;
+
+          try {
+             provider = _angularInjector.get(dependencyName);
+          }
+          catch (e) {
+            console.error('Cannot find dependency with name: ' + dependencyName);
+            provider = null;
+          }
+
+          return provider;
+        }
+
+        function __setAPIDebugEnabled(isAPIDebugEnabled) {
+          return _APIInterface.setDebugEnabled(isAPIDebugEnabled);
+        }
+
+        function __getQualifiedHost() {
+          var url = '';
+
+          if ( _isLocalUIRun === true ) {
+            url = window.location.protocol + '//' + _defaultDevHost + ':' + _defaultDevPort;
+          }
+
+          return url;
+        }
+
+        ///////////////////////////////////////////////////////
+        // Public API
+        ////////////////////////////////////////////////////////
+        this.getAPI = function() {
+
+          if (_APIInterface === null) {
+            __initDefaultAPI();
+          }
+
+          return _APIInterface;
+        };
+
+        this.setAPI = function(version) {
+          _currentAPIVersion = version;
+          // TODO: extend with potential to specify host and port (for now default it)
+          _APIInterface = new API(_currentAPIVersion, _isLocalUIRun);
+          return this;
+        };
+
+        // Turn on all debug across the app
+        this.setDebugEnabled = function(isEnabled) {
+          _isDebugEnabled = isEnabled;
+          __setAPIDebugEnabled(isEnabled); // turn on the API debug as well
+          return this;
+        };
+
+        this.setLocalUIRun = function(isLocalUIRun) {
+          _isLocalUIRun = isLocalUIRun;
+          return this;
+        };
+
+        // This method should be used for checking before performing a console.*
+        // useful if debuging in a different environment that is not development
+        this.isDebugEnabled = function() {
+          return _isDebugEnabled;
+        };
+
+        // turn on the API debug only
+        this.setAPIDebugEnabled = __setAPIDebugEnabled;
+
+        this.getAngularInjector = __getAngularInjector;
+
+        this.getAngularProvider = __getAngularProvider;
+
+        this.getQualifiedHost = __getQualifiedHost;
+
+
+      return this;
+    }
+
+
+     // Singleton global variable used to control the application settings across non-angular
+     // libraries as well the the JS console
+     window.$icgcApp = new ICGCApp().setLocalUIRun(_developerLocalMode);
+
+    })(window.$ICGC_DEV_CONFIG || null);
+
+  }
+  //////////////////////////////////////////////////////////////////////////
+
   var toJson = angular.toJson;
 
   var module = angular.module('icgc', [
@@ -57,9 +228,11 @@
     'icgc.projects',
     'icgc.donors',
     'icgc.genes',
+    'icgc.compounds',
     'icgc.mutations',
     'icgc.advanced',
     'icgc.releases',
+    'icgc.portalfeature',
     'icgc.keyword',
     'icgc.browser',
     'icgc.donorlist',
@@ -73,10 +246,13 @@
     'icgc.beacon',
     'icgc.downloader',
     'icgc.pathwayviewer',
+    'icgc.repositories',
     'icgc.repository',
+    'icgc.software',
     'icgc.pancancer',
     'icgc.auth',
     'icgc.tokens',
+    'icgc.pathways',
 
     // old
     'app.ui',
@@ -90,34 +266,281 @@
   // modified for our needs
   module
     .value('$anchorScroll', angular.noop)
-    .run(function($state, $stateParams, $window, $rootScope) {
-      function scroll() {
-        var state, offset, to;
-        state = $state.$current;
+    // Offer a means of forcing a reload of the current state when necessary
+    .config(function($provide) {
 
-        // Prevents browser window from jumping around while navigating analyses
-        if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
+      // Let's decorate our $state object to inline it with this functionality
+      $provide.decorator('$state', ['$delegate', '$stateParams', function ($delegate, $stateParams) {
+        $delegate.forceReload = function () {
+          return $delegate.go($delegate.current, $stateParams, {
+            reload: true,
+            inherit: false,
+            notify: true
+          });
+        };
+        return $delegate;
+      }]);
+
+
+      $provide.decorator('Restangular', ['$delegate', '$q',  function($delegate, $q) {
+
+        var _cancellableRequests = {};
+
+        function _deletePromiseAbortCache(deferredKey) {
+
+          if (! angular.isDefined(_cancellableRequests[deferredKey])) {
+            return;
+          }
+
+          delete _cancellableRequests[deferredKey];
+
+          //console.log('Removing deferred from abort cache: ', deferredKey);
+
+          /*
+           if (s === 0) {
+           console.info('Request abort cache is empty!');
+           }*/
+        }
+
+        // Create a wrapped request function that will allow us to create http requests that
+        // can timeout when the abort promise is resolved.
+        function _createWrappedRequestFunction(restangularObject, deferredKey, requestFunction) {
+
+          if (! angular.isDefined(requestFunction) || ! angular.isFunction(requestFunction)) {
+            console.warn('Restangular REST function not defined cannot wrap!');
+            return false;
+          }
+
+          // Function to wrap the call in which removes the abort promise from the queue on resolve/reject
+          return function() {
+
+            var deferred = $q.defer(),
+              abortDeferred = $q.defer();
+
+            /*if ( ! _cancellableRequests[deferredKey]) {
+             console.log('Added deferred "' + deferredKey + '" to abort cache.');
+             }*/
+
+            // Save the deferred object so we may cancel it all later
+            _cancellableRequests[deferredKey] = abortDeferred;
+
+
+            restangularObject.withHttpConfig({timeout: abortDeferred.promise});
+
+            var requestPromise = requestFunction.apply(restangularObject, Array.prototype.slice.call(arguments));
+
+            requestPromise.then(
+              function(data) {
+                _deletePromiseAbortCache(deferredKey);
+                deferred.resolve(data);
+              },
+              function(error) {
+                _deletePromiseAbortCache(deferredKey);
+                deferred.reject(error);
+              }
+            );
+
+            return deferred.promise;
+          };
+
+        }
+
+        function _createCancelableRequest(restangularCollectionFunction, args) {
+          var callingArgs =  Array.prototype.slice.call(args),
+            deferredKey = callingArgs[0],
+          /*jshint validthis:true */
+            _this = this;
+
+          if (! deferredKey) {
+            console.warn('Restangular function called with no arguments!');
+            deferredKey = '*' + (new Date()).getTime();
+          }
+
+          var restangularObject = restangularCollectionFunction.apply(_this, callingArgs);
+
+          // Wrap the request items
+          restangularObject.get = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.get
+          );
+
+          restangularObject.getList = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.getList
+          );
+          restangularObject.post = _createWrappedRequestFunction(
+            restangularObject, deferredKey, restangularObject.post
+          );
+
+          // Add an auxiliary method to cancel an individual request if one exists
+          restangularObject.cancelRequest = function() {
+
+            var deferredAbort = _.get(_cancellableRequests, deferredKey, false);
+
+            if (deferredAbort) {
+              deferredAbort.resolve();
+              delete _cancellableRequests[deferredKey];
+            }
+          };
+
+          _wrapRestangular(restangularObject);
+
+
+          return restangularObject;
+        }
+
+
+        function _wrapRequest(fn) {
+
+          return function() {
+            return _createCancelableRequest.call(this, fn, arguments);
+          };
+
+        }
+
+
+        function _wrapRequestFunctions(restangularObj) {
+
+          if (! angular.isDefined(restangularObj.one)) {
+            return;
+          }
+
+          restangularObj.one = _.bind(_wrapRequest(restangularObj.one), restangularObj);
+          restangularObj.all = _.bind(_wrapRequest(restangularObj.all), restangularObj);
+        }
+
+
+        function _wrapRestangular(restangularObj) {
+
+          _wrapRequestFunctions(restangularObj);
+
+
+          if (! angular.isDefined(restangularObj.withHttpConfig)) {
+            return;
+          }
+
+          var withHttpConfigFn = restangularObj.withHttpConfig;
+
+          // Wrap the config
+          restangularObj.withHttpConfig = function() {
+            var withHttpConfigRestangularObject = withHttpConfigFn.apply(this, Array.prototype.slice.call(arguments));
+
+            _wrapRequestFunctions(withHttpConfigRestangularObject);
+
+            return withHttpConfigRestangularObject;
+          };
+
+        }
+
+        function _init() {
+          _wrapRestangular($delegate);
+        }
+
+        _init();
+
+        ///////////////
+
+        $delegate.abortAllHTTPRequests = function() {
+          var requestUrls = _.keys(_cancellableRequests);
+          var abortRequestLength = requestUrls.length;
+
+          for (var i = 0; i < abortRequestLength; i++) {
+            var requestURL = requestUrls[i];
+            console.log('Cancelling HTTP Request: ', requestURL);
+            _cancellableRequests[requestURL].resolve();
+          }
+
+          // Reset the deferred abort list
+          _cancellableRequests = {};
+        };
+
+        return $delegate;
+      }]);
+
+    })
+    .run(function($state, $location, $window, $timeout, $rootScope) {
+
+      var _scrollTimeoutHandle = null;
+
+      function scroll() {
+
+        function _doInlineScroll(hash) {
+          // Give angular some time to do digests then check for a
+          // in page scroll
+          
+          var match = hash ? hash.match(/^!([\w\-]+)$/i) : false,
+            to = 0,
+            HEADER_HEIGHT = 49 + 10, // Height of header + some nice looking offset.
+            el = null;
+          
+          if (match && match.length > 1) {
+            hash = match[1];
+            //$location.hash(hash);
+            to = - HEADER_HEIGHT;
+          }
+
+          if (hash) {
+             el = jQuery('#' + hash);
+          }
+          
+          if (el && el.length > 0) {
+            to += Math.round(parseFloat(el.offset().top));
+            to = Math.max(0, to);
+          }
+
+
+          jQuery(window).scrollTop( to );
+        }
+        
+        /////
+
+        var _hash = $location.hash();
+
+        // Prevents browser window from jumping around while navigating analysis
+        if (['analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
 
-
-        // Default behaviour is to scroll to top
-        // Any string that isn't [top,none] is treated as a jq selector
-        // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
-        if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
-          $window.scrollTo(0, 0);
-        } else {
-          offset = jQuery(state.scrollTo).offset();
-          if (offset) {
-            to = offset.top - 40;
-            jQuery('body,html').animate({ scrollTop: to }, 800);
-          }
+        // Prevent the timeout from being fired multiple times if called before previous
+        // timeout is complete. Make the last request the most valid.
+        if (_scrollTimeoutHandle) {
+          clearTimeout(_scrollTimeoutHandle);
         }
+
+        _scrollTimeoutHandle = setTimeout(function () {
+            _doInlineScroll(_hash);
+            _scrollTimeoutHandle = null;
+          }, 500);
 
       }
 
       $rootScope.$on('$viewContentLoaded', scroll);
       $rootScope.$on('$stateChangeSuccess', scroll);
+
+      function _wrapHistoryAPI(method) {
+
+        var _originalHistoryMethod = $window.window.history[method];
+
+        $window.window.history[method] = function() {
+
+          var _h = $location.hash();
+
+          if (! _h || ! _h.match(/^!([\w\-]+)$/i)) {
+            //console.log('Restoring scroll top to original position of: 0');
+            jQuery(window).scrollTop(0);
+          }
+
+          return _originalHistoryMethod.apply(this, Array.prototype.slice.call(arguments));
+        };
+
+      }
+
+      _.map(['pushState', 'replaceState'], _wrapHistoryAPI);
+
+
+      
+      // Add UI Router Debug if there is a fatal state change error
+      $rootScope.$on('$stateChangeError', function () { 
+        console.error('State Change Error Occurred. Error occurred with arguments: ', arguments);
+      });
     });
 
 
@@ -126,102 +549,49 @@
    * This is the base URL for API requests. We can change this to use API from a different server, this is useful
    * when only testing the user interface, or to debug production UI issues.
    */
+
   module.constant('API', {
-    // BASE_URL options
-    // '/api/v1' (<--- default non-local server route)
-    // 'http://localhost:8080/api/v1' (<--- use route with localhost 'grunt' run)
-    BASE_URL: '/api/v1',
-    DEBUG_ENABLED: false // set DEBUG_ENABLED to true if you want to turn on the request/response console output
+    BASE_URL: $icgcApp.getAPI().getBasePathURL()
   });
 
-
-  /**
-   * This serves as a debugging service to toggle features that are merged
-   * but disabled.
-   *
-   * Note: This works automatically for views that are tied to a state, otherwise
-   * it will be up to the callers to check for state change via watch/observe or other means.
-   */
-  module.service('PortalFeature', function($state, LocationService) {
-    var features = {
-      REACTOME_VIEWER: false,
-      AUTH_TOKEN: false
-    };
-    function _enable(feature) {
-      if (features.hasOwnProperty(feature) === false) { return; }
-      features[feature] = true;
-      if ($state.current.name) {
-        $state.go($state.current.name, {}, {reload: true});
-      }
-    }
-
-    function _disable(feature) {
-      if (features.hasOwnProperty(feature) === false) { return; }
-      features[feature] = false;
-      if ($state.current.name) {
-        $state.go($state.current.name, {}, {reload: true});
-      }
-    }
-
-    function init() {
-      var enable = LocationService.getParam('enable');
-      if (_.isEmpty(enable)) {
-        return;
-      }
-      enable.split(',').forEach(function(feature) {
-        _enable(feature.trim());
-      });
-    }
-
-    // Allow features to be turned on via query param on application load
-    init();
-
-
-    this.get = function(s) {
-      if (features.hasOwnProperty(s) === false) { return false; }
-      return features[s];
-    };
-
-    this.enable = function(s) {
-      _enable(s);
-    };
-
-    this.disable = function(s) {
-      _disable(s);
-    };
-
-    this.list = function() {
-      return features;
-    };
-
-  });
 
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
-                          markdownConverterProvider, localStorageServiceProvider, API) {
-
+                          markdownConverterProvider, localStorageServiceProvider, API,
+    copyPasteProvider) {
+                            
+    // Let copyPasteProvider know where the flash app for copying and pasting is
+    var copyPastePath = window.$ICGC_DEV_CONFIG ? null : 'bower_components/zeroclipboard/dist/ZeroClipboard.swf';
+    copyPasteProvider.zeroClipboardPath(copyPastePath);
+    
+    
     // Disables debugging information
     $compileProvider.debugInfoEnabled(false);
 
     // Combine calls - needs more testing
-    // $httpProvider.useApplyAsync(true);
+    $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
 
-    if (API.DEBUG_ENABLED) {
-      RestangularProvider.setRequestInterceptor(function(data, operation, model) {
-          console.log('Request Method: ', operation.toUpperCase(), '\nModel: ', model, '\nData: ', data);
-          return data;
-       });
+    // Function that returns a interceptor function
+    function _getInterceptorDebugFunction(requestType){
 
-       RestangularProvider.setResponseInterceptor(
-        function(data, operation, model) {
-          console.log('Response Method: ', operation.toUpperCase(), '\nModel: ', model, '\nData: ', data);
-          return data;
-      });
-   }
+      return function(data, operation, model) {
+        // perform this check dynamically the computation time is neglible so this shouldn't impede on perfomance
+        if ($icgcApp.getAPI().isDebugEnabled()) {
+          console.log(requestType + ' Method: ', operation.toUpperCase(), '\nModel: ', model, '\nData: ', data);
+        }
+        return data;
+      };
+
+    }
+
+    RestangularProvider.setRequestInterceptor(_getInterceptorDebugFunction('Request'));
+    RestangularProvider.setResponseInterceptor(_getInterceptorDebugFunction('Reponse'));
+
+
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -264,7 +634,8 @@
 
     var ignoreNotFound = [
       '/analysis/',
-      '/list'
+      '/list',
+      '/ui/reactome'
     ];
 
     Restangular.setErrorInterceptor(function (response) {

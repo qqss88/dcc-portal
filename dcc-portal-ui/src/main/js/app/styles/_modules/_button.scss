@@ -23,6 +23,9 @@
   &:focus {
   }
 
+  &.no-animate {
+    transition: none;
+  }
 
   // For destructive actions
   &.t_button__destructive {
@@ -51,4 +54,18 @@
     background: $greyLightest;
 
   }
+ 
 }
+ 
+.t_button_info {
+  background: lighten($brand-light, 10%);
+  border-color: lighten($brand-light, 10%);
+  
+    &:hover {
+    background: $brand;
+  }
+} 
+
+  
+  
+

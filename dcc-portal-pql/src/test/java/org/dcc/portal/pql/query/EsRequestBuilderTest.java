@@ -20,7 +20,10 @@ package org.dcc.portal.pql.query;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.exception.SemanticException;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -30,10 +33,9 @@ import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.rules.ExpectedException;
 
 /**
  * Contains 3 mutations: MU1, MU2, MU3
@@ -43,6 +45,9 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
   private EsRequestBuilder visitor;
   QueryEngine queryEngine;
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -279,6 +284,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void facetsTest_matchFilter() {
     val result = executeQuery("facets(verificationStatus), eq(verificationStatus, 'tested')");
+
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU2", "MU3");
 
@@ -293,6 +299,31 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
         assertThat(bucket.getDocCount()).isEqualTo(4);
       }
     }
+  }
+
+  @Test
+  public void facetsCountQueryTest_matchFilter() {
+    val result = executeQuery("count(),facets(verificationStatus), eq(verificationStatus, 'tested')");
+
+    assertTotalHitsCount(result, 2);
+
+    Global global = result.getAggregations().get("verificationStatus");
+    Nested nested = global.getAggregations().get("verificationStatus");
+    Terms terms = nested.getAggregations().get("verificationStatus");
+
+    for (val bucket : terms.getBuckets()) {
+      if (bucket.getKey().equals("tested")) {
+        assertThat(bucket.getDocCount()).isEqualTo(2);
+      } else {
+        assertThat(bucket.getDocCount()).isEqualTo(4);
+      }
+    }
+  }
+
+  @Test
+  public void countAndSelectShouldNotAppearTogetherTest() {
+    thrown.expect(SemanticException.class);
+    executeQuery("count(),select(verificationStatus), eq(verificationStatus, 'tested')");
   }
 
   @Test

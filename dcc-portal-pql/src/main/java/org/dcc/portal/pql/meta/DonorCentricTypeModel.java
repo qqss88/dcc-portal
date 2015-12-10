@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.val;
+import lombok.experimental.UtilityClass;
 
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
@@ -42,11 +43,21 @@ public class DonorCentricTypeModel extends TypeModel {
 
   private final static String TYPE_PREFIX = "donor";
 
+  /**
+   * Field aliases
+   */
+  @UtilityClass
+  public class Fields {
+
+    public final String PROJECT_ID = "projectId";
+
+  }
+
   // Including real fields, not aliases. Because after the AST is built by PqlParseTreeVisitor includes are resolved to
   // the real fields
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of();
   private final static List<String> AVAILABLE_FACETS = ImmutableList.of(
-      "projectId",
+      Fields.PROJECT_ID,
       "primarySite",
       "gender",
       "tumourStageAtDiagnosis",
@@ -63,7 +74,7 @@ public class DonorCentricTypeModel extends TypeModel {
   private final static List<String> PUBLIC_FIELDS = ImmutableList.of(
       "id",
       "submittedDonorId",
-      "projectId",
+      Fields.PROJECT_ID,
       "primarySite",
       "projectName",
       "tumourType",
@@ -265,7 +276,7 @@ public class DonorCentricTypeModel extends TypeModel {
 
   private static ObjectFieldModel initProject() {
     return object("project",
-        string("_project_id", "projectId"),
+        string("_project_id", Fields.PROJECT_ID),
         string("primary_site", "primarySite"),
         string("project_name", "projectName"),
         string("tumour_type", "tumourType"),

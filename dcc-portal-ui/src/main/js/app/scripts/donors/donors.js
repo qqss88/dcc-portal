@@ -39,10 +39,12 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl',
-    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG) {
+  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations,
+    Settings, ExternalRepoService, PCAWG, RouteInfoService) {
 
     var _ctrl = this, promise;
+    var dataRepoRoutInfo = RouteInfoService.get ('dataRepositories');
+    var dataRepUrl = dataRepoRoutInfo.href;
 
     Page.setTitle(donor.id);
     Page.setPage('entity');
@@ -57,7 +59,6 @@
     };
 
     _ctrl.donor = donor;
-
     _ctrl.isPendingDonor = _.isUndefined (_.get(donor, 'primarySite'));
 
     var donorFilter = {
@@ -67,26 +68,30 @@
         }
       }
     };
-    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (donorFilter);
+
+    _ctrl.dataRepoTitle = dataRepoRoutInfo.title;
+
+    _ctrl.urlToExternalRepository = function() {
+      return dataRepUrl + '?filters=' + angular.toJson (donorFilter);
+    };
 
     _ctrl.donor.clinicalXML = null;
     promise = ExternalRepoService.getList({
       filters: {
         file: {
           donorId: {is: [_ctrl.donor.id]},
-          dataFormat: { is: ['XML']}
+          fileFormat: {is: ['XML']}
         }
       }
     });
-    promise.then(function(results) {
-      if (results.hits && results.hits[0]) {
-        var file = results.hits[0];
-        var repo = file.repository;
-        _ctrl.donor.clinicalXML = repo.repoServer[0].repoBaseUrl.replace(/\/$/, '') +
-          repo.repoDataPath + repo.repoEntityId;
+    promise.then (function (results) {
+      var fileCopy = _.get (results, 'hits[0].fileCopies[0]', undefined);
+
+      if (_.isPlainObject (fileCopy)) {
+        _ctrl.donor.clinicalXML = fileCopy.repoBaseUrl.replace (/\/$/, '') +
+          fileCopy.repoDataPath + fileCopy.fileName;
       }
     });
-
 
     _ctrl.downloadDonorData = function() {
       $modal.open({
@@ -204,7 +209,7 @@
         }
         filters.donor.projectId = { is: [ donor.projectId ]};
 
-        Restangular.one('ui/donor-mutations').get({
+        Restangular.one('ui').one('search').one('donor-mutations').get({
           filters: filters,
           donorId: d.id,
           include: 'consequences'

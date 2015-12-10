@@ -18,15 +18,18 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import lombok.val;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.test.TestIndex;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
+
+import lombok.val;
 
 public class DiagramRepositoryTest extends BaseElasticSearchTest {
 
@@ -36,10 +39,12 @@ public class DiagramRepositoryTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {
+    this.testIndex = TestIndex.RELEASE;
     es.execute(
         createIndexMapping(Type.DIAGRAM)
             .withData(bulkFile(getClass())));
-    diagramRepository = new DiagramRepository(es.client(), INDEX.getIndex());
+    diagramRepository =
+        new DiagramRepository(es.client(), testIndex.getName(), new QueryEngine(es.client(), testIndex.getName()));
   }
 
   @Test

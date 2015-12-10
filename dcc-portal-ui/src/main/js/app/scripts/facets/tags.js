@@ -22,7 +22,7 @@
 
   module.controller('tagsFacetCtrl',
     function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
-      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
+      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService, GeneSymbols) {
 
     $scope.Extensions = Extensions;
 
@@ -42,6 +42,32 @@
     $scope.shouldDisplayEntitySetId = function () {
       return $scope.type !== 'file' && $scope.facetName !== 'id';
     };
+
+    var isGeneType = $scope.isGeneType = function() {
+      return $scope.type === 'gene';
+    };
+
+    function resolveActiveGeneIds() {
+      var activeGeneIds = $scope.actives;
+
+      if (_.isEmpty (activeGeneIds)) {
+        $scope.activeGenes = [];
+        return;
+      }
+
+      GeneSymbols.resolve (activeGeneIds).then (function (ensemblIdGeneSymbolMap) {
+        var map = ensemblIdGeneSymbolMap.plain();
+
+        $scope.activeGenes = _.map (activeGeneIds, function (id) {
+          // This returns a custom Gene object that the ng-repeater will consume.
+          return {
+            uiText: _.get (map, id, id),
+            tooltip: id,
+            dataId: id
+          };
+        });
+      });
+    }
 
     function setup() {
       var type = $scope.proxyType || $scope.type, filters = LocationService.filters(), activeIds = [];
@@ -94,7 +120,11 @@
         }
 
         activeIds = $scope.actives;
-        pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}});
+        if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('pathwayId')) {
+          pathwayTypeFilters = LocationService.filters();
+        } else {
+          pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}});
+        }
 
         Genes.handler.one('count').get({filters:pathwayTypeFilters}).then(function (result) {
           $scope.allPathwayCounts = result || 0;
@@ -115,12 +145,15 @@
         GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {
           $scope.curatedIdCounts = result;
         });
+      } else if (isGeneType()) {
+        resolveActiveGeneIds();
       }
 
       // Check if there are extended element associated with this facet
-      // i.e. : GeneList is a subse of Gene
+      // i.e. : GeneList is a subset of Gene
       $scope.hasExtension = false;
-      if ($scope.type === 'gene') {
+
+      if (isGeneType()) {
         if (FiltersUtil.hasGeneListExtension(filters)) {
           $scope.hasExtension = true;
         }
@@ -184,7 +217,7 @@
       Facets.removeTerm({
         type: type,
         facet: facet,
-        term: term.id
+        term: term
       });
     };
 

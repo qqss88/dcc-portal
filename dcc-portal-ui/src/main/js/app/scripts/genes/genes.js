@@ -249,6 +249,27 @@
 
       refresh();
     });
+
+  module.controller ('GeneCompoundsCtrl', function ($stateParams, CompoundsService, RouteInfoService) {
+    var geneId = $stateParams.id;
+    var _this = this;
+
+    this.compoundUrl = RouteInfoService.get ('drugCompound').href;
+    this.concatAtcDescriptions = function (compound) {
+      var codes = _.map (_.get (compound, 'atcCodes', []), 'description');
+      return _.isEmpty (codes) ? '--' : codes.join (', ');
+    };
+
+    CompoundsService.getCompoundsByGeneId (geneId).then (function (data) {
+      var compounds = data.plain();
+
+      _this.compounds = compounds;
+
+    }, function (error) {
+      console.log ('Error getting compounds related to the geneId', error);
+    });
+  });
+
 })();
 
 (function () {
@@ -295,4 +316,13 @@
       return this.handler.one('mutations', '').get(angular.extend(defaults, params));
     };
   });
+
+  module.service ('GeneSymbols', function (Restangular) {
+    var apiUrl = 'ui/search/gene-symbols';
+
+    this.resolve = function (ensemblIds) {
+      return Restangular.one (apiUrl, ensemblIds).get();
+    };
+  });
+
 })();

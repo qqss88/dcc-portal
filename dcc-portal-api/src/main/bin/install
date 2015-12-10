@@ -8,9 +8,7 @@
 #   restarts the application.
 #
 # Usage:
-#  ./install -v 2.0.0 # installs the specified released version
-#  ./install -l       # installs the latest release version
-#  ./install -s       # installs the latest snapshot version
+#  See usage()
 
 # Enviromental configuation
 cache=hcache-dev.res:5381
@@ -22,10 +20,10 @@ usage: $0 options
 This script installs the dcc-portal-api from Artifactory, relinks the jar and restarts the daemon.
 
 OPTIONS:
-   -h      Show this message
-   -r      Install release number (e.g. 1.8)
-   -l      Install latest release
-   -s      Install latest snapshot
+   -h         # Show this message
+   -r version # Install release with version (use 'latest' for latest)
+   -s version # Install snapshot with version (use 'latest' for latest)
+   -p version # Install pr snapshot with version (use 'latest' for latest)
 EOF
 }
 
@@ -34,9 +32,9 @@ log(){
 }
 
 release=
-latest=
 snapshot=
-while getopts “hr:ls” OPTION
+pr=
+while getopts “:hr:s:p:” OPTION
 do
   case $OPTION in
          h)
@@ -44,13 +42,13 @@ do
              exit 1
              ;;
          r)
-             release=$OPTARG
-             ;;
-         l)
-             latest=1
+             release=$(( $OPTARG == latest ? 1 : $OPTARG ))
              ;;
          s)
-             snapshot=1
+             snapshot=$(( $OPTARG == latest ? 1 : $OPTARG ))
+             ;;
+         p)
+             pr=$(( $OPTARG == latest ? 1 : $OPTARG ))
              ;;
          ?)
              usage
@@ -59,7 +57,7 @@ do
      esac
 done
 
-if [[ -z $release ]] && [[ -z $latest ]] && [[ -z $snapshot ]]
+if [[ -z $release ]] && [[ -z $snapshot ]] && [[ -z $pr ]]
 then
   usage
   exit 1
@@ -80,21 +78,21 @@ if [[ -n $release ]]
 then
   repo="dcc-release"
   path="$server/$repo/$artifact"
-  version=$release
+  [[ $release = 1 ]] && version=`curl -s "$path/maven-metadata.xml" | grep latest | sed "s/.*<latest>\([^<]*\)<\/latest>.*/\1/"` || version="$release"
   build=$release
-fi
-if [[ -n $latest ]]
-then
-  repo="dcc-release"
-  path="$server/$repo/$artifact"
-  version=`curl -s "$path/maven-metadata.xml" | grep latest | sed "s/.*<latest>\([^<]*\)<\/latest>.*/\1/"`
-  build=$version
 fi
 if [[ -n $snapshot ]]
 then
   repo="dcc-snapshot"
   path="$server/$repo/$artifact"
-  version=`curl -s "$path/maven-metadata.xml" | grep latest | sed "s/.*<latest>\([^<]*\)<\/latest>.*/\1/"`
+  [[ $snapshot = 1 ]] && version=`curl -s "$path/maven-metadata.xml" | grep latest | sed "s/.*<latest>\([^<]*\)<\/latest>.*/\1/"` || version="$snapshot"
+  build=`curl -s "$path/$version/maven-metadata.xml" | grep '<value>' | head -1 | sed "s/.*<value>\([^<]*\)<\/value>.*/\1/"`
+fi
+if [[ -n $pr ]]
+then
+  repo="dcc-pr-snapshot"
+  path="$server/$repo/$artifact"
+  [[ $pr = 1 ]] && version=`curl -s "$path/maven-metadata.xml" | grep latest | sed "s/.*<latest>\([^<]*\)<\/latest>.*/\1/"` || version="$pr"
   build=`curl -s "$path/$version/maven-metadata.xml" | grep '<value>' | head -1 | sed "s/.*<value>\([^<]*\)<\/value>.*/\1/"`
 fi
 

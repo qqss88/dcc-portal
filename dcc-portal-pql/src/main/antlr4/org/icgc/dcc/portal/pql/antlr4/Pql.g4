@@ -7,7 +7,7 @@ grammar Pql;
 
 statement
   : (filter | function) (COMMA (filter | function))*
-  | count (COMMA filter)*
+  | count (COMMA (filter | aggs))*
   | (filter | function) (COMMA (filter | function))* COMMA order
   | (filter | function) (COMMA (filter | function))* COMMA range
   | (filter | function) (COMMA (filter | function))* COMMA order COMMA range
@@ -18,9 +18,17 @@ count
   ;
 
 function
+  : selects
+  | aggs
+  ;
+  
+selects
   : 'select' OPAR ID (COMMA ID)* CPAR       # select
   | 'select' OPAR ASTERISK CPAR             # select
-  | 'facets' OPAR ID (COMMA ID)* CPAR       # facets
+  ;
+
+aggs
+  : 'facets' OPAR ID (COMMA ID)* CPAR       # facets
   | 'facets' OPAR ASTERISK CPAR             # facets
   ;
 

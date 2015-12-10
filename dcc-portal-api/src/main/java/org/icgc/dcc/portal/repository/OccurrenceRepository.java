@@ -49,7 +49,7 @@ import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_TRUNCA
 import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_VARIANT;
 import static org.icgc.dcc.common.core.util.Separators.COMMA;
 import static org.icgc.dcc.common.core.util.Strings2.DOUBLE_QUOTE;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
@@ -58,10 +58,6 @@ import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 
 import java.util.Map;
 import java.util.Map.Entry;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -82,6 +78,10 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -241,12 +241,10 @@ public class OccurrenceRepository {
 
     // Print out some useful info now
     if (log.isDebugEnabled()) {
-      val counts = toMap(result.keySet(), projectId ->
-          result.get(projectId).size())
+      val counts = toMap(result.keySet(), projectId -> result.get(projectId).size())
           .entrySet();
 
-      counts.stream().forEach(entry ->
-          log.debug("Project: {} => Donor Count: {}", entry.getKey(), entry.getValue()));
+      counts.stream().forEach(entry -> log.debug("Project: {} => Donor Count: {}", entry.getKey(), entry.getValue()));
 
       val totalDonors = counts.stream()
           .mapToLong(Entry::getValue)

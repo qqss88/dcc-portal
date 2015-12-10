@@ -9,9 +9,6 @@ import static org.icgc.dcc.portal.test.JsonNodes.$;
 
 import java.util.UUID;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentParams;
 import org.icgc.dcc.portal.model.Query;
@@ -20,7 +17,7 @@ import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.repository.GeneSetRepository;
 import org.icgc.dcc.portal.repository.MutationRepository;
-import org.icgc.dcc.portal.service.TermsLookupService;
+import org.icgc.dcc.portal.repository.TermsLookupRepository;
 import org.icgc.dcc.portal.test.AbstractSpringIntegrationTest;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,6 +25,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Ignore("Need elasticsearch index dependencies to be present on jenkins")
@@ -37,7 +37,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
    * Dependencies.
    */
   @Autowired
-  TermsLookupService termLookupService;
+  TermsLookupRepository termsLookupRepository;
   @Autowired
   EnrichmentAnalysisRepository repository;
   @Autowired
@@ -57,7 +57,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
   @Before
   public void setUp() {
     this.analyzer = new EnrichmentAnalyzer(
-        termLookupService,
+        termsLookupRepository,
         repository,
         geneRepository,
         geneSetRepository,
@@ -116,7 +116,8 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
   }
 
   protected ObjectNode allEntityFilter() {
-    return filter("{'donor':{'primarySite':{'is':['Brain']},'gender':{'is':['male']}},'gene':{'type':{'is':['protein_coding']},'list':{'is':['Cancer Gene Census']}},'mutation':{'consequenceType':{'is':['missense']}}}");
+    return filter(
+        "{'donor':{'primarySite':{'is':['Brain']},'gender':{'is':['male']}},'gene':{'type':{'is':['protein_coding']},'list':{'is':['Cancer Gene Census']}},'mutation':{'consequenceType':{'is':['missense']}}}");
   }
 
   protected ObjectNode filter(String json) {

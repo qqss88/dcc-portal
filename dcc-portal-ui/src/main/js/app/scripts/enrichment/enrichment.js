@@ -138,11 +138,12 @@
     return {
       restrict: 'E',
       scope: {
-        item: '='
+        item: '=',
+        callingContext: '@'
       },
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       link: function($scope) {
-
+       
         // $scope.predicate = 'adjustedPValue';
         $scope.predicate = 'pvalue';
         $scope.reverse = false;

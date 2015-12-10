@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.repository;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.size;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.model.IndexModel.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
@@ -59,7 +59,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@SuppressWarnings("deprecation")
 public class GeneSetRepository {
 
   /**
