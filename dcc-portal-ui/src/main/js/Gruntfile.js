@@ -25,8 +25,7 @@ module.exports = function (grunt) {
   var yeomanConfig = {
     app: 'app',
     dist: '../../../target/app',
-    developIndexFile: 'develop/html/index.develop.html',
-    beforeUglifyMarker: '___tmp___'
+    developIndexFile: 'develop/html/index.develop.html'
   };
 
 // The purpose of the provider is to ensure that the appropriate configs 
@@ -44,68 +43,6 @@ function ICGCGruntConfigProvider() {
     
     function _initTasks() {
 
-      /*grunt.registerMultiTask('fixSourceMaps', 'Fixes the generated source maps.', function() {
-        var _task = this,
-          options = _task.options({
-          sourceMapPatchFunction: function(srcMapObj, srcMapFile) {
-            var origFileFieldValue = srcMapObj.file;
-            console.log(srcMapFile);
-
-            srcMapObj.sources = [origFileFieldValue.replace('.min.js', '.js')];
-            grunt.log.writeln('Changed ' + origFileFieldValue + ' to ' +  srcMapObj.sources[0]);
-            return srcMapObj;
-          }
-        });
-
-
-        // Iterate over all src-dest file pairs.
-        _task.files.forEach(function(file) {
-
-          // Grab all the source maps that fulfill our files array config
-          var srcMapFiles = file.src.filter(function (filepath) {
-
-            // Warn on and remove invalid source map files
-            if (! grunt.file.exists(filepath)) {
-              grunt.log.warn('Source file ' + filepath + ' not found!');
-              return false;
-            }
-
-            return true;
-          });
-
-          // No valid files found so warn and move on to the next file pair
-          if (srcMapFiles.length === 0) {
-            grunt.log.warn('Destination ' + file.dest + ' not written because src map files were empty.');
-            return;
-          }
-
-          // Foreach source map repair it...
-          srcMapFiles.forEach(function(srcMapFilePath) {
-            var srcMapContents = grunt.file.readJSON(srcMapFilePath),
-                srcMapFile = srcMapFilePath.split('/').pop();
-
-            if (srcMapContents) {
-              //
-              var newSrcMapContents = options.sourceMapPatchFunction.call(_task, srcMapContents, srcMapFile);
-
-              if (grunt.file.write(file.dest,  JSON.stringify(newSrcMapContents))) {
-                grunt.log.writeln('File "' + srcMapFile + '" patched!');
-              }
-              else {
-                grunt.log.warn('Destination ' + srcMapFile + ' could not be patched!');
-              }
-            }
-
-
-          });
-
-
-
-        });
-
-      });*/
-
-    
        grunt.registerTask('ICGC-setBuildEnv', 'Sets the target build environment (default: ' +
                            _CONFIG_CONSTANTS.BUILD_ENV.DEV + ')', function(env) {
          var message = 'Setting GRUNT build environment to ';
@@ -230,17 +167,6 @@ function ICGCGruntConfigProvider() {
         * Bower configuration
         * See: https://www.npmjs.com/package/grunt-bower-install-simple
         */
-        /*var bowerConfig = {
-          options: {
-            color: true
-          },
-          prod: {
-            options: { production: true }
-          },
-          dev: {
-            options: { production: false}
-          }
-        };*/
         
         var config =  {options: { color: true } };
         
@@ -348,7 +274,6 @@ function ICGCGruntConfigProvider() {
           {
             dot: true,
             src: [
-              '.tmp',
               '<%= yeoman.dist %>/*',
               '!<%= yeoman.dist %>/.git*'
             ]
@@ -360,7 +285,7 @@ function ICGCGruntConfigProvider() {
           {
             dot: true,
             src: [
-              '<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js'
+              '.tmp'
             ]
           }
         ]
@@ -420,7 +345,6 @@ function ICGCGruntConfigProvider() {
       dist: {
         src: [
           '<%= yeoman.dist %>/scripts/{,*/**/}*.js',
-          '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js',
           '<%= yeoman.dist %>/styles/{,*/**/}*.css',
           '<%= yeoman.dist %>/images/{,*/**/}*.{png,jpg,jpeg,gif,webp,svg}'//,
           //'<%= yeoman.dist %>/styles/fonts/*'
@@ -449,8 +373,7 @@ function ICGCGruntConfigProvider() {
         //'<%= yeoman.dist %>/styles/{,*/**/}*.css'
       ],
       js: [
-        '<%= yeoman.dist %>/scripts/{,*/}*.js',
-        '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js'
+        '<%= yeoman.dist %>/scripts/{,*/}*.js'
       ],
 
       options: {
@@ -510,26 +433,6 @@ function ICGCGruntConfigProvider() {
     },
     // Put files not handled in other tasks here
     copy: {
-      saveNonUglifiedJS: {
-        expand: true,
-        cwd: '<%= yeoman.dist %>/scripts',
-        dest: '<%= yeoman.dist %>/scripts',
-        src: '*.js',
-        rename: function(dest, src){
-          var name = src.split('.')[0];
-          return dest + '/' + name + yeomanConfig.beforeUglifyMarker + '.js';
-        }
-      },
-      restoreNonUglifiedJS: {
-        expand: true,
-        cwd: '<%= yeoman.dist %>/scripts',
-        dest: '<%= yeoman.dist %>/scripts',
-        src: '*<%= yeoman.beforeUglifyMarker %>.js',
-        rename: function(dest, src){
-          var originalParts = src.split(yeomanConfig.beforeUglifyMarker);
-          return dest + '/' + originalParts.join('');
-        }
-      },
       dist: {
         files: [
           {
@@ -614,14 +517,14 @@ function ICGCGruntConfigProvider() {
         options: {
           sourceMap: true,
           compress: true,
-          mangle: true
+          mangle: true,
+          sourceMapIncludeSources: true
         },
         files: [{
           expand: true,
           cwd: '<%= yeoman.dist %>/scripts',
           src: [
-            '*.js',
-            '!*<%= yeoman.beforeUglifyMarker %>.js'
+            '*.js'
           ],
           dest: '<%= yeoman.dist %>/scripts',
           ext: '.js'
@@ -696,15 +599,11 @@ function ICGCGruntConfigProvider() {
     'concat',
     'copy:dist',
 //    'cdnify',
-    //'ngmin',
     'ngAnnotate',
     'cssmin',
-    'copy:saveNonUglifiedJS',
     'uglify',
-    //'fixSourceMaps:dist',
     'filerev',
     'usemin',
-    'copy:restoreNonUglifiedJS',
     'clean:cleanTempBuildFiles'
   ]);
 
