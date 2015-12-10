@@ -68,7 +68,7 @@ angular.module('icgc.advanced.controllers', [
     .controller('AdvancedCtrl',
     function ($scope, $rootScope, $state, $modal, Page, AdvancedSearchTabs, LocationService, AdvancedDonorService,
               AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings,
-              RouteInfoService, FacetConstants, Restangular) {
+              RouteInfoService, FacetConstants) {
 
       var _controller = this,
           dataRepoRouteInfo = RouteInfoService.get ('dataRepositories'),
@@ -197,12 +197,6 @@ angular.module('icgc.advanced.controllers', [
 
         if (_refreshServicesLength > 0) {
           Page.startWork();
-          _execRefresh(_nonRefreshedServices.shift());
-
-          // Fire the other requests once using
-          // one digest cycle --> $http forceAsync has been turned on
-          // in Angular - see app.js
-
           _.forEach(_nonRefreshedServices, function (refreshServiceObj) {
             _execRefresh(refreshServiceObj);
           });
@@ -225,7 +219,7 @@ angular.module('icgc.advanced.controllers', [
             break;
         }
 
-        if (service.isHitsInitialized && forceFullRefresh !== true) {
+        if (service.isHitsInitialized === true && forceFullRefresh !== true) {
           console.info('Tab already rendered skipping rendering phase...');
           return;
         }
@@ -264,13 +258,15 @@ angular.module('icgc.advanced.controllers', [
         Page.setTitle('Advanced Search');
         Page.setPage('advanced');
 
-        // Setup
-        _controller.setActiveTab($state.current.data.tab);
-        _controller.setSubTab($state.current.data.subTab);
-
         // Cache the filters so we can use them during the several layers of promises
         // we perform
         _refreshFilterCache();
+        _resetServices();
+        _refresh();
+
+        // Setup
+        _controller.setActiveTab($state.current.data.tab);
+        _controller.setSubTab($state.current.data.subTab);
 
         $scope.$watch(function() {
           var queryParams = LocationService.search(),
@@ -312,6 +308,7 @@ angular.module('icgc.advanced.controllers', [
           if (_isInAdvancedSearchCtrl) {
             _refreshFilterCache();
           }
+
         });
 
         $rootScope.$on(FacetConstants.EVENTS.FACET_STATUS_CHANGE, function(event, facetStatus) {
@@ -339,9 +336,6 @@ angular.module('icgc.advanced.controllers', [
           }
         });*/
 
-        $scope.$on('$destroy', function() {
-          Restangular.abortAllHTTPRequests();
-        });
 
 
         // Tabs need to update when using browser buttons
@@ -360,8 +354,6 @@ angular.module('icgc.advanced.controllers', [
         }, function () {
           _controller.setSubTab($state.current.data.subTab);
         });
-
-        _refresh();
       }
 
 

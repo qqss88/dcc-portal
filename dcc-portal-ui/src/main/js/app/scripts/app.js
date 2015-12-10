@@ -282,29 +282,32 @@
       }]);
 
 
+
       $provide.decorator('Restangular', ['$delegate', '$q',  function($delegate, $q) {
 
-        var _cancellableRequests = {};
+        var _cancellableRequests = [];
 
         function _deletePromiseAbortCache(deferredKey) {
 
-          if (! angular.isDefined(_cancellableRequests[deferredKey])) {
+          var indexAt = _cancellableRequests.indexOf(deferredKey);
+
+          if (indexAt < 0) {
             return;
           }
 
-          delete _cancellableRequests[deferredKey];
+          _cancellableRequests.splice(indexAt, 1);
 
           //console.log('Removing deferred from abort cache: ', deferredKey);
 
-          /*
-           if (s === 0) {
-           console.info('Request abort cache is empty!');
+
+           /*if (_cancellableRequests.length === 0) {
+               console.info('Request abort cache is empty!');
            }*/
         }
 
         // Create a wrapped request function that will allow us to create http requests that
         // can timeout when the abort promise is resolved.
-        function _createWrappedRequestFunction(restangularObject, deferredKey, requestFunction) {
+        function _createWrappedRequestFunction(restangularObject, requestFunction) {
 
           if (! angular.isDefined(requestFunction) || ! angular.isFunction(requestFunction)) {
             console.warn('Restangular REST function not defined cannot wrap!');
@@ -317,12 +320,14 @@
             var deferred = $q.defer(),
               abortDeferred = $q.defer();
 
-            /*if ( ! _cancellableRequests[deferredKey]) {
-             console.log('Added deferred "' + deferredKey + '" to abort cache.');
-             }*/
-
             // Save the deferred object so we may cancel it all later
-            _cancellableRequests[deferredKey] = abortDeferred;
+            _cancellableRequests.push(abortDeferred);
+
+            // Add an auxiliary method to cancel an individual request if one exists
+            restangularObject.cancelRequest = function() {
+                abortDeferred.resolve();
+                _deletePromiseAbortCache(abortDeferred);
+            };
 
 
             restangularObject.withHttpConfig({timeout: abortDeferred.promise});
@@ -331,11 +336,13 @@
 
             requestPromise.then(
               function(data) {
-                _deletePromiseAbortCache(deferredKey);
+                //console.log('Success:', restangularObject, data);
+                _deletePromiseAbortCache(abortDeferred);
                 deferred.resolve(data);
               },
               function(error) {
-                _deletePromiseAbortCache(deferredKey);
+                //console.log('Failure:', restangularObject);
+                _deletePromiseAbortCache(abortDeferred);
                 deferred.reject(error);
               }
             );
@@ -347,39 +354,24 @@
 
         function _createCancelableRequest(restangularCollectionFunction, args) {
           var callingArgs =  Array.prototype.slice.call(args),
-            deferredKey = callingArgs[0],
-          /*jshint validthis:true */
+            /*jshint validthis:true */
             _this = this;
 
-          if (! deferredKey) {
-            console.warn('Restangular function called with no arguments!');
-            deferredKey = '*' + (new Date()).getTime();
-          }
+
 
           var restangularObject = restangularCollectionFunction.apply(_this, callingArgs);
 
           // Wrap the request items
           restangularObject.get = _createWrappedRequestFunction(
-            restangularObject, deferredKey, restangularObject.get
+            restangularObject, restangularObject.get
           );
 
           restangularObject.getList = _createWrappedRequestFunction(
-            restangularObject, deferredKey, restangularObject.getList
+            restangularObject, restangularObject.getList
           );
           restangularObject.post = _createWrappedRequestFunction(
-            restangularObject, deferredKey, restangularObject.post
+            restangularObject, restangularObject.post
           );
-
-          // Add an auxiliary method to cancel an individual request if one exists
-          restangularObject.cancelRequest = function() {
-
-            var deferredAbort = _.get(_cancellableRequests, deferredKey, false);
-
-            if (deferredAbort) {
-              deferredAbort.resolve();
-              delete _cancellableRequests[deferredKey];
-            }
-          };
 
           _wrapRestangular(restangularObject);
 
@@ -449,7 +441,7 @@
           }
 
           // Reset the deferred abort list
-          _cancellableRequests = {};
+          _cancellableRequests.length = 0;
         };
 
         return $delegate;

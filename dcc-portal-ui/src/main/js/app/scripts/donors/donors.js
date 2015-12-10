@@ -234,8 +234,9 @@
     refresh();
   });
 
-  module.controller('DonorSpecimenCtrl', function (Donors, PCAWG) {
-    var _ctrl = this;
+  module.controller('DonorSpecimenCtrl', function (Donors, PCAWG, $stateParams) {
+    var _ctrl = this,
+        donorId = $stateParams.id || null;
 
     _ctrl.PCAWG = PCAWG;
 
@@ -244,7 +245,7 @@
     };
 
     _ctrl.setActive = function (id) {
-      Donors.one().get({include: 'specimen'}).then(function (donor) {
+      Donors.one(id).get({include: 'specimen'}).then(function (donor) {
         if (donor.hasOwnProperty('specimen')) {
           _ctrl.active = id || donor.specimen[0].id;
           _ctrl.specimen = _.find(donor.specimen, function (s) {
@@ -254,7 +255,7 @@
       });
     };
 
-    _ctrl.setActive(null);
+    _ctrl.setActive(donorId);
   });
 
 })();
@@ -265,7 +266,7 @@
   var module = angular.module('icgc.donors.models', ['restangular', 'icgc.common.location']);
 
   module.service('Donors', function (Restangular, LocationService, Donor) {
-    this.handler = Restangular.all('donors');
+    this.handler = Restangular.one('donors');
 
     this.getList = function (params) {
       var defaults = {
@@ -276,7 +277,7 @@
 
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
 
-      return this.handler.one('', '').get(liveFilters).then(function (data) {
+      return this.handler.get(liveFilters).then(function (data) {
         if (data.hasOwnProperty('facets')) {
           for (var facet in data.facets) {
             if (data.facets.hasOwnProperty(facet) && data.facets[facet].missing) {
@@ -308,6 +309,7 @@
     };
 
     this.one = function (id) {
+      console.log('Donors One: ', arguments);
       return id ? Donor.init(id) : Donor;
     };
   });
