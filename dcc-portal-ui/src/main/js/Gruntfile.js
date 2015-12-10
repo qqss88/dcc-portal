@@ -25,7 +25,8 @@ module.exports = function (grunt) {
   var yeomanConfig = {
     app: 'app',
     dist: '../../../target/app',
-    developIndexFile: 'develop/html/index.develop.html'
+    developIndexFile: 'develop/html/index.develop.html',
+    beforeUglifyMarker: '___tmp___'
   };
 
 // The purpose of the provider is to ensure that the appropriate configs 
@@ -43,30 +44,63 @@ function ICGCGruntConfigProvider() {
     
     function _initTasks() {
 
-      grunt.registerTask('fixSourceMaps', 'Fixes the generated source maps.', function() {
-        /*var options = this.options(),
-            mapFileExt = options.mapFileExtension || '.map',
-            mapperFunction = options.sourceMapperFunction || function(srcFileName) {
+      grunt.registerMultiTask('fixSourceMaps', 'Fixes the generated source maps.', function() {
+        var _task = this,
+          options = _task.options({
+          sourceMapPatchFunction: function(srcMapObj, srcMapFile) {
+            var origFileFieldValue = srcMapObj.file;
+            console.log(srcMapFile);
 
-          };*/
+            srcMapObj.sources = [origFileFieldValue.replace('.min.js', '.js')];
+            grunt.log.writeln('Changed ' + origFileFieldValue + ' to ' +  srcMapObj.sources[0]);
+            return srcMapObj;
+          }
+        });
+
 
         // Iterate over all src-dest file pairs.
-        this.files.forEach(function(file) {
-          var srcMapFile = file.src.filter(function (filepath) {
+        _task.files.forEach(function(file) {
 
-            // Warn on and remove invalid source files (if nonull was set).
+          // Grab all the source maps that fulfill our files array config
+          var srcMapFiles = file.src.filter(function (filepath) {
+
+            // Warn on and remove invalid source map files
             if (! grunt.file.exists(filepath)) {
-              grunt.log.warn('Source file ' + filepath + ' not found.');
+              grunt.log.warn('Source file ' + filepath + ' not found!');
               return false;
             }
 
             return true;
           });
 
-          if (srcMapFile.length === 0) {
-            grunt.log.warn('Destination ' + (file.dest) + ' not written because src files were empty.');
+          // No valid files found so warn and move on to the next file pair
+          if (srcMapFiles.length === 0) {
+            grunt.log.warn('Destination ' + file.dest + ' not written because src map files were empty.');
             return;
           }
+
+          // Foreach source map repair it...
+          srcMapFiles.forEach(function(srcMapFilePath) {
+            var srcMapContents = grunt.file.readJSON(srcMapFilePath),
+                srcMapFile = srcMapFilePath.split('/').pop();
+
+            if (srcMapContents) {
+              //
+              var newSrcMapContents = options.sourceMapPatchFunction.call(_task, srcMapContents, srcMapFile);
+
+              if (grunt.file.write(file.dest,  JSON.stringify(newSrcMapContents))) {
+                grunt.log.writeln('File "' + srcMapFile + '" patched!');
+              }
+              else {
+                grunt.log.warn('Destination ' + srcMapFile + ' could not be patched!');
+              }
+            }
+
+
+          });
+
+
+
         });
 
       });
@@ -321,6 +355,16 @@ function ICGCGruntConfigProvider() {
           }
         ]
       },
+      cleanTempBuildFiles: {
+        files: [
+          {
+            dot: true,
+            src: [
+              '<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js'
+            ]
+          }
+        ]
+      },
       server: '.tmp'
     },
     jshint: {
@@ -376,6 +420,7 @@ function ICGCGruntConfigProvider() {
       dist: {
         src: [
           '<%= yeoman.dist %>/scripts/{,*/**/}*.js',
+          '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js',
           '<%= yeoman.dist %>/styles/{,*/**/}*.css',
           '<%= yeoman.dist %>/images/{,*/**/}*.{png,jpg,jpeg,gif,webp,svg}',
           '<%= yeoman.dist %>/styles/fonts/*'
@@ -400,8 +445,13 @@ function ICGCGruntConfigProvider() {
     usemin: {
       html: ['<%= yeoman.dist %>/**/*.html'],
       css: ['<%= yeoman.dist %>/styles/{,*/**/}*.css'],
+      js: [
+        '<%= yeoman.dist %>/scripts/{,*/}*.js',
+        '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js',
+      ],
+
       options: {
-        assetsDirs: ['<%= yeoman.dist %>', '<%= yeoman.dist %>/images']
+        assetsDirs: ['<%= yeoman.dist %>','<%= yeoman.dist %>/images']
       }
     },
     imagemin: {
@@ -457,6 +507,26 @@ function ICGCGruntConfigProvider() {
     },
     // Put files not handled in other tasks here
     copy: {
+      saveNonUglifiedJS: {
+        expand: true,
+        cwd: '<%= yeoman.dist %>/scripts',
+        dest: '<%= yeoman.dist %>/scripts',
+        src: '*.js',
+        rename: function(dest, src){
+          var name = src.split('.')[0];
+          return dest + '/' + name + yeomanConfig.beforeUglifyMarker + '.js';
+        }
+      },
+      restoreNonUglifiedJS: {
+        expand: true,
+        cwd: '<%= yeoman.dist %>/scripts',
+        dest: '<%= yeoman.dist %>/scripts',
+        src: '*<%= yeoman.beforeUglifyMarker %>.js',
+        rename: function(dest, src){
+          var originalParts = src.split(yeomanConfig.beforeUglifyMarker);
+          return dest + '/' + originalParts.join('');
+        }
+      },
       dist: {
         files: [
           {
@@ -558,32 +628,47 @@ function ICGCGruntConfigProvider() {
       generated: {
         options: {
           sourceMap: true,
-          sourceMapName: function(path) {
-            var map = path.replace('.js', '.map');
-            grunt.log.writeln('Creating map from: ' + path + ' to ' + map);
-            return path.replace('.js', '.map');
-          },
           compress: true,
           mangle: true
         },
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: [
+            '*.js',
+            '!*<%= yeoman.beforeUglifyMarker %>.js'
+          ],
+          dest: '<%= yeoman.dist %>/scripts',
+          ext: '.js'
+        }]/*
         files: {
-          '<%= yeoman.dist %>/scripts/scripts.min.js': [
-            '<%= yeoman.dist %>/scripts/scripts.js'
-          ]
-        }
-        /*files: [{
+          '<%= yeoman.dist %>/scripts/scripts.min.js': ['<%= yeoman.dist %>/scripts/scripts.js']
+        }*/
+
+      }/*,
+      dist: {
+        options: {
+          sourceMap: true,
+          compress: true,
+          mangle: true
+        },
+        files: [{
           expand: true,
           cwd: '<%= yeoman.dist %>/scripts',
           src: ['*.js'],
           dest: '<%= yeoman.dist %>/scripts'
-        }]*/
-        /*files: [{
+        }]
+      }*/
+
+    },
+    fixSourceMaps: {
+      dist: {
+        files: [{
           expand: true,
           cwd: '<%= yeoman.dist %>/scripts',
-          src: '** /*.js',
+          src: ['*.map'],
           dest: '<%= yeoman.dist %>/scripts'
-        }]*/
-
+        }]
       }
     },
     injector: {
@@ -641,15 +726,18 @@ function ICGCGruntConfigProvider() {
     'useminPrepare',
     'concurrent:dist',
     'concat',
-    'copy',
+    'copy:dist',
 //    'cdnify',
     //'ngmin',
     'ngAnnotate',
     'cssmin',
+    'copy:saveNonUglifiedJS',
     'uglify',
-    //'rev',
-    //'filerev',
-    'usemin'
+    //'fixSourceMaps:dist',
+    'filerev',
+    'usemin',
+    'copy:restoreNonUglifiedJS',
+    'clean:cleanTempBuildFiles'
   ]);
 
   grunt.registerTask('default', [
