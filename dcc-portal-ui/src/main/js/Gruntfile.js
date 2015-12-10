@@ -435,7 +435,7 @@ function ICGCGruntConfigProvider() {
           html: {
             steps: {
               js: ['concat'],
-              css: ['cssmin']
+              css: ['concat', 'cssmin']
             },
             post: {}
           }
