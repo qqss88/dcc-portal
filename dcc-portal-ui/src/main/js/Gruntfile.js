@@ -419,11 +419,11 @@ function ICGCGruntConfigProvider() {
     filerev: {
       dist: {
         src: [
-          '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js',
           '<%= yeoman.dist %>/scripts/{,*/**/}*.js',
+          '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js',
           '<%= yeoman.dist %>/styles/{,*/**/}*.css',
-          '<%= yeoman.dist %>/images/{,*/**/}*.{png,jpg,jpeg,gif,webp,svg}',
-          '<%= yeoman.dist %>/styles/fonts/*'
+          '<%= yeoman.dist %>/images/{,*/**/}*.{png,jpg,jpeg,gif,webp,svg}'//,
+          //'<%= yeoman.dist %>/styles/fonts/*'
         ]
       }
     },
@@ -449,8 +449,8 @@ function ICGCGruntConfigProvider() {
         //'<%= yeoman.dist %>/styles/{,*/**/}*.css'
       ],
       js: [
-        '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js',
-        '<%= yeoman.dist %>/scripts/{,*/}*.js'
+        '<%= yeoman.dist %>/scripts/{,*/}*.js',
+        '!<%= yeoman.dist %>/scripts/*<%= yeoman.beforeUglifyMarker %>.js'
       ],
 
       options: {
