@@ -288,6 +288,10 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
             if (filters[params.type][params.facet].is.indexOf(item.term) !== -1) {
               r.push(term);
             }
+          } else if (filters[params.type][params.facet].hasOwnProperty('not')) {
+            if (filters[params.type][params.facet].not.indexOf(item.term) === -1) {
+              r.push(term);
+            }
           }
         } else {
           r.push(term);
