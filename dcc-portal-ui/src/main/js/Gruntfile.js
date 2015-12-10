@@ -42,7 +42,7 @@ function ICGCGruntConfigProvider() {
     
     
     function _initTasks() {
-    
+
        grunt.registerTask('ICGC-setBuildEnv', 'Sets the target build environment (default: ' +
                            _CONFIG_CONSTANTS.BUILD_ENV.DEV + ')', function(env) {
          var message = 'Setting GRUNT build environment to ';
@@ -167,17 +167,6 @@ function ICGCGruntConfigProvider() {
         * Bower configuration
         * See: https://www.npmjs.com/package/grunt-bower-install-simple
         */
-        /*var bowerConfig = {
-          options: {
-            color: true
-          },
-          prod: {
-            options: { production: true }
-          },
-          dev: {
-            options: { production: false}
-          }
-        };*/
         
         var config =  {options: { color: true } };
         
@@ -285,9 +274,18 @@ function ICGCGruntConfigProvider() {
           {
             dot: true,
             src: [
-              '.tmp',
               '<%= yeoman.dist %>/*',
               '!<%= yeoman.dist %>/.git*'
+            ]
+          }
+        ]
+      },
+      cleanTempBuildFiles: {
+        files: [
+          {
+            dot: true,
+            src: [
+              '.tmp'
             ]
           }
         ]
@@ -342,17 +340,44 @@ function ICGCGruntConfigProvider() {
         }
       }
     },
+    // Renames files for browser caching purposes
+    filerev: {
+      dist: {
+        src: [
+          '<%= yeoman.dist %>/scripts/{,*/**/}*.js',
+          '<%= yeoman.dist %>/styles/{,*/**/}*.css',
+          '<%= yeoman.dist %>/images/{,*/**/}*.{png,jpg,jpeg,gif,webp,svg}'//,
+          //'<%= yeoman.dist %>/styles/fonts/*'
+        ]
+      }
+    },
     useminPrepare: {
       html: '<%= yeoman.app %>/index.html',
       options: {
-        dest: '<%= yeoman.dist %>'
+        dest: '<%= yeoman.dist %>',
+        flow: {
+          html: {
+            steps: {
+              js: ['concat'],
+              css: ['concat', 'cssmin']
+            },
+            post: {}
+          }
+        }
       }
     },
     usemin: {
-      html: ['<%= yeoman.dist %>/{,*/}*.html'],
-      css: ['<%= yeoman.dist %>/styles/{,*/}*.css'],
+      html: ['<%= yeoman.dist %>/**/*.html'],
+      css: [
+        '<%= yeoman.dist %>/styles/{,*/}*.css'
+        //'<%= yeoman.dist %>/styles/{,*/**/}*.css'
+      ],
+      js: [
+        '<%= yeoman.dist %>/scripts/{,*/}*.js'
+      ],
+
       options: {
-        dirs: ['<%= yeoman.dist %>']
+        assetsDirs: ['<%= yeoman.dist %>','<%= yeoman.dist %>/images']
       }
     },
     imagemin: {
@@ -400,7 +425,7 @@ function ICGCGruntConfigProvider() {
           {
             expand: true,
             cwd: '<%= yeoman.app %>',
-            src: ['*.html', 'views/*.html'],
+            src: ['*.html', 'views/**/*.html'],
             dest: '<%= yeoman.dist %>'
           }
         ]
@@ -426,6 +451,7 @@ function ICGCGruntConfigProvider() {
               'styles/fonts/*',
               'views/**/*',
               'scripts/**/*.html',
+              'scripts/**/*.map',
               'data/*'
             ]
           },
@@ -473,28 +499,47 @@ function ICGCGruntConfigProvider() {
         html: ['<%= yeoman.dist %>/*.html']
       }
     },
-    ngmin: {
+    // ngAnnotate tries to make the code safe for minification automatically by
+    // using the Angular long form for dependency injection. It doesn't work on
+    // things like resolve or inject so those have to be done manually.
+    ngAnnotate: {
       dist: {
-        files: [
-          {
-            expand: true,
-            cwd: '<%= yeoman.dist %>/scripts',
-            src: 'scripts.js',
-            dest: '<%= yeoman.dist %>/scripts'
-          }
-        ]
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: '*.js',
+          dest: '<%= yeoman.dist %>/scripts'
+        }]
       }
     },
     uglify: {
-      options: {
-        //sourceMap: true
-      },
+      generated: {
+        options: {
+          sourceMap: true,
+          compress: true,
+          mangle: true,
+          sourceMapIncludeSources: true
+        },
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: [
+            '*.js'
+          ],
+          dest: '<%= yeoman.dist %>/scripts',
+          ext: '.js'
+        }]
+
+      }
+    },
+    fixSourceMaps: {
       dist: {
-        files: {
-          '<%= yeoman.dist %>/scripts/scripts.js': [
-            '<%= yeoman.dist %>/scripts/scripts.js'
-          ]
-        }
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.dist %>/scripts',
+          src: ['*.map'],
+          dest: '<%= yeoman.dist %>/scripts'
+        }]
       }
     },
     injector: {
@@ -552,13 +597,14 @@ function ICGCGruntConfigProvider() {
     'useminPrepare',
     'concurrent:dist',
     'concat',
-    'copy',
+    'copy:dist',
 //    'cdnify',
-    'ngmin',
+    'ngAnnotate',
     'cssmin',
     'uglify',
-    'rev',
-    'usemin'
+    'filerev',
+    'usemin',
+    'clean:cleanTempBuildFiles'
   ]);
 
   grunt.registerTask('default', [
