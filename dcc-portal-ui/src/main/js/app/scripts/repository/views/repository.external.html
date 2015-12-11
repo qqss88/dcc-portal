@@ -139,19 +139,34 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
                 </div>
                 <div class="quarter">
                     <i class="icon-file" style="font-size:1.25rem"></i>
-                    <strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
+                    <strong >
+                        <span data-ng-if="ExternalRepoController.summary.fileCount" data-ng-bind="ExternalRepoController.summary.fileCount | number"></span>
+                        <span data-ng-if="! ExternalRepoController.summary.donorCount">
+                            <i class="icon-spinner icon-spin"></i>
+                        </span>
+                    </strong> Files
                 </div>
                 <div class="quarter">
                     <i class="icon-team" style="font-size:1.25rem"></i>
-                    <a href="" data-ng-click="ExternalRepoController.viewInSearch(ExternalRepoController.summary.fileCount)" >
+                    <a href="" data-ng-if="ExternalRepoController.summary.donorCount" data-ng-click="ExternalRepoController.viewInSearch(ExternalRepoController.summary.fileCount)" >
                       <strong>
-                        {{ExternalRepoController.summary.donorCount | number}}
+                          <span data-ng-bind="ExternalRepoController.summary.donorCount | number"></span>
                       </strong> Donors
                     </a>
+                    <span data-ng-if="! ExternalRepoController.summary.donorCount">
+                        <strong>
+                            <i class="icon-spinner icon-spin"></i>
+                        </strong> Donors
+                    </span>
                 </div>
                 <div class="quarter omega">
                     <i class="icon-database" style="font-size:1.25rem"></i>
-                    <strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
+                    <strong>
+                        <span data-ng-if="ExternalRepoController.summary.totalFileSize" data-ng-bind="ExternalRepoController.summary.totalFileSize | bytes"></span>
+                        <span data-ng-if="! ExternalRepoController.summary.totalFileSize">
+                            <i class="icon-spinner icon-spin"></i>
+                        </span>
+                    </strong>
                 </div>
             </section>
             <div class="clearfix"></div>
