@@ -532,14 +532,10 @@ function ICGCGruntConfigProvider() {
 
       }
     },
-    fixSourceMaps: {
-      dist: {
-        files: [{
-          expand: true,
-          cwd: '<%= yeoman.dist %>/scripts',
-          src: ['*.map'],
-          dest: '<%= yeoman.dist %>/scripts'
-        }]
+    jsdoc2md: {
+      oneOutputFile: {
+        src: '<%= yeoman.dist %>/scripts/scripts.js',
+        dest: '<%= yeoman.dist %>/docs/api/README.md'
       }
     },
     injector: {
@@ -598,6 +594,7 @@ function ICGCGruntConfigProvider() {
     'concurrent:dist',
     'concat',
     'copy:dist',
+    //'jsdoc2md',
 //    'cdnify',
     'ngAnnotate',
     'cssmin',
