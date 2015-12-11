@@ -34,6 +34,11 @@ angular.module('icgc.facets.location')
       type: $scope.type,
       facet: $scope.facetName
     });
+    
+    var params = {type: $scope.type,facet: $scope.facetName};
+    $scope.isNot = Facets.isNot(params);
+    $scope.activeClass = Facets.isNot(params) ? 
+      't_facets__facet__not' : '';
   }
 
   function checkLocation() {
@@ -73,6 +78,20 @@ angular.module('icgc.facets.location')
       term: term
     });
   };
+  
+  $scope.notFacet = function() {
+      Facets.notFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
+    
+    $scope.isFacet = function() {
+      Facets.isFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
 
   $scope.submit = function () {
     submitted = true;

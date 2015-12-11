@@ -565,11 +565,15 @@ angular.module('icgc.advanced.controllers', [
 
         _ASDonorService.mutationCounts = null;
 
+        var filters = _locationFilterCache.filters();
+        if (_.has(filters, 'donor.id')) {
+          delete filters.donor.id;
+        }
         Donors
           .one(_.pluck(_ASDonorService.donors.hits, 'id').join(','))
           .handler
           .one('mutations', 'counts')
-          .get({filters: _locationFilterCache.filters()})
+          .get({filters: filters})
           .then(function (counts) {
             _ASDonorService.mutationCounts = counts;
           });
@@ -695,10 +699,14 @@ angular.module('icgc.advanced.controllers', [
       var projectCachePromise = ProjectCache.getData();
 
 
+      var filters = _locationFilterCache.filters();
+      if (_.has(filters, 'gene.id')) {
+        delete filters.gene.id;
+      }
       // Get Mutations counts
       Genes.one(geneIds).handler
         .one('mutations', 'counts')
-        .get({filters: _locationFilterCache.filters()})
+        .get({filters: filters})
         .then(function (data) {
           _ASGeneService.mutationCounts = data;
         });

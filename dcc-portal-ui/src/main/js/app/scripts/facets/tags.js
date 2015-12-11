@@ -78,6 +78,11 @@
         type: type,
         facet: $scope.proxyFacetName || $scope.facetName
       });
+      
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
 
       // There are only 'active' entity ids
       $scope.activeEntityIds = Facets.getActiveTags({
@@ -218,6 +223,20 @@
         type: type,
         facet: facet,
         term: term
+      });
+    };
+    
+    $scope.notFacet = function() {
+      Facets.notFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
+    
+    $scope.isFacet = function() {
+      Facets.isFacet({
+        type: $scope.type,
+        facet: $scope.facetName
       });
     };
 

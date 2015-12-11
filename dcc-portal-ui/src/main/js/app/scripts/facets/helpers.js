@@ -99,13 +99,7 @@
       });
       
       filters = LocationService.filters();
-      if (!filters.hasOwnProperty(params.type)) {
-        filters[params.type] = {};
-      }
-      if (!filters[params.type].hasOwnProperty(params.facet)) {
-        filters[params.type][params.facet] = {not: []};
-      }
-      if (filters[params.type][params.facet].hasOwnProperty('is')) {
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
         filters[params.type][params.facet] = {not: filters[params.type][params.facet].is};
         delete filters[params.type][params.facet].is;
       }
@@ -127,13 +121,7 @@
       });
       
       filters = LocationService.filters();
-      if (!filters.hasOwnProperty(params.type)) {
-        filters[params.type] = {};
-      }
-      if (!filters[params.type].hasOwnProperty(params.facet)) {
-        filters[params.type][params.facet] = {is: []};
-      }
-      if (filters[params.type][params.facet].hasOwnProperty('not')) {
+      if (_.has(filters, [params.type, params.facet, 'not'])) {
         filters[params.type][params.facet] = {is: filters[params.type][params.facet].not};
         delete filters[params.type][params.facet].not;
       }
@@ -277,13 +265,10 @@
         }) || { term: active, count: 0};
       }
 
-      if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
-        // TODO make is possible to use 'is' or 'not'
-        if (filters[params.type][params.facet].hasOwnProperty('is')) {
-          list = _.map(filters[params.type][params.facet].is, filterFn);
-        } else {
-          list = _.map(filters[params.type][params.facet].not, filterFn);
-        }
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
+        list = _.map(filters[params.type][params.facet].is, filterFn);
+      } else if (_.has(filters, [params.type, params.facet, 'not'])){
+        list = _.map(filters[params.type][params.facet].not, filterFn);
       }
 
       return list;
@@ -330,10 +315,10 @@
       });
 
       filters = LocationService.filters();
-
-      if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
-        // TODO make is possible to use 'is' or 'not'
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
         list = filters[params.type][params.facet].is || [];
+      } else if (_.has(filters, [params.type, params.facet, 'not'])) {
+        list = filters[params.type][params.facet].not || [];
       }
 
       return list;
@@ -351,9 +336,10 @@
 
       filters = LocationService.filters();
 
-      if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
-        // TODO make is possible to use 'is' or 'not'
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
         list = filters[params.type][params.facet].is;
+      } else if (_.has(filters, [params.type, params.facet, 'not'])) {
+        list = filters[params.type][params.facet].not;
       }
 
       return list;
