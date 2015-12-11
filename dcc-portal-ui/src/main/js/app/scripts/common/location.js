@@ -168,6 +168,8 @@
             var entityFilters = filters[type][Extensions.ENTITY];
             if (entityFilters.hasOwnProperty('is')) {
               result = result.concat( entityFilters.is );
+            } else if (_.has(entityFilters, 'not')) {
+              result = result.concat( entityFilters.not );
             }
           }
 

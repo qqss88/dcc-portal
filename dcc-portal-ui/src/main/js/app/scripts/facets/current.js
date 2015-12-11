@@ -71,13 +71,15 @@
     
     $scope.isNot = function(terms) {
       var currentFilters = LocationService.filters();
-      var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not');
+      var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not') ||
+       _.has(currentFilters, terms.type +'.entitySetId.not');
       return isNot;
     };
     
     $scope.activeClass = function(terms) {
       var currentFilters = LocationService.filters();
-      var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not');
+      var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not') ||
+        _.has(currentFilters, terms.type +'.entitySetId.not');
       return isNot? 't_facets__facet__not' : '';
     };
 
