@@ -54,7 +54,11 @@
       ensurePath(filters, params);
 
       // TODO make is possible to use 'is' or 'not'
-      filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
+      if (isNot(params)) {
+        filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
+      } else {
+        filters[params.type][params.facet].not = angular.isArray(params.terms) ? params.terms : [params.terms];
+      }
       LocationService.setFilters(filters);
     }
 
@@ -230,7 +234,7 @@
     }
 
     /*
-     * TODO Toggle Term
+     * Toggle Term
      */
     function toggleTerm(params) {
       var filters;
@@ -243,10 +247,12 @@
 
       filters = LocationService.filters();
       console.info(filters);
-      if (filters.hasOwnProperty(params.type) &&
-          filters[params.type].hasOwnProperty(params.facet) &&
-        // TODO support is/not
-          filters[params.type][params.facet].is.indexOf(params.term) !== -1) {
+  
+      if (_.has(filters, [params.type, params.facet, 'is']) && 
+          filters[params.type][params.facet].is.indexOf(params.term)  !== -1) {
+        removeTerm(params);
+      } else if (_.has(filters, [params.type, params.facet, 'not']) && 
+          filters[params.type][params.facet].not.indexOf(params.term)  !== -1) {
         removeTerm(params);
       } else {
         addTerm(params);

@@ -84,11 +84,19 @@
     };
 
     function resolveActiveGeneIds (filters) {
-      var activeGeneIds = _(_.get (filters, 'gene.id.is', []))
-        .filter ({controlFacet: 'id', controlType: 'gene'})
-        .map ('term')
-        .value();
-
+      var activeGeneIds;
+      if (_.has(filters, 'gene.id.not')) {
+          activeGeneIds = _(_.get (filters, 'gene.id.not', []))
+          .filter ({controlFacet: 'id', controlType: 'gene'})
+          .map ('term')
+          .value();
+      } else if (_.has(filters, 'gene.id.is')) {
+        activeGeneIds = _(_.get (filters, 'gene.id.is', []))
+          .filter ({controlFacet: 'id', controlType: 'gene'})
+          .map ('term')
+          .value();
+      }
+      
       if (_.isEmpty (activeGeneIds)) {
         $scope.ensemblIdGeneSymbolMap = {};
         return;
