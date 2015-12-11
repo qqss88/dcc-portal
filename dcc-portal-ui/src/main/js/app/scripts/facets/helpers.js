@@ -36,13 +36,17 @@
       if (!filters.hasOwnProperty(params.type)) {
         filters[params.type] = {};
       }
-      if (!filters[params.type].hasOwnProperty(params.facet)) {
-        filters[params.type][params.facet] = {is: []};
+      if (!_.has(filters, [params.type, params.facet])) {
+        if (isNot(params)) {
+          filters[params.type][params.facet] = {not: []};
+        } else {
+          filters[params.type][params.facet] = {is: []};
+        }
       }
     }
 
     /*
-     * TODO Set Terms
+     * Set Terms
      */
     function setTerms(params) {
       if (invalidParams (params)) {
@@ -50,14 +54,12 @@
       }
 
       var filters = LocationService.filters();
-
       ensurePath(filters, params);
 
-      // TODO make is possible to use 'is' or 'not'
       if (isNot(params)) {
-        filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
-      } else {
         filters[params.type][params.facet].not = angular.isArray(params.terms) ? params.terms : [params.terms];
+      } else {
+        filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
       }
       LocationService.setFilters(filters);
     }
