@@ -85,10 +85,10 @@ hazelcast:
 # ElasticSearch index and hosts
 elastic:
   #indexName: icgc18-0-2
-  indexName: etl-test-release17-0-0
-  repoIndexName: test-icgc-repository
+  indexName: icgc20-0-6
+  repoIndexName: icgc-repository
   nodeAddresses:
-    - host: "localhost"
+    - host: "***REMOVED***"
       port: 9300
       
   # List of TransportClient settings. 

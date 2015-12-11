@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableMap;
 import static org.icgc.dcc.portal.repository.GeneRepository.GENE_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
@@ -18,6 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.common.lang3.tuple.Pair;
@@ -42,14 +48,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneService {
 
   /**
@@ -79,8 +80,7 @@ public class GeneService {
       val lookupTable = groupedByGeneSymbol.keySet().parallelStream()
           .map(geneSymbol -> ensemblAliasPairs(geneSymbol, groupedByGeneSymbol))
           .flatMap(Collection::stream)
-          // TODO: use dcc.common.core.util.stream.Collectors#toImmutableMap once the pom.xml is updated.
-          .collect(toMap(Pair::getKey, Pair::getValue));
+          .collect(toImmutableMap(Pair::getKey, Pair::getValue));
 
       log.debug("EnsemblId-to-GeneSymbol lookup table ({} entries) is: {}", lookupTable.size(), lookupTable);
 

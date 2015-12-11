@@ -492,8 +492,10 @@
   });
 
   module.controller('ProjectGeneCtrl',
-    function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
-    var _ctrl = this, project = Projects.one();
+    function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache, $stateParams) {
+    var _ctrl = this,
+        _projectId = $stateParams.id || null,
+        project = Projects.one(_projectId);
 
     function success(genes) {
       if (genes.hasOwnProperty('hits') ) {
@@ -505,12 +507,12 @@
           return;
         }
 
-        Projects.one().get().then(function (data) {
+        Projects.one(_projectId).get().then(function (data) {
           var project = data;
           genes.advQuery = LocationService.mergeIntoFilters({donor: {projectId: {is: [project.id]}}});
 
           // Get Mutations counts
-          Projects.one().handler
+          Projects.one(_projectId).handler
             .one('genes', geneIds)
             .one('mutations', 'counts').get({
               filters: LocationService.filters()
@@ -577,9 +579,11 @@
   });
 
   module.controller('ProjectMutationsCtrl',
-    function ($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
+    function ($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache, $stateParams) {
 
-    var _ctrl = this, project = Projects.one();
+    var _ctrl = this,
+        _projectId = $stateParams.id || null,
+        project = Projects.one(_projectId);
 
 
     function success(mutations) {
@@ -656,8 +660,11 @@
     refresh();
   });
 
-  module.controller('ProjectDonorsCtrl', function ($scope, HighchartsService, Projects, Donors, LocationService) {
-    var _ctrl = this, project = Projects.one();
+  module.controller('ProjectDonorsCtrl', function ($scope, HighchartsService, Projects,
+                                                   Donors, LocationService, $stateParams) {
+    var _ctrl = this,
+        _projectId = $stateParams.id || null,
+        project = Projects.one(_projectId);
 
     function success(donors) {
       if (donors.hasOwnProperty('hits')) {
