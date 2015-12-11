@@ -303,7 +303,7 @@
       });
 
       filters = LocationService.filters();
-      if (params.type === 'id') {
+      if (params.facet === 'id') {
         return _.has(filters, params.type+'.'+params.facet+'.not') || _.has(filters, params.type+'.entitySetId.not');
       } else {
         return _.has(filters, params.type+'.'+params.facet+'.not');
