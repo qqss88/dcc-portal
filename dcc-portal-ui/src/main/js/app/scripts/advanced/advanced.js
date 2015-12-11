@@ -168,7 +168,11 @@ angular.module('icgc.advanced.controllers', [
 
               serviceObj.service.isFacetsInitialized = true;
 
-              if (serviceObj.controllerUIActive) {
+              // Prevent rendering the main tab if the hits (i.e. it has been rendered previously)
+              // this can occur if one of our current tab watchers fire before this _refresh service
+              // is invoked. The tab watcher fires the render function but the tab data (i.e. facets) may not
+              // yet be fully initialized yet.
+              if (serviceObj.controllerUIActive && ! _.get(serviceObj, 'service.isHitsInitialized', false)) {
                 _renderTab(_controller.getActiveTab());
                 _controller.loadingFacet = false;
               }
@@ -224,7 +228,9 @@ angular.module('icgc.advanced.controllers', [
           return;
         }
 
-        if (forceFullRefresh === true) {
+        // Force a facet pull and rerender in the case that this method was being called before the _refresh
+        // function has had a chance to initialize the facets.
+        if (forceFullRefresh === true || ! _.get(service, 'isFacetsInitialized' , false)) {
           _resetService(service);
           _refresh();
         }
@@ -232,6 +238,7 @@ angular.module('icgc.advanced.controllers', [
           service.isHitsInitialized = true;
           service.renderBodyTab();
         }
+
       }
 
       function ensureString (string) {
