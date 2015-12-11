@@ -69,6 +69,16 @@
       });
     }
 
+    /**
+     * Sets the active class if this facet is 'not' 
+     */
+    function setActiveClass() {
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
+    }
+
     function setup() {
       var type = $scope.proxyType || $scope.type, filters = LocationService.filters(), activeIds = [];
 
@@ -79,10 +89,7 @@
         facet: $scope.proxyFacetName || $scope.facetName
       });
       
-      var params = {type: $scope.type,facet: $scope.facetName};
-      $scope.isNot = Facets.isNot(params);
-      $scope.activeClass = Facets.isNot(params) ? 
-        't_facets__facet__not' : '';
+      setActiveClass();
 
       // There are only 'active' entity ids
       $scope.activeEntityIds = Facets.getActiveTags({
