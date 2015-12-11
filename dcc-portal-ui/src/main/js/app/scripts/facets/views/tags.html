@@ -24,7 +24,7 @@
     <li>
         <ul class="t_facets__facet__terms__active">
             <li ng-if="shouldDisplayEntitySetId()"
-                class="t_facets__facet__terms__active__term__label"
+                class="t_facets__facet__terms__active__term__label {{activeClass}}"
                 data-active-term
                 data-item="item"
                 data-ng-repeat="item in activeEntityIds"

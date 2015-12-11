@@ -40,6 +40,9 @@
     // This function is called by tags.html to prevent the File input box in
     // External Repo File page from displaying the "Uploaded donor set" label.
     $scope.shouldDisplayEntitySetId = function () {
+      if ($scope.type === 'mutation' && $scope.facetName === 'id') {
+        return true;
+      }
       return $scope.type !== 'file' && $scope.facetName !== 'id';
     };
 
