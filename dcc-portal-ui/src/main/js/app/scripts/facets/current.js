@@ -72,27 +72,17 @@
     $scope.isNot = function(terms) {
       var currentFilters = LocationService.filters();
       if (terms.facet === 'id') {
-        return _.has(currentFilters, terms.type+'.'+terms.facet+'.not') || _.has(currentFilters, terms.type+'.entitySetId.not');
-      } else if (_.contains ( ['go_term'], terms.type )) {
+        return _.has(currentFilters, terms.type+'.'+terms.facet+'.not') || 
+          _.has(currentFilters, terms.type+'.entitySetId.not');
+      } else if (terms.type === 'go_term') {
         return _.has(currentFilters, ['gene',terms.facet,'not']);
       } else {
         return _.has(currentFilters, terms.type+'.'+terms.facet+'.not');
       }
     };
     
-    $scope.activeClass = function(terms) {
-      var currentFilters = LocationService.filters();
-      var isNot = false;
-      
-      if (terms.facet === 'id') {
-        isNot = _.has(currentFilters, terms.type+'.'+terms.facet+'.not') || _.has(currentFilters, terms.type+'.entitySetId.not');
-      } else if (_.contains ( ['go_term'], terms.type )) {
-        isNot = _.has(currentFilters, ['gene',terms.facet,'not']);
-      } else {
-        isNot = _.has(currentFilters, terms.type+'.'+terms.facet+'.not');
-      }
-      
-      return isNot? 't_facets__facet__not' : '';
+    $scope.activeClass = function(terms) {     
+      return $scope.isNot(terms) ? 't_facets__facet__not' : '';
     };
 
     function resolveActiveGeneIds (filters) {

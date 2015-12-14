@@ -91,12 +91,10 @@
       LocationService.setFilters(filters);
     }
     
-    /** 
-     * Make the facet an IS NOT   
+    /**
+     * Helper for walking filter and switching between 'is' and 'not'
      */
-    function notFacet(params) {
-      var filters;
-      
+    function notFilterHelper(params, makeNot) {
       // Check for required parameters
       [ 'type', 'facet'].forEach(function (rp) {
         if (!params.hasOwnProperty(rp)) {
@@ -104,59 +102,46 @@
         }
       });
       
-      filters = LocationService.filters();
-      if (_.has(filters, [params.type, params.facet, 'is'])) {
-        filters[params.type][params.facet] = {not: filters[params.type][params.facet].is};
-        delete filters[params.type][params.facet].is;
+      var which = 'not';
+      var into = 'is';
+      if (makeNot) {
+        which = 'is';
+        into = 'not';
+      }
+      
+      var filters = LocationService.filters();
+      if (_.has(filters, [params.type, params.facet, which])) {
+        filters[params.type][params.facet][into] = filters[params.type][params.facet][which];
+        delete filters[params.type][params.facet][which];
         if (params.facet === 'id') {
-          if (_.has(filters, [params.type, 'entitySetId', 'is'])) {
-            filters[params.type].entitySetId = {not: filters[params.type].entitySetId.is};
-            delete filters[params.type].entitySetId.is;
+          if (_.has(filters, [params.type, 'entitySetId', which])) {
+            filters[params.type].entitySetId[into] = filters[params.type].entitySetId[which];
+            delete filters[params.type].entitySetId[which];
           }
         }
-      } else if (_.has(filters, [params.type, 'entitySetId', 'is'])) {
-        filters[params.type].entitySetId = {not: filters[params.type].entitySetId.is};
-        delete filters[params.type].entitySetId.is;
-      } else if (params.type == 'go_term') {
-        filters.gene[params.facet] = {not: filters.gene[params.facet].is};
-        delete filters.gene[params.facet].is;
+      } else if (_.has(filters, [params.type, 'entitySetId', which])) {
+        filters[params.type].entitySetId[into] = filters[params.type].entitySetId[which];
+        delete filters[params.type].entitySetId[which];
+      } else if (params.type === 'go_term') {
+        filters.gene[params.facet][into] = filters.gene[params.facet][which];
+        delete filters.gene[params.facet][which];
       }
-
+      
       LocationService.setFilters(filters);
+    }
+    
+    /** 
+     * Make the facet an IS NOT   
+     */
+    function notFacet(params) {      
+      notFilterHelper(params, true);
     }
     
     /**
      * Remove the IS NOT
      */
     function isFacet(params) {
-      var filters;
-      
-      // Check for required parameters
-      [ 'type', 'facet'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp)) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-      
-      filters = LocationService.filters();
-      if (_.has(filters, [params.type, params.facet, 'not'])) {
-        filters[params.type][params.facet] = {is: filters[params.type][params.facet].not};
-        delete filters[params.type][params.facet].not;
-        if (params.facet === 'id') {
-          if (_.has(filters, [params.type, 'entitySetId', 'not'])) {
-            filters[params.type].entitySetId = {is: filters[params.type].entitySetId.not};
-            delete filters[params.type].entitySetId.not;
-          }
-        }
-      } else if (_.has(filters, [params.type, 'entitySetId', 'not'])) {
-        filters[params.type].entitySetId = {is: filters[params.type].entitySetId.not};
-        delete filters[params.type].entitySetId.not;
-      } else if (params.type == 'go_term') {
-        filters.gene[params.facet] = {is: filters.gene[params.facet].not};
-        delete filters.gene[params.facet].not;
-      }
-
-      LocationService.setFilters(filters);
+      notFilterHelper(params, false);
     }
 
     /*
