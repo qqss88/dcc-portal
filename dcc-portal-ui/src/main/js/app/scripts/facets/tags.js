@@ -18,12 +18,13 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
+  var module = angular.module('icgc.facets.tags', ['icgc.portalfeature', 'icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
     function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
-      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService, GeneSymbols) {
+      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService, GeneSymbols, PortalFeature) {
 
+    $scope.enabled = PortalFeature.get('NOT_FACET');
     $scope.Extensions = Extensions;
 
     var _fetchNameForSelections = function ( selections ) {

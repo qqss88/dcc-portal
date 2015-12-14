@@ -6,13 +6,13 @@
         </span>
         <span data-ng-if="actives.length || hasExtension" class="t_facets__facet__terms__inactive__reset t_tools">
             <span class="pull-right t_facets__facet__is__not" 
-                data-ng-if="type !== 'file' && !isNot"
+                data-ng-if="enabled && type !== 'file' && !isNot"
                 data-ng-click="notFacet(facet)"
                 data-tooltip="Toggle this facet to IS NOT">
                 <i style="color:black;" class="icon-toggle-on"></i>
             </span>
             <span class="pull-right t_facets__facet__is__not" 
-                data-ng-if="type !== 'file' && isNot"
+                data-ng-if="enabled && type !== 'file' && isNot"
                 data-ng-click="isFacet(facet)"
                 data-tooltip="Toggle this facet to IS">
                 <i style="color:darkred;" class="icon-toggle-off"></i>
