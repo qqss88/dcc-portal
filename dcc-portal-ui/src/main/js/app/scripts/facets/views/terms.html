@@ -5,7 +5,6 @@
             {{ label  }}
         </span>
         <span data-ng-if="actives.length" class="t_facets__facet__terms__inactive__reset t_tools">
-            <span data-ng-click="removeFacet()" class="t_tools__tool"><i class="icon-undo"></i></span>
             <span class="pull-right t_facets__facet__is__not" 
                 data-ng-if="type !== 'file' && !isNot"
                 data-ng-click="notFacet(facet)"
@@ -18,6 +17,7 @@
                 data-tooltip="Toggle this facet to IS">
                 <i style="color:darkred;" class="icon-toggle-off"></i>
             </span>
+            <span data-ng-click="removeFacet()" class="t_tools__tool"><i class="icon-undo"></i></span>
         </span>
     </li>
     <li class="t_facets__facet__terms">

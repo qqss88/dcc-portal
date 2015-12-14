@@ -108,10 +108,18 @@
       if (_.has(filters, [params.type, params.facet, 'is'])) {
         filters[params.type][params.facet] = {not: filters[params.type][params.facet].is};
         delete filters[params.type][params.facet].is;
-      }
-      if (_.has(filters, [params.type, 'entitySetId', 'is'])) {
+        if (params.facet === 'id') {
+          if (_.has(filters, [params.type, 'entitySetId', 'is'])) {
+            filters[params.type].entitySetId = {not: filters[params.type].entitySetId.is};
+            delete filters[params.type].entitySetId.is;
+          }
+        }
+      } else if (_.has(filters, [params.type, 'entitySetId', 'is'])) {
         filters[params.type].entitySetId = {not: filters[params.type].entitySetId.is};
         delete filters[params.type].entitySetId.is;
+      } else if (params.type == 'go_term') {
+        filters.gene[params.facet] = {not: filters.gene[params.facet].is};
+        delete filters.gene[params.facet].is;
       }
 
       LocationService.setFilters(filters);
@@ -134,10 +142,18 @@
       if (_.has(filters, [params.type, params.facet, 'not'])) {
         filters[params.type][params.facet] = {is: filters[params.type][params.facet].not};
         delete filters[params.type][params.facet].not;
-      }
-      if (_.has(filters, [params.type, 'entitySetId', 'not'])) {
+        if (params.facet === 'id') {
+          if (_.has(filters, [params.type, 'entitySetId', 'not'])) {
+            filters[params.type].entitySetId = {is: filters[params.type].entitySetId.not};
+            delete filters[params.type].entitySetId.not;
+          }
+        }
+      } else if (_.has(filters, [params.type, 'entitySetId', 'not'])) {
         filters[params.type].entitySetId = {is: filters[params.type].entitySetId.not};
         delete filters[params.type].entitySetId.not;
+      } else if (params.type == 'go_term') {
+        filters.gene[params.facet] = {is: filters.gene[params.facet].not};
+        delete filters.gene[params.facet].not;
       }
 
       LocationService.setFilters(filters);
@@ -305,6 +321,8 @@
       filters = LocationService.filters();
       if (params.facet === 'id') {
         return _.has(filters, params.type+'.'+params.facet+'.not') || _.has(filters, params.type+'.entitySetId.not');
+      } else if (params.type === 'go_term') {
+        return _.has(filters, ['gene',params.facet,'not']);
       } else {
         return _.has(filters, params.type+'.'+params.facet+'.not');
       }
