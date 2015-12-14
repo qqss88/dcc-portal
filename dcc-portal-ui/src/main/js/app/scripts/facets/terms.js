@@ -20,7 +20,8 @@
 
   var module = angular.module('icgc.facets.terms', ['icgc.facets.helpers']);
 
-  module.controller('termsCtrl', function ($scope, $filter, Facets, HighchartsService, ProjectCache, ValueTranslator, PortalFeature) {
+  module.controller('termsCtrl', 
+    function ($scope, $filter, Facets, HighchartsService, ProjectCache, ValueTranslator, PortalFeature) {
 
     $scope.enabled = PortalFeature.get('NOT_FACET');
 
