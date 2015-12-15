@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.model;
 
+import lombok.NonNull;
 import lombok.Value;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,35 +27,45 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Pagination {
 
-  @ApiModelProperty(value = "Actual Number of results returned", required = true)
+  @ApiModelProperty(value = "Reqeusted total number of records to return", required = true)
   Integer count;
-  @ApiModelProperty(value = "Total number of results matching query", required = true)
+  @ApiModelProperty(value = "Actual total number of matching records", required = true)
   Long total;
-  @ApiModelProperty(value = "Number of results returned", required = true)
+  @ApiModelProperty(value = "Number of records to return in this batch", required = true)
   Integer size;
-  @ApiModelProperty(value = "Start index of results", required = true)
+  @ApiModelProperty(value = "The index of the first record in this batch", required = true)
   Integer from;
-  @ApiModelProperty(value = "Current page", required = true)
+  @ApiModelProperty(value = "Page number of this batch", required = true)
   Integer page;
-  @ApiModelProperty(value = "Total number of pages", required = true)
+  @ApiModelProperty(value = "Number of pages of this record set", required = true)
   Long pages;
-  @ApiModelProperty(value = "Column that the results are sorted on", required = true)
+  @ApiModelProperty(value = "Name of the column to sort this record set", required = true)
   String sort;
-  @ApiModelProperty(value = "Order of the sorted column", required = true)
+  @ApiModelProperty(value = "Sorting order (e.g. asc or desc)", required = true)
   String order;
 
-  public static Pagination of(Integer count, Long total, Query query) {
+  public static Pagination of(@NonNull Integer count, @NonNull Long total, @NonNull Query query) {
     return new Pagination(count, total, query);
   }
 
+  public static Pagination of(int count, long total, int size, int from, @NonNull String sort, @NonNull String order) {
+    return new Pagination(count, total, size, from, sort, order);
+  }
+
   private Pagination(Integer count, Long total, Query query) {
+    this(count, total, query.getSize(), query.getFrom(), query.getSort(), query.getOrder().toString());
+  }
+
+  private Pagination(int count, long total, int size, int from, String sort, String order) {
     this.count = count;
     this.total = total;
-    this.size = query.getSize();
-    this.from = query.getFrom() + 1;
-    this.sort = query.getSort();
-    this.order = query.getOrder().toString().toLowerCase();
+    this.size = size;
+    this.from = from + 1;
+    this.sort = sort;
+    this.order = order.toLowerCase();
+
     this.page = size <= 1 ? from : (from / size) + 1;
     this.pages = size <= 1 ? total : (total + size - 1) / size;
   }
+
 }

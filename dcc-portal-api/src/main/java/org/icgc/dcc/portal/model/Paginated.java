@@ -1,5 +1,7 @@
 package org.icgc.dcc.portal.model;
 
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableMap;
+
 import java.util.Map;
 
 import lombok.Getter;
@@ -10,26 +12,22 @@ import org.elasticsearch.search.facet.Facet;
 import org.elasticsearch.search.facet.Facets;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 
-import com.google.common.collect.ImmutableMap;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @Setter
 @Getter
 public abstract class Paginated {
 
-  @ApiModelProperty(value = "EnrichmentSearchResponses")
+  @ApiModelProperty(value = "A collection of aggregation counts on pre-defined dimensions of a target entity")
   private Map<String, TermFacet> facets;
 
-  @ApiModelProperty(value = "Pagination Data", required = true)
+  @ApiModelProperty(value = "Pagination information of the search result set", required = true)
   private Pagination pagination;
 
   public void setFacets(Facets facets) {
     if (facets != null) {
-      ImmutableMap.Builder<String, TermFacet> terms = ImmutableMap.builder();
-      for (Facet facet : facets.facets())
-        terms.put(facet.getName(), TermFacet.of((TermsFacet) facet));
-
-      this.facets = terms.build();
+      this.facets = facets.facets().stream().collect(
+          toImmutableMap(Facet::getName, facet -> TermFacet.of((TermsFacet) facet)));
     }
   }
 
