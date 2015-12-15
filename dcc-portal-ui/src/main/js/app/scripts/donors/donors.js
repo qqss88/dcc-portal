@@ -250,7 +250,7 @@
     };
 
     _ctrl.setActive = function (id) {
-      Donors.one(id).get({include: 'specimen'}).then(function (donor) {
+      Donors.one(donorId).get({include: 'specimen'}).then(function (donor) {
         if (donor.hasOwnProperty('specimen')) {
           _ctrl.active = id || donor.specimen[0].id;
           _ctrl.specimen = _.find(donor.specimen, function (s) {
@@ -260,7 +260,7 @@
       });
     };
 
-    _ctrl.setActive(donorId);
+    _ctrl.setActive();
   });
 
 })();
