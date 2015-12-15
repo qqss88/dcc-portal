@@ -498,6 +498,11 @@ angular.module('icgc.advanced.controllers', [
       $modalInstance.dismiss('cancel');
     };
   })
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // AdvancedDonorService, AdvancedGeneService & AdvancedMutationService are essentially Strategy Pattern
+  // (without the proper language level enforcement (thanks ES5 :S) objects that have a common
+  // interface for facet initialization via <service>.init(), and hits initialization via <service>.renderBodyTab()
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   .service('AdvancedDonorService', // Advanced Donor Service
     function(Page, LocationService, HighchartsService, Donors, AdvancedSearchTabs, Extensions, $q) {
 

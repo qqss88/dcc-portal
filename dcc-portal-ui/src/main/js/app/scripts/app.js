@@ -267,7 +267,35 @@
   module
     .value('$anchorScroll', angular.noop)
     // Offer a means of forcing a reload of the current state when necessary
-    .config(function($provide) {
+    .config(function($provide, cfpLoadingBarProvider) {
+
+      // Global Loading Bar overrides
+      cfpLoadingBarProvider.latencyThreshold = 100; // wait in ms before the loading bar shows up
+
+      $provide.decorator('cfpLoadingBar', ['$delegate', function($delegate) {
+
+        var _isEnabledLoadingBar = true,
+            _originalStartFn = $delegate.start;
+
+        if (angular.isDefined($delegate.enabled)) {
+          console.warn('cfpLoadingBar.enabled exists! Aborting the decoration of cfpLoadingBar...');
+          return;
+        }
+
+        $delegate.enabled = function (isEnabled) {
+          _isEnabledLoadingBar = isEnabled === false ? false : true;
+        };
+
+        $delegate.start = function() {
+          if (! _isEnabledLoadingBar) {
+            return;
+          }
+
+          return _originalStartFn.apply($delegate, arguments);
+        };
+
+        return $delegate;
+      }]);
 
       // Let's decorate our $state object to inline it with this functionality
       $provide.decorator('$state', ['$delegate', '$stateParams', function ($delegate, $stateParams) {
@@ -448,7 +476,7 @@
       }]);
 
     })
-    .run(function($state, $location, $window, $timeout, $rootScope) {
+    .run(function($state, $location, $window, $timeout, $rootScope, cfpLoadingBar) {
 
       var _scrollTimeoutHandle = null;
 
@@ -533,6 +561,38 @@
       $rootScope.$on('$stateChangeError', function () { 
         console.error('State Change Error Occurred. Error occurred with arguments: ', arguments);
       });
+
+      function _initProgressBarRunOnce() {
+        var _shouldDisableLoadingBar = true,
+            _timeoutHandle = null,
+            _debounceDelayMS = 200;
+
+        var deregisterLoadingFn = $rootScope.$on('cfpLoadingBar:loading', function () {
+          //console.log('Progress Started!');
+          _shouldDisableLoadingBar = false;
+        });
+
+        var deregisterCompletedFn = $rootScope.$on('cfpLoadingBar:completed', function () {
+          // Disable the loading bar after the debounced run first run
+          _shouldDisableLoadingBar = true;
+          //console.log('Progress Completed!');
+
+          if (_timeoutHandle) {
+            clearTimeout(_timeoutHandle);
+          }
+
+          _timeoutHandle = setTimeout(function () {
+            if (_shouldDisableLoadingBar) {
+              //console.log('Progress Disabled!');
+              cfpLoadingBar.enabled(false);
+              deregisterLoadingFn();
+              deregisterCompletedFn();
+            }
+          }, _debounceDelayMS);
+        });
+      }
+
+      _initProgressBarRunOnce();
     });
 
 
