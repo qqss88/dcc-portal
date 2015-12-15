@@ -367,8 +367,8 @@ you might run into with child scopes used in forms, subcontrollers, and directiv
         (function() {
             'use strict';
 
-            angular.module('sessions.controller')
-              .controller(function($scope) {
+            angular.module('users.controllers')
+              .controller('UserCtrl', function($scope) {
 
                 var _controller = this, // You can seperate your vars with commas
                     _user = {
