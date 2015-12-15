@@ -10,19 +10,19 @@
 @import "_general/type";
 //-----------------------------------------------------------------------------
 // Sections
-@import "_sections/preheader";
-@import "_sections/header";
-@import "_sections/home";
-@import "_sections/donor";
-@import "_sections/advanced";
+@import "../scripts/common/styles/preheader";
+@import "../scripts/common/styles/header";
+@import "../scripts/releases/styles/home";
+@import "../scripts/donors/styles/donor";
+@import "../scripts/advanced/styles/advanced";
 @import "_sections/results";
-@import "_sections/footer";
-@import "_sections/download";
-@import "_sections/analysis";
+@import "../scripts/common/styles/footer";
+@import "../scripts/downloader/styles/download";
+@import "../scripts/analysis/styles/analysis";
 @import "_sections/team";
 //-----------------------------------------------------------------------------
 // Modules
-@import "_modules/modules";  
+@import "_modules/modules";
 
 html {
   font-family: $sans-stack;

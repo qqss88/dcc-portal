@@ -185,7 +185,7 @@ function ICGCGruntConfigProvider() {
     peg: {
       pql: {
         src: './app/scripts/pegjs/pql.pegjs',
-        dest: './app/scripts/common/pql/pqlparser.js',
+        dest: './app/scripts/common/js/pql/pqlparser.js',
         options: {
           exportVar: 'PqlPegParser'
         }
@@ -195,6 +195,7 @@ function ICGCGruntConfigProvider() {
     watch: {
       compass: {
         files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}',
+                '<%= yeoman.app %>/scripts/**/styles/*.{scss,sass}',
                 '<%= yeoman.app %>/vendor/styles/{,*/}*.{scss,sass}'],
         tasks: ['compass:server']
       },
@@ -209,6 +210,7 @@ function ICGCGruntConfigProvider() {
         files: [
           '<%= yeoman.app %>/{,*/}*.html',
           '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
+          '{.tmp,<%= yeoman.app %>}/scripts/**/styles/*.css',
           '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
           '<%= yeoman.app %>/develop/scripts/{,*/}*.js',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
