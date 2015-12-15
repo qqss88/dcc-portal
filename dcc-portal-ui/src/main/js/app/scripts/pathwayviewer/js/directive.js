@@ -34,7 +34,7 @@
         overlaps: '='
       },
       controller: 'PathwayViewerCtrl',
-      templateUrl: 'scripts/modules/pathwayviewer/views/viewer.html',
+      templateUrl: 'scripts/pathwayviewer/views/viewer.html',
       link: function ($scope, element, attrs, pathwayViewerCtrl) {
         var showingLegend = false,
             rendered = false,

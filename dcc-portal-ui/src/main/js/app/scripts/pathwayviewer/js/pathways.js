@@ -29,7 +29,7 @@
     .config(function($stateProvider) {
 		$stateProvider.state('pathways', {
 			url: '/pathways/:entityID',
-			templateUrl: '/scripts/modules/pathwayviewer/views/pathways.html',
+			templateUrl: '/scripts/pathwayviewer/views/pathways.html',
 			controller: 'PathwaysController',
 			resolve: {
                 EnrichmentData: ['$q', '$stateParams', 'Restangular',

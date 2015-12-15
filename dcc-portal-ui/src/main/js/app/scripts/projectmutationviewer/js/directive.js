@@ -8,7 +8,7 @@
     return {
       restrict: 'E',
       replace: 'true',
-      templateUrl: '/scripts/modules/projectmutationviewer/views/projectmutationviewer.html',
+      templateUrl: '/scripts/projectmutationviewer/views/projectmutationviewer.html',
       scope: {
         items: '=',
         selected: '=',

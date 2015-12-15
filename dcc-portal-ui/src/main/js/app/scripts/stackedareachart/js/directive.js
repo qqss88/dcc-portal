@@ -47,7 +47,7 @@
         selected: '=',
         selectedProjectCount: '='
       },
-      templateUrl: '/scripts/modules/stackedareachart/views/stackedareachart.html',
+      templateUrl: '/scripts/stackedareachart/views/stackedareachart.html',
       link: function ($scope, $element) {
         var chart;
         var filterProjects = function(data, includedProjects){

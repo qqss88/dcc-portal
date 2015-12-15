@@ -33,7 +33,7 @@
         subtitle: '@',
         yLabel: '@'
       },
-      templateUrl: '/scripts/modules/stackedbarchart/views/stackedbarchart.html',
+      templateUrl: '/scripts/stackedbarchart/views/stackedbarchart.html',
       link: function ($scope, $element) {
         $scope.showPlot = false;
         $scope.defaultGraphWidth = 500;
