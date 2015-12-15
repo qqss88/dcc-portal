@@ -657,7 +657,7 @@
     $stateProvider.state(
       'team', {
         url: '/team',
-        templateUrl: '/views/static/team.html',
+        templateUrl: '/scripts/static/views/team.html',
         controller: ['Page', function (Page) {
           Page.setTitle('The Team');
           Page.setPage('entity');
