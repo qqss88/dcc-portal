@@ -40,7 +40,7 @@ public class UICollaboratoryResource {
   /**
    * Constants.
    */
-  private static final String COLLAB_META_URL = "https://www.cancercollaboratory.org:9080/oicr.icgc.meta/metadata/";
+  private static final String COLLAB_META_URL = "https://object.cancercollaboratory.org:9080/oicr.icgc.meta/metadata/";
 
   /**
    * Resources - Collaboratory.
