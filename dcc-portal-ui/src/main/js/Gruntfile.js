@@ -184,7 +184,7 @@ function ICGCGruntConfigProvider() {
     .getConfigForTask('bower-install-simple'), 
     peg: {
       pql: {
-        src: './app/scripts/pegjs/pql.pegjs',
+        src: './app/scripts/common/js/pql/conf/pql.pegjs',
         dest: './app/scripts/common/js/pql/pqlparser.js',
         options: {
           exportVar: 'PqlPegParser'
