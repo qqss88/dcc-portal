@@ -24,21 +24,31 @@
 
 
 // --
-@import "../../scripts/ui/styles/suggest";
+
 @import "../../scripts/facets/styles/current";
 @import "../../scripts/facets/styles/facets";
+
+@import "../../scripts/ui/styles/suggest";
 @import "../../scripts/ui/styles/tooltip";
 @import "../../scripts/ui/styles/copyclip";
+@import "../../scripts/ui/styles/trees";
+
 @import "../../scripts/auth/styles/auth";
+
+@import "../../scripts/visualization/styles/vis";
 @import "../../scripts/highcharts/styles/highcharts";
 @import "../../scripts/proteinstructureviewer/styles/protein";
-@import "../../scripts/visualization/styles/vis";
-@import "../../scripts/beacon/styles/beacon";
 @import "../../scripts/genomemaps/styles/genomemaps";
 @import "../../scripts/pathwayviewer/styles/pathwayviewer";
+
 @import "../../scripts/repositories/styles/repositories";
-@import "../../scripts/tokens/styles/tokens";
 @import "../../scripts/repositories/styles/guide";
+
+@import "../../scripts/tokens/styles/tokens";
+
+@import "../../scripts/beacon/styles/beacon";
+
+@import "../vendor/styles/bamiobio/bamiobio";
 // --
 
 // Modules

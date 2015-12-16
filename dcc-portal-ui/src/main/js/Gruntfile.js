@@ -213,7 +213,8 @@ function ICGCGruntConfigProvider() {
           '{.tmp,<%= yeoman.app %>}/scripts/**/styles/*.css',
           '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
           '<%= yeoman.app %>/develop/scripts/{,*/}*.js',
-          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
+          '<%= yeoman.app %>/scripts/*/images/*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       }
     },
@@ -330,18 +331,6 @@ function ICGCGruntConfigProvider() {
     /*concat: {
      dist: {}
      },*/
-    rev: {
-      dist: {
-        files: {
-          src: [
-            '<%= yeoman.dist %>/scripts/{,*/}*.js',
-            '<%= yeoman.dist %>/styles/{,*/}*.css',
-            '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-            '<%= yeoman.dist %>/styles/fonts/*'
-          ]
-        }
-      }
-    },
     // Renames files for browser caching purposes
     filerev: {
       dist: {
@@ -387,11 +376,14 @@ function ICGCGruntConfigProvider() {
         files: [
           {
             expand: true,
-            cwd: '<%= yeoman.app %>/images',
+            cwd: '<%= yeoman.app %>',
             // TODO: looks like imagemin is not processing module image deps
             // copy is doing this instead -
             // will research proper way to fix this 
-            src: '{,*/}*.{png,jpg,jpeg}',
+            src:  [
+                    '/images/{,*/}*.{png,jpg,jpeg}',
+                    '/scripts/*/images/**/*.{png,jpg,jpeg}'
+                  ],
             dest: '<%= yeoman.dist %>/images'
           }
         ]
@@ -450,6 +442,7 @@ function ICGCGruntConfigProvider() {
               // 'vendor/scripts/angularjs/*',
               'vendor/styles/genomeviewer/**/*',
               'styles/images/**/*.{gif,webp,svg,png,jpg}',
+              'scripts/*/images/**/*.{gif,webp,svg,png,jpg}',
               'styles/fonts/*',
               'views/**/*',
               'scripts/**/*.html',
