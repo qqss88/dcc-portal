@@ -48,20 +48,7 @@ angular.module('icgc.advanced', ['icgc.advanced.controllers', 'ui.router'])
 
 (function () {
 
-  var _locationFilterCache = {
-        _filters: null,
-        filters: function(filterObj) {
-
-          if (arguments.length === 0) {
-            return _.cloneDeep(this._filters);
-          }
-          else {
-            this._filters = filterObj;
-          }
-
-          return this._filters;
-        }
-      };
+  var _locationFilterCache = null;
 
 angular.module('icgc.advanced.controllers', [
     'icgc.advanced.services', 'icgc.sets.services', 'icgc.facets'])
@@ -73,23 +60,13 @@ angular.module('icgc.advanced.controllers', [
       var _controller = this,
           dataRepoRouteInfo = RouteInfoService.get ('dataRepositories'),
           dataRepoUrl = dataRepoRouteInfo.href,
-          _serviceMap = {};
+          _serviceMap = {},
+          _filterService = LocationService.getFilterService();
 
-      ///////////////////////////////////////////////////////////////////////////
-      // TODO: Clean these controllers up so this patch isn't necessary
-      ///////////////////////////////////////////////////////////////////////////
+      _locationFilterCache = _filterService.getCachedFiltersFactory();
+
       var _isInAdvancedSearchCtrl = true;
 
-      function _refreshFilterCache() {
-        _locationFilterCache.filters(LocationService.filters());
-      }
-
-
-
-
-
-
-      ///////////////////////////////////////////////////////////////////////////
 
       function _refresh() {
         var filters = _locationFilterCache.filters(),
@@ -265,12 +242,6 @@ angular.module('icgc.advanced.controllers', [
         Page.setTitle('Advanced Search');
         Page.setPage('advanced');
 
-        // Cache the filters so we can use them during the several layers of promises
-        // we perform
-        _refreshFilterCache();
-        _resetServices();
-        _refresh();
-
         // Setup
         _controller.setActiveTab($state.current.data.tab);
         _controller.setSubTab($state.current.data.subTab);
@@ -293,29 +264,24 @@ angular.module('icgc.advanced.controllers', [
 
         });
 
-        $scope.$watch(
-          function() {
-            return JSON.stringify(LocationService.filters());
-          },
-          function(newFiltersStr, oldFiltersStr) {
-            if (! _isInAdvancedSearchCtrl || newFiltersStr === oldFiltersStr) {
-              return;
-            }
+        $scope.$on(_filterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
-            _refreshFilterCache();
-            _resetServices();
-            _refresh();
+          if (filterObj.currentPath.indexOf('/search') < 0) {
+            return;
           }
-        );
+
+          _locationFilterCache.updateCache();
+          _resetServices();
+          _refresh();
+        });
 
         $rootScope.$on('$stateChangeStart', function(e, toState) {
 
           _isInAdvancedSearchCtrl = _.get(toState, 'data.isAdvancedSearch', false) ? true : false;
 
           if (_isInAdvancedSearchCtrl) {
-            _refreshFilterCache();
+            _locationFilterCache.updateCache();
           }
-
         });
 
         $rootScope.$on(FacetConstants.EVENTS.FACET_STATUS_CHANGE, function(event, facetStatus) {
@@ -332,18 +298,6 @@ angular.module('icgc.advanced.controllers', [
         Settings.get().then(function(settings) {
           _controller.downloadEnabled = settings.downloadEnabled || false;
         });
-
-        // Refresh when filters change
-        // Data is cached so refreshing on tab switch
-        // should be free
-        /*$scope.$on('$locationChangeSuccess', function (event, next) {
-          if (next.indexOf('search') !== -1) {
-            _resetServices();
-            _refresh();
-          }
-        });*/
-
-
 
         // Tabs need to update when using browser buttons
         // Shouldn't have to worry about refreshing data here

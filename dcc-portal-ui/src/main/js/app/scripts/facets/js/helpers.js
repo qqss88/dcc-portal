@@ -22,7 +22,7 @@
 
   var module = angular.module('icgc.facets.helpers', ['icgc.facets']);
 
-  module.factory('Facets', function (LocationService, FacetConstants, $rootScope) {
+  module.factory('Facets', function (FilterService, FacetConstants, $rootScope) {
 
     function _broadcastFacetStatusChange(facet, isActive, changeType) {
       $rootScope.$broadcast(FacetConstants.EVENTS.FACET_STATUS_CHANGE, {
@@ -49,13 +49,13 @@
         throw new Error ('Missing property in params: ' + toJson (params));
       }
 
-      var filters = LocationService.filters();
+      var filters = FilterService.filters();
 
       ensurePath(filters, params);
 
       // TODO make is possible to use 'is' or 'not'
       filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
-      LocationService.setFilters(filters);
+      FilterService.filters(filters);
     }
 
     /*
@@ -66,7 +66,7 @@
         throw new Error ('Missing property in params: ' + toJson (params));
       }
 
-      var filters = LocationService.filters();
+      var filters = FilterService.filters();
 
       ensurePath(filters, params);
 
@@ -76,7 +76,7 @@
         _broadcastFacetStatusChange(params.term, true);
       }
 
-      LocationService.setFilters(filters);
+      FilterService.filters(filters);
     }
 
     /*
@@ -87,7 +87,7 @@
         throw new Error ('Missing property in params: ' + toJson (params));
       }
 
-      var filters = LocationService.filters();
+      var filters = FilterService.filters();
 
       // TODO make is possible to use 'is' or 'not'
       var index = filters[params.type][params.facet].is.indexOf(params.term);
@@ -96,7 +96,7 @@
       if (!filters[params.type][params.facet].is.length) {
         removeFacet(params);
       } else {
-        LocationService.setFilters(filters);
+        FilterService.filters(filters);
       }
     }
 
@@ -128,7 +128,7 @@
         }
       });
 
-      filters = LocationService.filters();
+      filters = FilterService.filters();
 
       if (! filters.hasOwnProperty(params.type)) {
         return;
@@ -142,9 +142,9 @@
       }
 
       if (_.isEmpty(filters)) {
-        LocationService.removeFilters();
+        FilterService.removeFilters();
       } else {
-        LocationService.setFilters(filters);
+        FilterService.filters(filters);
       }
     }
 
@@ -152,7 +152,7 @@
      * Removes all filters
      */
     function removeAll() {
-      LocationService.removeFilters();
+      FilterService.removeFilters();
       _broadcastFacetStatusChange(null, FacetConstants.FACET_CHANGE_TYPE.ALL);
     }
 
@@ -168,7 +168,7 @@
         }
       });
 
-      filters = LocationService.filters();
+      filters = FilterService.filters();
       console.info(filters);
       if (filters.hasOwnProperty(params.type) &&
           filters[params.type].hasOwnProperty(params.facet) &&
@@ -192,7 +192,7 @@
         }
       });
 
-      filters = LocationService.filters();
+      filters = FilterService.filters();
 
       function filterFn(active) {
         return _.find(params.terms, function (term) {
@@ -231,7 +231,7 @@
         }
       });
 
-      filters = LocationService.filters();
+      filters = FilterService.filters();
 
       if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
         // TODO make is possible to use 'is' or 'not'
@@ -251,7 +251,7 @@
         }
       });
 
-      filters = LocationService.filters();
+      filters = FilterService.filters();
 
       if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
         // TODO make is possible to use 'is' or 'not'

@@ -19,9 +19,11 @@
   'use strict';
 
   var module = angular.module('icgc.common.location', []);
-
+  // TODO: Refactor out all filter logic here to use only FilterService.
+  // Currently Advanced search and the facets module makes use of
+  // the new FilterService
   module
-    .factory('LocationService', function ($location, $anchorScroll, Notify, Extensions) {
+    .factory('LocationService', function ($location, FilterService, $anchorScroll, Notify, Extensions) {
 
     return {
       path: function () {
@@ -34,10 +36,17 @@
       clear: function () {
         return $location.search({});
       },
+      // Introduced to temporarily support older logic
+      getFilterService: function() {
+        return FilterService;
+      },
       filters: function () {
-        return this.getJsonParam('filters');
+        console.info('@Deprecated - Location Service filters() being used.');
+        return FilterService.filters.apply(FilterService, arguments);
       },
       setFilters: function (filters) {
+        // TODO: Factor this into FacetService
+        console.info('@Deprecated - Location Service setFilters() being used.');
         var search = this.search();
 
         // Clear all 'from' params. Pagination should be reset if filters change
