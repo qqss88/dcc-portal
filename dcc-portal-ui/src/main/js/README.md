@@ -43,8 +43,13 @@ Run
 ---
 
 - Start node development server: `grunt server`
+
 - Start the [Portal API](../dcc-portal-api/README.md)
+
 - View the site: [localhost:9000](http://localhost:9000/)
+
+- You can change some of the front end develop options (used `grunt server`) by modifying the `app/develop/scripts/config.js` file.
+
 
 ## Basic Style Guide
 
@@ -60,17 +65,28 @@ Run
 - Comments begin with a Capital letter
 - Use lodash functions to handle your array/object manipulation to
 avoid writing boilerplate array/object code. See - https://lodash.com/docs
+- Angular Services, Controllers and any function used to construct *new* objects
+should begin with a capitalized letter to denote that it is essentially a constructor function
+(i.e. called with the **new** JS keyword.)
 
 ## Coding Conventions
 
 ### Before we Begin...
+
 * This document is a work in progress and therefore it's important to note that it isn't a definitive guide to
 all possible style or convention-related topics you will encounter in your development endeavours.
+
 * This below 'best practices' are here to give you a starting point on how to structure your code moving forward.
+
 * Of course it should be mentioned that testing your code should **always** be part of your development process and you should
 consistently make best efforts to provide automated tests for any modules you develop/modify. Technical debt
 (introduced when testing is not a consideration) is bad as it  drives up maintenance and development efforts moving forward.
+
 * These tests will help you (and others) catch regression bugs on the frontend moving forward!
+
+* You may see some assets which do not fully conform to some (or many) of the below conventions. If you do see this please
+feel free to refactor them appropriately as you fix/extend functionality in these modules.
+
 
 ### Angular Modules
 
@@ -83,11 +99,13 @@ consistently make best efforts to provide automated tests for any modules you de
       |__ js/
       |__ views/
       |__ styles/
+      |__ images/
     ```
 
 - The **js** folder contains your angularJS controllers, services, filters, etc.
 - The **views** folder contains your angularJS html templates.
 - The **styles** folder contains your scss (sass) files pertaining (i.e. relevant to the styling of your html views).
+- The **images** folder contains your image files relevant to the module.
 
 #### Module Breakdown
 - Modules are broken down according to the function it serves within the application. This means that your module names
