@@ -20,7 +20,7 @@
 angular.module('icgc.facets.location', []);
 
 angular.module('icgc.facets.location')
-  .controller('locationFacetCtrl', function ($scope, Facets, LocationService, Chromosome) {
+  .controller('locationFacetCtrl', function ($scope, Facets, FilterService, Chromosome) {
 
   var submitted;
 
@@ -112,14 +112,7 @@ angular.module('icgc.facets.location')
   });
 
   // Needed if term removed from outside scope
-  $scope.$watch(function () {
-    return LocationService.filters();
-  }, function (n, o) {
-    if (n === o) {
-      return;
-    }
-    setup();
-  }, true);
+  $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, setup);
 
   setup();
 });

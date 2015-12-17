@@ -21,7 +21,7 @@
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
-    function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
+    function ($scope, $modal, Facets, FilterService, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService, GeneSymbols) {
 
     $scope.Extensions = Extensions;
@@ -70,7 +70,9 @@
     }
 
     function setup() {
-      var type = $scope.proxyType || $scope.type, filters = LocationService.filters(), activeIds = [];
+      var type = $scope.proxyType || $scope.type,
+          filters = FilterService.filters(),
+          activeIds = [];
 
       _fetchNameForSelections ( filters.gene );
 
@@ -121,9 +123,9 @@
 
         activeIds = $scope.actives;
         if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('pathwayId')) {
-          pathwayTypeFilters = LocationService.filters();
+          pathwayTypeFilters = FilterService.filters();
         } else {
-          pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}});
+          pathwayTypeFilters = FilterService.mergeIntoFilters({'gene':{'hasPathway':true}});
         }
 
         Genes.handler.one('count').get({filters:pathwayTypeFilters}).then(function (result) {
@@ -161,7 +163,7 @@
     }
 
     $scope.addGeneSetType = function(type) {
-      var filters = LocationService.filters();
+      var filters = FilterService.filters();
       if (! filters.hasOwnProperty('gene')) {
         filters.gene = {};
       }
@@ -170,7 +172,7 @@
     };
 
     $scope.removeGeneSetType = function(type) {
-      var filters = LocationService.filters();
+      var filters = FilterService.filters();
       if (filters.hasOwnProperty('gene')) {
         delete filters.gene[type];
         if (_.isEmpty(filters.gene)) {
@@ -284,14 +286,8 @@
     };
 
     // Needed if term removed from outside scope
-    $scope.$watch(function () {
-      return LocationService.filters();
-    }, function (n, o) {
-      if (n === o) {
-        return;
-      }
-      setup();
-    }, true);
+    $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, setup);
+
 
     setup();
   });

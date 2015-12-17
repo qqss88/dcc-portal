@@ -29,7 +29,6 @@
       path: function () {
         return $location.path();
       },
-
       search: function () {
         return $location.search();
       },
@@ -41,13 +40,13 @@
         return FilterService;
       },
       filters: function () {
-        console.info('@Deprecated - Location Service filters() being used.');
         return FilterService.filters.apply(FilterService, arguments);
       },
       setFilters: function (filters) {
         // TODO: Factor this into FacetService
-        console.info('@Deprecated - Location Service setFilters() being used.');
-        var search = this.search();
+        console.info('@Deprecated - Location Service setFilters() being used.', filters);
+        var search = this.search(),
+            filtersJSON = (_.isObject(filters) && !_.isEmpty(filters)) ? angular.toJson(filters) : '{}';
 
         // Clear all 'from' params. Pagination should be reset if filters change
         delete search.from;
@@ -65,50 +64,23 @@
           }
         });
 
-        search.filters = angular.toJson(filters);
+        if (filtersJSON) {
+          search.filters = filtersJSON;
+        }
+
         $location.search(search);
       },
       removeFilters: function () {
-        this.removeParam('filters');
+        FilterService.removeFilters.apply(FilterService, arguments);
       },
-      mergeIntoFilters: function (obj) {
-        return this.merge(this.filters(), obj);
+      mergeIntoFilters: function () {
+        return FilterService.mergeIntoFilters.apply(FilterService, arguments);
       },
-      overwriteFilters: function (obj, level) {
-        return this.merge(this.filters(), obj, level);
+      overwriteFilters: function () {
+        return FilterService.overwriteFiltersAtObjectLevel.apply(FilterService, arguments);
       },
-      merge: function (obj1, obj2, overwriteAt) {
-        var o1 = angular.copy(obj1);
-        var o2 = angular.copy(obj2);
-
-        function bools(type, facet) {
-          for (var bool in o2[type][facet]) {
-            if (o2[type][facet].hasOwnProperty(bool) &&
-                (!o1[type][facet].hasOwnProperty(bool) || overwriteAt === 'bool')) {
-              o1[type][facet][bool] = o2[type][facet][bool];
-            }
-          }
-        }
-
-        function facets(type) {
-          for (var facet in o2[type]) {
-            if (o2[type].hasOwnProperty(facet) && (!o1[type].hasOwnProperty(facet) || overwriteAt === 'facet')) {
-              o1[type][facet] = o2[type][facet];
-            } else {
-              bools(type, facet);
-            }
-          }
-        }
-
-        for (var type in o2) {
-          if (o2.hasOwnProperty(type) && (!o1.hasOwnProperty(type) || overwriteAt === 'type')) {
-            o1[type] = o2[type];
-          } else {
-            facets(type);
-          }
-        }
-
-        return o1;
+      merge: function () {
+        return FilterService.merge.apply(FilterService, arguments);
       },
       toURLParam: function(filterParamObj) {
         var filterStr = '';

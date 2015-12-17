@@ -257,7 +257,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           pie: {
             allowPointSelect: false,
             borderWidth: 1,
-            animation: false,
+            animation: true,
             cursor: 'pointer',
             showInLegend: false,
             events: {

@@ -21,7 +21,7 @@
   var module = angular.module ('icgc.facets.current', []);
 
   module.controller('currentCtrl',
-    function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page, GeneSymbols) {
+    function ($scope, Facets, LocationService, FilterService, FiltersUtil, Extensions, SetService, Page, GeneSymbols) {
 
     $scope.Page = Page;
     $scope.Facets = Facets;
@@ -95,7 +95,7 @@
     };
 
     function refresh() {
-      var currentFilters = LocationService.filters();
+      var currentFilters = FilterService.filters();
       var ids = LocationService.extractSetIds(currentFilters);
 
       if (ids.length > 0) {
@@ -181,6 +181,8 @@
         refresh();
       }
     });
+
+    //$scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, refresh);
 
   });
 

@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('icgc.common.filters', [])
   .constant('filterConstants', {
     FILTER_NAME: 'filters',
@@ -6,32 +8,19 @@ angular.module('icgc.common.filters', [])
     }
   })
   .service('FilterService', function($location, $rootScope, filterConstants) {
-    var _service = this,
-        _filtersObj = {};
-
-    _service.filters = _filters;
-    _service.removeFilters = _removeFilters;
-    _service.getCachedFiltersFactory = _getCachedFiltersFactory;
-    _service.filterParam = _filterParam;
-    _service.constants = filterConstants;
-
-    _init();
-
-
-    ////////////////////////////////////////////////////////////////
-
     /**
      * Initializes the filter service
      * @private
      */
     function _init() {
       $rootScope.$watch(function () {
-          return _.get($location.search(), filterConstants.FILTER_NAME, '');
+          return _.get($location.search(), filterConstants.FILTER_NAME, '{}');
         },
         function (newFilterJSON) {
 
           try {
             _filtersObj = JSON.parse(newFilterJSON);
+            //console.log('Watcher Update Filters to ', _filtersObj);
           }
           catch (e) {
             _filtersObj = {};
@@ -52,17 +41,19 @@ angular.module('icgc.common.filters', [])
 
       if (arguments.length === 1) {
 
-        if (_.isObject(filters) && ! _.isEmpty(filters)) {
+        if (_.isObject(filters)) {
           _filtersObj = _.cloneDeep(filters);
         }
         else {
           _filtersObj = {};
         }
+
         //console.log('Update Filters to ', _filtersObj);
         _updateFilterParamsURL();
       }
 
-      return _.cloneDeep(_filtersObj);
+      //console.log('Return Filters ', _filtersObj);
+      return _.cloneDeep(_filtersObj); // Do not allow overwriting the original object!
     }
 
     /**
@@ -112,7 +103,7 @@ angular.module('icgc.common.filters', [])
      * @private
      */
     function _getCachedFiltersFactory() {
-      var initialFilters = _filtersObj;
+      var initialFilters = _filters();
 
       return {
           _cachedFilters: initialFilters,
@@ -149,5 +140,65 @@ angular.module('icgc.common.filters', [])
       $rootScope.$broadcast(filterConstants.FILTER_EVENTS.FILTER_UPDATE_EVENT, filterNotifyObj);
     }
 
+    function _overwriteFiltersAtObjectLevel(obj, level) {
+      return _merge(_filtersObj, obj, level); // Return a copy of the filters
+    }
+
+    function _mergeIntoFilters(obj) {
+      return _merge(_filtersObj, obj); // Return a copy of the filters
+    }
+
+    function _merge(obj1, obj2, overwriteAt) {
+      // Do not modify the original object - since we are modifying this object do a deep copy
+      var o1 = _.cloneDeep(obj1),
+          o2 = _.clone(obj2);
+
+      function bools(type, facet) {
+        for (var bool in o2[type][facet]) {
+          if (o2[type][facet].hasOwnProperty(bool) &&
+              (!o1[type][facet].hasOwnProperty(bool) || overwriteAt === 'bool')) {
+            o1[type][facet][bool] = o2[type][facet][bool];
+          }
+        }
+      }
+
+      function facets(type) {
+        for (var facet in o2[type]) {
+          if (o2[type].hasOwnProperty(facet) && (!o1[type].hasOwnProperty(facet) || overwriteAt === 'facet')) {
+            o1[type][facet] = o2[type][facet];
+          } else {
+            bools(type, facet);
+          }
+        }
+      }
+
+      for (var type in o2) {
+        if (o2.hasOwnProperty(type) && (!o1.hasOwnProperty(type) || overwriteAt === 'type')) {
+          o1[type] = o2[type];
+        } else {
+          facets(type);
+        }
+      }
+
+      return o1;
+    }
+
+    /////////////////////////////////////////////////////
+    var _service = this,
+      _filtersObj = {};
+
+    _service.filters = _filters;
+    _service.removeFilters = _removeFilters;
+    _service.getCachedFiltersFactory = _getCachedFiltersFactory;
+    _service.filterParam = _filterParam;
+    _service.mergeIntoFilters = _mergeIntoFilters;
+    _service.overwriteFiltersAtObjectLevel = _overwriteFiltersAtObjectLevel;
+    _service.merge = _merge;
+    _service.constants = filterConstants;
+
+
+    ////////////////////////////////////////////////////////////////
+
+    _init();
 
   });
