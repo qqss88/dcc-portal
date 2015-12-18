@@ -98,12 +98,12 @@
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
   module.service('SetService',
-    function ($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster,
-      Extensions, Page, RouteInfoService) {
+    function ($window, $location, $q, Restangular, RestangularNoCache, API,
+              localStorageService, toaster, Extensions, Page, RouteInfoService) {
 
     var LIST_ENTITY = 'entity';
     var dataRepoUrl = RouteInfoService.get ('dataRepositories').href;
-    var _this = this;
+    var _service = this;
 
     // For application/json format
     function params2JSON(type, params) {
@@ -142,7 +142,7 @@
     };
     */
 
-    this.createAdvLink = function(set) {
+    _service.createAdvLink = function(set) {
       var type = set.type.toLowerCase(), filters = {};
       filters[type] = {};
       filters[type][Extensions.ENTITY] = {is: [set.id]};
@@ -154,7 +154,7 @@
       }
     };
 
-    this.createRepoLink = function(set) {
+    _service.createRepoLink = function(set) {
       var filters = {};
     	var type = 'file';
       filters[type] = {};
@@ -163,7 +163,7 @@
       return dataRepoUrl + '?filters=' + angular.toJson(filters);
     };
 
-    this.materialize = function(type, params) {
+    _service.materialize = function(type, params) {
       var data = params2JSON(type, params);
       return Restangular.one('entityset').post('union', data, {}, {'Content-Type': 'application/json'});
     };
@@ -171,7 +171,7 @@
     /**
     * We want to materialize a new set in a synchronous request.
     */
-    this.materializeSync = function(type, params) {
+    _service.materializeSync = function(type, params) {
       var data = params2JSON(type, params);
       return Restangular.one('entityset')
         .customPOST(data, 'union', {async:false}, {'Content-Type': 'application/json'});
@@ -188,7 +188,7 @@
     *
     * Create a new set from
     */
-    this.addSet = function(type, params) {
+    _service.addSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);
       promise = Restangular.one('entityset').post(undefined, data, {}, {'Content-Type': 'application/json'});
@@ -215,7 +215,7 @@
       return promise;
     };
 
-    this.addExternalSet = function(type, params) {
+    _service.addExternalSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);
       promise = Restangular.one('entityset').one('external')
@@ -243,7 +243,7 @@
       return promise;
     };
 
-    this.createFileSet = function (params) {
+    _service.createFileSet = function (params) {
       params.name = 'File Set';
       params.description = 'File Set for Manifest';
       params.sortBy = 'id';
@@ -256,7 +256,7 @@
       return promise;
     };
 
-    this.createForwardSet = function(type, params, forwardUrl) {
+    _service.createForwardSet = function(type, params, forwardUrl) {
       Page.startWork();
       params.name = 'Input donor set';
       params.description = '';
@@ -279,7 +279,7 @@
       return promise;
     };
 
-    this.createForwardRepositorySet = function(type, params, forwardUrl) {
+    _service.createForwardRepositorySet = function(type, params, forwardUrl) {
       Page.startWork();
       params.name = 'Input donor set';
       params.description = '';
@@ -305,7 +305,7 @@
      *
      * Create a new set from the union of various subsets of the same type
      */
-    this.addDerivedSet = function(type, params) {
+    _service.addDerivedSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);
 
@@ -333,7 +333,7 @@
     /*
      * Attemp to sync with the server - fires only once, up to controller to do polling
      */
-    this.sync = function() {
+    _service.sync = function() {
       var pendingLists, pendingListsIDs, promise;
 
       pendingLists = _.filter(setList, function(d) {
@@ -346,7 +346,7 @@
         return;
       }
 
-      promise = _this.getMetaData(pendingListsIDs);
+      promise = _service.getMetaData(pendingListsIDs);
       promise.then(function(updatedList) {
         updatedList.forEach(function(item) {
           var index = _.findIndex(setList, function(d) {
@@ -360,14 +360,14 @@
 
         // Save update back
         localStorageService.set(LIST_ENTITY, setList);
-        _this.refreshList();
+        _service.refreshList();
       });
       return promise;
     };
 
 
 
-    this.refreshList = function() {
+    _service.refreshList = function() {
       setList.forEach(function(set) {
         var filters = {};
         filters[set.type] = {};
@@ -385,11 +385,11 @@
       });
     };
 
-    this.getMetaData = function( ids ) {
+    _service.getMetaData = function( ids ) {
       return RestangularNoCache.several('entityset/sets', ids).get('', {});
     };
 
-    this.lookupTable = function(metaData) {
+    _service.lookupTable = function(metaData) {
       var map = {};
       metaData.forEach(function(d) {
         map[d.id] = d.name;
@@ -397,23 +397,23 @@
       return map;
     };
 
-    this.exportSet = function(id) {
+    _service.exportSet = function(id) {
       $window.location.href = API.BASE_URL + '/entityset/' + id + '/export';
     };
 
 
     /****** Local storage related API ******/
-    this.getAll = function() {
+    _service.getAll = function() {
       return setList;
     };
 
-    this.getAllGeneSets = function() {
+    _service.getAllGeneSets = function() {
       return _.filter(setList, function(s) {
         return s.type === 'gene';
       });
     };
 
-    this.initService = function() {
+    _service.initService = function() {
       setList = localStorageService.get(LIST_ENTITY) || [];
 
       // Reset everything to PENDNG
@@ -421,13 +421,13 @@
         set.state = 'PENDING';
       });
 
-      _this.refreshList();
+      _service.refreshList();
 
       return setList;
     };
 
 
-    this.updateSets = function(sets) {
+    _service.updateSets = function(sets) {
       sets.forEach(function(item) {
         var index = _.findIndex(setList, function(d) {
           return item.id === d.id;
@@ -438,11 +438,11 @@
         }
       });
       localStorageService.set(LIST_ENTITY, setList);
-      _this.refreshList();
+      _service.refreshList();
     };
 
 
-    this.removeSeveral = function(ids) {
+    _service.removeSeveral = function(ids) {
       _.remove(setList, function(list) {
         return ids.indexOf(list.id) >= 0;
       });
@@ -450,7 +450,7 @@
       return true;
     };
 
-    this.remove = function(id) {
+    _service.remove = function(id) {
       _.remove(setList, function(list) {
         return list.id === id;
       });
@@ -460,7 +460,7 @@
 
 
     // Make sure the demo is in place
-    this.initDemo = function() {
+    _service.initDemo = function() {
       var settingsPromise = Restangular.one('settings').get();
 
       function addDemo(demo) {
@@ -483,20 +483,128 @@
       settingsPromise.then(function(settings) {
         if (settings.hasOwnProperty('demoListUuid')) {
           var uuid = settings.demoListUuid;
-          var demoPromise = _this.getMetaData([uuid]);
+          var demoPromise = _service.getMetaData([uuid]);
 
           demoPromise.then(function(results) {
             addDemo(results[0]);
-            _this.refreshList();
+            _service.refreshList();
           });
         }
       });
 
     };
 
+    // Wait for sets to getResolved
+    function ResolveSet(Ids, waitMS, numTries) {
+      var _Ids = Ids,
+          _waitMS = waitMS || 1500,
+          _numTries = numTries || 10,
+          _originalNumTries = _numTries,
+          _retrievalTargetPromiseFunction = _defaultRetrievalTargetPromiseFunction,
+          _resolvedEntityFunction = _defaultSetResolvedFunction,
+          _resolvePromise = null,
+          _this = this;
+
+      _this.resolve = _resolve;
+      _this.reset = _reset;
+
+      _this.setRetrievalEntityFunction = function(fn) {
+
+        if (! angular.isFunction(fn)) {
+          throw new Error('Expected Function for setRetrievalEntityFunction method!');
+        }
+
+        _retrievalTargetPromiseFunction = fn;
+        return _this;
+      };
+
+      _this.setResolvedEntityFunction = function(fn) {
+
+        if (! angular.isFunction(fn)) {
+          throw new Error('Expected Function for setResolvedEntityFunction method!');
+        }
+
+        _resolvedEntityFunction = fn;
+        return _this;
+      };
+
+
+      ////
+
+      function _defaultRetrievalTargetPromiseFunction() {
+        return _service.getMetaData(_Ids);
+      }
+
+      function _defaultSetResolvedFunction(data) {
+
+        var resolvedSets = _.filter(data, function (entityStatusData) {
+          return entityStatusData.state.toUpperCase() === 'FINISHED';
+        });
+
+        return resolvedSets.length === _Ids.length;
+      }
+
+      ////
+
+      function _reset() {
+        _numTries = _originalNumTries;
+        _resolvePromise = null;
+        return _this;
+      }
+
+      function _resolve() {
+
+        if (_resolvePromise === null) {
+          _resolvePromise = $q.defer();
+        }
+
+        if (numTries <= 0) {
+          return _resolvePromise.reject();
+        }
+
+        _retrievalTargetPromiseFunction()
+          .then(function(data) {
+
+            var entityData = data.plain();
+
+            if (_resolvedEntityFunction(entityData)) {
+              _resolvePromise.resolve(entityData);
+            }
+            else {
+              setTimeout(function() {
+                _numTries--;
+                _resolve();
+              }, _waitMS);
+            }
+
+          });
+
+        return _resolvePromise.promise;
+      }
+
+
+    }
+
+    _service.pollingResolveSetFactory = function(Ids, waitMS, numTries) {
+      var _Ids = [];
+
+      if (angular.isArray(Ids)) {
+        _Ids = Ids;
+      }
+      else if (angular.isDefined(Ids)) {
+        _Ids.push(Ids);
+      }
+      else {
+        throw new Error('Expected an entity ID, or array of entity IDs but got: ', Ids);
+      }
+
+      return new ResolveSet(_Ids, waitMS, numTries);
+    };
+
+
     // Initialize
-    var setList = _this.initService();
-    _this.refreshList();
+    var setList = _service.initService();
+    _service.refreshList();
   });
 
 })();

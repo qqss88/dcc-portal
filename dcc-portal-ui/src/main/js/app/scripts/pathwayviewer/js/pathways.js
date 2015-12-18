@@ -18,7 +18,9 @@
 (function () {
   'use strict';
 	
-	var module = angular.module('icgc.pathways', ['icgc.enrichment.directives']);
+	var module = angular.module('icgc.pathways', [
+    'icgc.enrichment.directives', 'icgc.sets.services'
+  ]);
 	
 	module
     .constant('PathwaysConstants', {
@@ -39,13 +41,13 @@
                         deferred = $q.defer();
 
                     Restangular.one('analysis/enrichment', entityID).get()
-                        .then(function(rectangularEnrichmentData) {
-                            deferred.resolve(rectangularEnrichmentData.plain());      
-						},
-						function(response) {
-							deferred.reject(response);
-						}
-						);          
+                      .then(function(rectangularEnrichmentData) {
+                            return deferred.resolve(rectangularEnrichmentData.plain());
+                          },
+                          function(response) {
+                            return deferred.reject(response);
+                          }
+						          );
 
                     return deferred.promise;
                 }]
@@ -56,41 +58,82 @@
 
 	module.controller('PathwaysController', function($scope, $q, Page, EnrichmentData, Restangular,
 		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService,
-    EnrichmentService, PathwaysConstants) {
+    EnrichmentService, SetService, PathwaysConstants, RestangularNoCache) {
 				
 		
 		var _selectedPathway = null;
 
+    function _resolveEnrichmentData(Id) {
+      $scope.analysis.isLoading = true;
+
+      SetService.pollingResolveSetFactory(Id, 2000, 10)
+        .setRetrievalEntityFunction(function() {
+          return RestangularNoCache.one('analysis/enrichment', Id).get();
+        })
+        .setResolvedEntityFunction(function(entityData){
+          return entityData.state.toUpperCase() === 'FINISHED';
+        })
+        .resolve()
+        .then(function (entityData) {
+
+          _initAnalysisScope(entityData);
+
+          if (! _selectedPathway) {
+            return;
+          }
+
+          var _updateSelectedPathway = _.first(
+            _.filter(entityData.results, function(pathway) {
+              return pathway.geneSetId === _selectedPathway.geneSetId;
+            })
+          );
+
+          _.assign(_selectedPathway, _updateSelectedPathway);
+          $scope.analysis.isLoading = false;
+
+        });
+    }
+
+    function _initAnalysisScope(entityRecords) {
+      $scope.pathways = entityRecords.results;
+      $scope.analysis = {
+        getID: function() {
+          return entityRecords.id;
+        },
+        getData: function() {
+          return entityRecords;
+        },
+        getContext: function() {
+          return 'pathways';
+        }
+      };
+    }
 	
 		function _init() {
 			Page.stopWork();
 			Page.setPage('entity');
 			Page.setTitle('Enrichment Analysis Pathway Viewer');
-      
+
       $scope.TooltipText = TooltipText;
-			
-			$scope.pathways = EnrichmentData.results;
-			$scope.analysis = {
-						getID: function() {
-							return EnrichmentData.id;	
-						},
-						getData: function() {
-							return EnrichmentData;
-						},
-						getContext: function() {
-							return 'pathways';
-						}
-			};
-			
-			
-			// Select the first gene set in the pathway as the
-			// default value if one exists...
+
+      _initAnalysisScope(EnrichmentData);
+      $scope.analysis.isLoading = true;
+
+      // Select the first gene set in the pathway as the
+      // default value if one exists...
       var firstGenesetPathway = _.first($scope.pathways);
-	
-			if ( firstGenesetPathway ) {
-				$scope.setSelectedPathway(firstGenesetPathway);
-			}
-			
+
+      if ( firstGenesetPathway ) {
+        $scope.setSelectedPathway(firstGenesetPathway);
+      }
+
+      if (EnrichmentData.state !== 'FINISHED') {
+        _resolveEnrichmentData(EnrichmentData.id);
+      }
+      else {
+        $scope.analysis.isLoading = false;
+      }
+
 		}
     
     function _addFilters(pathway) {
