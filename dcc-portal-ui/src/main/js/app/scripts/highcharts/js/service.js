@@ -158,7 +158,8 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     }
 
     chosenColour = colours[colourIndex];
-    //console.log('For Term "' + term + '" (normalized to: ' + normalizedTerm + ' ). The colour Index Chosen is ' + colourIndex + ' (' + colour + ')');
+    //console.log('For Term "' + term + '" (normalized to: ' + normalizedTerm + ' ).' +
+    //              ' The colour Index Chosen is ' + colourIndex + ' (' + colour + ')');
 
     // save it to the primaryColour object store for later caching purposes
     primaryColours[normalizedTerm] = chosenColour;
@@ -187,7 +188,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       data = params.data;
 
     // Creates outer ring
-    function buildOuterRing(hit, idx) {
+    function buildOuterRing(hit) {
       var inner = hit[innerFacet],
         name = hit[outerFacet],
         count = hit[countBy] ? hit[countBy] : 0,
@@ -261,7 +262,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       return r;
     }
 
-    terms.forEach(function (item, idx) {
+    terms.forEach(function (item) {
       term = {
         name: item.term,
         y: item.count,

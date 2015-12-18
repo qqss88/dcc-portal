@@ -175,7 +175,10 @@ module.exports = function (grunt) {
       },
       all: [
         'Gruntfile.js',
-        '<%= yeoman.app %>/scripts/**/*.js'
+        '<%= yeoman.app %>/scripts/**/*.js',
+        // Skip pqlparser.js as this is auto generated during the build
+        // from the 3rd party task
+        '!<%= yeoman.app %>/scripts/common/js/pql/pqlparser.js'
       ]
     },
     compass: {

@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 (function() {
 
   'use strict';
@@ -155,9 +172,40 @@
     var nodes = [];
     var mutatedNodeText = 'Mutated Gene(s)';
     var failedText = 'Failed Output';
-    var lofText = "LossOfFunction";
+    var lofText = 'LossOfFunction';
     var x = marginLeft, y= marginTop;
-    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText,lofText,mutatedNodeText];
+    var types = [
+      'Complex',
+      'Protein',
+      'EntitySet',
+      'Chemical',
+      'Compartment',
+      'ProcessNode',
+      failedText,
+      lofText,
+      mutatedNodeText
+    ];
+
+    function _getNodeType(type) {
+      var newType = 'Renderable'+type;
+
+      switch(type) {
+        case 'ProcessNode':
+          newType = type;
+          break;
+        case failedText:
+          newType ='RenderableFailed';
+          break;
+        case lofText:
+          newType ='RenderableEntitySet';
+          break;
+        default:
+          break;
+      }
+
+      return newType;
+    }
+
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
@@ -166,17 +214,7 @@
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
-        type:(function(type) {
-          if (type==='ProcessNode') {
-            return type;
-          } else if (type===failedText) {
-            return 'RenderableFailed';
-          } else if (type===lofText) {
-            return 'RenderableEntitySet';
-          } else {
-            return 'Renderable'+type;
-          }
-        })(type),
+        type: _getNodeType(type),
         id:type===mutatedNodeText?'mutated':'fake',
         crossed:type===failedText?true:false,
         lof:type===lofText?true:false,

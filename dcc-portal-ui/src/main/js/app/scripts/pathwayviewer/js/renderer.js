@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 (function() {
 
   'use strict';
@@ -320,11 +337,13 @@
             '<td style="max-width:'+d.size.width+'px;" class="RenderableNodeTextCell lof-cell" valign="middle">'+
             d.text.content+'</td></tr></table>';
         } else if (d.overlaid && !d.crossed) {
-          return '<table class="RenderableNodeTextCell"><tr><td style="max-width:'+d.size.width+'px;" valign="middle">' + 
+          return '<table class="RenderableNodeTextCell">' +
+                 '<tr><td style="max-width:'+d.size.width+'px;" valign="middle">' +
           '<span class="span__'+ d.type +'">'+
             d.text.content+'</span></td></tr></table>';
         } else {
-          return '<table class="RenderableNodeTextCell"><tr><td style="max-width:'+d.size.width+'px;" valign="middle">'+
+          return '<table class="RenderableNodeTextCell">' +
+                 '<tr><td style="max-width:'+d.size.width+'px;" valign="middle">'+
             d.text.content+'</td></tr></table>';
         }
       });
@@ -339,7 +358,7 @@
       'x2':function(d){return (+d.position.x)+(+d.size.width)  + 5.5;},
       'y2':function(d){return (+d.position.y) + 1;},
     }).attr('stroke','black')
-      .attr('marker-end',"url('"+config.urlPath+"#GeneArrow')");
+      .attr('marker-end','url("'+config.urlPath + '#GeneArrow")');
     
   };
 
@@ -379,11 +398,11 @@
     }).attr({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker) && !isLink(d.type)?
-          "url('"+config.urlPath+'#'+d.marker+"')":"";
+          'url("'+config.urlPath+'#'+d.marker+'")' : '';
       },
       'marker-end':function(d){
         return d.marked && !isStartMarker(d.marker) && !isLink(d.type)?
-          "url('"+config.urlPath+'#'+d.marker+"')":"";
+          'url("'+config.urlPath+'#'+d.marker+'")' : '';
       }
     });
   };

@@ -43,30 +43,33 @@
             highlights = $scope.highlights || [],
             overlaps = $scope.overlaps || [],
             scrollTimer,
-            consequenceFilter = {"is":
-          ["frameshift_variant",
-          "missense_variant",
-          "start_lost",
-          "initiator_codon_variant",
-          "stop_gained","stop_lost",
-          "exon_loss_variant",
-          "exon_variant",
-          "splice_acceptor_variant",
-          "splice_donor_variant",
-          "splice_region_variant",
-          "5_prime_UTR_premature_start_codon_gain_variant",
-          "disruptive_inframe_deletion",
-          "inframe_deletion",
-          "disruptive_inframe_insertion",
-          "inframe_insertion"]};
+            consequenceFilter = {
+              is: [
+                      'frameshift_variant',
+                      'missense_variant',
+                      'start_lost',
+                      'initiator_codon_variant',
+                      'stop_gained','stop_lost',
+                      'exon_loss_variant',
+                      'exon_variant',
+                      'splice_acceptor_variant',
+                      'splice_donor_variant',
+                      'splice_region_variant',
+                      '5_prime_UTR_premature_start_codon_gain_variant',
+                      'disruptive_inframe_deletion',
+                      'inframe_deletion',
+                      'disruptive_inframe_insertion',
+                      'inframe_insertion'
+                    ]
+            };
 
-        element.bind("mouseenter", function() {
+        element.bind('mouseenter', function() {
           scrollTimer = setTimeout(function() {
             $('.pathwaysvg').attr('class', 'pathwaysvg');
           }, 500);
         });
 
-        element.bind("mouseleave", function() {
+        element.bind('mouseleave', function() {
           clearTimeout(scrollTimer);
           $('.pathwaysvg').attr('class', 'pathwaysvg pathway-no-scroll');
         });
@@ -116,7 +119,10 @@
               .attr('preserveAspectRatio', 'xMidYMid')
               .attr('style', 'padding-top:20px')
               .append('g');
-          var infoRenderer = new pathwayViewerCtrl.Renderer(infoSvg, {onClick: null, urlPath: $location.url(), overlapColor: '#ff9900', highlightColor: '#9b315b', strokeColor: '#696969'});
+          var infoRenderer = new pathwayViewerCtrl.Renderer(infoSvg, {
+            onClick: null, urlPath: $location.url(), overlapColor: '#ff9900',
+            highlightColor: '#9b315b', strokeColor: '#696969'
+          });
 
           node.size={width:120-padding*2,height:60-padding*2};
           node.position={x:padding+15,y:padding+nodeTopPadding};
@@ -188,10 +194,13 @@
                 mutationCount = geneList[0].value;
               }
 
-              $scope.geneList = _.sortBy(geneList,function(n){return -n.value;});
+              $scope.geneList = _.sortBy(geneList, function(n) {
+                return -n.value;
+              });
             }
 
-            renderinfo(node, geneList.length > 0 ? mutationCount : 0, (geneList.length > 0 || overlappingGenesList.length > 0));
+            renderinfo(node, geneList.length > 0 ? mutationCount : 0,
+                        (geneList.length > 0 || overlappingGenesList.length > 0));
           },
           urlPath: $location.url(),
           strokeColor: '#696969',
@@ -259,7 +268,7 @@
             if (matches !== null) {
               var svgId = matches[1];
               var newPath = window.location.pathname + window.location.search;
-              var newUrl = "url('" + newPath + svgId + "')";
+              var newUrl = 'url("' + newPath + svgId + '")';
 
               e.setAttribute(attr, newUrl);
             }
@@ -301,7 +310,7 @@
             }
         };
 
-        $scope.$watch('items', function (newValue, oldValue) {
+        $scope.$watch('items', function (newValue) {
           rendered = false;
           xml = newValue;
           handleRender();

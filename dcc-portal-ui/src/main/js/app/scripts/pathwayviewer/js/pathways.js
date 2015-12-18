@@ -59,8 +59,7 @@
     EnrichmentService, PathwaysConstants) {
 				
 		
-		var _ctrl = this,
-        _selectedPathway = null;
+		var _selectedPathway = null;
 
 	
 		function _init() {
@@ -132,7 +131,7 @@
         
         
         
-       Restangular.one("genesets").one(id).get()
+       Restangular.one('genesets').one(id).get()
        .then(function(geneSet){
           _geneSet = geneSet;
           _uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy(_geneSet.hierarchy, _geneSet);
@@ -241,8 +240,9 @@
 
 
 
-             //console.log('Overlap genes returned: ' + _.keys(_geneOverlapExistsHash).length, '\nProtein Map Intersect Overlap Length = ' +
-             //                                                                             (_.intersection(_.values(_uniprotIds), _.keys(_geneOverlapExistsHash)).length) );
+             //console.log('Overlap genes returned: ' +
+             // _.keys(_geneOverlapExistsHash).length, '\nProtein Map Intersect Overlap Length = ' +
+            //  (_.intersection(_.values(_uniprotIds), _.keys(_geneOverlapExistsHash)).length) );
              deferred.resolve();
 
            });

@@ -180,7 +180,10 @@
 
               options.tooltipShowFunc = function(elem, d, options, isDomain) {
                 var getLabel = function(){
-                  if(isDomain) return d.id + ': ' + d.description;
+
+                  if(isDomain) {
+                    return d.id + ': ' + d.description;
+                  }
 
                   var FI = getOverallFunctionalImpact(d);
                   return 'Mutation ID: ' + d.ref + '<br>' +
@@ -189,6 +192,8 @@
                          'Functional Impact: ' + FI;
                 };
 
+                var position = null;
+
                 if(isDomain){
                   // The domain svg element consits of a group of text and rect. Since the text
                   // can extend the rect which we care about it, get the first child (rect)
@@ -196,12 +201,13 @@
 
                   // Use the width/height of the rect and the CTM of the svg container plus the
                   // x and y position of the rect within the svg container to find the left/right values
-                  var position = {
+                  position = {
                     width: actualElement.prop('width').baseVal.value,
                     height: actualElement.prop('height').baseVal.value,
                     left: elem.getScreenCTM().e + actualElement.prop('x').baseVal.value,
                     top: elem.getScreenCTM().f + $window.pageYOffset + actualElement.prop('y').baseVal.value
-                  }
+                  };
+
                 }
 
                 scope.$emit('tooltip::show', {
@@ -210,11 +216,11 @@
                   placement: options.placement,
                   elementPosition: isDomain?position:null
                 });
-              }
+              };
 
               options.tooltipHideFunc = function() {
                 scope.$emit('tooltip::hide');
-              }
+              };
 
               options.markerClassFn = function(d) {
                 var style;
@@ -244,7 +250,7 @@
         }
 
 
-        scope.$on('$locationChangeSuccess', function (event, dest) {
+        scope.$on('$locationChangeSuccess', function () {
           if (scope.transcript) {
             refresh(scope.transcript);
           }

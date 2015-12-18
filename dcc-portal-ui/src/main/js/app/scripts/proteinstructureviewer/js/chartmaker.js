@@ -63,8 +63,8 @@ var ProteinStructureChart = function (options, data) {
     markerTooltipOptions: {container: 'body', placement: 'right', html: true},
     tooltipShowFunc: {},
     tooltipHideFunc: {},
-    markerClassFn: function (d) {
-      return undefined;
+    markerClassFn: function () {
+      return; // Return undefined
     },
     markerUrlFn: null
   };
@@ -103,19 +103,19 @@ ProteinStructureChart.prototype.packRanges = function (data, rangeKey) {
   var length = data.length;
   var binRights = [];
   var binCount = 0;
-  sorted: for (var i = 0; i < length; i++) {
+  sortedSection: for (var i = 0; i < length; i++) {
     var next = sorted[i];
     var left = next.range[0];
     for (var j = 0; j < binCount; j++) {
       if (left > binRights[j]) {
         data[next.index].bin = j;
         binRights[j] = next.range[1];
-        continue sorted;
+        continue sortedSection;
       }
     }
     data[next.index].bin = binCount++;
     binRights.push(next.range[1]);
-    continue sorted;
+    continue sortedSection;
   }
 
   return binCount;
@@ -131,11 +131,11 @@ ProteinStructureChart.prototype.addChartData = function (data) {
     return 10 + d;
   }
 
-  function widthFunction(d) {
+  function widthFunction() {
     return 10;
   }
 
-  function heightFunction(d) {
+  function heightFunction() {
     return 10;
   }
 
@@ -164,11 +164,11 @@ ProteinStructureChart.prototype.addValues = function () {
   var markerRadius = this.config.markerRadius;
   var bboxOffset = 2;
 
-  function markerCxFn(d, i) {
+  function markerCxFn(d) {
     return proteinScale(d.position);
   }
 
-  function markerCyFn(d, i) {
+  function markerCyFn(d) {
     return valueScale(d.value);
   }
 
@@ -180,11 +180,11 @@ ProteinStructureChart.prototype.addValues = function () {
     return markerCyFn(d, i) - (markerRadius + bboxOffset);
   }
 
-  function markerBBoxSize(d, i) {
+  function markerBBoxSize() {
     return 2 * (markerRadius + bboxOffset);
   }
 
-  function valuePathFn(d, i) {
+  function valuePathFn(d) {
     var x = proteinScale(d.position);
     var top = valueScale(d.value);
     return 'M' + x + ',' + Math.min(top + markerRadius - 1, bottom) + 'L' + x + ',' + bottom;
@@ -226,7 +226,7 @@ ProteinStructureChart.prototype.addValues = function () {
  */
 ProteinStructureChart.prototype.addDomains = function () {
   var domains = this.data.domains;
-  if (!domains || domains.length == 0) {
+  if (! domains || domains.length === 0) {
     // No domains to render
     return;
   }
@@ -242,35 +242,35 @@ ProteinStructureChart.prototype.addDomains = function () {
   var dbo = (drh - dbh) / 2;
   // var lm = this.config.leftMargin;
 
-  function domainXFn(d, i) {
+  function domainXFn(d) {
     return proteinScale(d.start);
   }
 
-  function domainYFn(d, i) {
+  function domainYFn(d) {
     return domainRowScale(d.bin);
   }
 
-  function domainWidthFn(d, i) {
+  function domainWidthFn(d) {
     return proteinScale(d.stop) - proteinScale(d.start);
   }
 
-  function domainHeightFn(d, i) {
+  function domainHeightFn() {
     return drh;
   }
 
-  function domainColourFn(d, i) {
+  function domainColourFn(d) {
     return domainColourScale(d.id);
   }
 
-  function domainLabelFn(d, i) {
+  function domainLabelFn(d) {
     return d.id;
   }
 
-  function domainRowLabelFn(d, i) {
+  function domainRowLabelFn(d) {
     return d.label;
   }
 
-  function domainRowYFn(d, i) {
+  function domainRowYFn(d) {
     return domainRowScale(d.row) + dbo;
   }
 
@@ -322,7 +322,7 @@ ProteinStructureChart.prototype.addDomains = function () {
       .style('opacity', 0.1);
   }
 
-  function unhighlightDomainFn(domain) {
+  function unhighlightDomainFn() {
     domainGroups.selectAll('rect')
       .transition()
       .duration(250)

@@ -55,6 +55,7 @@ angular.module('icgc.modules.genomeviewer.service').service('GMService', functio
       consequenceType = consequences[i][1];
       geneSymbol = consequences[i][2];
       aaChange = consequences[i][3];
+
       if (!consequenceMap.hasOwnProperty(consequenceType)) {
         consequenceMap[consequenceType] = {};
       }
@@ -66,10 +67,9 @@ angular.module('icgc.modules.genomeviewer.service').service('GMService', functio
       if (!consequenceMap[consequenceType].hasOwnProperty(geneSymbol)) {
         consequenceMap[consequenceType][geneSymbol] = [];
       }
-      if (aaChange && aaChange !== '') {
-        if (consequenceMap[consequenceType][geneSymbol].indexOf(aaChange) === -1) {
+
+      if (aaChange && aaChange !== '' && consequenceMap[consequenceType][geneSymbol].indexOf(aaChange) === -1) {
           consequenceMap[consequenceType][geneSymbol].push(aaChange);
-        }
       }
     }
 

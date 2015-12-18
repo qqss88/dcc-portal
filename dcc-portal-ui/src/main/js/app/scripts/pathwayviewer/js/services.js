@@ -1,3 +1,21 @@
+/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+'use strict';
 
 angular.module('icgc.pathwayviewer.directives.services', [])
   .service('pathwayModelService', function() {
@@ -61,8 +79,10 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           var overlaidIndex = overlaidList.indexOf(attrs.id.nodeValue);
           var type = this.tagName.substring(this.tagName.lastIndexOf('.') + 1);
 
-          // We need to be careful and check if forNormalDraw has been set. If so ONLY draw compartments and normal nodes
-          if ((forNormalDraw && normalComponents.indexOf(attrs.id.nodeValue) >= 0 ) || !forNormalDraw || type === 'RenderableCompartment') {
+          // We need to be careful and check if forNormalDraw has been set.
+          // If so ONLY draw compartments and normal nodes
+          if ( (forNormalDraw && normalComponents.indexOf(attrs.id.nodeValue) >= 0 ) ||
+              (!forNormalDraw || type === 'RenderableCompartment') ) {
             nodes.push({
               position: {
                 x: +bounds[0],
@@ -76,7 +96,9 @@ angular.module('icgc.pathwayviewer.directives.services', [])
               id: attrs.id.nodeValue,
               crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ),
               lof: (lofIndex >= 0 ),
-              grayed: (isDisease && (overlaid && overlaidIndex < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
+              grayed: (isDisease &&
+                       (overlaid && overlaidIndex < 0) &&
+                       diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
               // Do not set as overlaid if it is already a loss of function node as lof ensures opaque background
               overlaid: (isDisease && (overlaid && overlaidIndex >= 0) && lofIndex < 0 ),
               // Empty compartments will not have any schemaClass. We use this info to not render them
@@ -114,16 +136,17 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           var base = getPointsArray(this.attributes.points.nodeValue);
           var nodes=[];
           var description = $(this).children().find('properties').context;
+          var nodeColour = _.get(this.attributes, 'lineColor.nodeValue', false);
 
           var schemaClass = this.attributes.schemaClass;
           var failedReaction = false;
-          if ((!(typeof schemaClass === 'undefined') && schemaClass.nodeValue === 'FailedReaction') ||
-              (this.attributes.lineColor && (this.attributes.lineColor.nodeValue === '255 0 0' || this.attributes.lineColor.nodeValue === '255 51 51'))) {
+          if ((typeof schemaClass !== 'undefined' && schemaClass.nodeValue === 'FailedReaction') ||
+              (nodeColour === '255 0 0' || nodeColour === '255 51 51')) {
             failedReaction = true;
           }
 
           var grayed = false;
-          if (isDisease && this.attributes.lineColor && this.attributes.lineColor.nodeValue === '255 51 51') {
+          if (isDisease && nodeColour === '255 51 51') {
             grayed = true;
           }
 
@@ -192,7 +215,7 @@ angular.module('icgc.pathwayviewer.directives.services', [])
 
     this.getPathwayModel = function() {
       return PathwayModel;
-    }
+    };
 
   })
   .service('PathwayRendererService', function() {
@@ -538,7 +561,9 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           'fill': 'none',
           'stroke': 'red',
           'stroke-width': '2',
-          'points': function(d) {return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+          'points': function(d) {
+            return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);
+          }
         });
 
         // Add a foreignObject to contain all text so that warpping is done for us
@@ -555,15 +580,17 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           .html(function(d){
             if (d.lof) {
               var lofClass = 'lof-'+ d.type;
-              return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr>' +
-                     '<td style="max-width:'+d.size.width+'px;" class="RenderableNodeTextCell lof-cell" valign="middle">'+
-                     d.text.content+'</td></tr></table>';
+              return '<table class="RenderableNodeTextCell ' + lofClass +'">' +
+                     '<tr><td style="max-width:'+d.size.width+'px;" class="RenderableNodeTextCell lof-cell" ' +
+                     ' valign="middle">' + d.text.content+'</td></tr></table>';
             } else if (d.overlaid && !d.crossed) {
-              return '<table class="RenderableNodeTextCell"><tr><td style="max-width:'+d.size.width+'px;" valign="middle">' +
+              return '<table class="RenderableNodeTextCell">' +
+                     '<tr><td style="max-width:'+d.size.width+'px;" valign="middle">' +
                      '<span class="span__'+ d.type +'">'+
                      d.text.content+'</span></td></tr></table>';
             } else {
-              return '<table class="RenderableNodeTextCell"><tr><td style="max-width:'+d.size.width+'px;" valign="middle">'+
+              return '<table class="RenderableNodeTextCell">' +
+                     '<tr><td style="max-width:'+d.size.width+'px;" valign="middle">'+
                      d.text.content+'</td></tr></table>';
             }
           });
@@ -578,7 +605,7 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           'x2':function(d){return (+d.position.x)+(+d.size.width)  + 5.5;},
           'y2':function(d){return (+d.position.y) + 1;},
         }).attr('stroke','black')
-          .attr('marker-end',"url('"+config.urlPath+"#GeneArrow')");
+          .attr('marker-end','url("' + config.urlPath + '#GeneArrow")');
 
       };
 
@@ -618,11 +645,11 @@ angular.module('icgc.pathwayviewer.directives.services', [])
         }).attr({
           'marker-start':function(d){
             return d.marked && isStartMarker(d.marker) && !isLink(d.type)?
-            "url('"+config.urlPath+'#'+d.marker+"')":"";
+            'url("' + config.urlPath + '#' + d.marker + '")' : '';
           },
           'marker-end':function(d){
             return d.marked && !isStartMarker(d.marker) && !isLink(d.type)?
-            "url('"+config.urlPath+'#'+d.marker+"')":"";
+            'url("' + config.urlPath + '#' + d.marker + '")' : '';
           }
         });
       };
@@ -951,7 +978,7 @@ angular.module('icgc.pathwayviewer.directives.services', [])
         var mutatedNodeText = 'Mutated Gene(s)';
         var overlappedNodeText = 'Overlapping Gene(s)';
         var failedText = 'Failed Output';
-        var lofText = "LossOfFunction";
+        var lofText = 'LossOfFunction';
         var x = marginLeft, y= marginTop;
         var types = [
           'Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',
@@ -976,6 +1003,29 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           return _id;
         }
 
+        function _getNodeType(type) {
+          var newType = 'Renderable'+type;
+
+          switch(type) {
+            case 'ProcessNode':
+              newType = type;
+              break;
+            case failedText:
+              newType ='RenderableFailed';
+              break;
+            case overlappedNodeText:
+              newType = 'RenderableOverlappedEntitySet';
+              break;
+            case lofText:
+              newType ='RenderableEntitySet';
+              break;
+            default:
+              break;
+          }
+
+          return newType;
+        }
+
 
         for(var i=0;i<types.length;i++){
           x = i%2===0?marginLeft:marginLeft+100+10;
@@ -991,23 +1041,7 @@ angular.module('icgc.pathwayviewer.directives.services', [])
           var node = {
             position:{x:x,y:y},
             size:{width:90,height:30},
-            type:(function(type) {
-              if (type==='ProcessNode') {
-                return type;
-              }
-              else if (type === failedText) {
-                return 'RenderableFailed';
-              }
-              else if (type === lofText) {
-                return 'RenderableEntitySet';
-              }
-              else if (type === overlappedNodeText) {
-                return 'RenderableOverlappedEntitySet';
-              }
-              else {
-                return 'Renderable'+type;
-              }
-            })(type),
+            type: _getNodeType(type),
             id: _getIDForType(type),
             crossed:type===failedText?true:false,
             lof:type===lofText?true:false,

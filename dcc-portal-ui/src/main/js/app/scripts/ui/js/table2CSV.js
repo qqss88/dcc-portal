@@ -15,20 +15,20 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+'use strict';
 
 /** 
  * Adapated to work with ICGC table double header format 
  */
-jQuery.fn.table2CSV = function(options) {
+jQuery.fn.table2CSV = function(opts) {
   var options = jQuery.extend({
         separator: ',',
         header: [],
         delivery: 'popup' // popup, value
       },
-      options);
+    opts);
 
   var csvData = [];
-  var headerArr = [];
   var el = this;
 
   //header
@@ -44,30 +44,30 @@ jQuery.fn.table2CSV = function(options) {
     // portal-ui: support 2-level table header, dependent on the use of subhead class
     var subQueue = [];
     var idx = -1;
-    //$(el).filter(':visible').find('tr').each(function() {
-    $(el).find('tr').each(function() {
+    //jQuery(el).filter(':visible').find('tr').each(function() {
+    jQuery(el).find('tr').each(function() {
       // Second level processing
-      if ($(this).hasClass('subhead')) {
-        $(this).find('th').each(function() {
-          //if ($(this).css('display') != 'none') {
+      if (jQuery(this).hasClass('subhead')) {
+        jQuery(this).find('th').each(function() {
+          //if (jQuery(this).css('display') != 'none') {
             if (subQueue.length > 0) {
               idx = subQueue.splice(0, 1);
-              tmpRow[idx] += ' ' + formatData($(this).html());
+              tmpRow[idx] += ' ' + formatData(jQuery(this).html());
             }
           //}
         });
       } else {
         // Top level processing
-        $(this).find('th').each(function() {
-          //if ($(this).css('display') != 'none') {
-            if ($(this).attr('colspan')) {
-              var cols = $(this).attr('colspan');
+        jQuery(this).find('th').each(function() {
+          //if (jQuery(this).css('display') != 'none') {
+            if (jQuery(this).attr('colspan')) {
+              var cols = jQuery(this).attr('colspan');
               for (var i=0; i < cols; i++) {
                 subQueue.push( tmpRow.length );
-                tmpRow[tmpRow.length] = formatData($(this).html());
+                tmpRow[tmpRow.length] = formatData(jQuery(this).html());
               }
             } else {
-              tmpRow[tmpRow.length] = formatData($(this).html());
+              tmpRow[tmpRow.length] = formatData(jQuery(this).html());
             }
           //}
         });
@@ -76,8 +76,8 @@ jQuery.fn.table2CSV = function(options) {
 
 
     /* Original
-    $(el).filter(':visible').find('th').each(function() {
-      if ($(this).css('display') != 'none') tmpRow[tmpRow.length] = formatData($(this).html());
+    jQuery(el).filter(':visible').find('th').each(function() {
+      if (jQuery(this).css('display') != 'none') tmpRow[tmpRow.length] = formatData(jQuery(this).html());
     });
     */
   }
@@ -85,42 +85,45 @@ jQuery.fn.table2CSV = function(options) {
   row2CSV(tmpRow);
 
   // actual data
-  $(el).find('tr').each(function() {
+  jQuery(el).find('tr').each(function() {
     var tmpRow = [];
-    //$(this).filter(':visible').find('td').each(function() {
-    $(this).find('td').each(function() {
-      //if ($(this).css('display') != 'none') 
-        tmpRow[tmpRow.length] = formatData($(this).html());
+    //jQuery(this).filter(':visible').find('td').each(function() {
+    jQuery(this).find('td').each(function() {
+      //if (jQuery(this).css('display') != 'none') 
+        tmpRow[tmpRow.length] = formatData(jQuery(this).html());
     });
     row2CSV(tmpRow);
   });
-  if (options.delivery == 'popup') {
-    var mydata = csvData.join('\n');
+
+  var mydata = '';
+
+  if (options.delivery ==='popup') {
+    mydata = csvData.join('\n');
     return popup(mydata);
-  } else {
-    var mydata = csvData.join('\n');
+  }
+  else {
+    mydata = csvData.join('\n');
     return mydata;
   }
 
   function row2CSV(tmpRow) {
-    var tmp = tmpRow.join('') // to remove any blank rows
+    var tmp = tmpRow.join(''); // to remove any blank rows
     // alert(tmp);
-    if (tmpRow.length > 0 && tmp != '') {
-      var mystr = tmpRow.join(options.separator);
-      csvData[csvData.length] = mystr;
+    if (tmpRow.length > 0 && tmp !== '') {
+      csvData[csvData.length] = tmpRow.join(options.separator);
     }
   }
   function formatData(input) {
     var regexp, output;
 
     // replace " with â€œ
-    regexp = new RegExp(/["]/g);
-    output = input.replace(regexp, "â€œ");
+    regexp = new RegExp('"', 'g');
+    output = input.replace(regexp, 'â€œ');
 
 
     //HTML
-    regexp = new RegExp(/\<[^\<]+\>/g);
-    output = output.replace(regexp, "");
+    regexp = new RegExp('<[^<]+>', 'g');
+    output = output.replace(regexp, '');
 
     // portal-ui: additional formatting
     // - Remove non-breaking space
@@ -128,18 +131,21 @@ jQuery.fn.table2CSV = function(options) {
     // - Trim leading/trailing spaces
     // - Trim internal spaces
     output = output.replace(/&nbsp;/g, '');
-    output = output.replace('&lt;', '<')
-    output = output.replace('&gt;', '>')
+    output = output.replace('&lt;', '<');
+    output = output.replace('&gt;', '>');
     output = output.replace(/^\s+|\s+$/g, '');
     output = output.replace(/\n/g, '');
     output = output.replace(/\s+/g, ' ');
 
-    if (output == "") return '';
+    if (output === '') {
+      return output;
+    }
 
     // Do not wrap in quotes if format is tsv
     if (options.separator === '\t') {
       return output;
     }
+
     return '"' + output + '"';
   }
   function popup(data) {

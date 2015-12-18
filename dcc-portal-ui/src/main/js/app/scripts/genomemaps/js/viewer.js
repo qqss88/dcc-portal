@@ -17,6 +17,10 @@
 
 'use strict';
 
+/* globals CellBaseManager:false, CellBaseAdapter:false, FeatureTrack:false, IcgcGeneAdapter: false */
+/* globals GeneRenderer: false, FeatureRenderer: false, IcgcMutationTrack: false, IcgcMutationAdapter: false  */
+/* globals GENE_BIOTYPE_COLORS: false, GENE_BIOTYPE_COLORS: false */
+
 angular.module('icgc.modules.genomeviewer', ['icgc.modules.genomeviewer.header', 'icgc.modules.genomeviewer.service'])
   .constant('gvConstants',  {
     CHROMOSOME_LIMIT_MAP: {
@@ -55,19 +59,35 @@ angular.module('icgc.modules.genomeviewer').controller('GenomeViewerController',
   _controller.getSpecies = function getSpecies(callback) {
     CellBaseManager.get({
       host: GMService.getConfiguration().cellBaseHost,
-      category: "meta",
-      subCategory: "species",
+      category: 'meta',
+      subCategory: 'species',
       success: function (r) {
         var taxonomies = r.response[0].result[0];
+
         for (var taxonomy in taxonomies) {
+
+          if (! taxonomies.hasOwnProperty(taxonomy)) {
+            continue;
+          }
+
           var newSpecies = [];
+
           for (var i = 0; i < taxonomies[taxonomy].length; i++) {
+
             var species = taxonomies[taxonomy][i];
+
+            if (! species.hasOwnProperty('assemblies')) {
+              continue;
+            }
+
             for (var j = 0; j < species.assemblies.length; j++) {
-              var s = Utils.clone(species)
+
+              var s = Utils.clone(species);
+
               s.assembly = species.assemblies[j];
               delete s.assemblies;
-              newSpecies.push(s)
+              newSpecies.push(s);
+
             }
           }
           taxonomies[taxonomy] = newSpecies;
@@ -396,7 +416,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
             done = true;
             var gene = genes.data.hits[0];
             regionObj = new Region({chromosome: gene.chromosome, start: gene.start - 1500, end: gene.end + 1500});
-            if (availableSpecies == null) {
+            if (! availableSpecies) {
               GenomeViewerController.getSpecies(function (s) {
                 availableSpecies = s;
                 setup(regionObj);
@@ -416,7 +436,8 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
               start: mutation.start,
               end: mutation.start
             });
-            if (availableSpecies == null) {
+
+            if (! availableSpecies) {
               GenomeViewerController.getSpecies(function (s) {
                 availableSpecies = s;
                 setup(regionObj);
@@ -452,7 +473,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
       scope.$on('gv:reset', function (e) {
         navigationBar._handleRestoreDefaultRegion(e);
       });
-      scope.$on('gv:autofit', function (e) {
+      scope.$on('gv:autofit', function () {
         genomeViewer.toggleAutoHeight(true);
       });
       scope.$on('$destroy', function () {
@@ -562,10 +583,10 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           visibleRegionSize: 200,
           renderer: new SequenceRenderer({tooltipContainerID: '#genomic'}),
           dataAdapter: new CellBaseAdapter({
-            category: "genomic",
+            category: 'genomic',
             chromosomeLimitMap: gvConstants.CHROMOSOME_LIMIT_MAP,
-            subCategory: "region",
-            resource: "sequence",
+            subCategory: 'region',
+            resource: 'sequence',
             params: {},
             species: genomeViewer.species,
             cacheConfig: {
@@ -579,10 +600,10 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           tooltipContainerID: '#genomic',
           label: function (f) {
             var str = '';
-            str += (f.strand < 0 || f.strand == '-') ? '<' : '';
-            str += (f.strand > 0 || f.strand == '+') ? '>' : '';
+            str += (f.strand < 0 || f.strand === '-') ? '<' : '';
+            str += (f.strand > 0 || f.strand === '+') ? '>' : '';
             str += ' ' + f.externalName + ' ';
-            str += (f.biotype != null && f.biotype != '') ? ' [' + f.biotype + ']' : '';
+            str += (f.biotype !== null && f.biotype !== '') ? ' [' + f.biotype + ']' : '';
             return str;
           },
           tooltipTitle: function (f) {
@@ -602,9 +623,9 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           color: function (f) {
             return GENE_BIOTYPE_COLORS[f.biotype];
           },
-          infoWidgetId: "stableId",
+          infoWidgetId: 'stableId',
           height: 4,
-          histogramColor: "lightblue",
+          histogramColor: 'lightblue',
           handlers: {
             'feature:click': function (e) {
               var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
@@ -760,7 +781,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         scope.$on('gv:reset', function (e) {
           navigationBar._handleRestoreDefaultRegion(e);
         });
-        scope.$on('gv:autofit', function (e) {
+        scope.$on('gv:autofit', function () {
           genomeViewer.toggleAutoHeight(true);
         });
         scope.$on('$destroy', function () {
@@ -788,7 +809,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         regionObj.start -= offset;
         regionObj.end += offset;
 
-        if (availableSpecies == null) {
+        if (! availableSpecies) {
           GenomeViewerController.getSpecies(function (s) {
             availableSpecies = s;
             setup(regionObj);

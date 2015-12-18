@@ -1,3 +1,20 @@
+/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 (function($) {
 
   'use strict';
@@ -58,7 +75,9 @@
       var type = this.tagName.substring(this.tagName.lastIndexOf('.') + 1);
 
       // We need to be careful and check if forNormalDraw has been set. If so ONLY draw compartments and normal nodes
-      if ((forNormalDraw && normalComponents.indexOf(attrs.id.nodeValue) >= 0 ) || !forNormalDraw || type === 'RenderableCompartment') {
+      if (  (forNormalDraw && normalComponents.indexOf(attrs.id.nodeValue) >= 0 ) ||
+            (! forNormalDraw) ||
+            (type === 'RenderableCompartment') ) {
         nodes.push({
           position: {
             x: +bounds[0],
@@ -113,13 +132,15 @@
       
       var schemaClass = this.attributes.schemaClass;
       var failedReaction = false;
-      if ((!(typeof schemaClass === 'undefined') && schemaClass.nodeValue === 'FailedReaction') || 
-        (this.attributes.lineColor && (this.attributes.lineColor.nodeValue === '255 0 0' || this.attributes.lineColor.nodeValue === '255 51 51'))) {
+      var lineColour = _.get(this.attributes, 'lineColor.nodeValue', false);
+
+      if ( (typeof schemaClass !== 'undefined' && schemaClass.nodeValue === 'FailedReaction') ||
+              (lineColour === '255 0 0' || lineColour === '255 51 51') ) {
         failedReaction = true;
       }
       
       var grayed = false;
-      if (isDisease && this.attributes.lineColor && this.attributes.lineColor.nodeValue === '255 51 51') {
+      if (isDisease && lineColour === '255 51 51') {
         grayed = true;
       }
 
