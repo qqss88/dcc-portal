@@ -53,7 +53,7 @@
           return 'IS';
         } 
       }
-    }
+    };
 
     /*
      * This function determines the opening or closing for a human-readable JQL expression,
