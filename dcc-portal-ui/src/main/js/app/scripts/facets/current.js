@@ -39,6 +39,22 @@
       controlType: 'file'
     }];
 
+    $scope.prepositionBuilder = function (typeName, facet, terms) {
+      if ($scope.isNot({type:typeName, facet:facet})) {
+        if ($scope.inPluralForm (terms)) {
+          return 'NOT IN (';
+        } else {
+          return 'IS NOT';
+        }
+      } else {
+        if ($scope.inPluralForm (terms)) { 
+          return 'IN ('; 
+        } else { 
+          return 'IS';
+        } 
+      }
+    }
+
     /*
      * This function determines the opening or closing for a human-readable JQL expression,
      * displayed in UI (usually a top panel above a data table).
@@ -46,7 +62,7 @@
      * with additional logic for special cases.
      */
     $scope.inPluralForm = function (terms) {
-      var filters = _.get (terms, 'is', []);
+      var filters = _.get (terms, 'is', _.get (terms, 'not', []));
 
       if (_.isEmpty (filters)) {return false;}
       if (_.size (filters) > 1) {return true;}

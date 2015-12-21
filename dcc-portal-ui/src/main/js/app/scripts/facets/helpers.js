@@ -127,6 +127,7 @@
         delete filters.gene[params.facet][which];
       }
       
+      _broadcastFacetStatusChange(params.facet, true);
       LocationService.setFilters(filters);
     }
     
@@ -167,6 +168,7 @@
         if (!filters[params.type][params.facet].not.length) {
           removeFacet(params);
         } else {
+          _broadcastFacetStatusChange(params.facet, false);
           LocationService.setFilters(filters);
         }
       } else {
@@ -175,6 +177,7 @@
         if (!filters[params.type][params.facet].is.length) {
           removeFacet(params);
         } else {
+          _broadcastFacetStatusChange(params.facet, false);
           LocationService.setFilters(filters);
         }
       }
