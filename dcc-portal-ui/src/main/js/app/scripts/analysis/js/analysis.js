@@ -3,6 +3,7 @@
 
   var module = angular.module('icgc.analysis', [
     'icgc.analysis.controllers',
+    'icgc.share',
     'ui.router'
   ]);
 

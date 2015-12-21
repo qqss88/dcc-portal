@@ -4,7 +4,7 @@
   var module = angular.module('icgc.analysis.controllers');
 
   module.controller('SavedSetController', function($scope, $window, $location, $timeout, $modal,
-    SetService, Settings, RouteInfoService) {
+    SetService, Settings, LocationService, RouteInfoService) {
 
     var _this = this;
     var syncSetTimeout;
@@ -40,6 +40,25 @@
       _this.entitySets.forEach(function(set) {
         set.checked = _this.checkAll;
       });
+    };
+
+    _this.getEntitySetShareParams = function(item) {
+      // Only do this assignment operation once - otherwise return the
+      // cached value.
+      if (angular.isDefined(item.entitySetShareParams)) {
+        return item.entitySetShareParams;
+      }
+
+
+      var shareParams = {
+        url: LocationService.buildURLFromPath('search' +
+                                              (item.advType !== '' ? ('/' +  item.advType) : '')),
+        filters: JSON.stringify(item.advFilters)
+      };
+
+      item.entitySetShareParams = shareParams;
+
+      return item.entitySetShareParams;
     };
 
     _this.exportSet = function(id) {

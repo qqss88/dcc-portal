@@ -35,6 +35,13 @@
       clear: function () {
         return $location.search({});
       },
+      buildURLFromPath: function(path) {
+        var port = window.location.port ? ':' +  window.location.port : '',
+            URL = window.location.protocol + '//' + window.location.hostname +
+                port + (('/' + path) || window.location.pathname);
+
+        return URL;
+      },
       // Introduced to temporarily support older logic
       getFilterService: function() {
         return FilterService;

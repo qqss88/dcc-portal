@@ -373,9 +373,16 @@
         filters[set.type] = {};
         filters[set.type][Extensions.ENTITY] = {is: [set.id]};
 
+        // Grab the type (base advanced search router and corresponding filters)
+        set.advType = ''; // default route is donors or just route is '/search';
+        set.advFilters = filters;
+
         if (['gene', 'mutation'].indexOf(set.type) !== -1) {
-          set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
-        } else {
+          // Grab the type (base advanced search router and corresponding filters)
+          set.advType = set.type.charAt(0); // route is '/search' plus either '/g' or '/m'
+          set.advLink = '/search/' +  set.advType + '?filters=' + JSON.stringify(filters);
+        }
+        else {
           set.advLink = '/search?filters=' + JSON.stringify(filters);
           var fileFilters = {};
           fileFilters.file = {};
