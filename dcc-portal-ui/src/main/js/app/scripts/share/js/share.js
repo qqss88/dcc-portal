@@ -32,6 +32,20 @@
     };
   });
 
+  module.directive('shareIcon', function () {
+    return {
+      restrict: 'E',
+      replace: true,
+      templateUrl: '/scripts/share/views/share.icon.html',
+      controller: 'shareCtrl as shareCtrl',
+      scope: {
+        shareParams: '='
+      },
+      link: function () {
+      }
+    };
+  });
+
   module.directive('sharePopup', function () {
     return {
       restrict: 'E',
@@ -41,22 +55,30 @@
   });
 
   module.service('Share', function (Restangular, $location) {
-    this.getShortUrl = function (params) {
+    var _service = this;
+
+    _service.getShortUrl = function (params, shouldUseParamsOnlyForRequest) {
+
       var port = window.location.port ? ':' +  window.location.port : '',
           defaults = {
             url: window.location.protocol + '//' + window.location.hostname + 
             port + window.location.pathname
-          };
-      
-      
-      var requestParams = $location.search(),
-          queryStr = '';
-        
-      for (var requestKey in requestParams) {
-        
-        if (! requestParams.hasOwnProperty(requestKey)) {
+          },
+          requestParams = (shouldUseParamsOnlyForRequest === true ? params : $location.search()),
+          queryStr = '',
+          urlShortnerParams = defaults;
+
+      _.assign(urlShortnerParams, params);
+
+      // For some reason JSHint is not correctly picking up that we are checking if the object
+      // has it's own property when using the || - bug with JSHint so ignore the below...
+      for (var requestKey in requestParams) { // jshint ignore:line
+
+        if (  ! requestParams.hasOwnProperty(requestKey) ||
+              (shouldUseParamsOnlyForRequest === true && requestKey === 'url')) {
           continue;
         }
+
           
         if (queryStr !== '') {
           queryStr += '&';
@@ -65,15 +87,20 @@
         // I will file a bug with them but in the meantime
         // this double encoding will do...fail...
         queryStr += requestKey +  '=' + encodeURIComponent(encodeURIComponent(requestParams[requestKey]));
+
+        // The webservice does not take any other parameters so only keep the 'url'
+        // property - no point making a request for the rest since we are encoding
+        // it with the url anyways.
+        delete urlShortnerParams[requestKey];
       }
-      
-      
+
+
       if (queryStr.length > 0) {
-          defaults.url += '?' + queryStr;
+        urlShortnerParams.url += '?' + queryStr;
       }
       
      
-      return Restangular.one('short', '').get(angular.extend(defaults, params));
+      return Restangular.one('short', '').get(urlShortnerParams);
     };
   });
 
@@ -92,10 +119,10 @@
       _ctrl.active = opt;
     };
 
-    _ctrl.getShortUrl = function() {
+    _ctrl.getShortUrl = function(shareParams, shouldUseParamsOnlyForRequest) {
       _ctrl.shortUrl = '';
 
-      Share.getShortUrl().then(function(url) {
+      Share.getShortUrl(shareParams, shouldUseParamsOnlyForRequest).then(function(url) {
         _ctrl.shortUrl = url.shortUrl;
 
         $modal.open({
