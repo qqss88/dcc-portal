@@ -1,0 +1,94 @@
+////////// Animations //////////
+.animated {
+  -webkit-animation-duration: 0.5s;
+  animation-duration: 0.5s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.fadeInDownEnter {
+  -webkit-animation-name: fadeInDownEnter;
+  animation-name: fadeInDownEnter;
+}
+
+
+@keyframes fadeInDownEnter {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -30%, 0);
+    transform: translate3d(0, -30%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+@-webkit-keyframes fadeInDownEnter {
+  from {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -30%, 0);
+    transform: translate3d(0, -30%, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+
+@keyframes colourize {
+  from {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+  }
+
+  to {
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+  }
+}
+
+@-webkit-keyframes colourize {
+  from {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+  }
+
+  to {
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+  }
+}
+
+@keyframes decolourize {
+  from {
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+  }
+
+  to {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+  }
+}
+
+@-webkit-keyframes decolourize {
+  from {
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+  }
+
+  to {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+  }
+}
+
+////////////////////

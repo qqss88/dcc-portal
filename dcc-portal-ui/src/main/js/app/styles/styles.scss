@@ -10,19 +10,49 @@
 @import "_general/type";
 //-----------------------------------------------------------------------------
 // Sections
-@import "_sections/preheader";
-@import "_sections/header";
-@import "_sections/home";
-@import "_sections/donor";
-@import "_sections/advanced";
-@import "_sections/results";
-@import "_sections/footer";
-@import "_sections/download";
-@import "_sections/analysis";
-@import "_sections/team";
+@import "../scripts/common/styles/preheader";
+@import "../scripts/common/styles/header";
+@import "../scripts/releases/styles/home";
+@import "../scripts/donors/styles/donor";
+@import "../scripts/advanced/styles/advanced";
+@import "../scripts/keyword/styles/results";
+@import "../scripts/common/styles/footer";
+@import "../scripts/downloader/styles/download";
+@import "../scripts/analysis/styles/analysis";
+@import "../scripts/static/styles/team";
 //-----------------------------------------------------------------------------
+
+
+// --
+
+@import "../../scripts/facets/styles/current";
+@import "../../scripts/facets/styles/facets";
+
+@import "../../scripts/ui/styles/suggest";
+@import "../../scripts/ui/styles/tooltip";
+@import "../../scripts/ui/styles/copyclip";
+@import "../../scripts/ui/styles/trees";
+
+@import "../../scripts/auth/styles/auth";
+
+@import "../../scripts/visualization/styles/vis";
+@import "../../scripts/highcharts/styles/highcharts";
+@import "../../scripts/proteinstructureviewer/styles/protein";
+@import "../../scripts/genomemaps/styles/genomemaps";
+@import "../../scripts/pathwayviewer/styles/pathwayviewer";
+
+@import "../../scripts/repositories/styles/repositories";
+@import "../../scripts/repositories/styles/guide";
+
+@import "../../scripts/tokens/styles/tokens";
+
+@import "../../scripts/beacon/styles/beacon";
+
+@import "../vendor/styles/bamiobio/bamiobio";
+// --
+
 // Modules
-@import "_modules/modules";  
+@import "_modules/modules";
 
 html {
   font-family: $sans-stack;
