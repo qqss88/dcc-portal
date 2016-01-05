@@ -94,7 +94,7 @@
         });
     }
 
-    function _initAnalysisScope(entityRecords) {console.log(entityRecords);
+    function _initAnalysisScope(entityRecords) {
       $scope.pathways = entityRecords.results;
       $scope.analysis = {
         getID: function() {
