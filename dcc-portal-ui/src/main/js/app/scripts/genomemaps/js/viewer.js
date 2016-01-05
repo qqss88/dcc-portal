@@ -339,7 +339,6 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           tooltipText: function (f) {
             var consequences = GMService.tooltipConsequences(f.consequences), fi;
             fi = (f.functionalImpact && _.contains(f.functionalImpact, 'High')) ? 'High' : 'Low';
-
             return '<span class="gmkeys">mutation:&nbsp;</span>' + f.mutation + '<br>' +
               '<span class="gmkeys">reference allele:&nbsp;</span>' + f.refGenAllele + '<br>' +
               '<span class="gmkeys">mutation type:&nbsp;</span>' + f.mutationType + '<br>' +
@@ -378,8 +377,8 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         }),
           dataAdapter: new IcgcMutationAdapter({
             resource: 'mutation',
-            //multiRegions: true,
-            //histogramMultiRegions: false,
+            multiRegions: true,
+            histogramMultiRegions: false,
             chromosomeLimitMap: gvConstants.CHROMOSOME_LIMIT_MAP,
             featureCache: {
               chunkSize: 10000
