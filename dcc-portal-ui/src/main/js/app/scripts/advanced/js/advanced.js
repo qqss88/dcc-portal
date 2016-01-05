@@ -242,6 +242,12 @@ angular.module('icgc.advanced.controllers', [
         Page.setTitle('Advanced Search');
         Page.setPage('advanced');
 
+        // Force a refresh of the tabs for good measure!
+        // Useful if we are being directed to the Advanced Search
+        // form a different part of the application
+        _resetServices();
+        _refresh();
+
         // Setup
         _controller.setActiveTab($state.current.data.tab);
         _controller.setSubTab($state.current.data.subTab);
