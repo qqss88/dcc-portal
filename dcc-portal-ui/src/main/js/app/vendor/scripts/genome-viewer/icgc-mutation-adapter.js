@@ -182,9 +182,13 @@ IcgcMutationAdapter.prototype.getData = function (args) {
 //            _this.featureCache.putFeaturesByRegion(jsonResponse, segment, 'snp', dataType);
 //        } else {
     var fc = _this.featureCache._getChunk(segment.start);
-    var k = segment.chromosome + ':' + fc;
+    //var k = segment.chromosome + ':' + fc;
     if (_this.featureCache.cache[key] == null || _this.featureCache.cache[key][dataType] == null) {
-      _this.featureCache.putFeaturesByRegion(jsonResponse || {}, segment, 'snp', dataType);
+      // Define a feature type where genome viewer does not have a default for - the reason
+      // is that genome viewer will by default clobber your own custom settings if you do.
+      // This was previously 'snp' (now 'mutation'). snp is defined in the defaults gv-config.js and as
+      // such your settings will be clobbered.
+      _this.featureCache.putFeaturesByRegion(jsonResponse || {}, segment, 'mutation', dataType);
     }
 //        }
     /**/

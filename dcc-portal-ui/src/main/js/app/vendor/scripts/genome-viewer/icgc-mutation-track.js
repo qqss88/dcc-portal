@@ -101,13 +101,13 @@ IcgcMutationTrack.prototype.initializeDom = function(targetId) {
 
 IcgcMutationTrack.prototype.render = function (targetId) {
   var _this = this;
-  this.initializeDom(targetId);
+  _this.initializeDom(targetId);
 
-  this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
-  this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-  this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2;
+  _this.svgCanvasOffset = (_this.width * 3 / 2) / _this.pixelBase;
+  _this.svgCanvasLeftLimit = _this.region.start - _this.svgCanvasOffset * 2;
+  _this.svgCanvasRightLimit = _this.region.start + _this.svgCanvasOffset * 2;
 
-  this.dataAdapter.on('data:ready', function (event) {
+  _this.dataAdapter.on('data:ready', function (event) {
     var features;
     if (event.params.histogram === true) {
       _this.renderer = _this.histogramRenderer;
@@ -124,9 +124,11 @@ IcgcMutationTrack.prototype.render = function (targetId) {
       regionSize: _this.region.length(),
       maxLabelRegionSize: _this.maxLabelRegionSize,
       width: _this.width,
-      pixelPosition: _this.pixelPosition
-
+      pixelPosition: _this.pixelPosition,
+      resource: _this.resource,
+      species: _this.species
     });
+
     _this.updateHeight();
     _this.setLoading(false);
   });
@@ -146,7 +148,7 @@ IcgcMutationTrack.prototype.clean = function() {
 
 IcgcMutationTrack.prototype.draw = function () {
   this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset * 2;
-  this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2
+  this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset * 2;
 
   this.updateHistogramParams();
   this.clean();
