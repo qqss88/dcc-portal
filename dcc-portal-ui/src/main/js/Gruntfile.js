@@ -7,10 +7,6 @@ var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
 };
 
-
-
-
-
 // # Globbing
 // for performance reasons we're only matching one level down:
 // 'test/spec/{,*/}*.js'
@@ -21,6 +17,9 @@ module.exports = function (grunt) {
   // load all grunt tasks
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
   require('time-grunt')(grunt);
+
+  var configProvider = require('./dcc-grunt-tasks/ICGC-grunt-config-provider')(grunt);
+
   // configurable paths
   var yeomanConfig = {
     app: 'app',
@@ -28,137 +27,12 @@ module.exports = function (grunt) {
     developIndexFile: 'develop/html/index.develop.html'
   };
 
-// The purpose of the provider is to ensure that the appropriate configs 
-// (for those registered via setConfigForTask() public method)
-// are made available for the given environment (i.e. production vs development)
-function ICGCGruntConfigProvider() {
-    
-    var _CONFIG_CONSTANTS = {
-        BUILD_ENV: {DEV: 'development', PRODUCTION: 'production'}
-      },
-      _currentConfigBuildEnvironment = _CONFIG_CONSTANTS.BUILD_ENV.DEV,
-      _configFunctionMap = {},
-      _self = this;
-    
-    
-    function _initTasks() {
-
-       grunt.registerTask('ICGC-setBuildEnv', 'Sets the target build environment (default: ' +
-                           _CONFIG_CONSTANTS.BUILD_ENV.DEV + ')', function(env) {
-         var message = 'Setting GRUNT build environment to ';
-         
-          switch(env.toLowerCase()) {
-            case _CONFIG_CONSTANTS.BUILD_ENV.PRODUCTION:
-              _currentConfigBuildEnvironment = env;
-            break;
-            default:
-              _currentConfigBuildEnvironment = _CONFIG_CONSTANTS.BUILD_ENV.DEV;
-            break;
-          }
-          
-          grunt.log.oklns(message + _currentConfigBuildEnvironment); 
-          
-          _updateAllTaskConfigs();
-          
-        });
-    }
-    
-    function _updateAllTaskConfigs() {
-      
-      // Loop through the registered tasks and ensure we have the appropriate configs for them
-      // (given the current set environment _currentConfigBuildEnvironment )
-      for (var taskName in _configFunctionMap) {
-        
-        if ( _updateGruntConfigForTaskAndCurrentBuildEnv(taskName) ) {
-          grunt.log.oklns('Assigning config for task \'' + taskName + 
-                          '\' (Build Env: ' + _currentConfigBuildEnvironment + ')');
-        }
-        
-      }
-    }
-    
-    function _updateGruntConfigForTaskAndCurrentBuildEnv(taskName) {
-      
-      var currentGruntConfigForTask = grunt.config(taskName);
-      
-      if (typeof currentGruntConfigForTask === 'undefined') {
-        return false;
-      }
-      
-      var configuration = _self.getConfigForTask(taskName);
-      
-      if (typeof configuration !== 'undefined' && configuration !== null) { 
-        grunt.config(taskName, configuration);
-      }
-      
-      return true;  
-    }
-    
-    function _init() {
-        _initTasks();
-    }
-    
-     _init();
-     
-     
-    // Public APIs
-    this.getConfigForTask = function(taskName) {
-      var config = {},
-          task = typeof taskName === 'string' ? taskName : null;
-      
-      if (typeof _configFunctionMap[task]  === 'undefined' || task === null) {
-        return null;
-      }
-      
-      config = _configFunctionMap[task].call(_self);
-      
-      return config;
-    };
-    
-    this.setConfigForTask = function(taskName, config) {
-      
-      if (typeof taskName !== 'string' || config === null) {
-        return null; 
-      } 
-      
-      var task = taskName;
-      
-      // Handle the different "config" parameter types...
-      switch(typeof config) {
-        case 'function':
-          _configFunctionMap[task] = config;
-        break;
-        case 'object': 
-          _configFunctionMap[task] = function() { return config; };
-        break;
-        default:
-        break;
-      }
-      
-      return this;
-    };
-    
-    this.isProductionBuild = function() {
-      return _currentConfigBuildEnvironment === _CONFIG_CONSTANTS.BUILD_ENV.PRODUCTION;
-    };
-    
-    
-    
-    return this;
-  }
-  
-  var configProvider = new ICGCGruntConfigProvider();
-
-
-
 
   try {
     yeomanConfig.app = require('./bower.json').appPath || yeomanConfig.app;
   } 
   catch (e) {
   }
-
-
 
   grunt.initConfig({
     'bower-install-simple': configProvider.setConfigForTask('bower-install-simple', function() {
@@ -184,8 +58,8 @@ function ICGCGruntConfigProvider() {
     .getConfigForTask('bower-install-simple'), 
     peg: {
       pql: {
-        src: './app/scripts/pegjs/pql.pegjs',
-        dest: './app/scripts/common/pql/pqlparser.js',
+        src: './app/scripts/common/js/pql/conf/pql.pegjs',
+        dest: './app/scripts/common/js/pql/pqlparser.js',
         options: {
           exportVar: 'PqlPegParser'
         }
@@ -195,6 +69,7 @@ function ICGCGruntConfigProvider() {
     watch: {
       compass: {
         files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}',
+                '<%= yeoman.app %>/scripts/**/styles/*.{scss,sass}',
                 '<%= yeoman.app %>/vendor/styles/{,*/}*.{scss,sass}'],
         tasks: ['compass:server']
       },
@@ -209,9 +84,11 @@ function ICGCGruntConfigProvider() {
         files: [
           '<%= yeoman.app %>/{,*/}*.html',
           '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
-          '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
+          '{.tmp,<%= yeoman.app %>}/scripts/**/styles/*.css',
+          '{.tmp,<%= yeoman.app %>}/scripts/**/*.js',
           '<%= yeoman.app %>/develop/scripts/{,*/}*.js',
-          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
+          '<%= yeoman.app %>/scripts/*/images/*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       }
     },
@@ -294,11 +171,15 @@ function ICGCGruntConfigProvider() {
     },
     jshint: {
       options: {
-        jshintrc: '.jshintrc'
+        jshintrc: '.jshintrc',
+        reporter: require('jshint-stylish')
       },
       all: [
         'Gruntfile.js',
-        '<%= yeoman.app %>/scripts/{,*/}*.js'
+        '<%= yeoman.app %>/scripts/**/*.js',
+        // Skip pqlparser.js as this is auto generated during the build
+        // from the 3rd party task
+        '!<%= yeoman.app %>/scripts/common/js/pql/pqlparser.js'
       ]
     },
     compass: {
@@ -328,18 +209,6 @@ function ICGCGruntConfigProvider() {
     /*concat: {
      dist: {}
      },*/
-    rev: {
-      dist: {
-        files: {
-          src: [
-            '<%= yeoman.dist %>/scripts/{,*/}*.js',
-            '<%= yeoman.dist %>/styles/{,*/}*.css',
-            '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-            '<%= yeoman.dist %>/styles/fonts/*'
-          ]
-        }
-      }
-    },
     // Renames files for browser caching purposes
     filerev: {
       dist: {
@@ -385,11 +254,14 @@ function ICGCGruntConfigProvider() {
         files: [
           {
             expand: true,
-            cwd: '<%= yeoman.app %>/images',
+            cwd: '<%= yeoman.app %>',
             // TODO: looks like imagemin is not processing module image deps
             // copy is doing this instead -
             // will research proper way to fix this 
-            src: '{,*/}*.{png,jpg,jpeg}',
+            src:  [
+                    '/images/{,*/}*.{png,jpg,jpeg}',
+                    '/scripts/*/images/**/*.{png,jpg,jpeg}'
+                  ],
             dest: '<%= yeoman.dist %>/images'
           }
         ]
@@ -448,6 +320,7 @@ function ICGCGruntConfigProvider() {
               // 'vendor/scripts/angularjs/*',
               'vendor/styles/genomeviewer/**/*',
               'styles/images/**/*.{gif,webp,svg,png,jpg}',
+              'scripts/*/images/**/*.{gif,webp,svg,png,jpg}',
               'styles/fonts/*',
               'views/**/*',
               'scripts/**/*.html',
