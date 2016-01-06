@@ -135,7 +135,7 @@
   angular.module('icgc.auth.controllers', ['icgc.auth.models']);
 
   angular.module('icgc.auth.controllers').controller('authController',
-    function ($window, $scope, $modal, Auth, CUD, OpenID, $state, $stateParams, PortalFeature) {
+    function ($window, $scope, $location, $modal, Auth, CUD, OpenID, $state, $stateParams, PortalFeature) {
 
       $scope.params = {};
       $scope.params.provider = 'icgc';
@@ -145,8 +145,22 @@
       $scope.params.cudUsername = null;
       $scope.params.cudPassword = null;
       $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
-    
 
+      function shouldRefreshLocation() {
+        var shouldRefresh = true,
+            urlPath = $location.path().toLowerCase();
+
+        switch(urlPath) {
+          // Prevent Refresh for the main page
+          case '/':
+            shouldRefresh = false;
+            break;
+          default:
+            break;
+        }
+
+        return shouldRefresh;
+      }
 
       function setup() {
         $scope.params.user = Auth.getUser();
@@ -154,13 +168,27 @@
         if (OpenID.hasErrors()) {
           $scope.params.error = OpenID.getErrors();
           $scope.loginModal = true;
-        } else {
+        }
+        else {
           Auth.checkSession(
             function (data) {
+
+              // Default to refreshing the page on login
+              var transitionParams =  {
+                reload: true,
+                inherit: false,
+                notify: true
+              };
+
               Auth.login(data);
               $scope.params.user = Auth.getUser();
-              $state.transitionTo($state.current, $stateParams,
-                { reload: true, inherit: true, notify: true, location: false });
+
+              if (! shouldRefreshLocation()) {
+                transitionParams.inherit = true;
+                transitionParams.location = false;
+              }
+
+              $state.transitionTo($state.current, $stateParams, transitionParams);
 
               $scope.closeLoginPopup();
               console.log('logged in as: ', $scope.params.user);
