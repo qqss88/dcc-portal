@@ -576,11 +576,15 @@ public class FiltersConverter {
     val fieldValue = jqlField.getValue();
 
     if (fieldValue.isArray()) {
-      // FIXME: assumes the operation is 'IS'
       val arrayFilter = createArrayFilterForMissingField(jqlField, indexType);
       val missingFilter = format(MISSING_TEMPLATE, fieldName);
+      val orFilter = arrayFilter.isPresent() ? format("or(%s,%s)", missingFilter, arrayFilter.get()) : missingFilter;
 
-      return arrayFilter.isPresent() ? format("or(%s,%s)", missingFilter, arrayFilter.get()) : missingFilter;
+      if (jqlField.getOperation() == NOT) {
+        return format(NOT_TEMPLATE, orFilter);
+      } else {
+        return orFilter;
+      }
     }
 
     val formatTemplate = isTrue(fieldValue) ? MISSING_TEMPLATE : EXISTS_TEMPLATE;
