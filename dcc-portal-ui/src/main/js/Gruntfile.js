@@ -48,7 +48,7 @@ module.exports = function (grunt) {
           config.prod = { options: { production: true, interactive: false, forceLatest: false } };
         }
         else {
-          config.dev = { options: { production: false,  interactive: true, foceLatest: false } };
+          config.dev = { options: { production: false,  interactive: true, forceLatest: false } };
         }
             
         return config;  
