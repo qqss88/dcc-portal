@@ -50,6 +50,7 @@ import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.JqlSingleValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlValue;
 
 import com.google.common.base.Joiner;
@@ -403,8 +404,14 @@ public class FiltersConverter {
             notFacet = true;
           }
 
-          JqlArrayValue jqlValue = (JqlArrayValue) idField.getValue();
-          List<Object> values = jqlValue.get();
+          List<Object> values;
+          if (idField.getValue().isArray()) {
+            val jqlValue = (JqlArrayValue) idField.getValue();
+            values = jqlValue.get();
+          } else {
+            val jqlValue = (JqlSingleValue) idField.getValue();
+            values = ImmutableList.of(jqlValue.get());
+          }
 
           // Transform entitySetIds into entitySetFields and remove from entity id list.
           values.forEach(value -> {
@@ -435,6 +442,7 @@ public class FiltersConverter {
           } else if (!entitySetIdFields.isEmpty()) {
             entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
           } else {
+            // There were no entitysets, use original unmodified fields
             remainingFields.addAll(idFields);
           }
 
