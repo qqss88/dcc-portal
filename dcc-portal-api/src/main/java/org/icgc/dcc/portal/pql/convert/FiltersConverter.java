@@ -36,6 +36,7 @@ import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -77,6 +78,7 @@ public class FiltersConverter {
   private static final String EXISTS_TEMPLATE = "exists(%s)";
   private static final String MISSING_TEMPLATE = "missing(%s)";
   private static final String NESTED_TEMPLATE = "nested(%s,%s)";
+  private static final String ENTITY_SET_PREFIX = "ES:";
 
   private static final Ordering<String> NATURAL_ORDER = Ordering.<String> natural();
   private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
@@ -387,10 +389,54 @@ public class FiltersConverter {
 
     // Special handling when entitySetId and id are both present; if not, process normally
     String entitySetRelatedFilter = null;
-
     if (entitySetIdFields.isEmpty() || idFields.isEmpty()) {
-      remainingFields.addAll(entitySetIdFields);
-      remainingFields.addAll(idFields);
+
+      boolean notFacet = false;
+      val newIdFields = Lists.<JqlField> newArrayList();
+
+      // Inspect ids to see if we have an inline entity set
+      if (!idFields.isEmpty()) {
+        for (val idField : idFields) {
+
+          // Need to know if we need to wrap everything in a NOT at the end.
+          if (idField.getOperation() == NOT) {
+            notFacet = true;
+          }
+
+          JqlArrayValue jqlValue = (JqlArrayValue) idField.getValue();
+          List<Object> values = jqlValue.get();
+
+          // Transform entitySetIds into entitySetFields and remove from entity id list.
+          values.forEach(value -> {
+            String strValue = value.toString();
+            if (strValue.startsWith(ENTITY_SET_PREFIX)) {
+              JqlArrayValue newValue = new JqlArrayValue(ImmutableList.of(strValue.substring(3)));
+              JqlField entitySetField = new JqlField("entitySetId", IS, newValue, idField.getPrefix());
+              List<Object> newValues = new ArrayList<Object>(values);
+              newValues.remove(value);
+
+              entitySetIdFields.add(entitySetField);
+
+              JqlField newIdField =
+                  new JqlField("id", IS, new JqlArrayValue(newValues), idField.getPrefix());
+              newIdFields.add(newIdField);
+            }
+          });
+
+          if (!entitySetIdFields.isEmpty()) {
+            entitySetIdFields.addAll(newIdFields);
+            entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
+            entitySetRelatedFilter =
+                (null == entitySetRelatedFilter) ? null : format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
+            entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
+          } else {
+            remainingFields.addAll(idFields);
+          }
+        }
+      } else {
+        remainingFields.addAll(entitySetIdFields);
+        remainingFields.addAll(idFields);
+      }
     } else {
       entitySetIdFields.addAll(idFields);
       entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
