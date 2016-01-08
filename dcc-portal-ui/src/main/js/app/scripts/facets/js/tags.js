@@ -82,6 +82,20 @@
       $scope.activeClass = Facets.isNot(params) ? 
         't_facets__facet__not' : '';
     }
+    
+    function activeEntityHelper(type) {
+      if (type === 'file') {
+        return Facets.getActiveTags({
+          type: type,
+          facet: Extensions.ENTITY
+        });
+      } else {
+        return Facets.getActiveFromTags({
+          type: type,
+          facet: 'id'
+        }, true);
+      }
+    }
 
     function setup() {
       var type = $scope.proxyType || $scope.type,
@@ -90,18 +104,15 @@
 
       _fetchNameForSelections ( filters.gene );
 
-      $scope.actives = Facets.getActiveTags({
+      $scope.actives = Facets.getActiveFromTags({
         type: type,
         facet: $scope.proxyFacetName || $scope.facetName
-      });
+      }, false);
       
       setActiveClass();
 
       // There are only 'active' entity ids
-      $scope.activeEntityIds = Facets.getActiveTags({
-        type: type,
-        facet: Extensions.ENTITY
-      });
+      $scope.activeEntityIds = activeEntityHelper(type);
 
       // Fetch display names for entity lists
       $scope.entityIdMap = {};

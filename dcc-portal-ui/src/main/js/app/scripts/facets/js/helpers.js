@@ -22,7 +22,7 @@
 
   var module = angular.module('icgc.facets.helpers', ['icgc.facets']);
 
-  module.factory('Facets', function (FilterService, FacetConstants, $rootScope) {
+  module.factory('Facets', function (FilterService, FacetConstants, Extensions, $rootScope) {
 
     function _broadcastFacetStatusChange(facet, isActive, changeType) {
       $rootScope.$broadcast(FacetConstants.EVENTS.FACET_STATUS_CHANGE, {
@@ -329,6 +329,20 @@
       return _.difference(params.terms, params.actives);
     }
 
+    function getActiveFromTags(params, isSet) {
+      var list = getActiveTags(params);
+      var retList = [];
+      _.forEach(list, function(item) {
+        if (isSet && item.indexOf(Extensions.ENITY_PREFIX) === 0) {
+          retList.push(item.substring(3));
+        } else if (!isSet && item.indexOf(Extensions.ENITY_PREFIX) !== 0) {
+          retList.push(item);
+        }
+      });
+      
+      return retList; 
+    }
+
     /* Get a list of active tags */
     function getActiveTags(params) {
       var filters, list = [];
@@ -383,7 +397,8 @@
       isNot: isNot,
       getInactiveTerms: getInactiveTerms,
       getActiveTags: getActiveTags,
-      getActiveLocations: getActiveLocations
+      getActiveLocations: getActiveLocations,
+      getActiveFromTags: getActiveFromTags
     };
   });
 
