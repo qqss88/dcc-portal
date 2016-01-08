@@ -417,21 +417,27 @@ public class FiltersConverter {
 
               entitySetIdFields.add(entitySetField);
 
-              JqlField newIdField =
-                  new JqlField("id", IS, new JqlArrayValue(newValues), idField.getPrefix());
-              newIdFields.add(newIdField);
+              JqlField newIdField = null;
+              if (!newValues.isEmpty()) {
+                newIdField = new JqlField("id", IS, new JqlArrayValue(newValues), idField.getPrefix());
+                newIdFields.add(newIdField);
+              }
             }
           });
 
-          if (!entitySetIdFields.isEmpty()) {
-            entitySetIdFields.addAll(newIdFields);
-            entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
+          entitySetIdFields.addAll(newIdFields);
+          entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
+
+          if (!entitySetIdFields.isEmpty() && !newIdFields.isEmpty()) {
             entitySetRelatedFilter =
                 (null == entitySetRelatedFilter) ? null : format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
+            entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
+          } else if (!entitySetIdFields.isEmpty()) {
             entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
           } else {
             remainingFields.addAll(idFields);
           }
+
         }
       } else {
         remainingFields.addAll(entitySetIdFields);
