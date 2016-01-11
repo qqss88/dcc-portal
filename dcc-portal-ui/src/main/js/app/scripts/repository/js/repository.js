@@ -71,8 +71,8 @@
 
     Page.setTitle (dataReleasesRouteInfo.title);
     Page.setPage ('dataReleases');
-
-    _ctrl.path = $stateParams.path || '';
+    // Prevent double encoding issues when reloading state on login
+    _ctrl.path = $stateParams.path ? decodeURIComponent($stateParams.path) : '';
     _ctrl.slugs = [];
     _ctrl.API = API;
     _ctrl.deprecatedReleases = ['release_15'];
@@ -162,7 +162,8 @@
     $scope.$watch (function() {
       return $stateParams.path;
     }, function() {
-      _ctrl.path = $stateParams.path || '';
+      // Prevent double encoding issues when reloading state on login
+      _ctrl.path = $stateParams.path ? decodeURIComponent($stateParams.path) : '';
       _ctrl.slugs = [];
       refresh();
     });
