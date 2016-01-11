@@ -20,7 +20,6 @@ package org.dcc.portal.pql.meta;
 import static java.util.Collections.emptyList;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
-import static org.dcc.portal.pql.meta.field.DoubleFieldModel.double_;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.nestedObject;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
@@ -44,36 +43,15 @@ public class ObservationCentricTypeModel extends TypeModel {
   private final static String TYPE_PREFIX = "observation";
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of("ssm.consequence", "ssm.observation");
   private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
-      "observation",
-      "donorId",
-      "analysisId",
-      "analyzedSampleId",
-      "baseCallingAlgorithm",
       "chromosome",
-      "controlGenotype",
+      "donor.primarySite",
+      "donorId",
       "end",
-      "experimentalProtocol",
-      "expressedAllele",
-      "matchedSampleId",
       "mutation",
       "mutationId",
-      "platform",
-      "donor.primarySite",
-      "probability",
+      "observation",
       "projectId",
-      "qualityScore",
-      "rawDataAccession",
-      "rawDataRepository",
-      "readCount",
-      "refsnpAllele",
-      "sampleId",
-      "seqCoverage",
-      "sequencingStrategy",
-      "specimenId",
-      "start",
-      "submittedMatchedSampleId",
-      "variationCallingAlgorithm",
-      "verificationStatus");
+      "start");
 
   public ObservationCentricTypeModel() {
     super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
@@ -127,29 +105,8 @@ public class ObservationCentricTypeModel extends TypeModel {
         long_("chromosome_end", ImmutableSet.of("mutation.end", "end")),
 
         string("_donor_id", "donorId"),
-        string("analysis_id", "analysisId"),
-        string("analyzed_sample_id", "analyzedSampleId"),
-        string("base_calling_algorithm", "baseCallingAlgorithm"),
-        string("control_genotype", "controlGenotype"),
-        string("experimental_protocol", "experimentalProtocol"),
-        string("expressed_allele", "expressedAllele"),
-        string("_matched_sample_id", "matchedSampleId"),
         string("mutation", "mutation"),
-        string("platform", "platform"),
-        long_("probability", "probability"),
-        string("_project_id", "projectId"),
-        double_("quality_score", "qualityScore"),
-        string("raw_data_accession", "rawDataAccession"),
-        string("raw_data_repository", "rawDataRepository"),
-        long_("read_count", "readCount"),
-        string("refsnp_allele", "refsnpAllele"),
-        string("_sample_id", "sampleId"),
-        string("seq_coverage", "seqCoverage"),
-        string("sequencing_strategy", "sequencingStrategy"),
-        string("_specimen_id", "specimenId"),
-        string("matched_sample_id", "submittedMatchedSampleId"),
-        string("variation_calling_algorithm", "variationCallingAlgorithm"),
-        string("verification_status", "verificationStatus"));
+        string("_project_id", "projectId"));
   }
 
   private static ArrayFieldModel defineSsmObservation() {
