@@ -71,7 +71,7 @@
 
     Page.setTitle (dataReleasesRouteInfo.title);
     Page.setPage ('dataReleases');
-
+    // Prevent double encoding issues when reloading state on login
     _ctrl.path = $stateParams.path ? decodeURIComponent($stateParams.path) : '';
     _ctrl.slugs = [];
     _ctrl.API = API;
@@ -162,6 +162,7 @@
     $scope.$watch (function() {
       return $stateParams.path;
     }, function() {
+      // Prevent double encoding issues when reloading state on login
       _ctrl.path = $stateParams.path ? decodeURIComponent($stateParams.path) : '';
       _ctrl.slugs = [];
       refresh();
