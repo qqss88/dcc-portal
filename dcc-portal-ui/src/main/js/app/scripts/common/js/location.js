@@ -149,7 +149,7 @@
         var list = this.extractSetIdsHelper(filters);
         var retList = [];
         _.forEach(list, function(item) {
-          if (item.indexOf(Extensions.ENITY_PREFIX) === 0) {
+          if (item.indexOf(Extensions.ENTITY_PREFIX) === 0) {
             retList.push(item.substring(3));
           }
         });

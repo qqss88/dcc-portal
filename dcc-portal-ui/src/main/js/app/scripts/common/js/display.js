@@ -150,7 +150,7 @@
             var uiTerm = term, isPredefined = false;
             
             if (facetKey === Extensions.ENTITY || facetKey === 'id') {
-              if (term.indexOf(Extensions.ENITY_PREFIX) === 0) {
+              if (term.indexOf(Extensions.ENTITY_PREFIX) === 0) {
                 uiTerm = entityIDMap[term.substring(3)] || term;
               } else {
                 uiTerm = entityIDMap[term] || term;

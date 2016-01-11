@@ -29,6 +29,7 @@ import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
+import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 import static org.dcc.portal.pql.meta.TypeModel.GENE_SET_ID;
 import static org.dcc.portal.pql.util.Converters.stringValue;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.ALL;
@@ -96,7 +97,7 @@ public class FiltersConverter {
       "gene.goTermId",
       "gene.hasPathway",
       GENE_SET_ID,
-      "entitySetId",
+      ENTITY_SET_ID,
       "mutation.location",
       "gene.location");
 
@@ -367,7 +368,7 @@ public class FiltersConverter {
         pathwayIdFields.add(jqlField);
       } else if (fieldName.equals("hasPathway")) {
         hasPathwayFields.add(jqlField);
-      } else if (fieldName.equals("entitySetId")) {
+      } else if (fieldName.equals(ENTITY_SET_ID)) {
         entitySetIdFields.add(jqlField);
       } else if (fieldName.equals("id")) {
         idFields.add(jqlField);
@@ -418,7 +419,7 @@ public class FiltersConverter {
             String strValue = value.toString();
             if (strValue.startsWith(ENTITY_SET_PREFIX)) {
               JqlArrayValue newValue = new JqlArrayValue(ImmutableList.of(strValue.substring(3)));
-              JqlField entitySetField = new JqlField("entitySetId", IS, newValue, idField.getPrefix());
+              JqlField entitySetField = new JqlField(ENTITY_SET_ID, IS, newValue, idField.getPrefix());
               List<Object> newValues = new ArrayList<Object>(values);
               newValues.remove(value);
 

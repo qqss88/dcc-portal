@@ -333,9 +333,9 @@
       var list = getActiveTags(params);
       var retList = [];
       _.forEach(list, function(item) {
-        if (isSet && item.indexOf(Extensions.ENITY_PREFIX) === 0) {
+        if (isSet && item.indexOf(Extensions.ENTITY_PREFIX) === 0) {
           retList.push(item.substring(3));
-        } else if (!isSet && item.indexOf(Extensions.ENITY_PREFIX) !== 0) {
+        } else if (!isSet && item.indexOf(Extensions.ENTITY_PREFIX) !== 0) {
           retList.push(item);
         }
       });

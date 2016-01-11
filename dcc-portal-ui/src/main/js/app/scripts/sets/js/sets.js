@@ -385,7 +385,7 @@
             function redirect2Advanced() {
               var filters = {};
               filters[type] = {};
-              filters[type].id = { is: [Extensions.ENITY_PREFIX+data.id] };
+              filters[type].id = { is: [Extensions.ENTITY_PREFIX+data.id] };
 
               $location.path(path).search({filters: angular.toJson(filters)});
             }

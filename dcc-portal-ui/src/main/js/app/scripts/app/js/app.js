@@ -754,7 +754,7 @@
     // Donor, mutation or gene set ids
     ENTITY: 'entitySetId',
     
-    ENITY_PREFIX: 'ES:',
+    ENTITY_PREFIX: 'ES:',
 
     // Order matters, this is in most important to least important (For enrichment analysis)
     GENE_SET_ROOTS: [
