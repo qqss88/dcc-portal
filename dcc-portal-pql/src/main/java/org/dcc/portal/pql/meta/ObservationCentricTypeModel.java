@@ -41,7 +41,7 @@ import com.google.common.collect.ImmutableSet;
 public class ObservationCentricTypeModel extends TypeModel {
 
   private final static String TYPE_PREFIX = "observation";
-  private static final List<String> INCLUDE_FIELDS = ImmutableList.of("ssm.consequence", "ssm.observation");
+  private static final List<String> INCLUDE_FIELDS = ImmutableList.of("ssm.gene.consequence", "ssm.observation");
   private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
       "chromosome",
       "donor.primarySite",
@@ -96,17 +96,14 @@ public class ObservationCentricTypeModel extends TypeModel {
 
   private static ObjectFieldModel defineSsm() {
     return ObjectFieldModel.nestedObject("ssm",
-        defineSsmConsequence(),
+        defineSsmGene(),
         string("_mutation_id", ImmutableSet.of("mutation.id", "mutationId")),
         string("mutation_type", "mutation.type"),
         defineSsmObservation(),
         string("chromosome", ImmutableSet.of("mutation.chromosome", "chromosome")),
         long_("chromosome_start", ImmutableSet.of("mutation.start", "start")),
         long_("chromosome_end", ImmutableSet.of("mutation.end", "end")),
-
-        string("_donor_id", "donorId"),
-        string("mutation", "mutation"),
-        string("_project_id", "projectId"));
+        string("mutation", "mutation"));
   }
 
   private static ArrayFieldModel defineSsmObservation() {
@@ -116,35 +113,35 @@ public class ObservationCentricTypeModel extends TypeModel {
         string("verification_status", "mutation.verificationStatus")));
   }
 
-  private static ArrayFieldModel defineSsmConsequence() {
-    return nestedArrayOfObjects("consequence", "consequences", object(
-        object("gene",
-            string("_gene_id", "gene.id"),
-            string("biotype", "gene.type"),
-            arrayOfStrings("pathway", "gene.pathwayId"),
-            string("chromosome", "gene.chromosome"),
-            long_("start", "gene.start"),
-            long_("end", "gene.end"),
-            string("curated_set", "gene.curatedSetId"),
-            object("go_term", "gene.GoTerm",
-                arrayOfStrings("biological_process"),
-                arrayOfStrings("cellular_component"),
-                arrayOfStrings("molecular_function"))
-
-        ),
-        string("consequence_type", "mutation.consequenceType"),
-        string("functional_impact_prediction_summary", "mutation.functionalImpact")));
+  private static ArrayFieldModel defineSsmGene() {
+    return nestedArrayOfObjects("gene", object(
+        string("_gene_id", "gene.id"),
+        string("biotype", "gene.type"),
+        arrayOfStrings("pathway", "gene.pathwayId"),
+        string("chromosome", "gene.chromosome"),
+        long_("start", "gene.start"),
+        long_("end", "gene.end"),
+        string("curated_set", "gene.curatedSetId"),
+        object("go_term", "gene.GoTerm",
+            arrayOfStrings("biological_process"),
+            arrayOfStrings("cellular_component"),
+            arrayOfStrings("molecular_function")),
+        nestedArrayOfObjects("consequence", "consequences", object(
+            string("consequence_type", "mutation.consequenceType"),
+            string("functional_impact_prediction_summary", "mutation.functionalImpact")
+            ))
+        ));
   }
 
   private static ObjectFieldModel defineProject() {
     return nestedObject("project",
-        string("_project_id", "donor.projectId"),
+        string("_project_id", ImmutableSet.of("donor.projectId", "projectId")),
         string("primary_site", "donor.primarySite"));
   }
 
   private static ObjectFieldModel defineDonor() {
     return ObjectFieldModel.nestedObject("donor",
-        string("_donor_id", "donor.id"),
+        string("_donor_id", ImmutableSet.of("donor.id", "donorId")),
         string("donor_sex", "donor.gender"),
         string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
         string("donor_vital_status", "donor.vitalStatus"),
@@ -164,11 +161,11 @@ public class ObservationCentricTypeModel extends TypeModel {
 
   private static Map<String, String> defineInternalAliases() {
     return new ImmutableMap.Builder<String, String>()
-        .put(BIOLOGICAL_PROCESS, "ssm.consequence.gene.go_term.biological_process")
-        .put(CELLULAR_COMPONENT, "ssm.consequence.gene.go_term.cellular_component")
-        .put(MOLECULAR_FUNCTION, "ssm.consequence.gene.go_term.molecular_function")
+        .put(BIOLOGICAL_PROCESS, "ssm.gene.go_term.biological_process")
+        .put(CELLULAR_COMPONENT, "ssm.gene.go_term.cellular_component")
+        .put(MOLECULAR_FUNCTION, "ssm.gene.go_term.molecular_function")
         .put(DONOR_ENTITY_SET_ID, "ssm._donor_id")
-        .put(GENE_ENTITY_SET_ID, "ssm.consequence.gene._gene_id")
+        .put(GENE_ENTITY_SET_ID, "ssm.gene._gene_id")
         .put(MUTATION_ENTITY_SET_ID, "ssm._mutation_id")
         .put(LOOKUP_TYPE, "mutation-ids")
         .build();
