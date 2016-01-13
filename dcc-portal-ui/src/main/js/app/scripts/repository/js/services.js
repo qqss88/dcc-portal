@@ -181,13 +181,11 @@
 
     this.folder = function (path) {
       return RestangularNoCache.one('download', 'info' + path)
-              .withHttpConfig({withCredentials: true})
               .get();
     };
 
     this.getStatus = function () {
       return RestangularNoCache.one('download', 'status')
-              .withHttpConfig({withCredentials: true})
               .get();
     };
 
