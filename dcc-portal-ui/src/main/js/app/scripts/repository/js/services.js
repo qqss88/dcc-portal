@@ -180,7 +180,9 @@
   module.service('RepositoryService', function ($filter, Restangular) {
 
     this.folder = function (path) {
-      return Restangular.one('download', 'info' + path).get();
+      return Restangular.one('download', 'info' + path)
+              .withHttpConfig({cache: false, withCredentials: true})
+              .get();
     };
 
     this.getStatus = function () {
