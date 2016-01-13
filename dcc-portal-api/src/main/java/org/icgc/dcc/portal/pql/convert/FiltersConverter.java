@@ -385,8 +385,7 @@ public class FiltersConverter {
       remainingFields.addAll(hasPathwayFields);
     } else {
       pathwayIdFields.addAll(hasPathwayFields);
-      pathwayRelatedFilter = toPqlFilter(pathwayIdFields, indexType);
-      pathwayRelatedFilter = (null == pathwayRelatedFilter) ? null : format(PQL_OR_TEMPLATE, pathwayRelatedFilter);
+      pathwayRelatedFilter = orFilterHelper(toPqlFilter(pathwayIdFields, indexType));
     }
 
     // Special handling when entitySetId and id are both present; if not, process normally
@@ -396,73 +395,78 @@ public class FiltersConverter {
       boolean notFacet = false;
       val newIdFields = Lists.<JqlField> newArrayList();
 
-      // Inspect ids to see if we have an inline entity set
-      if (!idFields.isEmpty()) {
-        for (val idField : idFields) {
-
-          // Need to know if we need to wrap everything in a NOT at the end.
-          if (idField.getOperation() == NOT) {
-            notFacet = true;
-          }
-
-          List<Object> values;
-          if (idField.getValue().isArray()) {
-            val jqlValue = (JqlArrayValue) idField.getValue();
-            values = jqlValue.get();
-          } else {
-            val jqlValue = (JqlSingleValue) idField.getValue();
-            values = ImmutableList.of(jqlValue.get());
-          }
-
-          // Transform entitySetIds into entitySetFields and remove from entity id list.
-          values.forEach(value -> {
-            String strValue = value.toString();
-            if (strValue.startsWith(ENTITY_SET_PREFIX)) {
-              JqlArrayValue newValue = new JqlArrayValue(ImmutableList.of(strValue.substring(3)));
-              JqlField entitySetField = new JqlField(ENTITY_SET_ID, IS, newValue, idField.getPrefix());
-              List<Object> newValues = new ArrayList<Object>(values);
-              newValues.remove(value);
-
-              entitySetIdFields.add(entitySetField);
-
-              JqlField newIdField = null;
-              if (!newValues.isEmpty()) {
-                newIdField = new JqlField("id", IS, new JqlArrayValue(newValues), idField.getPrefix());
-                newIdFields.add(newIdField);
-              }
-            }
-          });
-
-          entitySetIdFields.addAll(newIdFields);
-          entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
-
-          if (!entitySetIdFields.isEmpty() && !newIdFields.isEmpty()) {
-            entitySetRelatedFilter =
-                (null == entitySetRelatedFilter) ? null : format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
-            entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
-          } else if (!entitySetIdFields.isEmpty()) {
-            entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
-          } else {
-            // There were no entitysets, use original unmodified fields
-            remainingFields.addAll(idFields);
-          }
-
-        }
-      } else {
+      if (idFields.isEmpty()) {
         remainingFields.addAll(entitySetIdFields);
         remainingFields.addAll(idFields);
+        return joinFilters(remainingFields, pathwayRelatedFilter, entitySetRelatedFilter, indexType);
       }
+
+      // Inspect ids to see if we have an inline entity set
+      for (val idField : idFields) {
+
+        // Need to know if we need to wrap everything in a NOT at the end.
+        if (idField.getOperation() == NOT) {
+          notFacet = true;
+        }
+
+        List<Object> values;
+        if (idField.getValue().isArray()) {
+          val jqlValue = (JqlArrayValue) idField.getValue();
+          values = jqlValue.get();
+        } else {
+          val jqlValue = (JqlSingleValue) idField.getValue();
+          values = ImmutableList.of(jqlValue.get());
+        }
+
+        // Transform entitySetIds into entitySetFields and remove from entity id list.
+        for (val value : values) {
+          String strValue = value.toString();
+          if (strValue.startsWith(ENTITY_SET_PREFIX)) {
+            val newValue = new JqlArrayValue(ImmutableList.of(strValue.substring(3)));
+            val entitySetField = new JqlField(ENTITY_SET_ID, IS, newValue, idField.getPrefix());
+            val newValues = new ArrayList<Object>(values);
+            newValues.remove(value);
+
+            entitySetIdFields.add(entitySetField);
+
+            if (!newValues.isEmpty()) {
+              val newIdField = new JqlField("id", IS, new JqlArrayValue(newValues), idField.getPrefix());
+              newIdFields.add(newIdField);
+            }
+          }
+        }
+
+        entitySetIdFields.addAll(newIdFields);
+        entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
+
+        if (!entitySetIdFields.isEmpty() && !newIdFields.isEmpty()) {
+          entitySetRelatedFilter = orFilterHelper(entitySetRelatedFilter);
+          entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
+        } else if (!entitySetIdFields.isEmpty()) {
+          entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
+        } else {
+          // There were no entitysets, use original unmodified fields
+          remainingFields.addAll(idFields);
+        }
+      }
+
     } else {
       entitySetIdFields.addAll(idFields);
-      entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
-      entitySetRelatedFilter =
-          (null == entitySetRelatedFilter) ? null : format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
+      entitySetRelatedFilter = orFilterHelper(toPqlFilter(entitySetIdFields, indexType));
     }
 
+    return joinFilters(remainingFields, pathwayRelatedFilter, entitySetRelatedFilter, indexType);
+  }
+
+  private static String orFilterHelper(String filter) {
+    return (null == filter) ? null : format(PQL_OR_TEMPLATE, filter);
+  }
+
+  private static String joinFilters(ArrayList<JqlField> remaining, String pathways, String entitySets, Type type) {
     return COMMA_JOINER.join(
-        toPqlFilter(remainingFields, indexType),
-        pathwayRelatedFilter,
-        entitySetRelatedFilter);
+        toPqlFilter(remaining, type),
+        pathways,
+        entitySets);
   }
 
   private static boolean isNestedField(@NonNull JqlField field) {
