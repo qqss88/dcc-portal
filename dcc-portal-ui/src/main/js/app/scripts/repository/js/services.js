@@ -177,16 +177,18 @@
   });
 
 
-  module.service('RepositoryService', function ($filter, Restangular) {
+  module.service('RepositoryService', function ($filter, RestangularNoCache) {
 
     this.folder = function (path) {
-      return Restangular.one('download', 'info' + path)
-              .withHttpConfig({cache: false, withCredentials: true})
+      return RestangularNoCache.one('download', 'info' + path)
+              .withHttpConfig({withCredentials: true})
               .get();
     };
 
     this.getStatus = function () {
-      return Restangular.one('download', 'status').get();
+      return RestangularNoCache.one('download', 'status')
+              .withHttpConfig({withCredentials: true})
+              .get();
     };
 
 
