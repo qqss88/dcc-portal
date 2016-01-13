@@ -177,14 +177,16 @@
   });
 
 
-  module.service('RepositoryService', function ($filter, Restangular) {
+  module.service('RepositoryService', function ($filter, RestangularNoCache) {
 
     this.folder = function (path) {
-      return Restangular.one('download', 'info' + path).get();
+      return RestangularNoCache.one('download', 'info' + path)
+              .get();
     };
 
     this.getStatus = function () {
-      return Restangular.one('download', 'status').get();
+      return RestangularNoCache.one('download', 'status')
+              .get();
     };
 
 
