@@ -50,7 +50,10 @@
     return {
       restrict: 'E',
       replace: true,
-      templateUrl: '/scripts/share/views/share.popup.html'
+      templateUrl: '/scripts/share/views/share.popup.html',
+      scope: {
+        customMessaging: '@'
+      }
     };
   });
 

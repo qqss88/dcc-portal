@@ -16,8 +16,11 @@
       <input id="shortURLInput" placeholder="Loading..." class="input-block-level" type="text" value={{shortUrl}} />
       <span class="icon-clippy" />
     </div>
-    <p>
+    <p data-ng-if="! customMessaging">
       <small>You can also copy the link from your browser's address bar.</small>
+    </p>
+    <p data-ng-if="customMessaging">
+      <small data-ng-bind="customMessaging"></small>
     </p>
   </div>
   <div class="modal-footer">
