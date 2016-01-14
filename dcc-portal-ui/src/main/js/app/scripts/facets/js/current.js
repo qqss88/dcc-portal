@@ -182,7 +182,7 @@
       }
     });
 
-    //$scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, refresh);
+    $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, refresh);
 
   });
 
