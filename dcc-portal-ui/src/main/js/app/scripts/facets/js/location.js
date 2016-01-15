@@ -20,9 +20,10 @@
 angular.module('icgc.facets.location', []);
 
 angular.module('icgc.facets.location')
-  .controller('locationFacetCtrl', function ($scope, Facets, FilterService, Chromosome) {
+  .controller('locationFacetCtrl', function ($scope, Facets, FilterService, Chromosome, PortalFeature) {
 
   var submitted;
+  $scope.enabled = PortalFeature.get('NOT_FACET');
 
   //$scope.regex = /^(chr)?[xy0-9]+(:\d+(\-\d+)?)?$/i;
   $scope.regex = /^(chr)?(x|y|mt|[0-9]+)(:\d+(\-\d+)?)?$/i;
@@ -34,6 +35,11 @@ angular.module('icgc.facets.location')
       type: $scope.type,
       facet: $scope.facetName
     });
+    
+    var params = {type: $scope.type,facet: $scope.facetName};
+    $scope.isNot = Facets.isNot(params);
+    $scope.activeClass = Facets.isNot(params) ? 
+      't_facets__facet__not' : '';
   }
 
   function checkLocation() {
@@ -73,6 +79,20 @@ angular.module('icgc.facets.location')
       term: term
     });
   };
+  
+  $scope.notFacet = function() {
+      Facets.notFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
+    
+    $scope.isFacet = function() {
+      Facets.isFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
 
   $scope.submit = function () {
     submitted = true;

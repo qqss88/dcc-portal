@@ -141,8 +141,8 @@
       var filters = {
         donor:{}
       };
-      filters.donor[Extensions.ENTITY] = {
-        is: [id]
+      filters.donor.id = {
+        is: [Extensions.ENTITY_PREFIX+id]
       };
       return filters;
     };

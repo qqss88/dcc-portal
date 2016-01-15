@@ -30,9 +30,6 @@ import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupFieldsByNest
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupNestedPaths;
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.isEncloseWithCommonParent;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -46,6 +43,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FiltersConverterTest {
@@ -105,6 +106,18 @@ public class FiltersConverterTest {
   public void missingValueTest_array() {
     val result = converter.convertFilters(createFilters("{donor:{id:{is:['_missing', 'DO1']}}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("or(missing(donor.id),in(donor.id,'DO1'))");
+  }
+
+  @Test
+  public void missingValueNotTest() {
+    val result = converter.convertFilters(createFilters("{donor:{id:{not:['_missing']}}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("not(missing(donor.id))");
+  }
+
+  @Test
+  public void missingValueNotTest_array() {
+    val result = converter.convertFilters(createFilters("{donor:{id:{not:['_missing', 'DO1']}}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("not(or(missing(donor.id),in(donor.id,'DO1')))");
   }
 
   @Test
@@ -220,8 +233,7 @@ public class FiltersConverterTest {
   public void mutationNestedAndNonNestedTest() {
     val filters = createFilters("{mutation:{platform:{is:['M1','M2']},id:{is:['M1','M2']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
-    assertThat(result).
-        isEqualTo("in(mutation.id,'M1','M2'),nested(ssm_occurrence.observation,in(platform,'M1','M2'))");
+    assertThat(result).isEqualTo("in(mutation.id,'M1','M2'),nested(ssm_occurrence.observation,in(platform,'M1','M2'))");
   }
 
   @Test
@@ -429,7 +441,7 @@ public class FiltersConverterTest {
   public void groupNestedPathsTest_single() {
     assertThat(groupNestedPaths(of("gene"), getDonorCentricTypeModel())
         .get("gene"))
-        .containsExactly("gene");
+            .containsExactly("gene");
   }
 
   @Test
@@ -445,21 +457,21 @@ public class FiltersConverterTest {
   public void groupNestedPathsTest_two() {
     assertThat(groupNestedPaths(of("gene.ssm", "gene.ssm.observation"), getDonorCentricTypeModel())
         .get("gene.ssm"))
-        .containsExactly("gene.ssm", "gene.ssm.observation");
+            .containsExactly("gene.ssm", "gene.ssm.observation");
   }
 
   @Test
   public void groupNestedPathsTest_withEmptyPath() {
     assertThat(groupNestedPaths(of("", "gene.ssm", "gene.ssm.observation"), getDonorCentricTypeModel())
         .get("gene.ssm"))
-        .containsExactly("gene.ssm", "gene.ssm.observation");
+            .containsExactly("gene.ssm", "gene.ssm.observation");
   }
 
   @Test
   public void groupNestedPathsTest_noCommonParent() {
     assertThat(groupNestedPaths(of("gene.ssm.consequence", "gene.ssm.observation"), getDonorCentricTypeModel())
         .get("gene.ssm"))
-        .containsExactly("gene.ssm.consequence", "gene.ssm.observation");
+            .containsExactly("gene.ssm.consequence", "gene.ssm.observation");
   }
 
   @Test
@@ -503,7 +515,7 @@ public class FiltersConverterTest {
     values.put("gene", new JqlField("id", IS, new JqlSingleValue("G"), "gene"));
     assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
         Lists.newArrayList("gene")))
-        .isEqualTo("nested(gene,eq(gene.id,'G'))");
+            .isEqualTo("nested(gene,eq(gene.id,'G'))");
   }
 
   @Test
@@ -515,7 +527,7 @@ public class FiltersConverterTest {
     values.put("gene", new JqlField("start", IS, new JqlSingleValue(1), "gene"));
     assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
         Lists.newArrayList("gene")))
-        .isEqualTo("nested(gene,eq(gene.start,1),eq(gene.id,'G'))");
+            .isEqualTo("nested(gene,eq(gene.start,1),eq(gene.id,'G'))");
   }
 
   @Test
@@ -528,8 +540,8 @@ public class FiltersConverterTest {
 
     assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
         Lists.newArrayList("gene.ssm.observation", "gene.ssm.consequence")))
-        .isEqualTo("nested(gene.ssm.consequence,eq(mutation.functionalImpact,'fi')),"
-            + "nested(gene.ssm.observation,eq(mutation.platform,'p'))");
+            .isEqualTo("nested(gene.ssm.consequence,eq(mutation.functionalImpact,'fi')),"
+                + "nested(gene.ssm.observation,eq(mutation.platform,'p'))");
 
   }
 
@@ -542,7 +554,7 @@ public class FiltersConverterTest {
     values.put("gene.ssm", new JqlField("id", IS, new JqlSingleValue("M"), "mutation"));
     assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
         Lists.newArrayList("gene.ssm", "gene")))
-        .isEqualTo("nested(gene,and(nested(gene.ssm,eq(mutation.id,'M')),eq(gene.id,'G')))");
+            .isEqualTo("nested(gene,and(nested(gene.ssm,eq(mutation.id,'M')),eq(gene.id,'G')))");
   }
 
   @Test

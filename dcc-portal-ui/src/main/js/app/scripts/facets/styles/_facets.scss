@@ -27,6 +27,13 @@
   }
 }
 
+.t_facets__facet__is__not {
+  font-size: 0.75rem;
+  font-weight: 200;
+  cursor: pointer;
+  float: right;
+}
+
 /************************************************
  *   Terms
  ***********************************************/
@@ -144,6 +151,19 @@
   &:hover {
     background: lighten($cyan, 47);
   }
+}
+
+.t_facets__facet__not {
+  background: lighten($red, 35%);
+  color: $black;
+  &:hover {
+    background: lighten($red, 30%);
+  }
+}
+
+.t_facets__facet__not__bar {
+  background: lighten($red, 25%);
+  color: $black;
 }
 
 .t_impact_high {
