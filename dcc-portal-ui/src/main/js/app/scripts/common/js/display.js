@@ -48,7 +48,7 @@
       filter.gene[type] = {is: geneSetIds};
       return filter;
     };
-
+   
     /*
      * This only applies when we're in the External File page. It "moves" (and merges) the 'entitySetId' filter
      * into the 'donorId' filter. The reason is to make 'Uploaded Donor Set' appear as a filter along with
@@ -80,6 +80,7 @@
     this.buildUIFilters = function (filters, entityIDMap) {
       var display = {};
       entityIDMap = entityIDMap || {};
+      var self = this;
 
       var queryFilters = _.cloneDeep (filters);
       queryFilters = adjustExternalFileFilters (queryFilters, entityIDMap);
@@ -104,32 +105,56 @@
             var uiTerm = 'Reactome Pathways';
             uiFacetKey = 'pathwayId';
 
+            if (_.has(facetFilters, 'not')) { 
+              if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+                display[typeKey][uiFacetKey] = {};
+                display[typeKey][uiFacetKey].not = [];
+              }
+              display[typeKey][uiFacetKey].not.unshift({
+                term: uiTerm,
+                controlTerm: undefined,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+              return;
+            } else {
+              if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+                display[typeKey][uiFacetKey] = {};
+                display[typeKey][uiFacetKey].is = [];
+              }
+              display[typeKey][uiFacetKey].is.unshift({
+                term: uiTerm,
+                controlTerm: undefined,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+              return;
+            }
+          }
+
+          // Allocate terms
+          if ( _.has(facetFilters,'is')) {
             if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
               display[typeKey][uiFacetKey] = {};
               display[typeKey][uiFacetKey].is = [];
             }
-            display[typeKey][uiFacetKey].is.unshift({
-              term: uiTerm,
-              controlTerm: undefined,
-              controlFacet: facetKey,
-              controlType: typeKey
-            });
-            return;
+          } else {
+              if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+              display[typeKey][uiFacetKey] = {};
+              display[typeKey][uiFacetKey].not = [];
+            }
           }
 
-          // Allocate terms
-          if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
-            display[typeKey][uiFacetKey] = {};
-            display[typeKey][uiFacetKey].is = [];
-          }
-
-
-          facetFilters.is.forEach(function(term) {
+          var facetIter = ( _.has(facetFilters,'is')) ? facetFilters.is : facetFilters.not;
+          facetIter.forEach(function(term) {
             var uiTerm = term, isPredefined = false;
-            // if (typeKey === 'gene' && facetKey === Extensions.ENTITY) {
-            if (facetKey === Extensions.ENTITY) {
-              //uiTerm = 'Gene List';
-              uiTerm = entityIDMap[term] || term;
+            
+            if (facetKey === Extensions.ENTITY || facetKey === 'id') {
+              if (term.indexOf(Extensions.ENTITY_PREFIX) === 0) {
+                uiTerm = entityIDMap[term.substring(3)] || term;
+              } else {
+                uiTerm = entityIDMap[term] || term;
+              }
 
               isPredefined = true;
             } else if (typeKey === 'gene' && facetKey === 'goTermId') {
@@ -154,27 +179,52 @@
               }
             }
 
-            // Extension terms goes first
-            if (isPredefined) {
-              display[typeKey][uiFacetKey].is.unshift({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
-            } else {
-              display[typeKey][uiFacetKey].is.push({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
-            }
+            // TODO: Rafactor this entire function. Helper here helps avoid complexity jshint warning
+            self.shiftBlockHelper(facetFilters, typeKey, facetKey,isPredefined, display, uiFacetKey, uiTerm, term);
 
           });
         });
       });
       return display;
+    };
+    
+    this.shiftBlockHelper = function(facetFilters, typeKey, facetKey,
+      isPredefined, display, uiFacetKey, uiTerm, term) {
+        
+      if (( _.has(facetFilters,'is'))) {
+        // Extension terms goes first
+        if (isPredefined) {
+          display[typeKey][uiFacetKey].is.unshift({
+            term: uiTerm,
+            controlTerm: term,
+            controlFacet: facetKey,
+            controlType: typeKey
+          });
+        } else {
+          display[typeKey][uiFacetKey].is.push({
+            term: uiTerm,
+            controlTerm: term,
+            controlFacet: facetKey,
+            controlType: typeKey
+          });
+        }
+      } else {
+        if (isPredefined) {
+          display[typeKey][uiFacetKey].not.unshift({
+            term: uiTerm,
+            controlTerm: term,
+            controlFacet: facetKey,
+            controlType: typeKey
+          });
+        } else {
+          display[typeKey][uiFacetKey].not.push({
+            term: uiTerm,
+            controlTerm: term,
+            controlFacet: facetKey,
+            controlType: typeKey
+          });
+        }
+      }
     };
 
   });

@@ -39,6 +39,22 @@
       controlType: 'file'
     }];
 
+    $scope.prepositionBuilder = function (typeName, facet, terms) {
+      if ($scope.isNot({type:typeName, facet:facet})) {
+        if ($scope.inPluralForm (terms)) {
+          return 'NOT IN (';
+        } else {
+          return 'IS NOT';
+        }
+      } else {
+        if ($scope.inPluralForm (terms)) { 
+          return 'IN ('; 
+        } else { 
+          return 'IS';
+        } 
+      }
+    };
+
     /*
      * This function determines the opening or closing for a human-readable JQL expression,
      * displayed in UI (usually a top panel above a data table).
@@ -46,7 +62,7 @@
      * with additional logic for special cases.
      */
     $scope.inPluralForm = function (terms) {
-      var filters = _.get (terms, 'is', []);
+      var filters = _.get (terms, 'is', _.get (terms, 'not', []));
 
       if (_.isEmpty (filters)) {return false;}
       if (_.size (filters) > 1) {return true;}
@@ -68,14 +84,37 @@
 
       return _.contains (_.get (filter, 'controlFacet', ''), Extensions.ENTITY);
     };
-
+    
+    $scope.isNot = function(terms) {
+      var currentFilters = LocationService.filters();
+      if (terms.facet === 'id') {
+        return _.has(currentFilters, terms.type+'.'+terms.facet+'.not') || 
+          _.has(currentFilters, terms.type+'.entitySetId.not');
+      } else if (terms.type === 'go_term') {
+        return _.has(currentFilters, ['gene',terms.facet,'not']);
+      } else {
+        return _.has(currentFilters, terms.type+'.'+terms.facet+'.not');
+      }
+    };
+    
+    $scope.activeClass = function(terms) {     
+      return $scope.isNot(terms) ? 't_facets__facet__not' : '';
+    };
 
     function resolveActiveGeneIds (filters) {
-      var activeGeneIds = _(_.get (filters, 'gene.id.is', []))
-        .filter ({controlFacet: 'id', controlType: 'gene'})
-        .map ('term')
-        .value();
-
+      var activeGeneIds;
+      if (_.has(filters, 'gene.id.not')) {
+          activeGeneIds = _(_.get (filters, 'gene.id.not', []))
+          .filter ({controlFacet: 'id', controlType: 'gene'})
+          .map ('term')
+          .value();
+      } else if (_.has(filters, 'gene.id.is')) {
+        activeGeneIds = _(_.get (filters, 'gene.id.is', []))
+          .filter ({controlFacet: 'id', controlType: 'gene'})
+          .map ('term')
+          .value();
+      }
+      
       if (_.isEmpty (activeGeneIds)) {
         $scope.ensemblIdGeneSymbolMap = {};
         return;

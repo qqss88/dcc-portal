@@ -130,9 +130,12 @@
 .icon-help-circled:before { content: '\e849'; } /* '' */
 .icon-eye:before { content: '\e84a'; } /* '' */
 .icon-cw:before { content: '\e84b'; } /* '' */
+.icon-toggle-off:before { content: '\e84c'; } /* '' */
+.icon-toggle-on:before { content: '\e84d'; } /* '' */
+
 /*
-   Animation example, for spinners
-*/
+ *  Animation example, for spinners
+ */
 .icon-spin {
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;

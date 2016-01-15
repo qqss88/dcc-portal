@@ -20,7 +20,10 @@
 
   var module = angular.module('icgc.facets.terms', ['icgc.facets.helpers']);
 
-  module.controller('termsCtrl', function ($scope, $filter, Facets, HighchartsService, ProjectCache, ValueTranslator) {
+  module.controller('termsCtrl', 
+    function ($scope, $filter, Facets, HighchartsService, ProjectCache, ValueTranslator, PortalFeature) {
+
+    $scope.enabled = PortalFeature.get('NOT_FACET');
 
     // Translation on UI is slow, do in here
     function addTranslations (terms, facetName, missingText) {
@@ -55,6 +58,11 @@
         terms: terms
       });
 
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
+
       $scope.actives = actives;
       addTranslations (actives, facetName, missingText);
 
@@ -71,6 +79,11 @@
       if ($scope.facet) {
         splitTerms();
       }
+      
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
       $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
     }
 
@@ -98,7 +111,21 @@
         facet: $scope.facetName
       });
     };
+    
+    $scope.notFacet = function() {
+      Facets.notFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
 
+    $scope.isFacet = function() {
+      Facets.isFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
+    
     $scope.bar = function (count) {
       return {width: (count / ($scope.facet.total + $scope.facet.missing) * 100) + '%'};
     };

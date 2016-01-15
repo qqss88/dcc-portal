@@ -146,8 +146,40 @@
       },
       // Extract UUIDs from filters
       extractSetIds: function(filters) {
+        var list = this.extractSetIdsHelper(filters);
+        var retList = [];
+        _.forEach(list, function(item) {
+          if (item.indexOf(Extensions.ENTITY_PREFIX) === 0) {
+            retList.push(item.substring(3));
+          }
+        });
+ 
+        return retList.concat(this.extractSetIdsFileHelper(filters)); 
+      },
+      
+      extractSetIdsHelper: function(filters) {
         var result = [];
-        ['donor', 'gene', 'mutation', 'file'].forEach(function(type) {
+        ['donor', 'gene', 'mutation'].forEach(function(type) {
+          if (filters.hasOwnProperty(type) === false) {
+            return;
+          }
+
+          if (filters[type].hasOwnProperty('id')) {
+            var entityFilters = filters[type].id;
+            if (entityFilters.hasOwnProperty('is')) {
+              result = result.concat( entityFilters.is );
+            } else if (_.has(entityFilters, 'not')) {
+              result = result.concat( entityFilters.not );
+            }
+          }
+
+        });
+        return result;
+      },
+      
+      extractSetIdsFileHelper: function(filters) {
+        var result = [];
+        ['file'].forEach(function(type) {
           if (filters.hasOwnProperty(type) === false) {
             return;
           }
@@ -156,6 +188,8 @@
             var entityFilters = filters[type][Extensions.ENTITY];
             if (entityFilters.hasOwnProperty('is')) {
               result = result.concat( entityFilters.is );
+            } else if (_.has(entityFilters, 'not')) {
+              result = result.concat( entityFilters.not );
             }
           }
 

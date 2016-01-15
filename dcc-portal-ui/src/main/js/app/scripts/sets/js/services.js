@@ -145,7 +145,7 @@
     _service.createAdvLink = function(set) {
       var type = set.type.toLowerCase(), filters = {};
       filters[type] = {};
-      filters[type][Extensions.ENTITY] = {is: [set.id]};
+      filters[type].id = {is: [Extensions.ENTITY_PREFIX+set.id]};
 
       if (['gene', 'mutation'].indexOf(type) >= 0) {
         return '/search/' + type.charAt(0) + '?filters=' + angular.toJson(filters);
@@ -373,7 +373,7 @@
       setList.forEach(function(set) {
         var filters = {};
         filters[set.type] = {};
-        filters[set.type][Extensions.ENTITY] = {is: [set.id]};
+        filters[set.type].id = {is: [Extensions.ENTITY_PREFIX+set.id]};
 
         // Grab the type (base advanced search router and corresponding filters)
         set.advType = ''; // default route is donors or just route is '/search';

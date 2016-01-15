@@ -24,12 +24,12 @@
                         <span data-ng-switch-default="">{{facet | trans}}</span>
                     </span>
 
-                    <span class="t_current__or">{{ inPluralForm (terms) ? 'IN (' : 'IS' }}</span>
+                    <span class="t_current__or">{{ prepositionBuilder(typeName, facet, terms) }}</span>
 
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false; limit=3">
                         <li data-ng-repeat="termObj in terms.is | limitTo:(expandTerms===true? terms.is.length : limit) track by termObj.term"
                             class="t_facets__facet__terms__term">
-                            <span class="t_facets__facet__terms__active__term__label"
+                            <span class="t_facets__facet__terms__active__term__label {{ activeClass({type:typeName, facet:facet}) }}"
                                   data-ng-style="hoverStyle"
                                   data-ng-click="removeTerm(termObj.controlType, termObj.controlFacet, termObj.controlTerm)"
                                   data-tooltip="{{ termObj.term | geneSetNameLookup | define:termObj.controlFacet }}">
@@ -38,6 +38,21 @@
                             <span data-ng-if="!$last" class="t_current__or">,&nbsp;</span>
                         </li>
                         <li data-ng-show="terms.is.length > limit">
+                            <a href=""><span data-ng-click="expandTerms=!expandTerms" class="t_current__or">
+                                <i class="{{expandTerms?'icon-caret-left':''}}"></i> {{ expandTerms? 'less':'...'}}
+                            </span></a>
+                        </li>
+                        <li data-ng-repeat="termObj in terms.not | limitTo:(expandTerms===true? terms.not.length : limit) track by termObj.term"
+                            class="t_facets__facet__terms__term">
+                            <span class="t_facets__facet__terms__active__term__label {{ activeClass({type:typeName, facet:facet}) }}"
+                                  data-ng-style="hoverStyle"
+                                  data-ng-click="removeTerm(termObj.controlType, termObj.controlFacet, termObj.controlTerm)"
+                                  data-tooltip="{{ termObj.term | geneSetNameLookup | define:termObj.controlFacet }}">
+                                  {{ resolveGeneSymbols (termObj.controlType, termObj.term) | trans:termObj.controlFacet }}
+                            </span>
+                            <span data-ng-if="!$last" class="t_current__or">,&nbsp;</span>
+                        </li>
+                        <li data-ng-show="terms.not.length > limit">
                             <a href=""><span data-ng-click="expandTerms=!expandTerms" class="t_current__or">
                                 <i class="{{expandTerms?'icon-caret-left':''}}"></i> {{ expandTerms? 'less':'...'}}
                             </span></a>

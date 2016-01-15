@@ -991,6 +991,18 @@
       "src": "fontawesome"
     },
     {
+      "uid": "2a4e6c99b732a57da40e32fa2a7800a4",
+      "css": "toggle-off",
+      "code": 59468,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "3256ef03b16e7ab51235bc7378b53bb5",
+      "css": "toggle-on",
+      "code": 59469,
+      "src": "fontawesome"
+    },
+    {
       "uid": "25fc99a30fecc4021fdcae5fff5ba9ac",
       "css": "eye",
       "code": 59466,

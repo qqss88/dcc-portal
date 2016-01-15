@@ -40,7 +40,7 @@
 
   // Angular wiring
   angular.module ('icgc.donorlist.services', [])
-    .service ('DonorSetVerificationService', function (Restangular, LocationService, Extensions) {
+    .service ('DonorSetVerificationService', function (Restangular, LocationService, Extensions, Facets) {
     // Helpers
     function restEndpoint (endpointName) {
       return Restangular.one (endpointName)
@@ -75,8 +75,14 @@
 
     this.updateDonorSetIdFilter = function (donorSetId, isExternalRepo) {
       var filters = LocationService.filters();
-      var path = [(isExternalRepo ? 'file' : 'donor'), Extensions.ENTITY, 'is'];
-
+      var params = {type: 'donor', facet: 'id'};
+      var path;
+      if (Facets.isNot(params)) {
+        path = [(isExternalRepo ? 'file' : 'donor'), Extensions.ENTITY, 'not'];
+      } else {
+        path = [(isExternalRepo ? 'file' : 'donor'), Extensions.ENTITY, 'is'];
+      }
+      
       return _.set (filters, path, [donorSetId]);
     };
   });

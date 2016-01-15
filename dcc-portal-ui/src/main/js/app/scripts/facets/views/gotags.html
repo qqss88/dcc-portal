@@ -10,7 +10,7 @@
     </li>
     <li>
         <ul class="t_facets__facet__terms__active">
-            <li class="t_facets__facet__terms__active__term__label"
+            <li class="t_facets__facet__terms__active__term__label {{activeClass}}"
                 data-active-term
                 data-item="item"
                 data-ng-show="predefinedGOIds.indexOf(item) === -1"
@@ -46,7 +46,7 @@
             <li data-ng-repeat="item in predefinedGO"
                 data-ng-if="actives.indexOf(item.id) >= 0"
                 data-ng-click="removeTerm({'type':type, 'facetName': facetName, 'id':item.id})"
-                class="t_facets__facet__terms__active__term__label"
+                class="t_facets__facet__terms__active__term__label {{activeClass}}"
                 data-ng-mouseover="toggleRemove=true"
                 data-ng-mouseleave="toggleRemove=false">
                 <span class="t_facets__facet__terms__active__term__label__text" data-tooltip="{{item.name}}" data-tooltip-placement="overflow">

@@ -29,6 +29,7 @@ import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
+import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 import static org.dcc.portal.pql.meta.TypeModel.GENE_SET_ID;
 import static org.dcc.portal.pql.util.Converters.stringValue;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.ALL;
@@ -36,6 +37,7 @@ import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,7 @@ import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.JqlSingleValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlValue;
 
 import com.google.common.base.Joiner;
@@ -77,6 +80,7 @@ public class FiltersConverter {
   private static final String EXISTS_TEMPLATE = "exists(%s)";
   private static final String MISSING_TEMPLATE = "missing(%s)";
   private static final String NESTED_TEMPLATE = "nested(%s,%s)";
+  private static final String ENTITY_SET_PREFIX = "ES:";
 
   private static final Ordering<String> NATURAL_ORDER = Ordering.<String> natural();
   private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
@@ -93,7 +97,7 @@ public class FiltersConverter {
       "gene.goTermId",
       "gene.hasPathway",
       GENE_SET_ID,
-      "entitySetId",
+      ENTITY_SET_ID,
       "mutation.location",
       "gene.location");
 
@@ -364,7 +368,7 @@ public class FiltersConverter {
         pathwayIdFields.add(jqlField);
       } else if (fieldName.equals("hasPathway")) {
         hasPathwayFields.add(jqlField);
-      } else if (fieldName.equals("entitySetId")) {
+      } else if (fieldName.equals(ENTITY_SET_ID)) {
         entitySetIdFields.add(jqlField);
       } else if (fieldName.equals("id")) {
         idFields.add(jqlField);
@@ -381,27 +385,88 @@ public class FiltersConverter {
       remainingFields.addAll(hasPathwayFields);
     } else {
       pathwayIdFields.addAll(hasPathwayFields);
-      pathwayRelatedFilter = toPqlFilter(pathwayIdFields, indexType);
-      pathwayRelatedFilter = (null == pathwayRelatedFilter) ? null : format(PQL_OR_TEMPLATE, pathwayRelatedFilter);
+      pathwayRelatedFilter = orFilterHelper(toPqlFilter(pathwayIdFields, indexType));
     }
 
     // Special handling when entitySetId and id are both present; if not, process normally
     String entitySetRelatedFilter = null;
-
     if (entitySetIdFields.isEmpty() || idFields.isEmpty()) {
-      remainingFields.addAll(entitySetIdFields);
-      remainingFields.addAll(idFields);
+
+      boolean notFacet = false;
+      val newIdFields = Lists.<JqlField> newArrayList();
+
+      if (idFields.isEmpty()) {
+        remainingFields.addAll(entitySetIdFields);
+        remainingFields.addAll(idFields);
+        return joinFilters(remainingFields, pathwayRelatedFilter, entitySetRelatedFilter, indexType);
+      }
+
+      // Inspect ids to see if we have an inline entity set
+      for (val idField : idFields) {
+
+        // Need to know if we need to wrap everything in a NOT at the end.
+        if (idField.getOperation() == NOT) {
+          notFacet = true;
+        }
+
+        List<Object> values;
+        if (idField.getValue().isArray()) {
+          val jqlValue = (JqlArrayValue) idField.getValue();
+          values = jqlValue.get();
+        } else {
+          val jqlValue = (JqlSingleValue) idField.getValue();
+          values = ImmutableList.of(jqlValue.get());
+        }
+
+        // Transform entitySetIds into entitySetFields and remove from entity id list.
+        for (val value : values) {
+          String strValue = value.toString();
+          if (strValue.startsWith(ENTITY_SET_PREFIX)) {
+            val newValue = new JqlArrayValue(ImmutableList.of(strValue.substring(3)));
+            val entitySetField = new JqlField(ENTITY_SET_ID, IS, newValue, idField.getPrefix());
+            val newValues = new ArrayList<Object>(values);
+            newValues.remove(value);
+
+            entitySetIdFields.add(entitySetField);
+
+            if (!newValues.isEmpty()) {
+              val newIdField = new JqlField("id", IS, new JqlArrayValue(newValues), idField.getPrefix());
+              newIdFields.add(newIdField);
+            }
+          }
+        }
+
+        entitySetIdFields.addAll(newIdFields);
+        entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
+
+        if (!entitySetIdFields.isEmpty() && !newIdFields.isEmpty()) {
+          entitySetRelatedFilter = orFilterHelper(entitySetRelatedFilter);
+          entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
+        } else if (!entitySetIdFields.isEmpty()) {
+          entitySetRelatedFilter = notFacet ? format(NOT_TEMPLATE, entitySetRelatedFilter) : entitySetRelatedFilter;
+        } else {
+          // There were no entitysets, use original unmodified fields
+          remainingFields.addAll(idFields);
+        }
+      }
+
     } else {
       entitySetIdFields.addAll(idFields);
-      entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
-      entitySetRelatedFilter =
-          (null == entitySetRelatedFilter) ? null : format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
+      entitySetRelatedFilter = orFilterHelper(toPqlFilter(entitySetIdFields, indexType));
     }
 
+    return joinFilters(remainingFields, pathwayRelatedFilter, entitySetRelatedFilter, indexType);
+  }
+
+  private static String orFilterHelper(String filter) {
+    return (null == filter) ? null : format(PQL_OR_TEMPLATE, filter);
+  }
+
+  private static String joinFilters(ArrayList<JqlField> remaining, String pathways, String entitySets, Type type) {
     return COMMA_JOINER.join(
-        toPqlFilter(remainingFields, indexType),
-        pathwayRelatedFilter,
-        entitySetRelatedFilter);
+        toPqlFilter(remaining, type),
+        pathways,
+        entitySets);
   }
 
   private static boolean isNestedField(@NonNull JqlField field) {
@@ -576,11 +641,15 @@ public class FiltersConverter {
     val fieldValue = jqlField.getValue();
 
     if (fieldValue.isArray()) {
-      // FIXME: assumes the operation is 'IS'
       val arrayFilter = createArrayFilterForMissingField(jqlField, indexType);
       val missingFilter = format(MISSING_TEMPLATE, fieldName);
+      val orFilter = arrayFilter.isPresent() ? format("or(%s,%s)", missingFilter, arrayFilter.get()) : missingFilter;
 
-      return arrayFilter.isPresent() ? format("or(%s,%s)", missingFilter, arrayFilter.get()) : missingFilter;
+      if (jqlField.getOperation() == NOT) {
+        return format(NOT_TEMPLATE, orFilter);
+      } else {
+        return orFilter;
+      }
     }
 
     val formatTemplate = isTrue(fieldValue) ? MISSING_TEMPLATE : EXISTS_TEMPLATE;

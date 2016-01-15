@@ -285,8 +285,14 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
         // and facet - else include
         if (filters[params.type].hasOwnProperty(params.facet)) {
           // and active - else don't include
-          if (filters[params.type][params.facet].is.indexOf(item.term) !== -1) {
-            r.push(term);
+          if (filters[params.type][params.facet].hasOwnProperty('is')) {
+            if (filters[params.type][params.facet].is.indexOf(item.term) !== -1) {
+              r.push(term);
+            }
+          } else if (filters[params.type][params.facet].hasOwnProperty('not')) {
+            if (filters[params.type][params.facet].not.indexOf(item.term) === -1) {
+              r.push(term);
+            }
           }
         } else {
           r.push(term);

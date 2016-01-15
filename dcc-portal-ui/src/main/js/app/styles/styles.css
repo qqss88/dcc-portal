@@ -656,14 +656,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -704,14 +704,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -737,14 +737,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -762,14 +762,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -781,14 +781,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -860,14 +860,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -1810,14 +1810,14 @@ footer .clear-fix {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 footer .clear-fix:before, footer .clear-fix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 footer .clear-fix:after {
   clear: both;
 }
@@ -2040,14 +2040,14 @@ footer .dcc-col {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2113,31 +2113,39 @@ footer .dcc-col {
   color: #e9931c;
 }
 
+/* line 30, ../scripts/facets/styles/_facets.scss */
+.t_facets__facet__is__not {
+  font-size: 0.75rem;
+  font-weight: 200;
+  cursor: pointer;
+  float: right;
+}
+
 /************************************************
  *   Terms
  ***********************************************/
-/* line 33, ../scripts/facets/styles/_facets.scss */
+/* line 40, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive ul li:last-child {
   border-bottom: none;
 }
 
-/* line 37, ../scripts/facets/styles/_facets.scss */
+/* line 44, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive {
   padding: 0;
 }
 
-/* line 42, ../scripts/facets/styles/_facets.scss */
+/* line 49, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term,
 .t_facets__facet__terms__active__term__label {
   position: relative;
 }
 
-/* line 46, ../scripts/facets/styles/_facets.scss */
+/* line 53, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term {
   border-bottom: 1px dashed #e6e6e6;
 }
 
-/* line 51, ../scripts/facets/styles/_facets.scss */
+/* line 58, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__label,
 .t_facets__facet__terms__active__term__label__text {
   position: relative;
@@ -2150,19 +2158,19 @@ footer .dcc-col {
   line-height: 1rem;
 }
 
-/* line 62, ../scripts/facets/styles/_facets.scss */
+/* line 69, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__label {
   padding-left: .5rem;
   color: #166aa2;
   cursor: pointer;
   transition: .5s color;
 }
-/* line 68, ../scripts/facets/styles/_facets.scss */
+/* line 75, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__label:hover {
   color: #ce6503;
 }
 
-/* line 74, ../scripts/facets/styles/_facets.scss */
+/* line 81, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__bar,
 .t_facets__facet__terms__active__term__bar {
   position: absolute;
@@ -2172,45 +2180,45 @@ footer .dcc-col {
   transition: width 1s;
 }
 
-/* line 83, ../scripts/facets/styles/_facets.scss */
+/* line 90, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__bar {
   background: #f2f2f2;
 }
 
-/* line 87, ../scripts/facets/styles/_facets.scss */
+/* line 94, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__active__term__bar {
   background: #bbe7f7;
 }
 
-/* line 91, ../scripts/facets/styles/_facets.scss */
+/* line 98, ../scripts/facets/styles/_facets.scss */
 .table .t_facets__facet__terms__active__term__bar {
   max-height: 2.2rem;
   background: #d1effa;
 }
 
-/* line 97, ../scripts/facets/styles/_facets.scss */
+/* line 104, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__count,
 .t_facets__facet__terms__active__term__count {
   position: relative;
   float: right;
 }
 
-/* line 102, ../scripts/facets/styles/_facets.scss */
+/* line 109, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__term__count {
   margin-right: 1rem;
 }
 
-/* line 106, ../scripts/facets/styles/_facets.scss */
+/* line 113, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__active__term__count {
   margin-right: .5rem;
 }
 
-/* line 110, ../scripts/facets/styles/_facets.scss */
+/* line 117, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__inactive__reset {
   font-size: 1.2rem;
 }
 
-/* line 113, ../scripts/facets/styles/_facets.scss */
+/* line 120, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__term__na {
   color: #cccccc;
 }
@@ -2218,55 +2226,71 @@ footer .dcc-col {
 /************************************************
  *   Labels
  ***********************************************/
-/* line 121, ../scripts/facets/styles/_facets.scss */
+/* line 128, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__active__term__label,
 .t_facets__facet__label {
   padding: 0 .5rem;
   line-height: 2.1rem;
 }
 
-/* line 127, ../scripts/facets/styles/_facets.scss */
+/* line 134, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__label:hover, .t_facets__facet__terms__active__term__label:hover {
   cursor: pointer;
   text-decoration: line-through;
 }
 
-/* line 133, ../scripts/facets/styles/_facets.scss */
+/* line 140, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__label {
   background: #e6e6e6;
   color: #166aa2;
 }
-/* line 136, ../scripts/facets/styles/_facets.scss */
+/* line 143, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__label:hover {
   background: #dedede;
 }
 
-/* line 141, ../scripts/facets/styles/_facets.scss */
+/* line 148, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__active__term__label {
   background: #daf2fb;
   color: #1693c0;
 }
-/* line 144, ../scripts/facets/styles/_facets.scss */
+/* line 151, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__terms__active__term__label:hover {
   background: #cdedf9;
 }
 
-/* line 149, ../scripts/facets/styles/_facets.scss */
+/* line 156, ../scripts/facets/styles/_facets.scss */
+.t_facets__facet__not {
+  background: #f5d0c6;
+  color: black;
+}
+/* line 159, ../scripts/facets/styles/_facets.scss */
+.t_facets__facet__not:hover {
+  background: #f2beb1;
+}
+
+/* line 164, ../scripts/facets/styles/_facets.scss */
+.t_facets__facet__not__bar {
+  background: #eeab9b;
+  color: black;
+}
+
+/* line 169, ../scripts/facets/styles/_facets.scss */
 .t_impact_high {
   color: #dc502e;
 }
 
-/* line 152, ../scripts/facets/styles/_facets.scss */
+/* line 172, ../scripts/facets/styles/_facets.scss */
 .t_impact_medium {
   color: #ce6503;
 }
 
-/* line 155, ../scripts/facets/styles/_facets.scss */
+/* line 175, ../scripts/facets/styles/_facets.scss */
 .t_impact_low {
   color: #1a9900;
 }
 
-/* line 158, ../scripts/facets/styles/_facets.scss */
+/* line 178, ../scripts/facets/styles/_facets.scss */
 .t_impact_unknown {
   color: #666666;
 }
@@ -2274,26 +2298,26 @@ footer .dcc-col {
 /************************************************
  *   Input
  ***********************************************/
-/* line 165, ../scripts/facets/styles/_facets.scss */
+/* line 185, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__input {
   padding: .5rem;
   position: relative;
 }
-/* line 168, ../scripts/facets/styles/_facets.scss */
+/* line 188, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__input input {
   padding-right: 1.5rem;
 }
-/* line 172, ../scripts/facets/styles/_facets.scss */
+/* line 192, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__input .t_suggest_flyout {
   margin-top: .25rem;
 }
-/* line 176, ../scripts/facets/styles/_facets.scss */
+/* line 196, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__input .t_suggest__embedded__right {
   top: .9rem;
   right: 1rem;
 }
 
-/* line 182, ../scripts/facets/styles/_facets.scss */
+/* line 202, ../scripts/facets/styles/_facets.scss */
 .t_facets__facet__button {
   padding-right: .5rem;
   position: relative;
@@ -2303,7 +2327,7 @@ footer .dcc-col {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 192, ../scripts/facets/styles/_facets.scss */
+  /* line 212, ../scripts/facets/styles/_facets.scss */
   .t_facets__facet__terms__inactive__term__label,
   .t_facets__facet__terms__active__term__label__text {
     line-height: 2.2rem;
@@ -2324,14 +2348,14 @@ footer .dcc-col {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2436,14 +2460,14 @@ footer .dcc-col {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -3343,14 +3367,14 @@ g.marker rect.selected {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:before, #pathways .pathway-filter-container .pathway-item-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:after {
   clear: both;
 }
@@ -3397,14 +3421,14 @@ g.marker rect.selected {
   padding-top: 0.2rem;
   padding-bottom: 0.6rem;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:before, #pathways .pathways-content .pathway-analysis-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:after {
   clear: both;
 }
@@ -6522,14 +6546,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../gems/1.9.1/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }

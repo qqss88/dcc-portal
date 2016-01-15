@@ -22,7 +22,7 @@
 
   var module = angular.module('icgc.facets.helpers', ['icgc.facets']);
 
-  module.factory('Facets', function (FilterService, FacetConstants, $rootScope) {
+  module.factory('Facets', function (FilterService, FacetConstants, Extensions, $rootScope) {
 
     function _broadcastFacetStatusChange(facet, isActive, changeType) {
       $rootScope.$broadcast(FacetConstants.EVENTS.FACET_STATUS_CHANGE, {
@@ -36,13 +36,17 @@
       if (!filters.hasOwnProperty(params.type)) {
         filters[params.type] = {};
       }
-      if (!filters[params.type].hasOwnProperty(params.facet)) {
-        filters[params.type][params.facet] = {is: []};
+      if (!_.has(filters, [params.type, params.facet])) {
+        if (isNot(params)) {
+          filters[params.type][params.facet] = {not: []};
+        } else {
+          filters[params.type][params.facet] = {is: []};
+        }
       }
     }
 
     /*
-     * TODO Set Terms
+     * Set Terms
      */
     function setTerms(params) {
       if (invalidParams (params)) {
@@ -50,11 +54,13 @@
       }
 
       var filters = FilterService.filters();
-
       ensurePath(filters, params);
 
-      // TODO make is possible to use 'is' or 'not'
-      filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
+      if (isNot(params)) {
+        filters[params.type][params.facet].not = angular.isArray(params.terms) ? params.terms : [params.terms];
+      } else {
+        filters[params.type][params.facet].is = angular.isArray(params.terms) ? params.terms : [params.terms];
+      }
       FilterService.filters(filters);
     }
 
@@ -70,13 +76,73 @@
 
       ensurePath(filters, params);
 
-      // TODO make is possible to use 'is' or 'not'
-      if (filters[params.type][params.facet].is.indexOf(params.term) === -1) {
-        filters[params.type][params.facet].is.push(params.term);
-        _broadcastFacetStatusChange(params.term, true);
+      if (isNot(params)) {
+        if (filters[params.type][params.facet].not.indexOf(params.term) === -1) {
+          filters[params.type][params.facet].not.push(params.term);
+          _broadcastFacetStatusChange(params.term, true);
+        }
+      } else {
+        if (filters[params.type][params.facet].is.indexOf(params.term) === -1) {
+          filters[params.type][params.facet].is.push(params.term);
+          _broadcastFacetStatusChange(params.term, true);
+        }
       }
 
       FilterService.filters(filters);
+    }
+    
+    /**
+     * Helper for walking filter and switching between 'is' and 'not'
+     */
+    function notFilterHelper(params, makeNot) {
+      // Check for required parameters
+      [ 'type', 'facet'].forEach(function (rp) {
+        if (!params.hasOwnProperty(rp)) {
+          throw new Error('Missing required parameter: ' + rp);
+        }
+      });
+      
+      var which = 'not';
+      var into = 'is';
+      if (makeNot) {
+        which = 'is';
+        into = 'not';
+      }
+      
+      var filters = FilterService.filters();
+      if (_.has(filters, [params.type, params.facet, which])) {
+        filters[params.type][params.facet][into] = filters[params.type][params.facet][which];
+        delete filters[params.type][params.facet][which];
+        if (params.facet === 'id') {
+          if (_.has(filters, [params.type, 'entitySetId', which])) {
+            filters[params.type].entitySetId[into] = filters[params.type].entitySetId[which];
+            delete filters[params.type].entitySetId[which];
+          }
+        }
+      } else if (_.has(filters, [params.type, 'entitySetId', which])) {
+        filters[params.type].entitySetId[into] = filters[params.type].entitySetId[which];
+        delete filters[params.type].entitySetId[which];
+      } else if (params.type === 'go_term') {
+        filters.gene[params.facet][into] = filters.gene[params.facet][which];
+        delete filters.gene[params.facet][which];
+      }
+      
+      _broadcastFacetStatusChange(params.facet, true);
+      FilterService.filters(filters);
+    }
+    
+    /** 
+     * Make the facet an IS NOT   
+     */
+    function notFacet(params) {      
+      notFilterHelper(params, true);
+    }
+    
+    /**
+     * Remove the IS NOT
+     */
+    function isFacet(params) {
+      notFilterHelper(params, false);
     }
 
     /*
@@ -87,16 +153,33 @@
         throw new Error ('Missing property in params: ' + toJson (params));
       }
 
+      // Check for required parameters
+      [ 'type', 'facet', 'term'].forEach(function (rp) {
+        if (!params.hasOwnProperty(rp)) {
+          throw new Error('Missing required parameter: ' + rp);
+        }
+      });
+
       var filters = FilterService.filters();
-
-      // TODO make is possible to use 'is' or 'not'
-      var index = filters[params.type][params.facet].is.indexOf(params.term);
-      filters[params.type][params.facet].is.splice(index, 1);
-
-      if (!filters[params.type][params.facet].is.length) {
-        removeFacet(params);
+      var index;
+      if (isNot(params)) {
+        index = filters[params.type][params.facet].not.indexOf(params.term);
+        filters[params.type][params.facet].not.splice(index, 1);
+        if (!filters[params.type][params.facet].not.length) {
+          removeFacet(params);
+        } else {
+          _broadcastFacetStatusChange(params.facet, false);
+          FilterService.filters(filters);
+        }
       } else {
-        FilterService.filters(filters);
+        index = filters[params.type][params.facet].is.indexOf(params.term);
+        filters[params.type][params.facet].is.splice(index, 1);
+        if (!filters[params.type][params.facet].is.length) {
+          removeFacet(params);
+        } else {
+          _broadcastFacetStatusChange(params.facet, false);
+          FilterService.filters(filters);
+        }
       }
     }
 
@@ -157,7 +240,7 @@
     }
 
     /*
-     * TODO Toggle Term
+     * Toggle Term
      */
     function toggleTerm(params) {
       var filters;
@@ -170,10 +253,12 @@
 
       filters = FilterService.filters();
       console.info(filters);
-      if (filters.hasOwnProperty(params.type) &&
-          filters[params.type].hasOwnProperty(params.facet) &&
-        // TODO support is/not
-          filters[params.type][params.facet].is.indexOf(params.term) !== -1) {
+  
+      if (_.has(filters, [params.type, params.facet, 'is']) && 
+          filters[params.type][params.facet].is.indexOf(params.term)  !== -1) {
+        removeTerm(params);
+      } else if (_.has(filters, [params.type, params.facet, 'not']) && 
+          filters[params.type][params.facet].not.indexOf(params.term)  !== -1) {
         removeTerm(params);
       } else {
         addTerm(params);
@@ -200,12 +285,35 @@
         }) || { term: active, count: 0};
       }
 
-      if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
-        // TODO make is possible to use 'is' or 'not'
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
         list = _.map(filters[params.type][params.facet].is, filterFn);
+      } else if (_.has(filters, [params.type, params.facet, 'not'])){
+        list = _.map(filters[params.type][params.facet].not, filterFn);
       }
 
       return list;
+    }
+    
+    /**
+     * Determine if this facet is an "IS NOT"
+     */
+    function isNot(params) { 
+      var filters;
+
+      [ 'type', 'facet'].forEach(function (rp) {
+        if (!params.hasOwnProperty(rp)) {
+          throw new Error('Missing required parameter: ' + rp);
+        }
+      });
+
+      filters = FilterService.filters();
+      if (params.facet === 'id') {
+        return _.has(filters, params.type+'.'+params.facet+'.not') || _.has(filters, params.type+'.entitySetId.not');
+      } else if (params.type === 'go_term') {
+        return _.has(filters, ['gene',params.facet,'not']);
+      } else {
+        return _.has(filters, params.type+'.'+params.facet+'.not');
+      }
     }
 
     /*
@@ -221,6 +329,20 @@
       return _.difference(params.terms, params.actives);
     }
 
+    function getActiveFromTags(params, isSet) {
+      var list = getActiveTags(params);
+      var retList = [];
+      _.forEach(list, function(item) {
+        if (isSet && item.indexOf(Extensions.ENTITY_PREFIX) === 0) {
+          retList.push(item.substring(3));
+        } else if (!isSet && item.indexOf(Extensions.ENTITY_PREFIX) !== 0) {
+          retList.push(item);
+        }
+      });
+      
+      return retList; 
+    }
+
     /* Get a list of active tags */
     function getActiveTags(params) {
       var filters, list = [];
@@ -232,10 +354,10 @@
       });
 
       filters = FilterService.filters();
-
-      if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
-        // TODO make is possible to use 'is' or 'not'
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
         list = filters[params.type][params.facet].is || [];
+      } else if (_.has(filters, [params.type, params.facet, 'not'])) {
+        list = filters[params.type][params.facet].not || [];
       }
 
       return list;
@@ -253,9 +375,10 @@
 
       filters = FilterService.filters();
 
-      if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
-        // TODO make is possible to use 'is' or 'not'
+      if (_.has(filters, [params.type, params.facet, 'is'])) {
         list = filters[params.type][params.facet].is;
+      } else if (_.has(filters, [params.type, params.facet, 'not'])) {
+        list = filters[params.type][params.facet].not;
       }
 
       return list;
@@ -266,12 +389,16 @@
       toggleTerm: toggleTerm,
       addTerm: addTerm,
       removeTerm: removeTerm,
+      notFacet: notFacet,
+      isFacet: isFacet,
       removeFacet: removeFacet,
       removeAll: removeAll,
       getActiveTerms: getActiveTerms,
+      isNot: isNot,
       getInactiveTerms: getInactiveTerms,
       getActiveTags: getActiveTags,
-      getActiveLocations: getActiveLocations
+      getActiveLocations: getActiveLocations,
+      getActiveFromTags: getActiveFromTags
     };
   });
 

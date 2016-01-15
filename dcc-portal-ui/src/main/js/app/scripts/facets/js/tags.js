@@ -18,12 +18,13 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
+  var module = angular.module('icgc.facets.tags', ['icgc.portalfeature', 'icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
     function ($scope, $modal, Facets, FilterService, LocationService, HighchartsService, FiltersUtil,
-      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService, GeneSymbols) {
+      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService, GeneSymbols, PortalFeature) {
 
+    $scope.enabled = PortalFeature.get('NOT_FACET');
     $scope.Extensions = Extensions;
 
     var _fetchNameForSelections = function ( selections ) {
@@ -40,6 +41,9 @@
     // This function is called by tags.html to prevent the File input box in
     // External Repo File page from displaying the "Uploaded donor set" label.
     $scope.shouldDisplayEntitySetId = function () {
+      if ($scope.type === 'mutation' && $scope.facetName === 'id') {
+        return true;
+      }
       return $scope.type !== 'file' && $scope.facetName !== 'id';
     };
 
@@ -69,6 +73,30 @@
       });
     }
 
+    /**
+     * Sets the active class if this facet is 'not' 
+     */
+    function setActiveClass() {
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
+    }
+    
+    function activeEntityHelper(type) {
+      if (type === 'file') {
+        return Facets.getActiveTags({
+          type: type,
+          facet: Extensions.ENTITY
+        });
+      } else {
+        return Facets.getActiveFromTags({
+          type: type,
+          facet: 'id'
+        }, true);
+      }
+    }
+
     function setup() {
       var type = $scope.proxyType || $scope.type,
           filters = FilterService.filters(),
@@ -76,16 +104,15 @@
 
       _fetchNameForSelections ( filters.gene );
 
-      $scope.actives = Facets.getActiveTags({
+      $scope.actives = Facets.getActiveFromTags({
         type: type,
         facet: $scope.proxyFacetName || $scope.facetName
-      });
+      }, false);
+      
+      setActiveClass();
 
       // There are only 'active' entity ids
-      $scope.activeEntityIds = Facets.getActiveTags({
-        type: type,
-        facet: Extensions.ENTITY
-      });
+      $scope.activeEntityIds = activeEntityHelper(type);
 
       // Fetch display names for entity lists
       $scope.entityIdMap = {};
@@ -220,6 +247,20 @@
         type: type,
         facet: facet,
         term: term
+      });
+    };
+    
+    $scope.notFacet = function() {
+      Facets.notFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
+    
+    $scope.isFacet = function() {
+      Facets.isFacet({
+        type: $scope.type,
+        facet: $scope.facetName
       });
     };
 

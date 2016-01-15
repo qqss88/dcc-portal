@@ -33,7 +33,7 @@
 
   var module = angular.module('icgc.genelist.services', []);
 
-  module.service('GeneSetVerificationService', function(Restangular, LocationService, Extensions) {
+  module.service('GeneSetVerificationService', function(Restangular, LocationService, Extensions, Facets) {
 
     /* Verify text input */
     this.verify = function(text) {
@@ -69,8 +69,12 @@
       if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
         filters.gene[Extensions.ENTITY] = {};
       }
-      // Note this overwrites
-      filters.gene[Extensions.ENTITY].is = [geneSetId];
+      var params = {type: 'gene', facet: 'id'};
+      if (Facets.isNot(params)) {
+        filters.gene[Extensions.ENTITY].not = [geneSetId];
+      } else {
+        filters.gene[Extensions.ENTITY].is = [geneSetId]; 
+      }
       return filters;
     };
 
