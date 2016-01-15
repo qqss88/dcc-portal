@@ -76,9 +76,9 @@
                               data-tooltip="View in {{:: SavedSetController.dataRepoTitle }}" href="{{item.repoLink}}">
                               <i class="icon-download-cloud"></i>
                             </a>
-                            <!-- span data-tooltip="Share Saved {{item.type | readable}} Data">
-                                <share-icon data-share-params="SavedSetController.getEntitySetShareParams(item)" class="t_tools__tool"></share-icon>
-                            </span -->
+                            <span data-tooltip="Share Saved Set">
+                                <share-icon data-custom-popup-disclaimer="" data-share-params="SavedSetController.getEntitySetShareParams(item)" class="t_tools__tool"></share-icon>
+                            </span>
                         </span>
                     </td>
                     <td colspan="2" data-ng-if="item.state !== 'FINISHED'">

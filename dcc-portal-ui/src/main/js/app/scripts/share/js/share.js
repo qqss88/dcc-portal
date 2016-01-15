@@ -39,7 +39,8 @@
       templateUrl: '/scripts/share/views/share.icon.html',
       controller: 'shareCtrl as shareCtrl',
       scope: {
-        shareParams: '='
+        shareParams: '=',
+        customPopupDisclaimer: '@'
       },
       link: function () {
       }
@@ -50,10 +51,7 @@
     return {
       restrict: 'E',
       replace: true,
-      templateUrl: '/scripts/share/views/share.popup.html',
-      scope: {
-        customMessaging: '@'
-      }
+      templateUrl: '/scripts/share/views/share.popup.html'
     };
   });
 
@@ -108,14 +106,15 @@
   });
 
 
-  module.controller('SharePopupController', function($scope, $modalInstance, shortUrl) {
+  module.controller('SharePopupController', function($scope, $modalInstance, shortUrl, customPopupDisclaimer) {
     $scope.shortUrl = shortUrl;
+    $scope.customPopupDisclaimer = customPopupDisclaimer;
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
     };
   });
 
-  module.controller('shareCtrl', function ($modal, Share) {
+  module.controller('shareCtrl', function ($scope, $modal, Share) {
     var _ctrl= this;
 
     _ctrl.toggle = function(opt) {
@@ -134,7 +133,16 @@
           resolve: {
             shortUrl: function() {
               return _ctrl.shortUrl;
+            },
+            customPopupDisclaimer: function() {
+
+              if (angular.isDefined($scope.customPopupDisclaimer) && ! $scope.customPopupDisclaimer) {
+                $scope.customPopupDisclaimer = true;
+              }
+
+              return $scope.customPopupDisclaimer || false;
             }
+
           }
         });
       });
