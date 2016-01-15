@@ -23,7 +23,7 @@ module.exports = function (grunt) {
   // configurable paths
   var yeomanConfig = {
     app: 'app',
-    dist: '../../../target/app',
+    dist: 'target/app',
     developIndexFile: 'develop/html/index.develop.html'
   };
 
