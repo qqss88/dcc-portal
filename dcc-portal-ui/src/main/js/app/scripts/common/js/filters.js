@@ -151,9 +151,12 @@ angular.module('icgc.common.filters', [])
 
             return this._cachedFilters;
         },
-        updateCache: function() {
-          //console.log('Updating cache from ', this._cachedFilters, ' to ', _filtersObj);
-          this.filters(_filtersObj);
+        updateCache: function(newFilters) {
+          var filterObj = newFilters && typeof newFilters === 'object' ? newFilters : _filters();
+
+          //console.log('Updating cache from ', this._cachedFilters, ' to ', _filters());
+
+          this.filters(filterObj);
         }
       };
     }

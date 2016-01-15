@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.sets.services', []);
+  var module = angular.module('icgc.sets.services', ['icgc.common.filters']);
 
   module.service('SetOperationService', function() {
     var shortHandPrefix = 'S';
@@ -99,7 +99,7 @@
    */
   module.service('SetService',
     function ($window, $location, $q, Restangular, RestangularNoCache, API,
-              localStorageService, toaster, Extensions, Page, RouteInfoService) {
+              localStorageService, toaster, Extensions, Page, FilterService, RouteInfoService) {
 
     var LIST_ENTITY = 'entity';
     var dataRepoUrl = RouteInfoService.get ('dataRepositories').href;
@@ -273,7 +273,8 @@
           return;
         } else {
           var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
-          $location.path(forwardUrl).search('filters', newFilter);
+          $location.path(forwardUrl);
+          FilterService.filters(newFilter);
         }
       });
       return promise;
@@ -285,14 +286,15 @@
       params.description = '';
       params.sortBy = 'fileName';
       params.sortOrder = 'DESCENDING';
-      var promise = null;
+
       var data = params2JSON(type, params);
-      promise = Restangular.one('entityset').one('external')
+      var promise = Restangular.one('entityset').one('external')
       .post(undefined, data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         Page.stopWork();
-        var newFilter = JSON.stringify({donor: {id: {is: [Extensions.ENTITY_PREFIX+data.id]}}});
-        $location.path(forwardUrl).search('filters', newFilter);
+        var newFilter = JSON.stringify({donor: {entitySetId: {is: [data.id]}}});
+        $location.path(forwardUrl);
+        FilterService.filters(newFilter);
       });
       return promise;
     };
