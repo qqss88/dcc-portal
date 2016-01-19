@@ -138,7 +138,7 @@ function discovery(selector) {
  * in the page rendering
  */
 function validateInnerText(route, innerText) {
-  phantom.create(function(ph) {
+  phantom.create('--ignore-ssl-errors=yes', function(ph) {
     ph.createPage(function(page) {
 
       function validate(result) {
@@ -163,7 +163,7 @@ function validateInnerText(route, innerText) {
  * also has these terms and term counts
  */
 function validateFacets(route, activeTerms, inactiveTerms) {
-  phantom.create(function(ph) {
+  phantom.create('--ignore-ssl-errors=yes', function(ph) {
     ph.createPage(function(page) {
 
       function validate(result) {
@@ -256,7 +256,7 @@ function validateLink(href, value) {
   if (href.charAt(0) !== '/') href = '/' + href;
   if (isNaN(value)) return;
 
-  phantom.create(function(ph) {
+  phantom.create('--ignore-ssl-errors=yes', function(ph) {
 
     function evaluate(selector) {
       var res = null;
@@ -292,7 +292,7 @@ function validateLink(href, value) {
 
 
 
-phantom.create(function(ph) {
+phantom.create('--ignore-ssl-errors=yes', function(ph) {
 
   function validate(result) {
     var links = _.filter(result.links, function(d) {

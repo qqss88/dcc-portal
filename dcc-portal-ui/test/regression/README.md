@@ -3,11 +3,15 @@ ramparts
 Cross-server regression tester with phantomJS. Given a URL, ramparts executes against an origin server and scrapes the page content for API invocations.
 It then executes the API against another server and validates the results against what is been shown on the orign server.
 
-Note: facet testing support is largely experimental, as it is largely reliant on class-based selectors. It does not actually simulate facet term clicking, but
+*Note 1*: facet testing support is largely experimental, as it is largely reliant on class-based selectors. It does not actually simulate facet term clicking, but
 rather that resultant page has the same facet terms and facet term counts.
 
-Note: ramparts.js creates additional processes to sandbox actions. You will need a decent machine !!
+*Note 2*: ramparts.js will test against donor, gene, mutation advanced search tabs automatically
+so it is sufficient to pass in /search?filters={...} for the <page> argument.
 
+*Note 3*: ramparts.js creates additional processes to sandbox actions. You will need a decent machine !!
+
+*Disclaimer*: This test tool is for the most part stable but could use some TLC to smooth out some of its rough spots.
 
 Installation and setup
 ---
