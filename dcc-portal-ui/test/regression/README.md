@@ -7,7 +7,7 @@ It then executes the API against another server and validates the results agains
 rather that resultant page has the same facet terms and facet term counts.
 
 *Note 2*: ramparts.js will test against donor, gene, mutation advanced search tabs automatically
-so it is sufficient to pass in /search?filters={...} for the <page> argument.
+so it is sufficient to pass in /search?filters={...} for the ```<page>``` argument.
 
 *Note 3*: ramparts.js creates additional processes to sandbox actions. You will need a decent machine !!
 
