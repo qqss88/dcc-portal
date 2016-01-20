@@ -22,6 +22,7 @@ import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CHROMOSOME;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CHROMOSOME_END;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CHROMOSOME_START;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_OBSERVATION_PROJECT;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_OCCURRENCES;
 import static org.icgc.dcc.common.core.model.FieldNames.PROJECT_ID;
 import lombok.val;
@@ -83,8 +84,10 @@ public class BeaconService {
         .lte(position));
     boolQuery.must(QueryBuilders.rangeQuery(MUTATION_CHROMOSOME_END).lte(position + POSITION_BUFFER));
     boolQuery.must(QueryBuilders.termQuery(MUTATION_CHROMOSOME, chromosome));
-    if (!isNullOrEmpty(dataset)) boolQuery.must(QueryBuilders.nestedQuery(MUTATION_OCCURRENCES,
-        QueryBuilders.termQuery(MUTATION_OCCURRENCES + '.' + PROJECT_ID, dataset)));
+    if (!isNullOrEmpty(dataset)) boolQuery
+        .must(QueryBuilders.nestedQuery(MUTATION_OCCURRENCES,
+            QueryBuilders.termQuery(MUTATION_OCCURRENCES + '.' + MUTATION_OBSERVATION_PROJECT + '.' + PROJECT_ID,
+                dataset)));
     search.setQuery(boolQuery);
 
     val params = new ImmutableMap.Builder<String, Object>()
