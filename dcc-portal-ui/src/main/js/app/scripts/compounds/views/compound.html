@@ -2,7 +2,7 @@
     <div class="h1-wrap">
         <h1 data-ui-scrollfix="79">
             <span class="t_badge t_badge__compound"></span>
-            <span data-ng-bind=":: compound.name"></span>
+            <span data-ng-bind=":: compound.name"></span> (<span data-ng-bind=":: compound.id"></span>)
         </h1>
     </div>
     <div data-scroll-spy="">
@@ -12,6 +12,19 @@
                     <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a></li>
                     <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Targeted Genes</a></li>
                     <li data-spy="trials" class="t_subnav__items__item"><a data-scrollto href="#trials">Clinical Trials</a></li>
+                    <li><br></li>
+                    <li class="t_subnav__items__item" data-ng-if="CompoundCtrl.getMutationImpactFacets() && CompoundCtrl.getMutationImpactFacets().functionalImpact.total > 0">
+                        <span>Page Filters</span>
+                    </li>
+                    <li class="t_subnav__items__box" data-ng-if="CompoundCtrl.getMutationImpactFacets() && CompoundCtrl.getMutationImpactFacets().functionalImpact.total > 0">
+                        <ul class="t_facets">
+                            <terms data-type="mutation"
+                                   data-facet-name="functionalImpact"
+                                   data-hide-count="true"
+                                   data-label="Mutation Impact"
+                                   data-facet=" CompoundCtrl.getMutationImpactFacets().functionalImpact"></terms>
+                        </ul>
+                    </li>
                 </ul>
             </section>
         </aside>
@@ -209,7 +222,7 @@
                     </table>
                 </div>
             </section>
-            <section id="trials">
+            <section id="trials" data-ng-init="sortField = 'code'; sortDescending = false;">
                 <div class="full">
                     <h3>
                         Clinical Trials
@@ -237,16 +250,52 @@
                     <table class="table table-info" data-ng-if="compound.trials.length > 0">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Description</th>
-                                <th>Conditions</th>
-                                <th>Start Date</th>
-                                <th>Phase</th>
-                                <th>Status</th>
+                                <th data-ng-click="sortField = 'code'; sortDescending = ! sortDescending" class="sortable">
+                                    Code
+                                    <i data-ng-if="sortField !== 'code'" class="icon-sort"></i>
+                                    <i data-ng-if="sortField === 'code'"
+                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
+                                    </i>
+                                </th>
+                                <th data-ng-click="sortField = 'description'; sortDescending = ! sortDescending" class="sortable">
+                                    Description
+                                    <i data-ng-if="sortField !== 'description'" class="icon-sort"></i>
+                                    <i data-ng-if="sortField === 'description'"
+                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
+                                    </i>
+                                </th>
+                                <th data-ng-click="sortField = 'conditions'; sortDescending = ! sortDescending" class="sortable">
+                                    Conditions
+                                    <i data-ng-if="sortField !== 'conditions'" class="icon-sort"></i>
+                                    <i data-ng-if="sortField === 'conditions'"
+                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}" class="sortable">
+                                    </i>
+                                </th>
+                                <th data-ng-click="sortField = 'startDate'; sortDescending = ! sortDescending" class="sortable">
+                                    Start Date
+                                    <i data-ng-if="sortField !== 'startDate'" class="icon-sort" ></i>
+                                    <i data-ng-if="sortField === 'startDate'"
+                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
+                                    </i>
+                                </th>
+                                <th data-ng-click="sortField = 'phaseName'; sortDescending = ! sortDescending" class="sortable">
+                                    Phase
+                                    <i data-ng-if="sortField !== 'phaseName'" class="icon-sort"></i>
+                                    <i data-ng-if="sortField === 'phaseName'"
+                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
+                                    </i>
+                                </th>
+                                <th data-ng-click="sortField = 'statusName'; sortDescending = ! sortDescending" class="sortable">
+                                    Status
+                                    <i data-ng-if="sortField !== 'statusName'" class="icon-sort"></i>
+                                    <i data-ng-if="sortField === 'statusName'"
+                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
+                                    </i>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-ng-repeat="trial in :: compound.trials track by $index">
+                            <tr data-ng-repeat="trial in compound.trials | orderBy:sortField:sortDescending">
                                 <td>
                                     <a style="white-space: nowrap" target="_blank" href="https://www.clinicaltrials.gov/ct2/show/{{trial.code}}">
                                         <i class="icon-external-link"></i> <span data-ng-bind="trial.code"></span>
@@ -271,66 +320,69 @@
                         </tbody>
                     </table>
                 </div>
+                <table class="hidden" id="compound_mutated_genes">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Type</th>
+                            <th>Number of donors affected</th>
+                            <th>Percentage of affected donors</th>
+                            <th>Number of Mutations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-ng-repeat="gene in CompoundCtrl.getTargetedCompoundGenes() | limitTo: CompoundCtrl.getTargetedCompoundGenesResultPerPage()">
+                            <td><a href="/genes/{{gene.id}}" data-ng-bind="gene.symbol"></a></td>
+                            <td data-ng-bind="gene.name"></td>
+                            <td data-ng-bind-template="chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}"></td>
+                            <td data-ng-bind="gene.type | trans"></td>
+                            <td>
+                                {{ gene.affectedDonorCountFiltered | number }}
+                            </td>
+                            <td>
+                                {{gene.affectedDonorCountFiltered/CompoundCtrl.getAffectedDonorCountTotal() * 100 | number:2}}%
+                            </td>
+                            <td>
+                                {{ gene.mutationCountTotal | number }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="hidden" data-ng-if="compound.trials.length > 0" id="compound_trials">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Conditions</th>
+                            <th>Start Date</th>
+                            <th>Phase</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-ng-repeat="trial in compound.trials | orderBy:sortField:sortDescending">
+                            <td>
+                                <a>
+                                    <span data-ng-bind="trial.code"></span>
+                                </a>
+                            </td>
+                            <td>
+                               {{ trial.description }}
+                            </td>
+                            <td>
+                                <span data-ng-repeat="condition in trial.conditions">
+                                    {{condition.name}}
+                                </span>
+                            </td>
+                            <td data-ng-bind="trial.startDate"></td>
+                            <td data-ng-bind="trial.phaseName"></td>
+                            <td data-ng-bind="trial.statusName"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
-            <table class="hidden" id="compound_mutated_genes">
-                <thead>
-                    <tr>
-                        <th>Symbol</th>
-                        <th>Name</th>
-                        <th>Location</th>
-                        <th>Type</th>
-                        <th>Number of donors affected</th>
-                        <th>Percentage of affected donors</th>
-                        <th>Number of Mutations</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr data-ng-repeat="gene in CompoundCtrl.getTargetedCompoundGenes() | limitTo: CompoundCtrl.getTargetedCompoundGenesResultPerPage()">
-                        <td><a href="/genes/{{gene.id}}" data-ng-bind="gene.symbol"></a></td>
-                        <td data-ng-bind="gene.name"></td>
-                        <td data-ng-bind-template="chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}"></td>
-                        <td data-ng-bind="gene.type | trans"></td>
-                        <td>
-                            {{ gene.affectedDonorCountFiltered | number }}
-                        </td>
-                        <td>
-                            {{gene.affectedDonorCountFiltered/CompoundCtrl.getAffectedDonorCountTotal() * 100 | number:2}}%
-                        </td>
-                        <td>
-                            {{ gene.mutationCountTotal | number }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <table class="hidden" data-ng-if="compound.trials.length > 0" id="compound_trials">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Description</th>
-                        <th>Conditions</th>
-                        <th>Start Date</th>
-                        <th>Phase</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr data-ng-repeat="trial in :: compound.trials track by $index">
-                        <td>
-                            <a>
-                                <span data-ng-bind="trial.code"></span>
-                            </a>
-                        </td>
-                        <td>
-                           {{ trial.description }}
-                        </td>
-                        <td>
-                           {{trial.conditions.join(', ')}}
-                        </td>
-                        <td data-ng-bind="trial.startDate"></td>
-                        <td data-ng-bind="trial.phaseName"></td>
-                        <td data-ng-bind="trial.statusName"></td>
-                    </tr>
-                </tbody>
         </article>
     </div>
 </div>
