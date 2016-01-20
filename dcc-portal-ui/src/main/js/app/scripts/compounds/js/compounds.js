@@ -38,7 +38,8 @@ angular.module('icgc.compounds', ['icgc.compounds.controllers', 'icgc.compounds.
   });
 
 angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
-  .controller('CompoundCtrl', function ($scope, compoundManager, CompoundsService, Page, CompoundsServiceConstants) {
+  .controller('CompoundCtrl', function ($scope, compoundManager, CompoundsService, Page
+                                        /*, CompoundsServiceConstants */) {
 
     var _ctrl = this,
         _compound = compoundManager.getCompound(),
@@ -59,7 +60,7 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
         .then(function(targetGenes) {
           _targetedCompoundGenes = targetGenes;
           _targetedCompoundIds = compoundManager.getTargetedCompoundGeneIds();
-        })
+        });
         /*.then(function() {
           compoundManager.getMutationImpactFacets().then(function(data) {
             _mutationalImpactFacets = data.facets
@@ -137,7 +138,8 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       COMPOUND_DATA_NEEDS_RELOAD: 'compound.service.event.compoundNeedsReload'
     }
   })
-  .service('CompoundsService', function($rootScope, $q, Gene, Mutations, Page, FilterService, $location, Restangular, CompoundsServiceConstants) {
+  .service('CompoundsService', function($rootScope, $q, Gene, Mutations, Page, FilterService, $location,
+                                        Restangular, CompoundsServiceConstants) {
 
     function _arrayOrEmptyArray(arr) {
       return angular.isArray(arr) ?  arr : [];
