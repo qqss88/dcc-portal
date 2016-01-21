@@ -25,13 +25,13 @@ database:
   driverClass: org.postgresql.Driver
 
   # the username
-  user: dcc
+  user: 
 
   # the password
-  password: dcc
+  password: 
   
   # the JDBC URL
-  url: jdbc:postgresql://***REMOVED***/dcc_portal
+  url: jdbc:postgresql://
   
   # any properties specific to your JDBC driver:
   properties:
@@ -76,7 +76,7 @@ cache:
 
 # Authentication
 crowd:
-  ssoUrl: "https://***REMOVED***/user?continue="
+  ssoUrl: ""
   
 oauth:
   serviceUrl: "https://localhost:8443"
@@ -89,8 +89,8 @@ hazelcast:
   # NB: Below hazelcast settings do not have default values. The portal won't start if they're unset
 
   # Credentials to enter a group. E.g. dev, uat, prod groups
-  groupName: "dcc-prod"
-  groupPassword: "DccProdPasswd"
+  groupName: ""
+  groupPassword: ""
 
   # Time-to-live settings.
   # Maximum number of seconds for each entry to stay in the cache. Entries that are
@@ -110,7 +110,7 @@ elastic:
   nodeAddresses:
      - host: "localhost"
        port: 9300
-       
+
   # List of TransportClient settings. 
   # E.g. 
   # "client.transport.sniff": true 
@@ -120,24 +120,24 @@ elastic:
 # Mail
 mail:
   enabled: false
-  recipientEmail: ***REMOVED***
+  recipientEmail:
 
 # Data download
 download:
   enabled: true
   uri: "hdfs://<namenode>:8020"
-  dynamicRootPath: "/icgc/download/dynamic"
-  staticRootPath: "/icgc/download/static"
+  dynamicRootPath: "/download/dynamic"
+  staticRootPath: "/download/static"
   currentReleaseSymlink: "/Current /dev-06e-6-31"
   stage: "PRODUCTION"
   quorum: "localhost"
-  oozieUrl: "http://***REMOVED***:11000/oozie"
-  appPath: "***REMOVED***/user/downloader/workflows/archive-main"
+  oozieUrl: ""
+  appPath: ""
   releaseName: "CURRENT_RELEASE"
 
 web:
   # Defines an external URL when the portal is behind a reverse proxy / load balancer. E.g. shortUrl resource uses it for generation of valid URLs
-  baseUrl: "https://dcc.icgc.org"
+  baseUrl: ""
 
 # Logging settings
 logging:
@@ -194,16 +194,15 @@ logging:
 icgc:
 
   # CGP/DACO API endpoint
-  cgpUrl: "https://***REMOVED***/ud_oauth/1/search"
-
+  cgpUrl: ""
   # ShortUrl API endpoint
-  shortUrl: "https://***REMOVED***/short/api/1/shorten"
+  shortUrl: ""
 
   # CUD API endpoint
-  cudUrl: "https://***REMOVED***/ud_rest/1"
+  cudUrl: ""
   
   # CMS API endpoint
-  cmsUrl: "https://***REMOVED***/cms_oauth_coop/1"
+  cmsUrl: ""
 
   # CUD credentials. Obtained from webdev@oicr.on.ca
   cudAppId: ""
@@ -212,10 +211,10 @@ icgc:
 
   # OAuth credentials
   # To generate the credentials go to icgc.org, log in, go to the "OAuth Settings" tab and request "Regenerate all tokens"
-  consumerKey: "***REMOVED***"
-  consumerSecret: "***REMOVED***"
-  accessToken: "***REMOVED***"
-  accessSecret: "***REMOVED***"
+  consumerKey: ""
+  consumerSecret: ""
+  accessToken: ""
+  accessSecret: ""
 
   # Log HTTP requests to the API
   enableHttpLogging: false
