@@ -559,7 +559,7 @@ public class FiltersConverter {
 
     case OBSERVATION_CENTRIC:
       if (fieldName.startsWith("gene")) {
-        return "ssm.consequence";
+        return "ssm.gene";
       }
 
       return "ssm";
