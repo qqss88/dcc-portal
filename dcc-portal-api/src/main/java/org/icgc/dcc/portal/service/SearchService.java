@@ -18,9 +18,6 @@
 package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Keyword;
@@ -34,8 +31,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class SearchService {
 
   private static final String DONOR_TYPE = "donor";
@@ -49,21 +50,23 @@ public class SearchService {
     val results = ImmutableList.<Keyword> builder();
 
     for (val hit : hits) {
-      val fieldMap = createResponseMap(hit, query, Kind.KEYWORD);
-      val keyword = new Keyword(fieldMap);
+      if (!(hit.getIndex().contains("repository") && hit.getType().contains("donor-text"))) {
+        val fieldMap = createResponseMap(hit, query, Kind.KEYWORD);
+        val keyword = new Keyword(fieldMap);
 
-      if (keyword.getType().equals(DONOR_TYPE)) {
-        val donorId = keyword.getId();
+        if (keyword.getType().equals(DONOR_TYPE)) {
+          val donorId = keyword.getId();
 
-        // Unique donors only
-        if (donors.contains(donorId)) {
-          continue;
+          // Unique donors only
+          if (donors.contains(donorId)) {
+            continue;
+          }
+
+          donors.add(donorId);
         }
 
-        donors.add(donorId);
+        results.add(keyword);
       }
-
-      results.add(keyword);
     }
 
     val keywords = new Keywords(results.build());
