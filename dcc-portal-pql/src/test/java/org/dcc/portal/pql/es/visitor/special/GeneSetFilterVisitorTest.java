@@ -275,7 +275,7 @@ public class GeneSetFilterVisitorTest {
   public void pathwayIdTest_observation() {
     val root = createEsAst("in(gene.pathwayId, 'REACT_6326')", OBSERVATION_CENTRIC);
     log.debug("After GeneSetFilterVisitor: {}", root);
-    assertPathwayAndCuratedSet(root, "ssm.consequence.gene.pathway", "REACT_6326");
+    assertPathwayAndCuratedSet(root, "ssm.gene.pathway", "REACT_6326");
   }
 
   @Test

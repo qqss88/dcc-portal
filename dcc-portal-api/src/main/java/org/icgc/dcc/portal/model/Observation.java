@@ -36,34 +36,19 @@ import com.wordnik.swagger.annotations.ApiModel;
 public class Observation {
 
   String alignmentAlgorithm;
-  String analyzedSampleId;
   String baseCallingAlgorithm;
-  String chromosomeStrand;
-  String controlGenotype;
-  String donorId;
+  String biologicalValidationStatus;
   String experimentalProtocol;
-  String expressedAllele;
-  String isAnnotated;
-  String note;
+  Integer mutantAlleleReadCount;
   String otherAnalysisAlgorithm;
   String platform;
   Double probability;
-  String projectId;
-  Double qualityScore;
   String rawDataAccession;
   String rawDataRepository;
-  Double readCount;
-  String referenceGenomeAllele;
-  String refsnpAllele;
-  String refsnpStrand;
-  Double seqCoverage;
   String sequencingStrategy;
-  String tumourGenotype;
-  String validationPlatform;
-  String validationStatus;
+  Integer totalReadCount;
   String variationCallingAlgorithm;
   String verificationStatus;
-  String xrefEnsemblVarId;
 
   String matchedICGCSampleId;
   String icgcSampleId;
@@ -73,7 +58,6 @@ public class Observation {
 
   @JsonCreator
   public Observation(Map<String, Object> fieldMap) {
-
     val fields = FIELDS_MAPPING.get(Kind.OBSERVATION);
 
     matchedICGCSampleId = (String) fieldMap.get(fields.get("matchedICGCSampleId"));
@@ -83,34 +67,19 @@ public class Observation {
     submittedMatchedSampleId = (String) fieldMap.get(fields.get("submittedMatchedSampleId"));
 
     alignmentAlgorithm = (String) fieldMap.get(fields.get("alignmentAlgorithm"));
-    analyzedSampleId = (String) fieldMap.get(fields.get("analyzedSampleId"));
     baseCallingAlgorithm = (String) fieldMap.get(fields.get("baseCallingAlgorithm"));
-    chromosomeStrand = (String) fieldMap.get(fields.get("chromosomeStrand"));
-    controlGenotype = (String) fieldMap.get(fields.get("controlGenotype"));
-    donorId = (String) fieldMap.get(fields.get("donorId"));
+    biologicalValidationStatus = (String) fieldMap.get(fields.get("biologicalValidationStatus"));
     experimentalProtocol = (String) fieldMap.get(fields.get("experimentalProtocol"));
-    expressedAllele = (String) fieldMap.get(fields.get("expressedAllele"));
-    isAnnotated = (String) fieldMap.get(fields.get("isAnnotated"));
 
-    note = (String) fieldMap.get(fields.get("note"));
+    mutantAlleleReadCount = (Integer) fieldMap.get(fields.get("mutantAlleleReadCount"));
     otherAnalysisAlgorithm = (String) fieldMap.get(fields.get("otherAnalysisAlgorithm"));
     platform = (String) fieldMap.get(fields.get("platform"));
     probability = (Double) fieldMap.get(fields.get("probability"));
-    projectId = (String) fieldMap.get(fields.get("projectId"));
-    qualityScore = (Double) fieldMap.get(fields.get("qualityScore"));
     rawDataAccession = (String) fieldMap.get(fields.get("rawDataAccession"));
     rawDataRepository = (String) fieldMap.get(fields.get("rawDataRepository"));
-    readCount = (Double) fieldMap.get(fields.get("readCount"));
-    referenceGenomeAllele = (String) fieldMap.get(fields.get("referenceGenomeAllele"));
-    refsnpAllele = (String) fieldMap.get(fields.get("refsnpAllele"));
-    refsnpStrand = (String) fieldMap.get(fields.get("refsnpStrand"));
-    seqCoverage = (Double) fieldMap.get(fields.get("seqCoverage"));
     sequencingStrategy = (String) fieldMap.get(fields.get("sequencingStrategy"));
-    tumourGenotype = (String) fieldMap.get(fields.get("tumourGenotype"));
-    validationPlatform = (String) fieldMap.get(fields.get("validationPlatform"));
-    validationStatus = (String) fieldMap.get(fields.get("validationStatus"));
+    totalReadCount = (Integer) fieldMap.get(fields.get("totalReadCount"));
     variationCallingAlgorithm = (String) fieldMap.get(fields.get("variation_callingAlgorithm"));
     verificationStatus = (String) fieldMap.get(fields.get("verificationStatus"));
-    xrefEnsemblVarId = (String) fieldMap.get(fields.get("xrefEnsemblVarId"));
   }
 }

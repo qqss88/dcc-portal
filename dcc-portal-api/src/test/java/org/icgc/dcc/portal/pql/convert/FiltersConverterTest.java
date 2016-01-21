@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.collect.ImmutableList.of;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
@@ -31,6 +32,7 @@ import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupNestedPaths;
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.isEncloseWithCommonParent;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 
+import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
@@ -297,7 +299,8 @@ public class FiltersConverterTest {
   @Test
   public void pathwayTest_observation() {
     val result = converter.convertFilters(createFilters("{gene:{hasPathway:false}}"), Type.OBSERVATION_CENTRIC);
-    assertThat(result).isEqualTo("nested(ssm.consequence,missing(gene.pathwayId))");
+    val nestedPath = IndexModel.getObservationCentricTypeModel().getNestedPath("gene.pathwayId");
+    assertThat(result).isEqualTo(format("nested(%s,missing(gene.pathwayId))", nestedPath));
   }
 
   @Test
