@@ -164,7 +164,7 @@ public class ObservationCentricTypeModel extends TypeModel {
         .put(BIOLOGICAL_PROCESS, "ssm.gene.go_term.biological_process")
         .put(CELLULAR_COMPONENT, "ssm.gene.go_term.cellular_component")
         .put(MOLECULAR_FUNCTION, "ssm.gene.go_term.molecular_function")
-        .put(DONOR_ENTITY_SET_ID, "ssm._donor_id")
+        .put(DONOR_ENTITY_SET_ID, "donor._donor_id")
         .put(GENE_ENTITY_SET_ID, "ssm.gene._gene_id")
         .put(MUTATION_ENTITY_SET_ID, "ssm._mutation_id")
         .put(LOOKUP_TYPE, "mutation-ids")
