@@ -130,7 +130,7 @@ public class Mutation {
     if (occurrenceObject == null) return false;
 
     // If request was made with ssm_occurrences included fields number will be significantly greater
-    return occurrenceObject.keySet().size() > DEFAULT_SSM_OCCURRENCE_FIELDS_NUM;
+    return occurrenceObject.keySet().size() >= DEFAULT_SSM_OCCURRENCE_FIELDS_NUM;
   }
 
   private List<Transcript> buildTranscripts(List<Map<String, Object>> transcripts) {
