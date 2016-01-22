@@ -176,10 +176,10 @@ public class PortalProperties extends Configuration {
     String oozieUrl = "http://localhost:11000/oozie";
 
     @JsonProperty
-    String supportEmailAddress = "***REMOVED***";
+    String supportEmailAddress = "";
 
     @JsonProperty
-    String appPath = "***REMOVED***";
+    String appPath = "";
 
     @JsonProperty
     byte capacityThreshold = 20;
@@ -288,7 +288,7 @@ public class PortalProperties extends Configuration {
 
     boolean enabled = false;
 
-    String smtpServer = "***REMOVED***";
+    String smtpServer = "";
     int smtpPort = 25;
 
     @Email
@@ -296,7 +296,7 @@ public class PortalProperties extends Configuration {
 
     String senderName = "DCC Portal";
 
-    String recipientEmail = "***REMOVED***";
+    String recipientEmail = "";
   }
 
   @Data

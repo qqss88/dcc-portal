@@ -20,8 +20,6 @@ package org.icgc.dcc.portal.pql.convert;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -29,6 +27,9 @@ import org.icgc.dcc.portal.model.Query;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Jql2PqlConverterTest {
@@ -56,6 +57,15 @@ public class Jql2PqlConverterTest {
         .filters(new FiltersParam("{donor:{id:{is:1}}}").get())
         .build();
     assertResponse(query, "select(id,age),eq(donor.id,1)");
+  }
+
+  @Test
+  public void fieldsWithFilterNotTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{not:1}}}").get())
+        .build();
+    assertResponse(query, "select(id,age),ne(donor.id,1)");
   }
 
   @Test
@@ -130,6 +140,15 @@ public class Jql2PqlConverterTest {
   }
 
   @Test
+  public void filterAndCountNotTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{not:1}}}").get())
+        .build();
+    assertCountQueryResponse(query, "count(),ne(donor.id,1)");
+  }
+
+  @Test
   public void filterAndFacetOnlyTest() {
     val query = Query.builder()
         .fields(ImmutableList.of("id", "age"))
@@ -137,6 +156,16 @@ public class Jql2PqlConverterTest {
         .includes(singletonList("facets"))
         .build();
     assertCountQueryResponse(query, "count(),facets(*),eq(donor.id,1)");
+  }
+
+  @Test
+  public void filterAndFacetOnlyNotTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{not:1}}}").get())
+        .includes(singletonList("facets"))
+        .build();
+    assertCountQueryResponse(query, "count(),facets(*),ne(donor.id,1)");
   }
 
   private void assertResponse(Query query, String exectedResult) {
