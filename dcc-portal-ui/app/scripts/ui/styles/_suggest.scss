@@ -1,17 +1,12 @@
 /* Suggest Input */
 .t_suggest {
-  @include clearfix();
-  @include grid-span(12);
-
   position: relative;
-
-  @include breakpoint($break-tablet) {
-    @include grid-span(8, 3);
-  }
+  width: 80%;
+  margin: auto auto;
 }
 
 .t_suggest__input {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   border: .2rem solid $greyLight;
   border-radius: 0;
   margin: 1rem 0rem 0.3rem 0rem;
