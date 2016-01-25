@@ -45,8 +45,12 @@ import java.util.stream.Stream;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
+import org.elasticsearch.index.query.IndicesFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.TypeFilterBuilder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -170,13 +174,19 @@ public class SearchRepository {
   public SearchResponse findAll(Query query, String type) {
     log.debug("Requested search type is: '{}'.", type);
 
+    val typeFilterBuilder = new TypeFilterBuilder("donor-text");
+    val typeBoolFilter = new BoolFilterBuilder().mustNot(typeFilterBuilder);
+    val indicesFilterBuilder = new IndicesFilterBuilder(typeBoolFilter, repoIndexName);
+
+    val filteredQuery = new FilteredQueryBuilder(getQuery(query, type), indicesFilterBuilder);
+
     val search = createSearch(type)
         .setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize())
         .setTypes(getSearchTypes(type))
         .addFields(getFields(query, KIND))
-        .setQuery(getQuery(query, type))
+        .setQuery(filteredQuery)
         .setPostFilter(getPostFilter(type));
 
     log.debug("ES search query is: {}", search);

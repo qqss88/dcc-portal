@@ -13,9 +13,9 @@
 </ul>
 <ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
     <li class="heading">Documentation</li>
-    <li><a href="https://docs.icgc.org/data-portal" target="_blank">Portal</a></li>
+    <li><a href="http://docs.icgc.org/portal/about" target="_blank">Portal</a></li>
     <li><a href="/docs/" target="_blank">Portal API</a></li>
-    <li><a href="https://docs.icgc.org/data-submission" target="_blank">Submission</a></li>
+    <li><a href="http://docs.icgc.org/submission/about" target="_blank">Submission</a></li>
    
     
 </ul>
@@ -37,6 +37,9 @@
     <li class="heading">Cloud</li>
     <li data-ng-repeat="cloudLink in ::stagedFeatures.getCloudLinks()"> 
       <a data-ng-href="{{cloudLink.link}}" data-ng-bind="cloudLink.title"></a>
+    </li>
+    <li>
+        <a href="http://docs.icgc.org/cloud/guide/" target="_blank">User Guide</a>
     </li>
 </ul>
 <div class="logo omega"><a href="http://oicr.on.ca/" target="_blank"><img src="/styles/images/OICR2logo.png"></a></div>
