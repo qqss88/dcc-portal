@@ -18,9 +18,6 @@
 package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Keyword;
@@ -34,8 +31,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class SearchService {
 
   private static final String DONOR_TYPE = "donor";
@@ -55,11 +56,6 @@ public class SearchService {
       if (keyword.getType().equals(DONOR_TYPE)) {
         val donorId = keyword.getId();
 
-        // Unique donors only
-        if (donors.contains(donorId)) {
-          continue;
-        }
-
         donors.add(donorId);
       }
 
@@ -67,8 +63,6 @@ public class SearchService {
     }
 
     val keywords = new Keywords(results.build());
-    // val count = keywords.getHits().size();
-    // FIXME: Fix the counts here now that we make the donor result unique.
     keywords.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return keywords;
