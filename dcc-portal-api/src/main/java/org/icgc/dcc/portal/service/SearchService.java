@@ -49,19 +49,12 @@ public class SearchService {
     val donors = Lists.<String> newArrayList();
     val results = ImmutableList.<Keyword> builder();
 
-    Long total = hits.getTotalHits();
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.KEYWORD);
       val keyword = new Keyword(fieldMap);
 
       if (keyword.getType().equals(DONOR_TYPE)) {
         val donorId = keyword.getId();
-
-        // Unique donors only
-        if ((hit.getIndex().contains("repository") && hit.getType().contains("donor-text"))) {
-          total--;
-          continue;
-        }
 
         donors.add(donorId);
       }
@@ -70,9 +63,7 @@ public class SearchService {
     }
 
     val keywords = new Keywords(results.build());
-    // val count = keywords.getHits().size();
-    // FIXME: Fix the counts here now that we make the donor result unique.
-    keywords.setPagination(Pagination.of(hits.getHits().length, total, query));
+    keywords.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return keywords;
   }
