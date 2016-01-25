@@ -27,7 +27,8 @@
   module.controller('DownloadRequestController', function($scope, $location, $modalInstance,
     $filter, Donors, LocationService, DownloaderService, DataType, filters, RouteInfoService) {
 
-    var emailRegex = /.+@.+\..+/i;
+    var emailRegex = /.+@.+\..+/i,
+        _isSendingRequest = false;
 
     $scope.params = {};
     $scope.params.useEmail = false;
@@ -88,8 +89,19 @@
       }
     };
 
+    $scope.isSendingRequest = function() {
+      return _isSendingRequest;
+    };
+
     $scope.sendRequest = function() {
       var i, item, actives, linkURL;
+
+      // Prevent sending the request multiple times
+      if (_isSendingRequest) {
+        return;
+      }
+
+      _isSendingRequest = true;
 
       actives = [];
       for (i = 0; i < $scope.params.dataTypes.length; ++i) {
@@ -105,6 +117,9 @@
           linkURL, JSON.stringify(filters)).then(function (job) {
           $modalInstance.dismiss('cancel');
           $location.path('/download/' + job.downloadId).search('');
+        })
+        .finally(function() {
+          _isSendingRequest = false;
         });
 
     };

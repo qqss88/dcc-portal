@@ -68,7 +68,12 @@
     <div class="modal-footer">
         <button class="t_button" data-ng-click="cancel()">Cancel</button>
         <button class="t_button" data-ng-click="sendRequest();"
-                data-ng-disabled="dlTotal==0 || !params.isValidEmail"><i class="icon-download"></i>Submit
+                data-ng-disabled="dlTotal==0 || !params.isValidEmail || isSendingRequest()">
+            <span data-ng-if="! isSendingRequest()"><i class="icon-download"></i></span>
+            <span data-ng-if="isSendingRequest()"><i class="icon-spinner icon-spin"></i></span>
+            Submit
         </button>
+
+
     </div>
 </div>
