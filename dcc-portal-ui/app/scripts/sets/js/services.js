@@ -273,8 +273,8 @@
           return;
         } else {
           var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
-          $location.path(forwardUrl);
           FilterService.filters(newFilter);
+          $location.path(forwardUrl).search('filters', newFilter);
         }
       });
       return promise;
@@ -292,9 +292,9 @@
       .post(undefined, data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         Page.stopWork();
-        var newFilter = JSON.stringify({donor: {entitySetId: {is: [data.id]}}});
-        $location.path(forwardUrl);
+        var newFilter = JSON.stringify({donor: {id: {is: [Extensions.ENTITY_PREFIX+data.id]}}});
         FilterService.filters(newFilter);
+        $location.path(forwardUrl).search('filters', newFilter);
       });
       return promise;
     };
