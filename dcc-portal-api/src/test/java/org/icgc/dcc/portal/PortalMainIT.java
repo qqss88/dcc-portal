@@ -2,9 +2,6 @@ package org.icgc.dcc.portal;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,6 +12,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+
 @Ignore
 public class PortalMainIT {
 
@@ -24,7 +25,7 @@ public class PortalMainIT {
   @RequiredArgsConstructor(access = PRIVATE)
   @Getter
   enum Environment {
-    LOCAL("http://localhost:8080"), DEV("hwww-dev.res.oicr.on.ca:5381"), PROD("http://portal.dcc.icgc.org");
+    LOCAL("http://localhost:8080"), DEV(""), PROD("http://portal.dcc.icgc.org");
 
     private final String baseUrl;
 
@@ -60,7 +61,8 @@ public class PortalMainIT {
     WebElement bloodFacet =
         driver
             .findElement(By
-                .xpath("//*[@id=\"projects-page\"]/div[2]/div[1]/aside/div/ul/li[1]/ul/li[2]/ul[2]/li[1]/ul/li[1]/span[2]/span"));
+                .xpath(
+                    "//*[@id=\"projects-page\"]/div[2]/div[1]/aside/div/ul/li[1]/ul/li[2]/ul[2]/li[1]/ul/li[1]/span[2]/span"));
 
     System.out.println(bloodFacet.getText());
   }

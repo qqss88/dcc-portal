@@ -115,7 +115,6 @@ public class EmbOccurrence {
   @SuppressWarnings("unchecked")
   public EmbOccurrence(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EMB_OCCURRENCE);
-    donorId = getString(fieldMap.get(fields.get("donorId")));
     mutationId = getString(fieldMap.get(fields.get("mutationId")));
     chromosome = getString(fieldMap.get(fields.get("chromosome")));
     start = getLong(fieldMap.get(fields.get("start")));
@@ -123,7 +122,6 @@ public class EmbOccurrence {
     submittedMutationId = getString(fieldMap.get(fields.get("submittedMutationId")));
     matchedSampleId = getString(fieldMap.get(fields.get("matchedSampleId")));
     submittedMatchedSampleId = getString(fieldMap.get(fields.get("submittedMatchedSampleId")));
-    projectId = getString(fieldMap.get(fields.get("projectId")));
     sampleId = getString(fieldMap.get(fields.get("sampleId")));
     specimenId = getString(fieldMap.get(fields.get("specimenId")));
     analysisId = getString(fieldMap.get(fields.get("analysisId")));
@@ -156,7 +154,22 @@ public class EmbOccurrence {
     p.put("_summary._available_data_type", ((Map<String, Object>) p.get("_summary")).get("_available_data_type"));
     p.put("_summary._ssm_tested_donor_count", ((Map<String, Object>) p.get("_summary")).get("_ssm_tested_donor_count"));
     project = new Project(p);
-    donor = new Donor((Map<String, Object>) fieldMap.get("donor"));
+    projectId = getProjectId(p);
+    val d = (Map<String, Object>) fieldMap.get("donor");
+    donorId = getDonorId(d);
+    donor = new Donor(d);
+  }
+
+  private static String getDonorId(Map<String, Object> donor) {
+    val fields = FIELDS_MAPPING.get(Kind.DONOR);
+
+    return getString(donor.get(fields.get("id")));
+  }
+
+  private static String getProjectId(Map<String, Object> project) {
+    val fields = FIELDS_MAPPING.get(Kind.PROJECT);
+
+    return getString(project.get(fields.get("id")));
   }
 
 }

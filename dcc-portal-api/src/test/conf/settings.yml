@@ -51,8 +51,8 @@ cache:
 
 # Authorization
 crowd:
-  ssoUrl: "https://***REMOVED***/user?continue="
-  ssoUrlGoogle: "https://***REMOVED***/gooapi/redirect?continue="
+  ssoUrl: "https://ssoUrl?continue="
+  ssoUrlGoogle: "https://ssoUrlGoogle?continue="
 
 oauth:
   serviceUrl: "http://localhost:8443"
@@ -68,8 +68,8 @@ hazelcast:
   # NB: Below hazelcast settings do not have default values. The portal won't start if they're unset
 
   # Credentials to enter a group. E.g. dev, uat, prod groups
-  groupName: "dcc-dev"
-  groupPassword: "dccpasswd"
+  groupName: ""
+  groupPassword: ""
 
   # Time-to-live settings.
   # Maximum number of seconds for each entry to stay in the cache. Entries that are
@@ -84,13 +84,12 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  #indexName: icgc18-0-2
   indexName: etl-test-release17-0-0
   repoIndexName: test-icgc-repository
   nodeAddresses:
     - host: "localhost"
       port: 9300
-      
+
   # List of TransportClient settings. 
   # E.g. 
   # "client.transport.sniff": true 
@@ -100,14 +99,13 @@ elastic:
 # Mail
 mail:
   enabled: false
-  recipientEmail: ***REMOVED***
-
+  recipientEmail:
 # Data download
 download:
   enabled: false
-  uri: "***REMOVED***"
-  dynamicRootPath: "/icgc/download/dynamic/r12"
-  staticRootPath: "/icgc/download/static"
+  uri: ""
+  dynamicRootPath: "/download/dynamic/r12"
+  staticRootPath: "/download/static"
   currentReleaseSymlink: "/current /r12"
   maxUsers: 16
   stage: "DEVELOPMENT"
@@ -146,28 +144,28 @@ logging:
 icgc:
 
   # CGP/DACO API endpoint
-  cgpUrl: "https://***REMOVED***/ud_oauth/1/search"
+  cgpUrl: ""
 
   # ShortUrl API endpoint
-  shortUrl: "https://***REMOVED***/short/api/1/shorten"
+  shortUrl: ""
 
   # CUD API endpoint
-  cudUrl: "https://***REMOVED***/ud_rest/1"
+  cudUrl: ""
 
   # CMS API endpoint
-  cmsUrl: "https://***REMOVED***/cms_oauth_coop/1"
+  cmsUrl: ""
 
   # CUD credentials. Obtained from webdev@oicr.on.ca
-  cudAppId: "change_me"
-  cudUser: "change_me"
-  cudPassword: "change_me"
+  cudAppId: ""
+  cudUser: ""
+  cudPassword: ""
 
   # OAuth credentials
   # To generate the credentials go to icgc.org, log in, go to the "OAuth Settings" tab and request "Regenerate all tokens"
-  consumerKey: "***REMOVED***"
-  consumerSecret: "***REMOVED***"
-  accessToken: "***REMOVED***"
-  accessSecret: "***REMOVED***"
+  consumerKey: ""
+  consumerSecret: ""
+  accessToken: ""
+  accessSecret: ""
 
   # Log HTTP requests to the API
   enableHttpLogging: false
