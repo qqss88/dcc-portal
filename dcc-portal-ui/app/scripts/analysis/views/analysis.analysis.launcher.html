@@ -106,8 +106,11 @@
                 </table>
                 <br>
                 <button class="t_button" 
-                    data-ng-disabled="NAC.selectedIds.length !== 1"
-                    data-ng-click="NAC.launchEnrichment(NAC.selectedIds[0])">Run</button>
+                    data-ng-disabled="NAC.selectedIds.length !== 1 || NAC.isLaunchingAnalysis()"
+                    data-ng-click="NAC.launchEnrichment(NAC.selectedIds[0])">
+                    <span data-ng-if="NAC.isLaunchingAnalysis()"><i class="icon-spinner icon-spin"></i></span>
+                    Run
+                </button>
             </div>
         </div>
 
@@ -155,7 +158,7 @@
                 </table>
                 <br>
                 <button class="t_button" 
-                    data-ng-disabled="NAC.selectedIds.length < 2 || NAC.selectedIds.length > 3"
+                    data-ng-disabled="NAC.selectedIds.length < 2 || NAC.selectedIds.length > 3  || NAC.isLaunchingAnalysis()"
                     data-ng-click="NAC.launchPhenotype(NAC.selectedIds)">Run</button>
             </div>
         </div>
@@ -205,8 +208,11 @@
                 </table>
                 <br>
                 <button class="t_button" 
-                    data-ng-disabled="NAC.selectedIds.length < 2 || NAC.selectedIds.length > 3"
-                    data-ng-click="NAC.launchSet(NAC.filteredSetType, NAC.selectedIds)">Run</button>
+                    data-ng-disabled="NAC.selectedIds.length < 2 || NAC.selectedIds.length > 3 || NAC.isLaunchingAnalysis()"
+                    data-ng-click="NAC.launchSet(NAC.filteredSetType, NAC.selectedIds)">
+                    <span data-ng-if="NAC.isLaunchingAnalysis()"><i class="icon-spinner icon-spin"></i></span>
+                    Run
+                </button>
             </div>
 
 
