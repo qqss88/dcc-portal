@@ -17,11 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
@@ -38,9 +33,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class MutationService {
 
   private static final AggregationToFacetConverter AGGS_TO_FACETS_CONVERTER = AggregationToFacetConverter.getInstance();
@@ -56,8 +56,8 @@ public class MutationService {
   @NonNull
   public Mutations findAllCentric(Query query, boolean facetsOnly) {
     val pql =
-        facetsOnly ? QUERY_CONVERTER.convertCount(query, MUTATION_CENTRIC) :
-            QUERY_CONVERTER.convert(query, MUTATION_CENTRIC);
+        facetsOnly ? QUERY_CONVERTER.convertCount(query, MUTATION_CENTRIC) : QUERY_CONVERTER.convert(query,
+            MUTATION_CENTRIC);
     log.info("PQL of findAllCentric is: {}", pql);
 
     val pqlAst = parse(pql);
@@ -110,7 +110,9 @@ public class MutationService {
     return getCounts(queries, sr);
   }
 
-  public List<SimpleImmutableEntry<String, Long>> counts(@NonNull List<String> geneIds, int maxSize,
+  public List<SimpleImmutableEntry<String, Long>> counts(@NonNull List<String> geneIds,
+      LinkedHashMap<String, Query> queries,
+      int maxSize,
       boolean sortDescendingly) {
     val genes = geneIds.stream()
         .filter(id -> !isNullOrEmpty(id))
@@ -118,7 +120,7 @@ public class MutationService {
         .collect(toImmutableList());
 
     final Comparator<SimpleImmutableEntry<String, Long>> comparator = comparing(SimpleImmutableEntry::getValue);
-    final MultiSearchResponse.Item[] responseItems = mutationRepository.counts(genes).getResponses();
+    final MultiSearchResponse.Item[] responseItems = mutationRepository.counts(queries).getResponses();
 
     return range(0, responseItems.length).boxed()
         .map(i -> {

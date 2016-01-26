@@ -53,6 +53,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.S;
 import static org.icgc.dcc.portal.resource.ResourceUtils.regularFindAllJqlQuery;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.ws.rs.DefaultValue;
@@ -62,23 +63,26 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.Drug;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
+import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.DrugService;
 import org.icgc.dcc.portal.service.MutationService;
+import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
+
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * End-points of drug index
@@ -88,9 +92,17 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/drugs")
 @Produces(APPLICATION_JSON)
 @Api(value = "/drugs", description = "Resources relating to drugs")
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DrugResource {
 
+  /**
+   * Constants.
+   */
+  private static final String GENE_FILTER_TEMPLATE = "{gene:{id:{is:['%s']}}}";
+
+  /**
+   * Dependencies.
+   */
   private final DrugService drugService;
   private final MutationService mutationService;
 
@@ -109,9 +121,9 @@ public class DrugResource {
   @ApiOperation(value = "Find most frequently mutated genes targeted by a drug", response = List.class)
   public List<SimpleImmutableEntry<String, Long>> topMutatedGenes(
       @ApiParam(value = "Drug ID", required = true) @PathParam("drugId") String drugId,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     val drug = drugService.findOne(drugId);
     val geneIds = drug.getGenes().stream()
         .filter(gene -> !isNullOrEmpty(gene.getEnsemblGeneId()))
@@ -119,7 +131,16 @@ public class DrugResource {
         .distinct()
         .collect(toImmutableList());
 
-    return geneIds.isEmpty() ? emptyList() : mutationService.counts(geneIds, size.get(), order.equals("desc"));
+    val queryMap = new LinkedHashMap<String, Query>();
+    for (val gene : geneIds) {
+      val mergedFilter = mergeFilters(filtersParam.get(), GENE_FILTER_TEMPLATE, gene);
+      val query =
+          regularFindAllJqlQuery(emptyList(), emptyList(), mergedFilter, new IntParam(DEFAULT_FROM), size, "", order);
+      queryMap.put(gene, query);
+    }
+
+    return geneIds.isEmpty() ? emptyList() : mutationService.counts(geneIds, queryMap, size.get(),
+        order.equals("desc"));
   }
 
   @Path("/genes/{" + API_GENE_PARAM + "}")
@@ -127,8 +148,7 @@ public class DrugResource {
   @Timed
   @ApiOperation(value = RETURNS_LIST + "compound" + S + FOR_THE + GENE + S, response = List.class)
   public List<Drug> findDrugsByGeneIds(
-      @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds
-      ) {
+      @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds) {
     return drugService.findDrugsByGeneIds(geneIds.get());
   }
 
@@ -142,8 +162,7 @@ public class DrugResource {
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue("") String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     val filters = filtersParam.get();
 
     log.debug(FIND_ALL_TEMPLATE, new Object[] { size, DONOR, from, sort, order, filters });
@@ -151,6 +170,10 @@ public class DrugResource {
     val query = regularFindAllJqlQuery(fields, include, filters, from, size, sort, order);
 
     return drugService.findAll(query);
+  }
+
+  private static ObjectNode mergeFilters(ObjectNode filters, String template, Object... objects) {
+    return JsonUtils.merge(filters, (new FiltersParam(String.format(template, objects)).get()));
   }
 
 }
