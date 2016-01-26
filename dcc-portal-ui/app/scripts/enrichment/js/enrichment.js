@@ -34,6 +34,8 @@
   module.controller('EnrichmentUploadController',
     function($scope, $modalInstance, $location, Restangular, LocationService, Extensions, geneLimit, filters) {
 
+    var _launchingEnrichmentUpload = false;
+
     $scope.params = {};
     $scope.Extensions = Extensions;
     $scope.filters = filters;
@@ -103,8 +105,18 @@
       return data;
     }
 
+    $scope.isLaunchingEnrichmentUpload = function() {
+      return _launchingEnrichmentUpload;
+    };
 
     $scope.newGeneSetEnrichment = function() {
+
+      if (_launchingEnrichmentUpload) {
+        return;
+      }
+
+      _launchingEnrichmentUpload = true;
+
       var promise, data;
       data = buildEnrichmentRequest();
       promise = Restangular.one('analysis')
@@ -117,6 +129,9 @@
         var id = result.id;
         $modalInstance.dismiss('cancel');
         $location.path('/analysis/view/enrichment/' + id).search({});
+      })
+      .finally(function() {
+        _launchingEnrichmentUpload = false;
       });
     };
 

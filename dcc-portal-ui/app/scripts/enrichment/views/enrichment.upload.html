@@ -56,7 +56,9 @@
     <div class="modal-footer">
         <button class="t_button" data-ng-click="cancel(); reset();">Cancel</button>
         <button class="t_button" data-ng-click="newGeneSetEnrichment()"
-            data-ng-disabled="! hasValidParams">Submit</button> 
+            data-ng-disabled="! hasValidParams || isLaunchingEnrichmentUpload()">
+            <span data-ng-if="isLaunchingEnrichmentUpload()"><i class="icon-spinner icon-spin"></i></span>
+            Submit</button>
     </div>
 </div>
 
