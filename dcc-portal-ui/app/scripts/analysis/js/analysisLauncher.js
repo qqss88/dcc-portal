@@ -30,7 +30,8 @@
   module.controller('NewAnalysisController',
     function($scope, $modal, $location, $timeout, Page, AnalysisService, Restangular, SetService, Extensions) {
 
-    var _this = this;
+    var _this = this,
+        _isLaunchingAnalysis = false;
 
     _this.analysisType = null; // One of "enrichment", "set", "phenotype" or "coverage"
     _this.filteredList = [];
@@ -91,8 +92,19 @@
     };
 
 
+    _this.isLaunchingAnalysis = function() {
+      return _isLaunchingAnalysis;
+    };
+
+
     /* Phenotype comparison only takes in donor set ids */
     _this.launchPhenotype = function(setIds) {
+
+      if (_isLaunchingAnalysis) {
+        return;
+      }
+
+      _isLaunchingAnalysis = true;
 
       var payload = setIds;
       var promise = Restangular.one('analysis').post('phenotype', payload, {}, {'Content-Type': 'application/json'});
@@ -100,11 +112,21 @@
         if (data.id) {
           $location.path('analysis/view/phenotype/' + data.id);
         }
+      })
+      .finally(function() {
+        _isLaunchingAnalysis = false;
       });
     };
 
 
     _this.launchSet = function(type, setIds) {
+
+      if (_isLaunchingAnalysis) {
+        return;
+      }
+
+      _isLaunchingAnalysis = true;
+
       var payload = {
         lists: setIds,
         type: type.toUpperCase()
@@ -115,6 +137,9 @@
           console.log('cannot create set operation');
         }
         $location.path('analysis/view/set/' + data.id);
+      })
+      .finally(function() {
+        _isLaunchingAnalysis = false;
       });
     };
 
