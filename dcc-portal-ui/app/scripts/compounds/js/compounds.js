@@ -356,10 +356,14 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
         var filters = _filters;
 
-        if (_geneEntityId ) {
+        if (_geneEntityId) {
 
           if (! _.has(filters, 'gene')) {
-            filters.gene = {entitySetId: [_geneEntityId]};
+            filters.gene = {
+              entitySetId: {
+                is: [_geneEntityId]
+              }
+            };
           }
           else if (! _.has(filters, 'gene.entitySetId')) {
             filters.gene.entitySetId = {
@@ -367,12 +371,6 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
             };
           }
 
-        }
-
-        if (_geneEntityId && ! _.has(filters, 'gene.entitySetId')) {
-          filters.gene.entitySetId = {
-            is: [_geneEntityId]
-          };
         }
 
        return  {
