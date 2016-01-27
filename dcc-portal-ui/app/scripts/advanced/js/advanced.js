@@ -314,15 +314,31 @@ angular.module('icgc.advanced.controllers', [
         // ... actually you can by clicking on counts in the tables
         // $scope.$on('$locationChangeSuccess') should take care of that anyway
         $scope.$watch(function () {
-          return $state.current.data.tab;
-        }, function () {
-          //alert($state.current.data.tab);
-          _controller.setActiveTab($state.current.data.tab);
-        });
+
+            if (! angular.isDefined($state.current.data) || ! angular.isDefined($state.current.data)) {
+              return null;
+            }
+
+            return $state.current.data.tab;
+          },
+          function (tab) {
+             if (tab !== null) {
+               _controller.setActiveTab(tab);
+             }
+          });
+
         $scope.$watch(function () {
+
+          if (! angular.isDefined($state.current.data) || ! angular.isDefined($state.current.subTab)) {
+            return null;
+          }
+
           return $state.current.data.subTab;
-        }, function () {
-          _controller.setSubTab($state.current.data.subTab);
+        },
+        function (subTab) {
+          if (subTab !== null) {
+            _controller.setSubTab(subTab);
+          }
         });
       }
 
