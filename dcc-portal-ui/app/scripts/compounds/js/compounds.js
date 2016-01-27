@@ -495,7 +495,12 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         $rootScope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
           if (filterObj.currentPath.indexOf('/compound') >= 0) {
-            _.assign(_filters, _getResultsCompoundGenesFilter().filters, filterObj.currentFilters);
+            if (! _.isEmpty(filterObj.currentFilters)) {
+              _.assign(_filters, _getResultsCompoundGenesFilter().filters, filterObj.currentFilters);
+            }
+            else {
+              _filters = {};
+            }
             $rootScope.$broadcast(CompoundsServiceConstants.EVENTS.COMPOUND_DATA_NEEDS_RELOAD, _filters);
           }
         });
