@@ -356,7 +356,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
         var filters = _filters;
 
-        if (! _.has(filters, 'gene')) {
+        if (_geneEntityId && ! _.has(filters, 'gene')) {
           filters.gene = {};
         }
 
