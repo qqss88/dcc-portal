@@ -34,13 +34,13 @@ angular.module('icgc.compounds', ['icgc.compounds.controllers', 'icgc.compounds.
           return CompoundsService.getCompoundManagerFactory($stateParams.compoundId);
         }]
       },
-      reloadOnSearch: false
+      reloadOnSearch: true
     });
   });
 
 angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
   .controller('CompoundCtrl', function ($scope, compoundManager, CompoundsService, Page,
-                                        CompoundsServiceConstants ) {
+                                        FilterService, CompoundsServiceConstants ) {
 
     var _ctrl = this,
         _compound = null,
@@ -62,7 +62,10 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
     }
 
     function _init() {
+      compoundManager.filters(FilterService.filters());
+
       _initCompound();
+
       Page.setTitle('Compounds - ' + _compound.name.toUpperCase() + ' (' + _compound.id + ')');
       Page.stopWork();
     }
@@ -78,7 +81,13 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
 
       compoundManager.getTargetedCompoundGenes(_targetCompoundResultPage)
         .then(_initTargetedCompoundGenes)
-        .then(getMutationImpactFacets);
+        .then(function() {
+          return getMutationImpactFacets();
+        })
+        .finally(function() {
+          $scope.$on(CompoundsServiceConstants.EVENTS.COMPOUND_DATA_NEEDS_RELOAD, _reloadCompound);
+        });
+
     }
 
     function _reloadCompound() {
@@ -100,8 +109,6 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
 
     _init();
 
-
-    $scope.$on(CompoundsServiceConstants.EVENTS.COMPOUND_DATA_NEEDS_RELOAD, _reloadCompound);
 
     //////////////////////////////////////////////////////////////////////
     // Controller API
@@ -154,6 +161,10 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
 
     _ctrl.getAffectedDonorCountTotal = function() {
       return compoundManager.getAffectedDonorCountTotal();
+    };
+
+    _ctrl.getAffectedDonorCountTotalFilter = function() {
+      return compoundManager.filters();
     };
 
     _ctrl.getCompound = function() {
@@ -343,13 +354,17 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
       function _getResultsCompoundGenesFilter(geneLimit) {
 
-        var filters = !_.isEmpty(_filters) ?  _filters : {
-            gene: {
-              entitySetId: {
-                is: [_geneEntityId]
-              }
-            }
+        var filters = _filters;
+
+        if (! _.has(filters, 'gene')) {
+          filters.gene = {};
+        }
+
+        if (_geneEntityId && ! _.has(filters, 'gene.entitySetId')) {
+          filters.gene.entitySetId = {
+            is: [_geneEntityId]
           };
+        }
 
        return  {
          from: 1,
@@ -400,9 +415,27 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
                 var geneListResultsLength = geneListResults.length;
                 _compoundTargetedGenes.length = 0;
 
+                var geneFilter = _getResultsCompoundGenesFilter().filters;
+
+                delete geneFilter.gene;
+
+
                 for (var i = 0; i < geneListResultsLength; i++) {
                   var gene = _geneEntityFactory(geneListResults[i]);
+
+                  var geneFilterDefault = {
+                    gene: {
+                      id: {
+                        is: [gene.id]
+                      }
+                    }
+                  };
+
+                  _.assign(geneFilterDefault, geneFilter);
+
+                  gene.affectedDonorCountFilter = geneFilterDefault;
                   gene.mutationCountTotal = mutationGeneValueMap[gene.id];
+
                   _compoundTargetedGenes.push(gene);
                 }
 
@@ -472,6 +505,15 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         return _compoundTargetedGeneIds;
       };
 
+      _self.filters = function(filters) {
+
+        if (arguments.length === 1) {
+          _filters = angular.isObject(filters) ? filters : {};
+        }
+
+        return _.cloneDeep(_filters);
+      };
+
       /* Reloads only the gene mutation data related to gene mutations - used for refining
       the compound targeted genes using filters */
       _self.reloadCompoundGenes = _reloadCompoundGenes;
@@ -495,12 +537,14 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         $rootScope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
           if (filterObj.currentPath.indexOf('/compound') >= 0) {
+
             if (! _.isEmpty(filterObj.currentFilters)) {
               _.assign(_filters, _getResultsCompoundGenesFilter().filters, filterObj.currentFilters);
             }
             else {
               _filters = {};
             }
+
             $rootScope.$broadcast(CompoundsServiceConstants.EVENTS.COMPOUND_DATA_NEEDS_RELOAD, _filters);
           }
         });

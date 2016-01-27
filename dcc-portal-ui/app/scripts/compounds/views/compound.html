@@ -198,11 +198,11 @@
                                      </span>
                                     <span data-ng-if="gene.affectedDonorCountFiltered==null"><i class="icon-spinner icon-spin"></i></span>
                                     <span style="position: relative" data-ng-if="gene.affectedDonorCountFiltered >= 0">
-                                    <a data-ng-href='/search?filters={"gene":{"id":{"is":["{{ gene.id }}"]}}}'>
+                                    <a data-ng-href='/search?filters={{gene.affectedDonorCountFilter}}'>
                                         {{ gene.affectedDonorCountFiltered | number }}
                                     </a>
                                     /
-                                    <a href="/search?filters={{CompoundCtrl.getFilter()}}">
+                                    <a href="/search?filters={{CompoundCtrl.getAffectedDonorCountTotalFilter()}}">
                                         {{ CompoundCtrl.getAffectedDonorCountTotal() | number }}
                                     </a>
                                     <em data-ng-bind-template="({{gene.affectedDonorCountFiltered/CompoundCtrl.getAffectedDonorCountTotal() * 100 | number:2}}%)"></em>
