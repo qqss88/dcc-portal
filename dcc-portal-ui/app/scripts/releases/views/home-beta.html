@@ -37,7 +37,7 @@
         <h3>Data Release {{ ReleaseCtrl.release.releaseNumber }}</h3>
         <h3 class="subhead">{{ ReleaseCtrl.applicationReleaseDate }}</h3>
         <donut home=true items='ReleaseCtrl.donut' inner-label='Donors' outer-label='Donors'
-               heading="Donor Distribution by Primary Site" height="325"></donut>
+               heading="Donor Distribution by Primary Site" height="325" should-show-no-data-message="false"></donut>
 
         <div class="summary-table-container">
             <table class="table table-striped table-bordered table-hover table-condensed">
