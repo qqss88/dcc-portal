@@ -227,8 +227,10 @@ public class DonorService {
               saRecord.put("submitted_sample_id", sample.getAnalyzedId());
               saRecord.put("analyzed_sample_interval", sample.getAnalyzedInterval());
               saRecord.put("study", sample.getStudy());
-              if (sample.getAvailableRawSequenceData() != null) {
-                for (val external : sample.getAvailableRawSequenceData()) {
+
+              val seqData = sample.getAvailableRawSequenceData();
+              if (seqData != null && !seqData.isEmpty()) {
+                for (val external : seqData) {
                   val eRecord = Maps.<String, Object> newHashMap();
                   eRecord.putAll(saRecord);
                   // eRecord.put("raw_sequence_repository", external.getRepository());
