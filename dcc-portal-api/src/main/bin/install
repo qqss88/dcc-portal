@@ -11,7 +11,7 @@
 #  See usage()
 
 # Enviromental configuation
-cache=hcache-dcc:5381
+#cache=<fill in!>
 domain=dcc.icgc.org
 slack=https://hooks.slack.com/services/<fill in!>
 
