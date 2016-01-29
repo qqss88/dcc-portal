@@ -41,27 +41,29 @@ angular.module('icgc.common.filters', [])
 
     ////////////////////////////////////////////////////////////////
 
+    function _getLocationFiltersJSON() {
+      var filters = _.get($location.search(), filterConstants.FILTER_NAME, '{}');
+      return filters;
+    }
+
+    function _setFilterJSONAndNotify(filtersJSON) {
+      _filtersObj = JSON.parse(filtersJSON);
+      _notifyFilterChangeEvent();
+    }
+
     /**
      * Initializes the filter service
      * @private
      */
     function _init() {
-      $rootScope.$watch(function () {
-          return _.get($location.search(), filterConstants.FILTER_NAME, '{}');
-        },
-        function (newFilterJSON) {
+      $rootScope.$watch(_getLocationFiltersJSON, _setFilterJSONAndNotify);
 
-          try {
-            _filtersObj = JSON.parse(newFilterJSON);
-            //console.log('Watcher Update Filters to ', _filtersObj);
-          }
-          catch (e) {
-            _filtersObj = {};
-          }
+      // On state changes ensure that we have the correct filters
+      $rootScope.$on('$stateChangeSuccess', function() {
 
-          _notifyFilterChangeEvent();
+          _filtersObj = JSON.parse(_getLocationFiltersJSON());
 
-        });
+      });
     }
 
     /**
