@@ -151,7 +151,7 @@
 
 
     if (_ctrl.gene.hasOwnProperty('transcripts')) {
-      var geneTranscriptPromie = Genes.one().handler.one('affected-transcripts').get({});
+      var geneTranscriptPromie = Genes.one(_ctrl.gene.id).handler.one('affected-transcripts').get({});
 
       geneTranscriptPromie.then(function(data) {
         var affectedTranscriptIds = Restangular.stripRestangular(data)[_ctrl.gene.id];
