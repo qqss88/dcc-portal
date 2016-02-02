@@ -186,7 +186,7 @@
   });
 
   module.controller('ExternalFileDownloadController',
-    function($scope, $window, $document, $modalInstance, ExternalRepoService, SetService, LocationService, params) {
+    function($scope, $window, $document, $modalInstance, ExternalRepoService, SetService, FilterService, params) {
 
     $scope.selectedFiles = params.selectedFiles;
     $scope.cancel = function() {
@@ -195,7 +195,7 @@
 
     var p = {};
     p.size = 0;
-    p.filters = LocationService.filters();
+    p.filters = FilterService.filters();
     if ($scope.selectedFiles && !_.isEmpty($scope.selectedFiles)) {
       if (! p.filters.file) {
         p.filters.file = {};
@@ -241,7 +241,7 @@
 
     $scope.download = function() {
       if (_.isEmpty($scope.selectedFiles)) {
-        ExternalRepoService.download(LocationService.filters(), $scope.selectedRepos);
+        ExternalRepoService.download(FilterService.filters(), $scope.selectedRepos);
       } else {
         ExternalRepoService.downloadSelected($scope.selectedFiles, $scope.selectedRepos);
       }
@@ -254,7 +254,7 @@
       repoData.manifestID = false;
       
       var selectedFiles = $scope.selectedFiles;
-      var filters = LocationService.filters();
+      var filters = FilterService.filters();
 
       if (! _.isEmpty (selectedFiles)) {
         filters = _.set (filters, 'file.id.is', selectedFiles);
@@ -405,7 +405,8 @@
   module.controller ('ExternalRepoController', function ($scope, $window, $modal, LocationService, Page,
     ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService, $rootScope) {
 
-    var dataRepoTitle = RouteInfoService.get ('dataRepositories').title;
+    var dataRepoTitle = RouteInfoService.get ('dataRepositories').title,
+        FilterService = LocationService.getFilterService();
 
     Page.setTitle (dataRepoTitle);
     Page.setPage ('repository');
@@ -563,7 +564,7 @@
      * Export table
      */
     _ctrl.export = function() {
-      ExternalRepoService.export (LocationService.filters());
+      ExternalRepoService.export (FilterService.filters());
     };
 
     /**
@@ -571,7 +572,7 @@
      */
     _ctrl.viewInSearch = function (limit) {
       var params = {};
-      params.filters = LocationService.filters();
+      params.filters = FilterService.filters();
       params.size = limit;
       params.isTransient = true;
       SetService.createForwardRepositorySet ('donor', params, '/search');
@@ -704,7 +705,7 @@
       }
 
       params.include = 'facets';
-      params.filters = LocationService.filters();
+      params.filters = FilterService.filters();
 
       // Get files that match query
       promise = ExternalRepoService.getList (params);
@@ -735,21 +736,18 @@
 
     refresh();
 
-    $scope.$watch (function() {return LocationService.filters();}, function (n) {
-
-      var hasFilters = ! _.isEmpty(n);
+    $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
+      var filters = filterObj.currentFilters,
+          hasFilters = ! _.isEmpty(filters);
 
       if (hasFilters && _ctrl.selectedFiles.length > 0) {
         _ctrl.undo();
       }
-    }, true);
-
-    $scope.$on ('$locationChangeSuccess', function (event, next) {
-      if (next.indexOf ('repositories') !== -1) {
-        // Undo existing selection if filters change
+      else {
         refresh();
       }
     });
+
   });
 
 })();

@@ -253,6 +253,7 @@
     'icgc.auth',
     'icgc.tokens',
     'icgc.pathways',
+    'icgc.historyManager',
 
     // old
     'app.ui',
@@ -476,87 +477,10 @@
       }]);
 
     })
-    .run(function($state, $location, $window, $timeout, $rootScope, cfpLoadingBar) {
+    .run(function($state, $location, $window, $timeout, $rootScope, cfpLoadingBar, HistoryManager) {
 
-      var _scrollTimeoutHandle = null;
+      HistoryManager.addToIgnoreScrollResetWhiteList(['analysis','advanced', 'compound']);
 
-      function scroll() {
-
-        function _doInlineScroll(hash) {
-          // Give angular some time to do digests then check for a
-          // in page scroll
-          
-          var match = hash ? hash.match(/^!([\w\-]+)$/i) : false,
-            to = 0,
-            HEADER_HEIGHT = 49 + 10, // Height of header + some nice looking offset.
-            el = null;
-          
-          if (match && match.length > 1) {
-            hash = match[1];
-            //$location.hash(hash);
-            to = - HEADER_HEIGHT;
-          }
-
-          if (hash) {
-             el = jQuery('#' + hash);
-          }
-          
-          if (el && el.length > 0) {
-            to += Math.round(parseFloat(el.offset().top));
-            to = Math.max(0, to);
-          }
-
-
-          jQuery(window).scrollTop( to );
-        }
-        
-        /////
-
-        var _hash = $location.hash();
-
-        // Prevents browser window from jumping around while navigating analysis
-        if (['analysis'].indexOf($state.current.name) >= 0) {
-          return;
-        }
-
-        // Prevent the timeout from being fired multiple times if called before previous
-        // timeout is complete. Make the last request the most valid.
-        if (_scrollTimeoutHandle) {
-          clearTimeout(_scrollTimeoutHandle);
-        }
-
-        _scrollTimeoutHandle = setTimeout(function () {
-            _doInlineScroll(_hash);
-            _scrollTimeoutHandle = null;
-          }, 500);
-
-      }
-
-      $rootScope.$on('$viewContentLoaded', scroll);
-      $rootScope.$on('$stateChangeSuccess', scroll);
-
-      function _wrapHistoryAPI(method) {
-
-        var _originalHistoryMethod = $window.window.history[method];
-
-        $window.window.history[method] = function() {
-
-          var _h = $location.hash();
-
-          if (! _h || ! _h.match(/^!([\w\-]+)$/i)) {
-            //console.log('Restoring scroll top to original position of: 0');
-            jQuery(window).scrollTop(0);
-          }
-
-          return _originalHistoryMethod.apply(this, Array.prototype.slice.call(arguments));
-        };
-
-      }
-
-      _.map(['pushState', 'replaceState'], _wrapHistoryAPI);
-
-
-      
       // Add UI Router Debug if there is a fatal state change error
       $rootScope.$on('$stateChangeError', function () { 
         console.error('State Change Error Occurred. Error occurred with arguments: ', arguments);
