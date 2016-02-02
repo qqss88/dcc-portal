@@ -193,6 +193,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
             function(id) {
               return id !== null && id.length > 0;
             }),
+          _drugGenesLength = _genes.length,
           _trials = _arrayOrEmptyArray(compound.trials);
 
 
@@ -207,6 +208,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
         cancerTrialCount: _cancerTrialCount,
         atcCodes: _atcCodes,
         genes: _genes,
+        drugGenesLength: _drugGenesLength,
         trials: _trials
       };
     }
@@ -370,7 +372,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
       function _reloadCompoundGenes(genePageIndex, geneLimit) {
         var deferred = $q.defer(),
-          limit = geneLimit || _compoundEntity.genes.length;
+            limit = geneLimit || _compoundEntity.drugGenesLength;
 
         _self.getCompoundMutations(genePageIndex, limit)
           .then(function (restangularMutationCountData) {
@@ -395,7 +397,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
               }
             }
 
-            var params = _getResultsCompoundGenesFilter();
+            var params = _getResultsCompoundGenesFilter(limit);
 
             Restangular
               .one('genes')
@@ -405,6 +407,14 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
                 if (!geneListResults) {
                   deferred.resolve(_compoundTargetedGenes);
+                }
+
+                if (geneList.pagination.total !==  _compoundEntity.genes.length) {
+
+                  // Validate genes against current Filters
+                  var validGenes = _.pluck(geneListResults, 'id');
+
+                  _compoundEntity.genes = validGenes;
                 }
 
                 var geneListResultsLength = geneListResults.length;
