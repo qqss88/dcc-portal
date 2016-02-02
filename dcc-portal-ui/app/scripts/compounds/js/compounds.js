@@ -66,7 +66,7 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
 
       _initCompound();
 
-      Page.setTitle('Compounds - ' + _compound.name.toUpperCase() + ' (' + _compound.id + ')');
+      Page.setTitle('Compounds - ' + _compound.name.toUpperCase());
       Page.stopWork();
     }
 
