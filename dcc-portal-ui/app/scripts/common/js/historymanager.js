@@ -43,7 +43,8 @@
         _whiteList = [],
         _$state = null,
         _$location = null,
-        _$window = null;
+        _$window = null,
+        _previousWhiteListMatches = null;
 
     ///////
     function _wrapHistoryAPI(method) {
@@ -72,12 +73,19 @@
 
     function _shouldSuppressScrollTop() {
       var _stateName = _$state.current.name,
-          _whiteListStateMatches = _.filter(_whiteList, function(whiteListState) {
+          whiteListStateMatches = _.filter(_whiteList, function(whiteListState) {
           return _stateName.indexOf(whiteListState) >= 0;
         });
 
+      var isInWhiteList = angular.isArray(whiteListStateMatches) && whiteListStateMatches.length > 0;
 
-      return angular.isArray(_whiteListStateMatches) && _whiteListStateMatches.length > 0;
+      // Look for an intersection in previous matches to maintain whether or not we have transitioned to a new state
+      // - if we have then do not suppress the scroll reset
+      var wasStateInPreviousWhiteList = (_.intersection(whiteListStateMatches, _previousWhiteListMatches)).length > 0;
+
+      _previousWhiteListMatches = whiteListStateMatches;
+
+      return isInWhiteList && wasStateInPreviousWhiteList;
     }
 
     ////////

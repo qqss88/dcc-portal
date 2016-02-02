@@ -148,14 +148,7 @@ angular.module('icgc.compounds.controllers', ['icgc.compounds.services'])
     };
 
     _ctrl.getFilter = function() {
-      var filter = {
-        gene: {
-          entitySetId: {
-            is: [compoundManager.getGeneEntityID()]
-          }
-        }
-      };
-
+      var filter = compoundManager.getCompoundGenesFilter().filters;
       return filter;
     };
 
@@ -180,7 +173,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
     }
   })
   .service('CompoundsService', function($rootScope, $q, Gene, Mutations, Page, FilterService, $location,
-                                        Restangular, CompoundsServiceConstants) {
+                                        Restangular, CompoundsServiceConstants, Extensions) {
 
     function _arrayOrEmptyArray(arr) {
       return angular.isArray(arr) ?  arr : [];
@@ -358,18 +351,13 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
         if (_geneEntityId) {
 
-          if (! _.has(filters, 'gene')) {
+       if (! _.has(filters, 'gene')) {
             filters.gene = {
-              entitySetId: {
-                is: [_geneEntityId]
+              id: {
+                is: [Extensions.ENTITY_PREFIX + _geneEntityId]
               }
             };
-          }
-          else if (! _.has(filters, 'gene.entitySetId')) {
-            filters.gene.entitySetId = {
-              is: [_geneEntityId]
-            };
-          }
+       }
 
         }
 
@@ -424,23 +412,17 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
 
                 var geneFilter = _getResultsCompoundGenesFilter().filters;
 
-                delete geneFilter.gene;
-
 
                 for (var i = 0; i < geneListResultsLength; i++) {
                   var gene = _geneEntityFactory(geneListResults[i]);
 
-                  var geneFilterDefault = {
-                    gene: {
-                      id: {
-                        is: [gene.id]
-                      }
-                    }
-                  };
+                  var filter = _.cloneDeep(geneFilter);
+                  filter.gene.id  = {is: [gene.id]};
 
-                  _.assign(geneFilterDefault, geneFilter);
+                  gene.mutationCountFilter = filter;
 
-                  gene.affectedDonorCountFilter = geneFilterDefault;
+                  gene.affectedDonorCountFilter = filter;
+
                   gene.mutationCountTotal = mutationGeneValueMap[gene.id];
 
                   _compoundTargetedGenes.push(gene);
@@ -494,7 +476,7 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       _self.getCompoundMutations = function(geneStartIndex, geneLimit) {
         var params = _getResultsCompoundGenesFilter(geneLimit);
         delete params.from;
-        delete params.filters;
+        //delete params.filters;
 
 
         return Restangular
@@ -524,6 +506,8 @@ angular.module('icgc.compounds.services', ['icgc.genes.models'])
       /* Reloads only the gene mutation data related to gene mutations - used for refining
       the compound targeted genes using filters */
       _self.reloadCompoundGenes = _reloadCompoundGenes;
+
+      _self.getCompoundGenesFilter = _getResultsCompoundGenesFilter;
 
       _self.getTargetedCompoundGenes = function(genePageIndex, geneLimit) {
 

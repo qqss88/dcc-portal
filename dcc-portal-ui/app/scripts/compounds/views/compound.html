@@ -213,7 +213,7 @@
                                     <span data-ng-if="gene.mutationCountTotal == null"><i class="icon-spinner icon-spin"></i></span>
                                     <span data-ng-if="gene.mutationCountTotal === 0">--</span>
                                     <a data-ng-if="gene.mutationCountTotal > 0"
-                                       data-ng-href='/search/m?filters={"gene":{"id":{"is":["{{ gene.id }}"]}}}'>
+                                       data-ng-href='/search/m?filters={{gene.mutationCountFilter}}'>
                                         {{ gene.mutationCountTotal | number }}
                                     </a>
                                 </td>
@@ -264,12 +264,8 @@
                                        data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
                                     </i>
                                 </th>
-                                <th data-ng-click="sortField = 'conditions'; sortDescending = ! sortDescending" class="sortable">
+                                <th>
                                     Conditions
-                                    <i data-ng-if="sortField !== 'conditions'" class="icon-sort"></i>
-                                    <i data-ng-if="sortField === 'conditions'"
-                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}" class="sortable">
-                                    </i>
                                 </th>
                                 <th data-ng-click="sortField = 'startDate'; sortDescending = ! sortDescending" class="sortable">
                                     Start Date
