@@ -108,7 +108,7 @@ public class ShortUrlResourceTest extends ResourceTest {
         true, // success
         "", // error
         REQUEST_URL, // longUrl
-        "http://***REMOVED***/FoO", // shortUrl
+        "http://beta-tra.icgc.org/FoO", // shortUrl
         1); // user
   }
 
