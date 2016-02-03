@@ -83,7 +83,6 @@
 
       filters.gene[entitySpecifier][logicalISorNOT] = newGeneSetCollection;
 
-      console.log(filters);
       return filters;
     };
 

@@ -26,25 +26,25 @@
       reloadOnSearch: false,
       templateUrl: 'scripts/projects/views/projects.html',
       controller: 'ProjectsCtrl as ProjectsCtrl',
-      data: {tab: 'summary'}
+      data: {tab: 'summary', isProject: true}
     });
 
     $stateProvider.state('projects.details', {
       url: '/details',
       reloadOnSearch: false,
-      data: {tab:'details'}
+      data: {tab:'details', isProject: true}
     });
 
     $stateProvider.state('projects.summary', {
       url: '/summary',
       reloadOnSearch: false,
-      data: {tab:'summary'}
+      data: {tab:'summary', isProject: true}
     });
 
     $stateProvider.state('projects.history', {
       url: '/history',
       reloadOnSearch: false,
-      data: {tab:'history'}
+      data: {tab:'history', isProject: true}
     });
 
     $stateProvider.state('project', {
@@ -84,9 +84,19 @@
 
 
     $scope.$watch(function () {
-        return $state.current.data.tab;
-      }, function () {
-        _ctrl.setTab($state.current.data.tab);
+       var currentStateData = angular.isDefined($state.current.data) ? $state.current.data : null;
+
+      if (! angular.isDefined(currentStateData.isProject) ||
+          ! angular.isDefined(currentStateData.tab)) {
+        return null;
+      }
+
+        return currentStateData.tab;
+      },
+      function (currentTab) {
+        if (currentTab !== null) {
+          _ctrl.setTab(currentTab);
+        }
       });
 
     $scope.countryCode = CodeTable.countryCode;
@@ -656,7 +666,7 @@
 
     $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
-      if (filterObj.currentPath.indexOf('/projects/' + project.id) < 0) {
+      if (filterObj.currentPath.indexOf('/projects/' + _projectId) < 0) {
         return;
       }
 
@@ -701,7 +711,7 @@
 
     $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
-      if (filterObj.currentPath.indexOf('/projects/' + project.id) < 0) {
+      if (filterObj.currentPath.indexOf('/projects/' + _projectId) < 0) {
         return;
       }
 
