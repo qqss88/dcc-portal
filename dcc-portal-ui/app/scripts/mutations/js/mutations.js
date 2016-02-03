@@ -145,14 +145,14 @@
 
   var module = angular.module('icgc.mutations.models', []);
 
-  module.service('Mutations', function (Restangular, LocationService, Mutation, Consequence, ImpactOrder) {
+  module.service('Mutations', function (Restangular, FilterService, Mutation, Consequence, ImpactOrder) {
     this.handler = Restangular.all('mutations');
 
     this.getList = function (params) {
       var defaults = {
         size: 10,
         from: 1,
-        filters: LocationService.filters()
+        filters: FilterService.filters()
       };
 
       return this.handler.get('', angular.extend(defaults, params)).then(function (data) {
@@ -198,14 +198,14 @@
     };
   });
 
-  module.service('Occurrences', function (Restangular, LocationService, Occurrence) {
+  module.service('Occurrences', function (Restangular, FilterService, Occurrence) {
     this.handler = Restangular.all('occurrences');
 
     this.getList = function (params) {
       var defaults = {
         size: 10,
         from: 1,
-        filters: LocationService.filters()
+        filters: FilterService.filters()
       };
 
       return this.handler.get('', angular.extend(defaults, params));
@@ -232,14 +232,14 @@
     };
   });
 
-  module.service('Transcripts', function (Restangular, LocationService, Transcript) {
+  module.service('Transcripts', function (Restangular, FilterService, Transcript) {
     this.handler = Restangular.all('occurrences');
 
     this.getList = function (params) {
       var defaults = {
         size: 10,
         from: 1,
-        filters: LocationService.filters()
+        filters: FilterService.filters()
       };
 
       return this.handler.get('', angular.extend(defaults, params));

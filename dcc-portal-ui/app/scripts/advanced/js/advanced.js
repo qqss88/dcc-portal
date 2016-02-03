@@ -986,7 +986,11 @@ angular.module('icgc.advanced.controllers', [
           deferred.resolve();
         });
 
-      Occurrences.getList(LocationService.getJsonParam('occurrences'))
+      var occurrencesFilters = LocationService.getJsonParam('occurrences') || {};
+
+      _.assign(occurrencesFilters, filters);
+
+      Occurrences.getList(occurrencesFilters)
         .then(function(occurrencesList) {
           _initOccurrences(occurrencesList);
         });
