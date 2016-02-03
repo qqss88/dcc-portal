@@ -2,7 +2,7 @@
     <div class="h1-wrap">
         <h1 data-ui-scrollfix="79">
             <span class="t_badge t_badge__compound"></span>
-            <span data-ng-bind=":: compound.name"></span> (<span data-ng-bind=":: compound.id"></span>)
+            <span data-ng-bind=":: compound.name"></span>
         </h1>
     </div>
     <div data-scroll-spy="">
@@ -198,11 +198,11 @@
                                      </span>
                                     <span data-ng-if="gene.affectedDonorCountFiltered==null"><i class="icon-spinner icon-spin"></i></span>
                                     <span style="position: relative" data-ng-if="gene.affectedDonorCountFiltered >= 0">
-                                    <a data-ng-href='/search?filters={"gene":{"id":{"is":["{{ gene.id }}"]}}}'>
+                                    <a data-ng-href='/search?filters={{gene.affectedDonorCountFilter}}'>
                                         {{ gene.affectedDonorCountFiltered | number }}
                                     </a>
                                     /
-                                    <a href="/search?filters={{CompoundCtrl.getFilter()}}">
+                                    <a href="/search?filters={{CompoundCtrl.getAffectedDonorCountTotalFilter()}}">
                                         {{ CompoundCtrl.getAffectedDonorCountTotal() | number }}
                                     </a>
                                     <em data-ng-bind-template="({{gene.affectedDonorCountFiltered/CompoundCtrl.getAffectedDonorCountTotal() * 100 | number:2}}%)"></em>
@@ -213,7 +213,7 @@
                                     <span data-ng-if="gene.mutationCountTotal == null"><i class="icon-spinner icon-spin"></i></span>
                                     <span data-ng-if="gene.mutationCountTotal === 0">--</span>
                                     <a data-ng-if="gene.mutationCountTotal > 0"
-                                       data-ng-href='/search/m?filters={"gene":{"id":{"is":["{{ gene.id }}"]}}}'>
+                                       data-ng-href='/search/m?filters={{gene.mutationCountFilter}}'>
                                         {{ gene.mutationCountTotal | number }}
                                     </a>
                                 </td>
@@ -264,12 +264,8 @@
                                        data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}">
                                     </i>
                                 </th>
-                                <th data-ng-click="sortField = 'conditions'; sortDescending = ! sortDescending" class="sortable">
+                                <th>
                                     Conditions
-                                    <i data-ng-if="sortField !== 'conditions'" class="icon-sort"></i>
-                                    <i data-ng-if="sortField === 'conditions'"
-                                       data-ng-class="{'icon-sort-down': sortDescending, 'icon-sort-up': ! sortDescending}" class="sortable">
-                                    </i>
                                 </th>
                                 <th data-ng-click="sortField = 'startDate'; sortDescending = ! sortDescending" class="sortable">
                                     Start Date

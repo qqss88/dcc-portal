@@ -19,9 +19,40 @@
 
 angular.module('highcharts', ['highcharts.directives', 'highcharts.services']);
 
-angular.module('highcharts.directives', []);
+angular.module('highcharts.directives', [])
+  .constant('highchartsConstants', {
+    DEFAULT_NO_DATA_SETTINGS: {
+      lang: {
+        noData: 'No data to display.'
+      },
+      noData: {
+        style: {
+          fontWeight: '400',
+          fontSize: '1rem',
+          color: '#777'
+        }
+      }
+    }
+  }).
+  service('highchartsService', function(highchartsConstants) {
+    var _service = this;
 
-angular.module('highcharts.directives').directive('pie', function (Facets, $filter, ValueTranslator) {
+    _service.getCustomNoDataConfig = function(shouldShowNoDataMsg) {
+      var defaultNoDataConfig = highchartsConstants.DEFAULT_NO_DATA_SETTINGS,
+          shouldShowNoDataMessage = typeof shouldShowNoDataMsg === 'string' &&
+                                    shouldShowNoDataMsg.toLowerCase() === 'false'  ? false : true;
+
+      if (! shouldShowNoDataMessage) {
+        defaultNoDataConfig.noData.style.display = 'none';
+      }
+
+      return defaultNoDataConfig;
+    };
+
+  });
+
+angular.module('highcharts.directives').directive('pie', function (Facets, $filter, ValueTranslator,
+                                                                   highchartsService) {
   function ensureArray (array) {
     return _.isArray (array) ? array : [];
   }
@@ -32,7 +63,8 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
     replace: true,
     scope: {
       items: '=',
-      groupPercent: '@'
+      groupPercent: '@',
+      shouldShowNoDataMessage: '@'
     },
     template: '<span style="margin: 0 auto">not working</span>',
     link: function ($scope, $element, $attrs) {
@@ -87,7 +119,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
           return (datum.y / max.y) < ($scope.groupPercent / 100);
         };
 
-        // Further separatation per the rule of isBelowGroupPercent()
+        // Further seperation per the rule of isBelowGroupPercent()
         separated = _.partition (withName, isBelowGroupPercent);
         var belowGroupPercent = _.first (separated);
         var regular = _.last (separated);
@@ -195,6 +227,8 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
           ]
         };
 
+      jQuery.extend(true, chartsDefaults, highchartsService.getCustomNoDataConfig($scope.shouldShowNoDataMessage));
+
       $scope.$watch('items', function (newValue) {
         // if (!newValue || angular.equals(newValue, oldValue)) {
         if (!newValue) {
@@ -211,13 +245,15 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
   };
 });
 
-angular.module('highcharts.directives').directive('donut', function ($rootScope, ProjectCache, $state, Facets) {
+angular.module('highcharts.directives').directive('donut', function ($rootScope, ProjectCache, $state, Facets,
+                                                                     highchartsService) {
   return {
     restrict: 'E',
     replace: true,
     scope: {
       items: '=',
-      subTitle: '@'
+      subTitle: '@',
+      shouldShowNoDataMessage: '@'
     },
     template: '<div id="container" style="margin: 0 auto">not working</div>',
     link: function ($scope, $element, $attrs) {
@@ -346,6 +382,8 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
         ]
       };
 
+      jQuery.extend(true, chartsDefaults, highchartsService.getCustomNoDataConfig($scope.shouldShowNoDataMessage));
+
       $scope.$watch('items', function (newValue) {
         var deepCopy, newSettings, promise;
         if (!newValue) {
@@ -379,13 +417,15 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
   };
 });
 
-angular.module('highcharts.directives').directive('groupedBar', function ($location) {
+angular.module('highcharts.directives')
+  .directive('groupedBar', function ($location, highchartsService) {
   return {
     restrict: 'E',
     replace: true,
     scope: {
       items: '=',
-      colours: '='
+      colours: '=',
+      shouldShowNoDataMessage: '@'
     },
     template: '<div id="container" style="margin: 0 auto">not working</div>',
     link: function ($scope, $element, $attrs) {
@@ -508,6 +548,8 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
         }
       };
 
+      jQuery.extend(true, chartsDefaults, highchartsService.getCustomNoDataConfig($scope.shouldShowNoDataMessage));
+
       $scope.$watch('items', function (newValue) {
         var deepCopy, newSettings;
 
@@ -544,12 +586,13 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
 
 
 
-angular.module('highcharts.directives').directive('bar', function ($location) {
+angular.module('highcharts.directives').directive('bar', function ($location, highchartsService) {
   return {
     restrict: 'E',
     replace: true,
     scope: {
-      items: '='
+      items: '=',
+      shouldShowNoDataMessage: '@'
     },
     template: '<div id="container" style="margin: 0 auto">not working</div>',
     link: function ($scope, $element, $attrs) {
@@ -674,6 +717,8 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
           }
         }
       };
+
+      jQuery.extend(true, chartsDefaults, highchartsService.getCustomNoDataConfig($scope.shouldShowNoDataMessage));
 
       $scope.$watch('items', function (newValue) {
         var deepCopy, newSettings;
