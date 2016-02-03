@@ -26,25 +26,25 @@
       reloadOnSearch: false,
       templateUrl: 'scripts/projects/views/projects.html',
       controller: 'ProjectsCtrl as ProjectsCtrl',
-      data: {tab: 'summary'}
+      data: {tab: 'summary', isProject: true}
     });
 
     $stateProvider.state('projects.details', {
       url: '/details',
       reloadOnSearch: false,
-      data: {tab:'details'}
+      data: {tab:'details', isProject: true}
     });
 
     $stateProvider.state('projects.summary', {
       url: '/summary',
       reloadOnSearch: false,
-      data: {tab:'summary'}
+      data: {tab:'summary', isProject: true}
     });
 
     $stateProvider.state('projects.history', {
       url: '/history',
       reloadOnSearch: false,
-      data: {tab:'history'}
+      data: {tab:'history', isProject: true}
     });
 
     $stateProvider.state('project', {
@@ -84,9 +84,19 @@
 
 
     $scope.$watch(function () {
-        return $state.current.data.tab;
-      }, function () {
-        _ctrl.setTab($state.current.data.tab);
+       var currentStateData = angular.isDefined($state.current.data) ? $state.current.data : null;
+
+      if (! angular.isDefined(currentStateData.isProject) ||
+          ! angular.isDefined(currentStateData.tab)) {
+        return null;
+      }
+
+        return currentStateData.tab;
+      },
+      function (currentTab) {
+        if (currentTab !== null) {
+          _ctrl.setTab(currentTab);
+        }
       });
 
     $scope.countryCode = CodeTable.countryCode;
@@ -495,7 +505,8 @@
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache, $stateParams) {
     var _ctrl = this,
         _projectId = $stateParams.id || null,
-        project = Projects.one(_projectId);
+        project = Projects.one(_projectId),
+        FilterService = LocationService.getFilterService();
 
     function success(genes) {
       if (genes.hasOwnProperty('hits') ) {
@@ -564,16 +575,19 @@
     }
 
     function refresh() {
-      Projects.one().getGenes({filters: LocationService.filters()}).then(success);
+      Projects.one(_projectId).getGenes({filters: LocationService.filters()}).then(success);
     }
 
-    $scope.$on('$locationChangeSuccess', function (event, dest) {
 
-      // Only refresh if we stay on the page
-      if (dest.indexOf('projects/' + project.id) !== -1) {
+      $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
+
+        if (filterObj.currentPath.indexOf('/projects/' + project.id) < 0) {
+          return;
+        }
+
         refresh();
-      }
-    });
+      });
+
 
     refresh();
   });
@@ -583,7 +597,8 @@
 
     var _ctrl = this,
         _projectId = $stateParams.id || null,
-        project = Projects.one(_projectId);
+        project = Projects.one(_projectId),
+        FilterService = LocationService.getFilterService();
 
 
     function success(mutations) {
@@ -649,12 +664,13 @@
       project.getMutations({include: 'consequences', filters: LocationService.filters()}).then(success);
     }
 
-    $scope.$on('$locationChangeSuccess', function (event, dest) {
+    $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
-      // Only refresh if we stay on the page
-      if (dest.indexOf('projects/' + project.id) !== -1) {
-        refresh();
+      if (filterObj.currentPath.indexOf('/projects/' + _projectId) < 0) {
+        return;
       }
+
+      refresh();
     });
 
     refresh();
@@ -664,7 +680,8 @@
                                                    Donors, LocationService, $stateParams) {
     var _ctrl = this,
         _projectId = $stateParams.id || null,
-        project = Projects.one(_projectId);
+        project = Projects.one(_projectId),
+        FilterService = LocationService.getFilterService();
 
     function success(donors) {
       if (donors.hasOwnProperty('hits')) {
@@ -689,15 +706,16 @@
     }
 
     function refresh() {
-      Projects.one().getDonors({ filters: LocationService.filters()}).then(success);
+      Projects.one(_projectId).getDonors({ filters: LocationService.filters()}).then(success);
     }
 
-    $scope.$on('$locationChangeSuccess', function (event, dest) {
+    $scope.$on(FilterService.constants.FILTER_EVENTS.FILTER_UPDATE_EVENT, function(e, filterObj) {
 
-      // Only refresh if we stay on the page
-      if (dest.indexOf('projects/' + project.id) !== -1) {
-        refresh();
+      if (filterObj.currentPath.indexOf('/projects/' + _projectId) < 0) {
+        return;
       }
+
+      refresh();
     });
 
     refresh();
