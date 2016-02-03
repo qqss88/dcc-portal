@@ -74,16 +74,14 @@
     };
 
     this.updateDonorSetIdFilter = function (donorSetId, isExternalRepo) {
-      var filters = LocationService.filters();
-      var params = {type: 'donor', facet: 'id'};
-      var path;
-      if (Facets.isNot(params)) {
-        path = [(isExternalRepo ? 'file' : 'donor'), Extensions.ENTITY, 'not'];
-      } else {
-        path = [(isExternalRepo ? 'file' : 'donor'), Extensions.ENTITY, 'is'];
-      }
-      
-      return _.set (filters, path, [donorSetId]);
+      var filters = LocationService.filters(),
+          params = {type: 'donor', facet: 'id'},
+          entityType = (isExternalRepo ? 'file' : 'donor'),
+          entitySpecifier = isExternalRepo ?  Extensions.ENTITY : 'id',
+          entityID = isExternalRepo ?  [donorSetId] :  [Extensions.ENTITY_PREFIX + donorSetId],
+          isOrNot = Facets.isNot(params) ? 'not' : 'is';
+
+      return _.set (filters, [entityType, entitySpecifier, isOrNot], entityID);
     };
   });
 

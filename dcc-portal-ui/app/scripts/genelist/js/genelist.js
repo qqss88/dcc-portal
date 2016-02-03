@@ -61,20 +61,29 @@
 
 
     this.geneSetIdFilters = function(geneSetId) {
-      var filters = LocationService.filters();
+      var filters = LocationService.filters(),
+          entitySpecifier = 'id',
+          newGeneSetCollection = [Extensions.ENTITY_PREFIX + geneSetId],
+          logicalISorNOT = 'is';
+
 
       if (! filters.hasOwnProperty('gene')) {
         filters.gene = {};
       }
-      if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
-        filters.gene[Extensions.ENTITY] = {};
+
+      if (! filters.gene.hasOwnProperty(entitySpecifier)) {
+        filters.gene[entitySpecifier] = {};
       }
+
       var params = {type: 'gene', facet: 'id'};
+
       if (Facets.isNot(params)) {
-        filters.gene[Extensions.ENTITY].not = [geneSetId];
-      } else {
-        filters.gene[Extensions.ENTITY].is = [geneSetId]; 
+        logicalISorNOT = 'not';
       }
+
+      filters.gene[entitySpecifier][logicalISorNOT] = newGeneSetCollection;
+
+      console.log(filters);
       return filters;
     };
 
