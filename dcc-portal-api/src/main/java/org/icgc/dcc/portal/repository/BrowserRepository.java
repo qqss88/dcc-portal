@@ -22,6 +22,7 @@ import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.orFilter;
 import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
+import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 
 import java.util.List;
@@ -65,8 +66,8 @@ public class BrowserRepository {
   }
 
   public SearchResponse getMutation(String segmentId, Long start, Long stop, List<String> consequenceTypes,
-      List<String> projectFilters) {
-    val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters);
+      List<String> projectFilters, List<String> impactFilters) {
+    val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters, impactFilters);
 
     return execute("Browser Mutation Request", (request) -> request
         .setTypes(MUTATION)
@@ -96,8 +97,8 @@ public class BrowserRepository {
   }
 
   public SearchResponse getGene(String segmentId, Long start, Long stop, List<String> biotypes,
-      boolean withTranscripts) {
-    val filter = getGeneFilter(segmentId, start, stop, biotypes);
+      boolean withTranscripts, List<String> impactFilters) {
+    val filter = getGeneFilter(segmentId, start, stop, biotypes, impactFilters);
 
     val request = client.prepareSearch(indexName)
         .setTypes(GENE)
@@ -124,8 +125,8 @@ public class BrowserRepository {
   }
 
   public SearchResponse getGeneHistogram(Long interval, String segmentId, Long start, Long stop,
-      List<String> biotypes) {
-    val filter = getGeneFilter(segmentId, start, stop, biotypes);
+      List<String> biotypes, List<String> impactFilters) {
+    val filter = getGeneFilter(segmentId, start, stop, biotypes, impactFilters);
 
     val histogramAggs = AggregationBuilders.histogram("hf")
         .field("start")
@@ -141,8 +142,8 @@ public class BrowserRepository {
   }
 
   public SearchResponse getMutationHistogram(Long interval, String segmentId, Long start, Long stop,
-      List<String> consequenceTypes, List<String> projectFilters) {
-    val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters);
+      List<String> consequenceTypes, List<String> projectFilters, List<String> impactFilters) {
+    val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters, impactFilters);
 
     val histogramAggs = AggregationBuilders.histogram("hf")
         .field("chromosome_start")
@@ -170,13 +171,18 @@ public class BrowserRepository {
    * Builds a FilterBuilder with only the applicable filter values.
    */
   private static FilterBuilder getMutationFilter(String segmentId, Long start, Long stop, List<String> consequenceTypes,
-      List<String> projectFilters) {
+      List<String> projectFilters, List<String> impacts) {
 
     val filter = andFilter(
         termFilter("chromosome", segmentId),
         rangeFilter("chromosome_start").lte(stop),
         rangeFilter("chromosome_end").gte(start));
 
+    if (impacts != null && !impacts.isEmpty()) {
+      val impactFilter = getImpactFilterMutation(impacts);
+      filter.add(impactFilter);
+    }
+    
     if (consequenceTypes != null) {
       val consequenceFilter = getConsequenceFilter(consequenceTypes);
       filter.add(consequenceFilter);
@@ -193,7 +199,8 @@ public class BrowserRepository {
   /**
    * Builds a FilterBuilder with only the applicable filter values.
    */
-  private static FilterBuilder getGeneFilter(String segmentId, Long start, Long stop, List<String> biotypes) {
+  private static FilterBuilder getGeneFilter(String segmentId, Long start, Long stop,
+      List<String> biotypes, List<String> impacts) {
     val filter = andFilter(
         termFilter("chromosome", segmentId),
         rangeFilter("start").lte(stop),
@@ -202,6 +209,11 @@ public class BrowserRepository {
     if (biotypes != null) {
       val biotypeFilter = getBiotypeFilterBuilder(biotypes);
       filter.add(biotypeFilter);
+    }
+    
+    if (impacts != null && !impacts.isEmpty()) {
+      val impactFilter = getImpactFilterGene(impacts);
+      filter.add(impactFilter);
     }
 
     return filter;
@@ -256,5 +268,35 @@ public class BrowserRepository {
 
     return projectFilter;
   }
+  
+  /**
+   * Builds a FilterBuilder for Functional Impact.
+   * This filter is special as Transcripts are nested documents. 
+   */
+  private static FilterBuilder getImpactFilterMutation(List<String> impacts) {
+    val impactFilter = orFilter();
+    for (val impact: impacts) {
+      impactFilter.add(FilterBuilders.termFilter("transcript.functional_impact_prediction_summary", impact));
+    }
+    
+    val nested = nestedFilter("transcript", impactFilter);
+    return nested;
+  }
+  
+  /**
+   * Builds a FilterBuilder for Functional Impact.
+   * This filter is special as Transcripts are nested documents. 
+   */
+  private static FilterBuilder getImpactFilterGene(List<String> impacts) {
+    val impactFilter = orFilter();
+    for (val impact: impacts) {
+      impactFilter.add(FilterBuilders.termFilter("donor.ssm.consequence.functional_impact_prediction_summary", impact));
+    }
+    
+    val nested = nestedFilter("donor.ssm.consequence", impactFilter);
+    return nested;
+  }
+  
+  
 
 }

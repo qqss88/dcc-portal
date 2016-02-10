@@ -160,17 +160,15 @@ IcgcMutationTrack.prototype.draw = function () {
       start: this.region.start - this.svgCanvasOffset * 2,
       end: this.region.end + this.svgCanvasOffset * 2,
       histogram: this.histogram,
-      interval: this.interval
+      interval: this.interval,
+      functional_impact: this.functional_impact
     });
-    //this.invalidZoomText.setAttribute('visibility', 'hidden');
   } else {
-    //this.invalidZoomText.setAttribute('visibility', 'visible');
   }
 };
 
 IcgcMutationTrack.prototype.move = function (disp) {
   var _this = this;
-//    trackSvg.position = _this.region.center();
   _this.region.center();
   var pixelDisplacement = disp * _this.pixelBase;
   this.pixelPosition -= pixelDisplacement;
@@ -190,7 +188,8 @@ IcgcMutationTrack.prototype.move = function (disp) {
         start: parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset),
         end: this.svgCanvasLeftLimit,
         histogram: this.histogram,
-        interval: this.interval
+        interval: this.interval,
+        functional_impact: this.functional_impact
       });
       this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
     }
@@ -201,7 +200,8 @@ IcgcMutationTrack.prototype.move = function (disp) {
         start: this.svgCanvasRightLimit,
         end: parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset, 10),
         histogram: this.histogram,
-        interval: this.interval
+        interval: this.interval,
+        functional_impact: this.functional_impact
       });
       this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset, 10);
     }
@@ -241,24 +241,12 @@ IcgcMutationTrack.prototype._getFeaturesByChunks = function (response) {
         featureLastChunk = this.dataAdapter.featureCache._getChunk(feature.end);
         for (var f = featureFirstChunk; f <= featureLastChunk; f++) {
           var fkey = chromosome + ':' + f;
-          //console.log(fkey + dataType)
           if (this.chunksDisplayed[fkey + dataType] === true) {
             displayed = true;
             break;
           }
         }
         if (!displayed) {
-          //apply filter
-          // if(filters != null) {
-          //		var pass = true;
-          // 		for(filter in filters) {
-          // 			pass = pass && filters[filter](feature);
-          //			if(pass == false) {
-          //				break;
-          //			}
-          // 		}
-          //		if(pass) features.push(feature);
-          // } else {
           features.push(feature);
         }
       }
