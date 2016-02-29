@@ -39,11 +39,30 @@
             </li>
             <li class="t_subnav__items__box" data-ng-if="ProjectCtrl.mutationFacets.functionalImpact.total > 0">
                 <ul class="t_facets">
-                    <terms data-type="mutation"
-                           data-facet-name="functionalImpact"
-                           data-hide-count="true"
-                           data-label="Mutation Impact"
-                           data-facet="ProjectCtrl.mutationFacets.functionalImpact"></terms>
+                  <terms 
+                      data-type="mutation" 
+                      data-facet-name="functionalImpact" 
+                      data-hide-count="true" 
+                      data-label="Mutation Impact" 
+                      data-facet="ProjectCtrl.mutationFacets.functionalImpact"></terms>
+                    
+                  <terms 
+                      data-type="donor" 
+                      data-facet-name="studies" 
+                      data-label="Study" 
+                      data-hide-count="true" 
+                      data-missing-text="None" 
+                      data-facet="ProjectCtrl.donorFacets.studies"></terms>
+                      
+                  <terms 
+                      data-type="donor" 
+                      data-facet-name="gender" 
+                      data-capitalize="true"
+                      data-label="Gender" 
+                      data-hide-count="true" 
+                      data-missing-text="None" 
+                      data-collapsed="true"
+                      data-facet="ProjectCtrl.donorFacets.gender"></terms>
                 </ul>
             </li>
         </ul>

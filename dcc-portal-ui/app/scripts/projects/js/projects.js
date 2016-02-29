@@ -472,7 +472,9 @@
       // Get study facets for summay section
       Donors.getList(params).then(function(d) {
         _ctrl.studies = d.facets.studies.terms || [];
-
+        console.log(d.facets)
+        _ctrl.donorFacets = d.facets;
+        
         // Remove no-data term
         _.remove(_ctrl.studies, function(t) {
           return t.term === '_missing';

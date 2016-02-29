@@ -147,6 +147,10 @@
       Mutations.getList(params).then(function (d) {
         _ctrl.mutationFacets = d.facets;
       });
+      
+      Donors.getList(params).then(function (d) {
+        _ctrl.donorFacets = d.facets;
+      });
     }
 
 
