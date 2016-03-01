@@ -32,7 +32,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -184,17 +183,17 @@ public class BrowserRepository {
         rangeFilter("chromosome_end").gte(start));
 
     if (!impacts.isEmpty()) {
-      val impactFilter = getImpactFilterMutation(impacts);
+      val impactFilter = mutationImpactFilter(impacts);
       filter.add(impactFilter);
     }
 
     if (!projectIds.isEmpty()) {
-      val projectIdFilter = getProjectIdFilterMutation(projectIds);
+      val projectIdFilter = mutationProjectIdFilter(projectIds);
       filter.add(projectIdFilter);
     }
 
     if (!studies.isEmpty()) {
-      val studiesFilter = getStudyFilterMutation(studies);
+      val studiesFilter = mutationDonorStudyFilter(studies);
       filter.add(studiesFilter);
     }
 
@@ -222,17 +221,17 @@ public class BrowserRepository {
     filter.add(biotypeFilter);
 
     if (!projectIds.isEmpty()) {
-      val projectIdFilter = getProjectIdFilterGene(projectIds);
+      val projectIdFilter = geneProjectIdFilter(projectIds);
       filter.add(projectIdFilter);
     }
 
     if (!studies.isEmpty()) {
-      val studiesFilter = getStudyFilterGene(studies);
+      val studiesFilter = donorStudyFilter(studies);
       filter.add(studiesFilter);
     }
 
     if (!impacts.isEmpty()) {
-      val impactFilter = getImpactFilterGene(impacts);
+      val impactFilter = donorImpactFilter(impacts);
       filter.add(impactFilter);
     }
 
@@ -271,7 +270,7 @@ public class BrowserRepository {
   private static FilterBuilder getConsequenceFilter(List<String> consequenceTypes) {
     val consequenceFilter = orFilter();
     for (val consequenceType : consequenceTypes) {
-      consequenceFilter.add(FilterBuilders.termFilter("transcript.consequence.consequence_type", consequenceType));
+      consequenceFilter.add(termFilter("transcript.consequence.consequence_type", consequenceType));
     }
 
     return consequenceFilter;
@@ -283,7 +282,7 @@ public class BrowserRepository {
   private static FilterBuilder getProjectFilter(List<String> projects) {
     val projectFilter = orFilter();
     for (val project : projects) {
-      projectFilter.add(FilterBuilders.termFilter("ssm_occurrence.project.project_name", project));
+      projectFilter.add(termFilter("ssm_occurrence.project.project_name", project));
     }
 
     return projectFilter;
@@ -292,10 +291,10 @@ public class BrowserRepository {
   /**
    * Builds a FilterBuilder for Functional Impact. This filter is special as Transcripts are nested documents.
    */
-  private static FilterBuilder getImpactFilterMutation(List<String> impacts) {
+  private static FilterBuilder mutationImpactFilter(List<String> impacts) {
     val impactFilter = orFilter();
     for (val impact : impacts) {
-      impactFilter.add(FilterBuilders.termFilter("transcript.functional_impact_prediction_summary", impact));
+      impactFilter.add(termFilter("transcript.functional_impact_prediction_summary", impact));
     }
 
     val nested = nestedFilter("transcript", impactFilter);
@@ -305,10 +304,10 @@ public class BrowserRepository {
   /**
    * Builds a FilterBuilder for Functional Impact. This filter is special as Transcripts are nested documents.
    */
-  private static FilterBuilder getImpactFilterGene(List<String> impacts) {
+  private static FilterBuilder donorImpactFilter(List<String> impacts) {
     val impactFilter = orFilter();
     for (val impact : impacts) {
-      impactFilter.add(FilterBuilders.termFilter("donor.ssm.consequence.functional_impact_prediction_summary", impact));
+      impactFilter.add(termFilter("donor.ssm.consequence.functional_impact_prediction_summary", impact));
     }
 
     val nested = nestedFilter("donor.ssm.consequence", impactFilter);
@@ -319,10 +318,10 @@ public class BrowserRepository {
    * Builds a FilterBuilder for ProjectId. This filter is for Mutations. SSM is a nested document, so a nested filter
    * builder is created.
    */
-  private static FilterBuilder getProjectIdFilterMutation(List<String> projectIds) {
+  private static FilterBuilder mutationProjectIdFilter(List<String> projectIds) {
     val projectIdFilter = orFilter();
     for (val id : projectIds) {
-      projectIdFilter.add(FilterBuilders.termFilter("ssm_occurrence.project._project_id", id));
+      projectIdFilter.add(termFilter("ssm_occurrence.project._project_id", id));
     }
 
     val nested = nestedFilter("ssm_occurrence", projectIdFilter);
@@ -333,10 +332,10 @@ public class BrowserRepository {
    * Builds a FilterBuilder for ProjectId. This filter is for Genes. Donor is a nested document, so a nested filter
    * builder is created.
    */
-  private static FilterBuilder getProjectIdFilterGene(List<String> projectIds) {
+  private static FilterBuilder geneProjectIdFilter(List<String> projectIds) {
     val projectIdFilter = orFilter();
     for (val id : projectIds) {
-      projectIdFilter.add(FilterBuilders.termFilter("donor._project_id", id));
+      projectIdFilter.add(termFilter("donor._project_id", id));
     }
 
     val nested = nestedFilter("donor", projectIdFilter);
@@ -347,13 +346,13 @@ public class BrowserRepository {
    * Builds a FilterBuilder for Studies. This filter is for Mutations. SSM is a nested document, so a nested filter
    * builder is created.
    */
-  private static FilterBuilder getStudyFilterMutation(List<String> studies) {
-    val projectIdFilter = orFilter();
+  private static FilterBuilder mutationDonorStudyFilter(List<String> studies) {
+    val studyFilter = orFilter();
     for (val study : studies) {
-      projectIdFilter.add(FilterBuilders.termFilter("ssm_occurrence.donor._summary._studies", study));
+      studyFilter.add(termFilter("ssm_occurrence.donor._summary._studies", study));
     }
 
-    val nested = nestedFilter("ssm_occurrence", projectIdFilter);
+    val nested = nestedFilter("ssm_occurrence", studyFilter);
     return nested;
   }
 
@@ -361,10 +360,10 @@ public class BrowserRepository {
    * Builds a FilterBuilder for Studies. This filter is for Genes. Donor is a nested document, so a nested filter
    * builder is created.
    */
-  private static FilterBuilder getStudyFilterGene(List<String> studies) {
+  private static FilterBuilder donorStudyFilter(List<String> studies) {
     val projectIdFilter = orFilter();
     for (val study : studies) {
-      projectIdFilter.add(FilterBuilders.termFilter("donor._summary._studies", study));
+      projectIdFilter.add(termFilter("donor._summary._studies", study));
     }
 
     val nested = nestedFilter("donor", projectIdFilter);
