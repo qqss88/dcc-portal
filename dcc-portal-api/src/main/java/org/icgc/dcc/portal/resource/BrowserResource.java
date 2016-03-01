@@ -52,6 +52,8 @@ public class BrowserResource {
     private static final String BIOTYPE = "biotype";
     private static final String CONSEQUENCE_TYPE = "consequence_type";
     private static final String FUNCTIONAL_IMPACT = "functional_impact";
+    private static final String PROJECTS = "projects";
+    private static final String STUDIES = "studies";
   }
 
   /**
@@ -69,8 +71,11 @@ public class BrowserResource {
       @QueryParam(ParameterNames.RESOURCE) String resource,
       @QueryParam(ParameterNames.BIOTYPE) String bioType,
       @QueryParam(ParameterNames.CONSEQUENCE_TYPE) String consequenceType,
-      @QueryParam(ParameterNames.FUNCTIONAL_IMPACT) String functionalImpact) {
-    return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType, functionalImpact);
+      @QueryParam(ParameterNames.FUNCTIONAL_IMPACT) String functionalImpact,
+      @QueryParam(ParameterNames.PROJECTS) String projects,
+      @QueryParam(ParameterNames.STUDIES) String studies) {
+    return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType, functionalImpact,
+        projects, studies);
   }
 
   /**
@@ -88,8 +93,11 @@ public class BrowserResource {
       @QueryParam(ParameterNames.RESOURCE) String resource,
       @QueryParam(ParameterNames.BIOTYPE) String bioType,
       @QueryParam(ParameterNames.CONSEQUENCE_TYPE) String consequenceType,
-      @QueryParam(ParameterNames.FUNCTIONAL_IMPACT) String functionalImpact) {
-    return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType, functionalImpact);
+      @QueryParam(ParameterNames.FUNCTIONAL_IMPACT) String functionalImpact,
+      @QueryParam(ParameterNames.PROJECTS) String projects,
+      @QueryParam(ParameterNames.STUDIES) String studies) {
+    return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType, functionalImpact,
+        projects, studies);
   }
 
   /**
@@ -97,7 +105,8 @@ public class BrowserResource {
    */
   @SneakyThrows
   String getData(String segment, String histogram, String dataType,
-      String interval, String resource, String bioType, String consequenceType, String functionalImpact) {
+      String interval, String resource, String bioType, String consequenceType, String functionalImpact,
+      String projects, String studies) {
 
     checkRequest(isBlank(resource), "'resource' parameter is required but missing.");
 
@@ -118,6 +127,8 @@ public class BrowserResource {
     queryMap.put(ParameterNames.BIOTYPE, bioType);
     queryMap.put(ParameterNames.CONSEQUENCE_TYPE, consequenceType);
     queryMap.put(ParameterNames.FUNCTIONAL_IMPACT, functionalImpact);
+    queryMap.put(ParameterNames.PROJECTS, projects);
+    queryMap.put(ParameterNames.STUDIES, studies);
 
     return MAPPER
         .writeValueAsString(isHistogram ? browserService.getHistogram(queryMap) : browserService.getRecords(queryMap));

@@ -163,7 +163,9 @@ IcgcGeneTrack.prototype.draw = function () {
       histogramMax: this.histogramMax,
       interval: this.interval,
       transcript: this.transcript,
-      functional_impact: this.functional_impact
+      functional_impact: this.functional_impact,
+      projects: this.projects,
+      studies: this.studies
     });
 
     //this.invalidZoomText.setAttribute('visibility', 'hidden');
@@ -197,7 +199,9 @@ IcgcGeneTrack.prototype.move = function (disp) {
         histogram: this.histogram,
         interval: this.interval,
         transcript: this.transcript,
-        functional_impact: this.functional_impact
+        functional_impact: this.functional_impact,
+        projects: this.projects,
+        studies: this.studies
       });
       this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset, 10);
     }
@@ -210,7 +214,9 @@ IcgcGeneTrack.prototype.move = function (disp) {
         histogram: this.histogram,
         interval: this.interval,
         transcript: this.transcript,
-        functional_impact: this.functional_impact
+        functional_impact: this.functional_impact,
+        projects: this.projects,
+        studies: this.studies
       });
       this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset, 10);
     }

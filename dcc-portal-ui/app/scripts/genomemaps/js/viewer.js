@@ -616,6 +616,8 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           height: 100,
           autoHeight: true,
           functional_impact: _.get(LocationService.filters(), 'mutation.functionalImpact.is', ''),
+          projects: _.get(LocationService.filters(), 'donor.projectId.is', ''),
+          studies: _.get(LocationService.filters(), 'donor.studies.is', ''),
           renderer: icgcGeneOverviewRenderer,
           dataAdapter: new IcgcGeneAdapter({
             resource: 'gene',
@@ -635,6 +637,8 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           minTranscriptRegionSize: 300000,
           height: 100,
           functional_impact: _.get(LocationService.filters(), 'mutation.functionalImpact.is', ''),
+          projects: _.get(LocationService.filters(), 'donor.projectId.is', ''),
+          studies: _.get(LocationService.filters(), 'donor.studies.is', ''),
           renderer: new GeneRenderer({
           tooltipContainerID: '#genomic',
             handlers: {
@@ -665,6 +669,8 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           maxLabelRegionSize: 3000,
           height: 100,
           functional_impact: _.get(LocationService.filters(), 'mutation.functionalImpact.is', ''),
+          projects: _.get(LocationService.filters(), 'donor.projectId.is', ''),
+          studies: _.get(LocationService.filters(), 'donor.studies.is', ''),
           renderer: new FeatureRenderer({
             tooltipContainerID: '#genomic',
             label: function (f) {
@@ -739,6 +745,10 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
             'mutation.functionalImpact.is', '');
           tracks.icgcMutationsTrack.functional_impact = _.get(LocationService.filters(),
             'mutation.functionalImpact.not', tracks.icgcMutationsTrack.functional_impact);
+            
+          tracks.icgcMutationsTrack.projects = _.get(LocationService.filters(), 'donor.projectId.is', '');
+          tracks.icgcMutationsTrack.studies = _.get(LocationService.filters(), 'donor.studies.is', '');
+      
           tracks.icgcMutationsTrack.dataAdapter.clearData();
           tracks.icgcMutationsTrack.draw();
           
@@ -746,6 +756,10 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
             'mutation.functionalImpact.is', '');
           tracks.icgcGeneTrack.functional_impact = _.get(LocationService.filters(),
             'mutation.functionalImpact.not', tracks.icgcMutationsTrack.functional_impact);
+            
+          tracks.icgcGeneTrack.projects = _.get(LocationService.filters(), 'donor.projectId.is', '');
+          tracks.icgcGeneTrack.studies = _.get(LocationService.filters(), 'donor.studies.is', '');
+            
           tracks.icgcGeneTrack.dataAdapter.clearData();
           tracks.icgcGeneTrack.draw();
         });

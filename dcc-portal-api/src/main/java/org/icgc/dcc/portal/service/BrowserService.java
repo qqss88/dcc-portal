@@ -107,12 +107,17 @@ public class BrowserService {
 
     val projectFilterValue = queryMap.get("consequence_type");
     val projectFilters = parseList(projectFilterValue);
-    
+
     val impactFilterValue = queryMap.get("functional_impact");
     val impactFilters = parseList(impactFilterValue);
 
-    val searchResponse = browserRepository.getMutation(segmentId, start, stop, consequenceTypes, projectFilters, impactFilters);
-    
+    val projectIds = parseList(queryMap.get("projects"));
+    val studies = parseList(queryMap.get("studies"));
+
+    val searchResponse =
+        browserRepository.getMutation(segmentId, start, stop, consequenceTypes, projectFilters, impactFilters,
+            projectIds, studies);
+
     return BrowserParsers.parseMutations(segmentId, start, stop, consequenceTypes, projectFilters, searchResponse);
   }
 
@@ -127,12 +132,15 @@ public class BrowserService {
     val impactFilterValue = queryMap.get("functional_impact");
     val impactFilters = parseList(impactFilterValue);
 
+    val projectIds = parseList(queryMap.get("projects"));
+    val studies = parseList(queryMap.get("studies"));
+
     val intervalValue = queryMap.get("interval");
     val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : 0;
 
     val searchResponse =
         browserRepository.getMutationHistogram(interval, segmentId, start, stop, consequenceTypes, projectFilters,
-            impactFilters);
+            impactFilters, projectIds, studies);
     return BrowserParsers.parseHistogramMutation(segmentId, start, stop, interval, consequenceTypes, projectFilters,
         searchResponse);
   }
@@ -140,27 +148,35 @@ public class BrowserService {
   private List<Object> getSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
     val biotypeValue = queryMap.get("biotype");
     val biotypes = parseList(biotypeValue);
-    
+
     val impactFilterValue = queryMap.get("functional_impact");
     val impactFilters = parseList(impactFilterValue);
 
+    val projectIds = parseList(queryMap.get("projects"));
+    val studies = parseList(queryMap.get("studies"));
+
     val withTranscripts = nullToEmpty(queryMap.get("dataType")).equals("withTranscripts");
 
-    val searchResponse = browserRepository.getGene(segmentId, start, stop, biotypes, withTranscripts, impactFilters);
+    val searchResponse = browserRepository.getGene(segmentId, start, stop, biotypes, withTranscripts, impactFilters,
+        projectIds, studies);
     return BrowserParsers.parseGenes(segmentId, start, stop, biotypes, withTranscripts, searchResponse);
   }
 
   private List<Object> getHistogramSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
     val biotypeValue = queryMap.get("biotype");
     val biotypes = parseList(biotypeValue);
-    
+
     val impactFilterValue = queryMap.get("functional_impact");
     val impactFilters = parseList(impactFilterValue);
+
+    val projectIds = parseList(queryMap.get("projects"));
+    val studies = parseList(queryMap.get("studies"));
 
     val intervalValue = queryMap.get("interval");
     val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : 0;
 
-    val searchResponse = browserRepository.getGeneHistogram(interval, segmentId, start, stop, biotypes, impactFilters);
+    val searchResponse = browserRepository.getGeneHistogram(interval, segmentId, start, stop, biotypes, impactFilters,
+        projectIds, studies);
     return BrowserParsers.parseHistogramGene(segmentId, start, stop, interval, biotypes, searchResponse);
   }
 

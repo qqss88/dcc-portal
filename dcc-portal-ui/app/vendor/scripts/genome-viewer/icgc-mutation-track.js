@@ -161,7 +161,9 @@ IcgcMutationTrack.prototype.draw = function () {
       end: this.region.end + this.svgCanvasOffset * 2,
       histogram: this.histogram,
       interval: this.interval,
-      functional_impact: this.functional_impact
+      functional_impact: this.functional_impact,
+      projects: this.projects,
+      studies: this.studies
     });
   } else {
   }
@@ -189,7 +191,9 @@ IcgcMutationTrack.prototype.move = function (disp) {
         end: this.svgCanvasLeftLimit,
         histogram: this.histogram,
         interval: this.interval,
-        functional_impact: this.functional_impact
+        functional_impact: this.functional_impact,
+        projects: this.projects,
+        studies: this.studies
       });
       this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
     }
@@ -201,7 +205,9 @@ IcgcMutationTrack.prototype.move = function (disp) {
         end: parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset, 10),
         histogram: this.histogram,
         interval: this.interval,
-        functional_impact: this.functional_impact
+        functional_impact: this.functional_impact,
+        projects: this.projects,
+        studies: this.studies
       });
       this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit + this.svgCanvasOffset, 10);
     }
