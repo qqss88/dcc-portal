@@ -1,0 +1,96 @@
+<div id="showData">
+
+  <div id="page">
+    <section id="banner" style="clear: both">
+      
+      <div id="banner-middle">
+        <div id="vcf_selection">
+          <div id="reference_selected"></div>
+          <div id="region_selected"></div>
+        </div>
+      </div>
+
+      <div id="total-reads">
+        <div>
+          <span id="value"> 0</span>
+        </div>
+        <div style="padding: 4px">
+          <div id="number">&nbsp;</div>
+          <div id="label">variants sampled</div>
+        </div>
+        <div style="padding-top: 10px; ">
+          <i class="icon-cw" id="sample-more-button" title="Sample More" onClick="increaseSampling()" style="width: 20px">
+          </i>
+        </div>
+
+      </div>
+
+    </section>
+
+    <section id="top">
+
+
+      <div id="chromosome-picker" class="panel">
+        <div class="title">References</div>
+        <div class="samplingLoader big">Initializing<img src="styles/images/loading_dots.gif" /></div>
+        <div id="primary-references">
+        </div>
+        <div id="other-references">
+          <label>Other references</label>
+          <select id="other-references-dropdown">
+            <option value=""></option>
+          </select>
+        </div>
+      </div>
+      <div id="variant-density-panel" class="panel">
+        <div class="title">Variant Density</div>
+        <span class="svg-alt hint">(drag bottom chart to select region)</span>
+        <div class="samplingLoader big">Initializing<img src="styles/images/loading_dots.gif" /></div>
+        <div id="variant-density"></div>
+        <div id="variant-density-vf"></div>
+        <div id="variant-density-ref-vf"></div>
+      </div>
+
+    </section>
+
+    <section id="middle">
+      <div id="tstv-ratio" class="panel">
+        <div class="title">TSTV Ratio</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <div id="ratio-panel" class="svg-alt">
+        </div>
+        <div id="ratio-value" class="svg-alt"></div>
+      </div>
+
+      <div id="allele-freq" class="panel">
+        <div class="title">Allele Frequency Spectrum</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg id="allele-freq-histogram" />
+      </div>
+      <div id="mut-spectrum" class="panel">
+        <div class="title">Base Changes</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+      </div>
+    </section>
+
+    <section id="bottom">
+      <div id="var-type" class="panel">
+        <div class="title">Variant Types</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+      </div>
+
+      <div id="indel-length" class="panel">
+        <div class="title">Insertion &amp; Deletion Lengths</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg id="indel-length-histogram" />
+      </div>
+
+      <div id="qual-distribution" class="panel">
+        <div class="title">Variant Quality</div>
+        <div class="samplingLoader">Sampling <img src="styles/images/loading_dots.gif" /></div>
+        <svg id="qual-distribution-histogram" />
+      </div>
+    </section>
+
+  </div>
+</div>

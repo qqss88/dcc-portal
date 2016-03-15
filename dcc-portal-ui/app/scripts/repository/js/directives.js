@@ -15,12 +15,12 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function ($) {
+(function($) {
   'use strict';
 
   var module = angular.module('icgc.repository.directives', ['cfp.loadingBar']);
 
-  module.directive('bamstats', function ($timeout, cfpLoadingBar) {
+  module.directive('bamstats', function($timeout, cfpLoadingBar) {
     return {
       replace: true,
       restrict: 'AE',
@@ -30,7 +30,7 @@
         bamName: '='
       },
       templateUrl: 'scripts/repository/views/bamiobio.html',
-      link: function (scope, element) {
+      link: function(scope, element) {
 
         // iobio team wanted analytics of when their app is being loaded
         if (iobioGoogleAnalytics !== undefined) {
@@ -74,11 +74,11 @@
         // Setup read coverage histogram chart
         var readCoverageChart = histogramViewFinderD3().width(width).height(height);
 
-        readCoverageChart.yAxis().tickFormat(function (tickValue) {
+        readCoverageChart.yAxis().tickFormat(function(tickValue) {
           return tickValue * 100 + '%';
         });
 
-        scope.toggleOutliers = function () {
+        scope.toggleOutliers = function() {
           scope.showOutliers = !scope.showOutliers;
           var histDataObject = sampleStats[scope.lengthChartDataId],
             histData = pivot(histDataObject),
@@ -90,8 +90,8 @@
         };
 
         // Highlights the selected chromosome button
-        scope.highlightSelectedSeq = function (chrId) {
-          scope.chromosomes.forEach(function (chr) {
+        scope.highlightSelectedSeq = function(chrId) {
+          scope.chromosomes.forEach(function(chr) {
             if (chr.id === chrId) {
               chr.selected = true;
             } else {
@@ -101,7 +101,7 @@
           scope.setSelectedSeq(chrId);
         };
 
-        scope.setSelectedSeq = function (selectedChrId, start, end) {
+        scope.setSelectedSeq = function(selectedChrId, start, end) {
           scope.chromosomeId = selectedChrId;
           charts.depthChart(bam.readDepth[scope.chromosomeId]);
           // Reset brush
@@ -124,7 +124,7 @@
           }
         };
 
-        scope.sampleMore = function () {
+        scope.sampleMore = function() {
           if (sampleMultiplier >= sampleMultiplierLimit) {
             window.alert('You\'ve reached the sampling limit');
             return;
@@ -145,7 +145,7 @@
           goSampling(options);
         };
 
-        scope.toggleChart = function (event, chartId) {
+        scope.toggleChart = function(event, chartId) {
           var elem = event.target;
           if ($(elem).hasClass('selected')) {
             return;
@@ -170,13 +170,13 @@
           charts[chartId](selection);
         };
 
-        scope.cancel = function () {
+        scope.cancel = function() {
           scope.$parent.cancel();
         };
 
         function goBam() {
           // Get read depth
-          bam.estimateBaiReadDepth(function (id) {
+          bam.estimateBaiReadDepth(function(id) {
             scope.chromosomes.push({
               id: id,
               selected: false
@@ -191,7 +191,7 @@
               $('.samplingLoader').css('display', 'block');
 
               // Update depth distribution
-              charts.depthChart.on('brushend', function (x, brush) {
+              charts.depthChart.on('brushend', function(x, brush) {
                 var options = {
                   sequenceNames: [scope.chromosomeId]
                 };
@@ -214,7 +214,7 @@
 
         function pivot(hist) {
           var histData = Object.keys(hist).map(
-            function (key) {
+            function(key) {
               return [+key, +hist[key]];
             });
           return histData;
@@ -249,7 +249,7 @@
           // Add default options
           options = $.extend({
             bed: window.bed,
-            onEnd: function () {
+            onEnd: function() {
               cfpLoadingBar.complete();
             }
           }, options);
@@ -261,7 +261,7 @@
           // Sets progress bar to 0 because of existing progress bar on page
           cfpLoadingBar.set(0);
           // Update selected stats
-          bam.sampleStats(function (data, seq) {
+          bam.sampleStats(function(data, seq) {
             if (scope.chromosomeId !== seq) {
               return;
             }
@@ -277,7 +277,7 @@
               percentDone = Math.round(((data.last_read_position - options.start) / length) * 100) / 100;
             } else {
               length = bam.header.sq.reduce(
-                function (prev, curr) {
+                function(prev, curr) {
                   if (prev) {
                     return prev;
                   }
@@ -301,9 +301,9 @@
           var pie = d3.layout.pie().sort(null);
           // Update percent charts
           var keys = ['mapped_reads', 'proper_pairs',
-                      'forward_strands', 'singletons', 'both_mates_mapped',
-                      'duplicates'];
-          keys.forEach(function (key) {
+            'forward_strands', 'singletons', 'both_mates_mapped',
+            'duplicates'];
+          keys.forEach(function(key) {
             var stat = stats[key];
             var data = [stat, stats.total_reads - stat];
             var arc = d3.select('#' + key + ' svg').selectAll('.arc')
@@ -320,11 +320,11 @@
           // Update read coverage histogram
           var histData, selection;
           histData = Object.keys(histograms.coverage_hist).filter(
-            function (i) {
+            function(i) {
               return histograms.coverage_hist[i] !== '0';
-            }).map(function (key) {
-            return [+key, +histograms.coverage_hist[key]];
-          });
+            }).map(function(key) {
+              return [+key, +histograms.coverage_hist[key]];
+            });
 
           selection = d3.select('#read-coverage-distribution-chart').datum(histData);
           readCoverageChart(selection);
@@ -339,11 +339,11 @@
           // Update read length distribution
           if (scope.lengthChartDataId === 'frag_hist') {
             histData = Object.keys(histograms.frag_hist).filter(
-              function (i) {
+              function(i) {
                 return histograms.frag_hist[i] !== '0';
-              }).map(function (key) {
-              return [+key, +histograms.frag_hist[key]];
-            });
+              }).map(function(key) {
+                return [+key, +histograms.frag_hist[key]];
+              });
           } else {
             histData = pivot(histograms.length_hist);
           }
@@ -389,7 +389,7 @@
         scope.lengthChartDataId = 'frag_hist';
         scope.qualityChartDataId = 'mapq_hist';
 
-        scope.$on('$destroy', function () {
+        scope.$on('$destroy', function() {
           if (bam.sampleClient !== undefined) {
             bam.sampleClient.close(1000);
           }
@@ -399,4 +399,83 @@
       }
     };
   });
+
+  module.directive('vcfstats', function() {
+    return {
+      replace: true,
+      restrict: 'AE',
+      scope: {
+        vcfId: '=',
+        onModal: '=',
+        vcfName: '='
+      },
+      templateUrl: 'scripts/repository/views/vcfiobio.html',
+      link: function(scope, element) {
+
+        var vcfiobio;
+        var chromosomeChart;
+        var variantDensityChart;
+        var variantDensityVF;
+        var variantDensityRefVF;
+
+        var tstvChart;
+        var alleleFreqChart;
+        var mutSpectrumChart;
+        var varTypeChart;
+        var qualDistributionChart;
+        var indelLengthChart;
+
+        var chromosomeIndex = 0;
+        var regionStart = null;
+        var regionEnd = null;
+        var afData = null;
+
+        var densityOptions = {
+          removeSpikes: false,
+          maxPoints: 5000,
+          epsilonRDP: null
+        }
+
+        var densityRegionOptions = {
+          removeSpikes: false,
+          maxPoints: 1000,
+          epsilonRDP: null
+        }
+
+        var samplingMultiplierLimit = 4;
+
+        var statsOptions = {
+          samplingMultiplier: 1,
+          binSize: 80000,
+          binNumber: 50,
+          start: 1
+        };
+
+        var colorSchemeMS = {
+          A: [1, 2, 3],
+          G: [0, 2, 3],
+          C: [0, 1, 3],
+          T: [0, 1, 2]
+        };
+        var colorMS = [
+          "#8ca252",
+          "#e7ba52",
+          "#1f77b4",
+          "#ad494a"
+        ];
+        var lookupNucleotide = {
+          A: ["G", "C", "T"],
+          G: ["A", "C", "T"],
+          C: ["A", "G", "T"],
+          T: ["A", "G", "C"]
+        };
+
+        var colorListVarType = ["#2171b5", "#eff3ff", "#bdd7e7", "#6baed6",];
+
+
+        vcfiobio = new Vcfiobio();
+      }
+    };
+  });
+
 })(jQuery);
