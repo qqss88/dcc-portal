@@ -24,6 +24,16 @@ groupedBarD3 = function module() {
   var showBarLabel = true;
   var categories = null;
 
+  if (d3.select('#iobio-tooltip')[0][0] !== null) {
+    var div = d3.select('#iobio-tooltip');
+  } else {
+    var div = d3.select('body')
+      .append("div")
+      .attr('id', 'iobio-tooltip')
+      .style('left', '0px')
+      .style('top', '0px')
+      .style('opacity', 0);
+  }
 
   /*
   * The default function for getting the category from the data.

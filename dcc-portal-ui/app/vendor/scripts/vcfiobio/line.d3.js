@@ -29,8 +29,16 @@ lineD3 = function module() {
 
   var tooltipSelector = ".tooltip";
 
-
-
+  if (d3.select('#iobio-tooltip')[0][0] !== null) {
+    var div = d3.select('#iobio-tooltip');
+  } else {
+    var div = d3.select('body')
+      .append("div")
+      .attr('id', 'iobio-tooltip')
+      .style('left', '0px')
+      .style('top', '0px')
+      .style('opacity', 0);
+  }
 
   function exports(selection, cb) {
 
