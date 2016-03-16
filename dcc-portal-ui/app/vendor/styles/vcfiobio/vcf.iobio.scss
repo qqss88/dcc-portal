@@ -384,7 +384,7 @@
 
 
   #reference_selected {
-      webkit-flex: 0 0  auto;
+      -webkit-flex: 0 0  auto;
               flex: 0 0 auto;
       -webkit-order: 1;
               order: 1;
@@ -393,7 +393,7 @@
   }
 
   #report-problem-screen-capture #reference_selected {
-      webkit-flex: 0 0  auto;
+      -webkit-flex: 0 0  auto;
               flex: 0 0 auto;
       -webkit-order: 1;
               order: 1;
@@ -402,7 +402,7 @@
   }
 
   #region_selected {
-      webkit-flex: 0 0  auto;
+      -webkit-flex: 0 0  auto;
               flex: 0 0 auto;
       -webkit-order: 2;
               order: 2;
@@ -620,7 +620,7 @@
           margin-top: -10px;
       }
 
-      #report-problem: {
+      #report-problem {
           margin-top: 10px;
       }
 
