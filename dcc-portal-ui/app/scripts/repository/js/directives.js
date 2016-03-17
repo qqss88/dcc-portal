@@ -410,7 +410,7 @@
         vcfName: '='
       },
       templateUrl: 'scripts/repository/views/vcfiobio.html',
-      link: function(scope, element) {
+      link: function(scope) {
 
         var vcfiobio;
         var chromosomeChart;
@@ -447,7 +447,6 @@
           maxPoints: 1000,
           epsilonRDP: null
         };
-        var samplingMultiplierLimit = 4;
         var statsOptions = {
           samplingMultiplier: 1,
           binSize: 80000,
@@ -572,8 +571,8 @@
             .width(355)
             .height(120)
             .margin({ left: 45, right: 0, top: 10, bottom: 30 })
-            .xValue(function(d, i) { return d[0]; })
-            .yValue(function(d, i) { return Math.log(d[1]); })
+            .xValue(function(d) { return d[0]; })
+            .yValue(function(d) { return Math.log(d[1]); })
             .yAxisLabel('log(frequency)');
 
           alleleFreqChart.formatXTick(function(d) {
@@ -645,10 +644,11 @@
             .xValue(function(d) { return d[0]; })
             .yValue(function(d) { return d[1]; })
             .xAxisLabel('Variant Quality Score');
-          qualDistributionChart.tooltipText(function(d, i) {
+          qualDistributionChart.tooltipText(function(d) {
             return d3.round(d[1]) + ' variants with VQ of ' + d[0];
           });
-
+          
+          console.log(scope.vcfId);
           _loadVcfFromUrl('http://s3.amazonaws.com/vcf.files/ExAC.r0.2.sites.vep.vcf.gz');
         }
 
@@ -687,7 +687,7 @@
               .data(otherRefData)
               .enter()
               .append('option')
-              .attr('value', function(d, i) { return d.idx; })
+              .attr('value', function(d) { return d.idx; })
               .text(function(d) { return d.name; });
 
             d3.select('#other-references').style('display', 'block');
@@ -710,7 +710,7 @@
           loadStats(chromosomeIndex);
         }
 
-        function loadGenomeVariantDensityData(i) {
+        function loadGenomeVariantDensityData() {
           d3.select('#variant-density-vf').style('display', 'none');
           d3.select('#variant-density-ref-vf').style('display', 'block');
           d3.selectAll('section#top .svg-alt').style('visibility', 'visible');
@@ -899,7 +899,7 @@
           loadStats(chromosomeIndex);
         }
 
-        function loadVariantDensityData(ref, i) {
+        function loadVariantDensityData(ref) {
           d3.select('#variant-density-vf').style('display', 'block');
           d3.select('#variant-density-ref-vf').style('display', 'none');
           d3.selectAll('section#top .svg-alt').style('visibility', 'visible');
