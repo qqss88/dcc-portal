@@ -93,21 +93,15 @@ Vcfiobio = function() {
         "Y":   +59373566
       };
 
-  //var vcfstatsAliveServer    = "ws://localhost:7070";
-  //var tabixServer            = "ws://localhost:7090";
-  //var vcfReadDeptherServer   = "ws://localhost:7062";
-  //var emailServer            = "ws://localhost:7068";
-  //var catInputServer         = "ws://localhost:7063";
-
-  // var vcfstatsAliveServer    = "wss://vcfstatsalive.iobio.io";
-  // var tabixServer            = "wss://tabix.iobio.io";
-  // var vcfReadDeptherServer   = "wss://vcfreaddepther.iobio.io";
-  // var emailServer            = "ws://localhost:7068";
-  // var catInputServer         = "ws://localhost:7063";
-
+  /*
   var vcfstatsAliveServer    = "wss://services.iobio.io/vcfstatsalive/";
   var tabixServer            = "wss://services.iobio.io/tabix/";
   var vcfReadDeptherServer   = "wss://services.iobio.io/vcfdepther/";
+  */
+  
+  var currentHost = '';
+  var vcfstatsAliveServer    = "ws://" + currentHost + "/vcfstatsalive/";
+  var vcfReadDeptherServer   = "ws://" + currentHost + "/vcfdepther/";
 
   var vcfURL;
   var vcfReader;
@@ -132,7 +126,7 @@ Vcfiobio = function() {
     sourceType = SOURCE_TYPE_URL;
 
     var client = BinaryClient(vcfReadDeptherServer);
-    var url = encodeURI( vcfReadDeptherServer + '?cmd= -i ' + vcfURL + ".tbi");
+    var url = encodeURI( vcfReadDeptherServer + '?cmd=' + vcfURL);
 
     client.on('open', function(stream){
       var stream = client.createStream({event:'run', params : {'url':url}});
@@ -326,14 +320,23 @@ Vcfiobio = function() {
     // This is the tabix url.  Here we send the regions as arguments.  tabix
     // output (vcf header+records for the regions) will be piped
     // to the vcfstatsalive server.
+    
+    var regStr = JSON.stringify((regions).map(function(d) {
+      return {
+        start: d.start,
+        end: d.end,
+        chr: d.name
+      };
+    }));
+
     var regionStr = "";
     regions.forEach(function(region) { 
       regionStr += " " + region.name + ":" + region.start + "-" + region.end 
     });
-    var tabixUrl = tabixServer + "?cmd=-h " + vcfURL + regionStr + "&encoding=binary";
+    //var tabixUrl = tabixServer + "?cmd=-h " + vcfURL + regionStr + "&encoding=binary";
 
     // This is the full url for vcfstatsalive server which is piped its input from tabixserver
-    var url = encodeURI( vcfstatsAliveServer + '?cmd=-u 1000 ' + encodeURIComponent(tabixUrl));
+    var url = encodeURI( vcfstatsAliveServer + '?cmd=\'' + regStr + '\' ' + vcfURL);
 
     // Connect to the vcfstatsaliveserver    
     var client = BinaryClient(vcfstatsAliveServer);

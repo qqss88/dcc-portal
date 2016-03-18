@@ -471,7 +471,7 @@
           C: ['A', 'G', 'T'],
           T: ['A', 'G', 'C']
         };
-
+        var	samplingMultiplierLimit = 4;
         var colorListVarType = ['#2171b5', '#eff3ff', '#bdd7e7', '#6baed6'];
 
 
@@ -649,7 +649,8 @@
           });
           
           console.log(scope.vcfId);
-          _loadVcfFromUrl('http://s3.amazonaws.com/vcf.files/ExAC.r0.2.sites.vep.vcf.gz');
+          //_loadVcfFromUrl('http://s3.amazonaws.com/vcf.files/ExAC.r0.2.sites.vep.vcf.gz');
+          _loadVcfFromUrl(scope.vcfId);
         }
 
         function _loadVcfFromUrl(url) {
@@ -959,6 +960,15 @@
           // Listen for finished event which is dispatched after line is drawn.  If chart has
           // transitions, event is dispatched after transitions have occurred.
           variantDensityChart.on('d3rendered', onVariantDensityChartRendered);
+        }
+
+        scope.increaseSampling = function() {
+          if (statsOptions.samplingMultiplier >= samplingMultiplierLimit) {
+            alert("You have reached the sampling limit");
+            return;
+          }
+          statsOptions.samplingMultiplier += 1;
+          loadStats(chromosomeIndex);
         }
 
         // GO!
