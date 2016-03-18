@@ -110,6 +110,8 @@ Vcfiobio = function() {
   var regionIndex = 0;
   var stream = null;
 
+  exports.sampleClient = undefined;
+
   exports.openVcfUrl = function(url) {
     sourceType = SOURCE_TYPE_URL;
     vcfURL = url;
@@ -332,14 +334,19 @@ Vcfiobio = function() {
     // This is the full url for vcfstatsalive server which is piped its input from tabixserver
     var url = encodeURI( vcfstatsAliveServer + '?cmd=\'' + regStr + '\' ' + vcfURL);
 
+    // Cleanup old connections
+    if (me.sampleClient !== undefined) {
+      me.sampleClient.close(1000);
+    }
+
     // Connect to the vcfstatsaliveserver    
-    var client = BinaryClient(vcfstatsAliveServer);
+    me.sampleClient = BinaryClient(vcfstatsAliveServer);
 
     var buffer = "";
-    client.on('open', function(stream){
+    me.sampleClient.on('open', function(stream){
 
         // Run the command
-        var stream = client.createStream({event:'run', params : {'url':url}});
+        var stream = me.sampleClient.createStream({event:'run', params : {'url':url}});
 
        // Listen for data to be streamed back to the client
         stream.on('data', function(datas, options) {

@@ -970,6 +970,12 @@
           statsOptions.samplingMultiplier += 1;
           loadStats(chromosomeIndex);
         }
+        
+        scope.$on('$destroy', function() {
+          if (bam.sampleClient !== undefined) {
+            vcfiobio.sampleClient.close(1000);
+          }
+        });
 
         // GO!
         init();
