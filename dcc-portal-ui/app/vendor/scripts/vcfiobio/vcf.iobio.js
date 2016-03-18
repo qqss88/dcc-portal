@@ -92,17 +92,11 @@ Vcfiobio = function() {
         "X":   +155270560,
         "Y":   +59373566
       };
-
-  /*
-  var vcfstatsAliveServer    = "wss://services.iobio.io/vcfstatsalive/";
-  var tabixServer            = "wss://services.iobio.io/tabix/";
-  var vcfReadDeptherServer   = "wss://services.iobio.io/vcfdepther/";
-  */
   
   var currentHost = '';
   var vcfstatsAliveServer    = "ws://" + currentHost + "/vcfstatsalive/";
   var vcfReadDeptherServer   = "ws://" + currentHost + "/vcfdepther/";
-
+  
   var vcfURL;
   var vcfReader;
   var vcfFile;
