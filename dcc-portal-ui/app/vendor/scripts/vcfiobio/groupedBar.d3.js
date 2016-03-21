@@ -117,6 +117,9 @@ groupedBarD3 = function module() {
       data.forEach(function(d) {
         d.values = categories.map(function(catName, i) {
           var valueObj = { category: category(d), name: catName, value: +d.values[i] };
+          if (isNaN(valueObj.value)) {
+            valueObj.value = 0;
+          }
           return valueObj;
         });
       });

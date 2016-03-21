@@ -100,6 +100,9 @@ function histogramD3VCF() {
 
       // Add the text label for the x axis
       //gEnter.selectAll("g.xaxis label")
+      if (isNaN(width)) {
+        width = 0;
+      }
       if (xAxisLabel) {
         gEnter.selectAll("g.x axis label").remove();
         gEnter.append("text")
@@ -129,12 +132,18 @@ function histogramD3VCF() {
 
       // Add avg line and text
       var half = x(x.domain()[0] + 1) / 2;
+      if (isNaN(half)) {
+        half = 0;
+      }
       var avgLineG = gEnter.selectAll(".avg")
         .data(avg)
         .enter().append("g")
         .attr("class", "avg")
         .style("z-index", 100)
-        .attr("transform", function(d) { return "translate(" + parseInt(x(d) + half) + "," + 0 + ")"; });
+        .attr("transform", function(d) { 
+          var value = (isNaN(x(d))) ? 0 : x(d);
+          return "translate(" + parseInt(value + half) + "," + 0 + ")"; 
+        });
 
       avgLineG.append("line")
         .attr("x1", 0)
@@ -151,7 +160,10 @@ function histogramD3VCF() {
       var bar = g.selectAll(".bar").data(data)
       var barEnter = bar.enter().append("g")
         .attr("class", "bar")
-        .attr("transform", function(d) { return "translate(" + x(d[0]) + "," + innerHeight + ")"; });
+        .attr("transform", function(d) { 
+          var value = (isNaN(x(d[0]))) ? 0 : x(d[0]);
+          return "translate(" + value + "," + innerHeight + ")"; 
+        });
 
       //  Add new bars.
       barEnter.append("rect")
@@ -207,7 +219,10 @@ function histogramD3VCF() {
       // Update avg line and text
       svg.selectAll(".avg").transition()
         .duration(200)
-        .attr("transform", function(d) { return "translate(" + parseInt(x(d) + half) + "," + 0 + ")"; })
+        .attr("transform", function(d) { 
+          var value = (isNaN(x(d))) ? 0 : x(d);
+          return "translate(" + parseInt(value + half) + "," + 0 + ")"; 
+        })
         .call(moveToFront);
 
       // Update brush if event has been set.

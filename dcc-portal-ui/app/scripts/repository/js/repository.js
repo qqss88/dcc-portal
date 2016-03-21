@@ -185,6 +185,21 @@
     
   });
 
+  module.controller('ExternalVcfIobioController', 
+    function($scope, $document, $modalInstance, params) {
+    
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+    
+    $scope.$on('bamready.event', function() {
+      $scope.vcfId = params.fileObjectId;
+      $scope.vcfName = params.fileObjectName;
+      $scope.$apply();
+    });
+    
+  });
+
   module.controller('ExternalFileDownloadController',
     function($scope, $window, $document, $modalInstance, ExternalRepoService, SetService, FilterService, params) {
 
@@ -639,6 +654,27 @@
       }).opened.then(function() {
         setTimeout(function() { $rootScope.$broadcast('bamready.event', {});}, 300);
         
+      });
+    };
+    
+    _ctrl.showVcfIobioModal = function(objectId, objectName) {
+      var fileObjectId = objectId;
+      var fileObjectName = objectName;
+      $modal.open ({
+        controller: 'ExternalVcfIobioController',
+        template: '<section id="vcf-statistics" class="vcf-statistics-modal">'+
+          '<vcfstats vcf-id="vcfId" on-modal=true vcf-name="vcfName" data-ng-if="vcfId"></vcfstats></section>',
+        windowClass: 'iobio-modal',
+        resolve: {
+          params: function() {
+            return {
+              fileObjectId: fileObjectId,
+              fileObjectName: fileObjectName
+            };
+          }
+        }
+      }).opened.then(function() {
+        setTimeout(function() { $rootScope.$broadcast('bamready.event', {});}, 300);      
       });
     };
 

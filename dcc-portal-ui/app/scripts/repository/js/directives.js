@@ -830,10 +830,12 @@
           // Alelle Frequency
           var afObj = stats.af_hist;
           afData = vcfiobio.jsonToArray2D(afObj);
-          var afSelection = d3.select('#allele-freq-histogram')
-            .datum(afData);
-          var afOptions = { outliers: true, averageLine: false };
-          alleleFreqChart(afSelection, afOptions);
+          if (afData.length > 0 ) {
+            var afSelection = d3.select('#allele-freq-histogram')
+              .datum(afData);
+            var afOptions = { outliers: true, averageLine: false };
+            alleleFreqChart(afSelection, afOptions);
+          }
 
           // Mutation Spectrum
           var msObj = stats.mut_spec;
@@ -843,7 +845,7 @@
           // but exclude 0 value for A.
           msArray.forEach(function(d) {
             d.values = d.values.filter(function(val) {
-              if (val === 0) {
+              if (val === undefined || val === NaN || val === 0) {
                 return false;
               } else {
                 return true;
@@ -972,10 +974,14 @@
         }
         
         scope.$on('$destroy', function() {
-          if (bam.sampleClient !== undefined) {
+          if (vcfiobio.sampleClient !== undefined) {
             vcfiobio.sampleClient.close(1000);
           }
         });
+        
+        scope.cancel = function() {
+          scope.$parent.cancel();
+        };
 
         // GO!
         init();
