@@ -845,7 +845,7 @@
           // but exclude 0 value for A.
           msArray.forEach(function(d) {
             d.values = d.values.filter(function(val) {
-              if (val === undefined || val === NaN || val === 0) {
+              if (val === undefined || isNaN(val) || val === 0) {
                 return false;
               } else {
                 return true;
@@ -966,12 +966,12 @@
 
         scope.increaseSampling = function() {
           if (statsOptions.samplingMultiplier >= samplingMultiplierLimit) {
-            alert("You have reached the sampling limit");
+            window.alert('You have reached the sampling limit');
             return;
           }
           statsOptions.samplingMultiplier += 1;
           loadStats(chromosomeIndex);
-        }
+        };
         
         scope.$on('$destroy', function() {
           if (vcfiobio.sampleClient !== undefined) {
