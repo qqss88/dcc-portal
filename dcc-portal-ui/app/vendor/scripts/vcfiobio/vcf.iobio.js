@@ -93,9 +93,9 @@ Vcfiobio = function() {
         "Y":   +59373566
       };
   
-  var currentHost = '';
-  var vcfstatsAliveServer    = "ws://" + currentHost + "/vcfstatsalive/";
-  var vcfReadDeptherServer   = "ws://" + currentHost + "/vcfdepther/";
+  var currentHost = 'iobio.icgc.org:8443';
+  var vcfstatsAliveServer    = "wss://" + currentHost + "/vcfstatsalive/";
+  var vcfReadDeptherServer   = "wss://" + currentHost + "/vcfdepther/";
   
   var vcfURL;
   var vcfReader;

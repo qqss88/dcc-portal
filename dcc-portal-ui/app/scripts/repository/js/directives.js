@@ -648,8 +648,6 @@
             return d3.round(d[1]) + ' variants with VQ of ' + d[0];
           });
           
-          console.log(scope.vcfId);
-          //_loadVcfFromUrl('http://s3.amazonaws.com/vcf.files/ExAC.r0.2.sites.vep.vcf.gz');
           _loadVcfFromUrl(scope.vcfId);
         }
 
@@ -835,6 +833,8 @@
               .datum(afData);
             var afOptions = { outliers: true, averageLine: false };
             alleleFreqChart(afSelection, afOptions);
+          } else {
+            d3.select('#allele-missing').style('visibility', 'visible');
           }
 
           // Mutation Spectrum
