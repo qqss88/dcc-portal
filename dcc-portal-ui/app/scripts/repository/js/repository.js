@@ -420,7 +420,8 @@
    * External repository controller
    */
   module.controller ('ExternalRepoController', function ($scope, $window, $modal, LocationService, Page,
-    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService, $rootScope, PortalFeature, FacetConstants) {
+    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService, $rootScope, PortalFeature,
+    FacetConstants) {
 
     var dataRepoTitle = RouteInfoService.get ('dataRepositories').title,
         FilterService = LocationService.getFilterService();
