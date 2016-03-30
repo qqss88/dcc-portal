@@ -24,7 +24,7 @@
     var shortHandPrefix = 'S';
 
     /**
-     * Check set/list equality ... is there a better way?
+     * Check set/list equality
      */
     this.isEqual = function(s1, s2) {
       return (_.difference(s1, s2).length === 0 && _.difference(s2, s1).length === 0);
