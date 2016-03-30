@@ -113,7 +113,7 @@ lineD3 = function module() {
         .attr('viewBox', "0 0 " + parseInt(width + margin.left + margin.right) + " " + parseInt(height + margin.top + margin.bottom));
 
 
-      if (kind == KIND_AREA && showGradient) {
+      if (kind === KIND_AREA && showGradient) {
         var defs = svg.selectAll("defs").data([data]).enter()
           .append("defs");
 
@@ -214,7 +214,7 @@ lineD3 = function module() {
 
       var area;
 
-      if (kind == KIND_AREA) {
+      if (kind === KIND_AREA) {
         area = d3.svg.area()
           .interpolate("linear")
           .x(function(d) { return x(pos(d)); })
@@ -276,7 +276,7 @@ lineD3 = function module() {
       }
 
 
-      if (kind == KIND_AREA) {
+      if (kind === KIND_AREA) {
         svgGroup.select("#area-chart-path").remove();
         var areaPath = svgGroup.append("path")
           .datum(data)
@@ -307,7 +307,7 @@ lineD3 = function module() {
       }
 
       if (showBrush) {
-        if (brushHeight == null) {
+        if (brushHeight === null) {
           brushHeight = height;
           brushY = -6;
         } else {

@@ -83,7 +83,7 @@ barChartAltD3 = function module() {
         _data[i].offset = offset;
         offset += _data[i].width;
 
-        if (i == _data.length - 1) {
+        if (i === _data.length - 1) {
           var actualWidth = _data[i].offset + _data[i].width;
           var diff = width - actualWidth;
           if (diff > 0) {

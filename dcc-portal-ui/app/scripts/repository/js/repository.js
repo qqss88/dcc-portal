@@ -300,7 +300,7 @@
    * Controller for File Entity page
    */
   module.controller('ExternalFileInfoController',
-    function (Page, ExternalRepoService, CodeTable, ProjectCache, PCAWG, fileInfo) {
+    function (Page, ExternalRepoService, CodeTable, ProjectCache, PCAWG, fileInfo, PortalFeature) {
 
     Page.setTitle('Repository File');
     Page.setPage('externalFileEntity');
@@ -314,6 +314,8 @@
       });
     }
     refresh();
+    
+    this.vcfIobio = PortalFeature.get('VCF_IOBIO');
 
     this.fileInfo = fileInfo;
     this.stringOrDefault = stringOrDefault;
@@ -418,7 +420,7 @@
    * External repository controller
    */
   module.controller ('ExternalRepoController', function ($scope, $window, $modal, LocationService, Page,
-    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService, $rootScope) {
+    ExternalRepoService, SetService, ProjectCache, CodeTable, RouteInfoService, $rootScope, PortalFeature) {
 
     var dataRepoTitle = RouteInfoService.get ('dataRepositories').title,
         FilterService = LocationService.getFilterService();
@@ -439,6 +441,8 @@
     _ctrl.dataRepoTitle = dataRepoTitle;
     _ctrl.dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
     _ctrl.advancedSearchInfo = RouteInfoService.get ('advancedSearch');
+
+    _ctrl.vcfIobio = PortalFeature.get('VCF_IOBIO');
 
     function toSummarizedString (values, name) {
       var size = _.size (values);

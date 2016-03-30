@@ -111,7 +111,7 @@ function histogramD3VCF() {
       x.range([0, width - margin.left - margin.right]);
 
       // Check for single value x axis.
-      if (x.domain()[0] == x.domain()[1]) { var v = x.domain()[0]; x.domain([v - 5, v + 5]); }
+      if (x.domain()[0] === x.domain()[1]) { var v = x.domain()[0]; x.domain([v - 5, v + 5]); }
 
       // Update the y-scale.
       y.domain([0, d3.max(data, function(d) { return d[1]; })])
@@ -299,9 +299,9 @@ function histogramD3VCF() {
       var hValue, hMinus1Value, currValue = 0;
       for (var i = 0; i < arr.length; i++) {
         currValue += arr[i][1];
-        if (hMinus1Value == undefined && currValue >= (h - 1))
+        if (hMinus1Value === undefined && currValue >= (h - 1))
           hMinus1Value = arr[i][0];
-        if (hValue == undefined && currValue >= h) {
+        if (hValue === undefined && currValue >= h) {
           hValue = arr[i][0];
           break;
         }

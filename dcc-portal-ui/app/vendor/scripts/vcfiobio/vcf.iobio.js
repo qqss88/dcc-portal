@@ -172,7 +172,7 @@ Vcfiobio = function() {
       stream.on('data', function(data, options) {
          data = data.split("\n");
          for (var i=0; i < data.length; i++)  {
-            if ( data[i][0] == '#' ) {
+            if ( data[i][0] === '#' ) {
                
                var tokens = data[i].substr(1).split("\t");
                refIndex = tokens[0];
@@ -197,7 +197,8 @@ Vcfiobio = function() {
       });
 
       stream.on("error", function(error) {
-
+        console.log('VCF Streaming error.');
+        console.log
       });
 
       stream.on('end', function() {
@@ -392,7 +393,7 @@ Vcfiobio = function() {
        // Listen for data to be streamed back to the client
         stream.on('data', function(datas, options) {
           datas.split(';').forEach(function(data) {
-             if (data == undefined) {
+             if (data === undefined) {
                 return;
              } 
              var success = true;
@@ -409,7 +410,7 @@ Vcfiobio = function() {
           });               
         });
         stream.on('end', function() {
-           if (options.onEnd != undefined)
+           if (options.onEnd !== undefined)
               options.onEnd();
         });
      });
@@ -441,7 +442,7 @@ Vcfiobio = function() {
         });
       } else {
          // If this is sparse data, seed with known regions first
-         if (sparsePointData != null && sparsePointData.length > 0) {
+         if (sparsePointData !== null && sparsePointData.length > 0) {
           sparsePointData.forEach( function(point) {
             regions.push( {
               'name' : ref.name,
@@ -517,7 +518,7 @@ Vcfiobio = function() {
       avgWindow = data.slice(i, i+factor);
       for (j = 0; j < avgWindow.length; j++) {
           var y = yvalue(avgWindow[j]);
-          sum += y != null ? d3.round(y) : 0;
+          sum += y !== null ? d3.round(y) : 0;
       }
       results.push([xvalue(data[i]), sum])
       sum = 0;
@@ -572,7 +573,7 @@ Vcfiobio = function() {
     var q3 = values[Math.ceil((values.length * (3 / 4)))][1];
     var iqr = q3 - q1;
     var newValues = [];
-    if (q3 != q1) {
+    if (q3 !== q1) {
       // Then find min and max values
       var maxValue = d3.round(q3 + iqr*1.5);
       var minValue = d3.round(q1 - iqr*1.5);

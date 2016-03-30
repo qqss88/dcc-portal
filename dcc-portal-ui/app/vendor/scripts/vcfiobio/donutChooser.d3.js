@@ -125,13 +125,13 @@ donutChooserD3 = function module() {
         .attr("stroke", 'lightgrey')
         .attr("fill", 'none')
         .on("mouseover", function(d) {
-          if (clickedSlices.length == 0) {
+          if (clickedSlices.length === 0) {
             _selectAllCircle(true);
           }
           d3.select(this).attr("cursor", "pointer");
         })
         .on("mouseout", function(d) {
-          if (clickedSlices.length == 0) {
+          if (clickedSlices.length === 0) {
             _selectAllCircle(false);
           }
           d3.select(this).attr("cursor", "default");
@@ -147,13 +147,13 @@ donutChooserD3 = function module() {
           dispatch.clickall();
         })
         .on("mouseover", function(d) {
-          if (clickedSlices.length == 0) {
+          if (clickedSlices.length === 0) {
             _selectAllCircle(true);
           }
           d3.select(this).attr("cursor", "pointer");
         })
         .on("mouseout", function(d) {
-          if (clickedSlices.length == 0) {
+          if (clickedSlices.length === 0) {
             _selectAllCircle(false);
           }
           d3.select(this).attr("cursor", "pointer");
