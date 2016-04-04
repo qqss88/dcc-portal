@@ -683,7 +683,8 @@
       $modal.open ({
         controller: 'ExternalVcfIobioController',
         template: '<section id="vcf-statistics" class="vcf-statistics-modal">'+
-          '<vcfstats vcf-id="vcfId" on-modal=true vcf-name="vcfName" vcf-file-name="vcfFileName" data-ng-if="vcfId"></vcfstats></section>',
+          '<vcfstats vcf-id="vcfId" on-modal=true vcf-name="vcfName" vcf-file-name="vcfFileName" data-ng-if="vcfId">'+
+          '</vcfstats></section>',
         windowClass: 'iobio-modal',
         resolve: {
           params: function() {
