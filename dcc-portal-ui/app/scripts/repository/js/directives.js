@@ -407,7 +407,8 @@
       scope: {
         vcfId: '=',
         onModal: '=',
-        vcfName: '='
+        vcfName: '=',
+        vcfFileName: '='
       },
       templateUrl: 'scripts/repository/views/vcfiobio.html',
       link: function(scope) {

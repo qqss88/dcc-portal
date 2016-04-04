@@ -442,7 +442,7 @@ Vcfiobio = function() {
         });
       } else {
          // If this is sparse data, seed with known regions first
-         if (sparsePointData !== null && sparsePointData.length > 0) {
+         if (sparsePointData!== undefined && sparsePointData !== null && sparsePointData.length > 0) {
           sparsePointData.forEach( function(point) {
             regions.push( {
               'name' : ref.name,

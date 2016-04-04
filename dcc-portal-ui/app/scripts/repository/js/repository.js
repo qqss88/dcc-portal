@@ -195,6 +195,7 @@
     $scope.$on('bamready.event', function() {
       $scope.vcfId = params.fileObjectId;
       $scope.vcfName = params.fileObjectName;
+      $scope.vcfFileName = params.fileName;
       $scope.$apply();
     });
     
@@ -413,7 +414,7 @@
        return _.includes(_.pluck(fileCopies, 'repoCode'), 'aws-virginia') ||
          _.includes(_.pluck(fileCopies, 'repoCode'), 'collaboratory');
     };
-    
+
   });
 
   /**
@@ -547,6 +548,19 @@
        return _.includes(_.pluck(fileCopies, 'repoCode'), 'aws-virginia') ||
          _.includes(_.pluck(fileCopies, 'repoCode'), 'collaboratory');
     };
+    
+    _ctrl.getAwsOrCollabFileName = function(fileCopies) {
+      try {
+        var fCopies = _.filter(fileCopies, function(fCopy) {
+          return fCopy.repoCode === 'aws-virginia' || fCopy.repoCode === 'collaboratory';
+        });
+
+        return _.pluck(fCopies, 'fileName')[0];
+      } catch (err) {
+        console.log(err);
+        return 'Could Not Retrieve File Name';
+      }
+    };
 
     _ctrl.fileAverageSize = function (fileCopies) {
       var count = _.size (fileCopies);
@@ -662,19 +676,21 @@
       });
     };
     
-    _ctrl.showVcfIobioModal = function(objectId, objectName) {
+    _ctrl.showVcfIobioModal = function(objectId, objectName, name) {
       var fileObjectId = objectId;
       var fileObjectName = objectName;
+      var fileName = name;
       $modal.open ({
         controller: 'ExternalVcfIobioController',
         template: '<section id="vcf-statistics" class="vcf-statistics-modal">'+
-          '<vcfstats vcf-id="vcfId" on-modal=true vcf-name="vcfName" data-ng-if="vcfId"></vcfstats></section>',
+          '<vcfstats vcf-id="vcfId" on-modal=true vcf-name="vcfName" vcf-file-name="vcfFileName" data-ng-if="vcfId"></vcfstats></section>',
         windowClass: 'iobio-modal',
         resolve: {
           params: function() {
             return {
               fileObjectId: fileObjectId,
-              fileObjectName: fileObjectName
+              fileObjectName: fileObjectName,
+              fileName: fileName
             };
           }
         }
