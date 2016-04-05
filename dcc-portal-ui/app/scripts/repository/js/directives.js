@@ -724,6 +724,7 @@
           var data = vcfiobio.getGenomeEstimatedDensity(false, densityOptions.removeSpikes,
             densityOptions.maxPoints, densityOptions.epsilonRDP);
 
+            console.log(data);
           // Load the variant density chart with the data
           variantDensityChart.showXAxis(false);
           variantDensityChart(d3.select('#variant-density').datum(data), onVariantDensityChartRendered);
@@ -794,14 +795,11 @@
             .text(readParts[0] || ' ');
           d3.select('#total-reads')
             .select('#number')
-            .text(readParts[1] || ' ');
-          d3.select('#total-reads')
-            .select('#label')
-            .style('padding-top', (readParts.length > 1 ? '0px' : '10px'));
+            .text(readParts[1] || '\xa0');
 
           // TsTv Ratio
           var tstvRatio = stats.TsTvRatio;
-          if (tstvRatio === null) {
+          if (tstvRatio === undefined || tstvRatio === null) {
             tstvRatio = 0;
           }
           d3.select('#tstv-ratio')

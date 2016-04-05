@@ -20,19 +20,16 @@
 
       <div id="total-reads">
         <div>
-          <span id="value"> 0</span>
+          <div class="pull-left">
+            <span id="value"> 0</span>
+          </div>
+          <div style="padding: 4px" class="pull-right">
+            <div id="number">&nbsp;</div>
+            <div id="label">variants sampled</div>
+          </div>
         </div>
-        <div style="padding: 4px">
-          <div id="number">&nbsp;</div>
-          <div id="label">variants sampled</div>
-        </div>
-        <div style="padding-top: 10px; ">
-          <i class="icon-cw" id="sample-more-button" title="Sample More" data-ng-click="increaseSampling()" style="width: 20px">
-          </i>
-        </div>
-
+        <i class="icon-cw" id="sample-more-button" title="Sample More" data-ng-click="increaseSampling()"></i>
       </div>
-
     </section>
 
     <section id="top">

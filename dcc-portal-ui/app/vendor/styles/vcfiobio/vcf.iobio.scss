@@ -6,6 +6,16 @@
 }
 
 #vcf-statistics {
+  
+  #sample-more-button {
+    color: #e9931c;
+    transition: color .5s, border .5s;
+    margin: auto;
+    cursor: pointer;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    border: 2px solid #e9931c;
+  }
 
   #vcf-url-go-button  { 
     font:300 28px quicksand;
@@ -455,13 +465,6 @@
       font-size: 24px;
       color:#2687BE; 
   }
-  #sample-more-button {
-      width: 20px; 
-      height: 20px;
-  }
-
-
-
 
   .panel#tstv-ratio {
       -webkit-flex: 1 0 188px;
@@ -469,8 +472,6 @@
       -webkit-order: 1;
               order: 1;
       height: 200px;
-
-
   }
 
   .panel#allele-freq {
