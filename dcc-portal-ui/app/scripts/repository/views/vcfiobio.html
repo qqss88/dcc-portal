@@ -1,9 +1,12 @@
 <div>
 <div class="modal-header clearfix anchor" data-ng-if="onModal">
-    <h3 class="pull-left"><span class="t_badge t_badge__file"></span><b>{{vcfName}} </b>VCF Stats</h3>
+    <h3 class="pull-left">
+      <span class="t_badge t_badge__file"></span>
+      <span><b>{{vcfName}} </b>VCF Stats</span>
+    </h3>
     <button class="pull-right t_button" data-ng-click="cancel()"><i class="icon-cancel"></i>
     </button>
-    <span class="vcf-file-name">{{vcfFileName}}</span> 
+    <span class="vcf-file-name light"><a href="/repositories/files/{{vcfName}}">{{vcfFileName}}</a></span> 
  </div>
 
 <div class="modal-body">

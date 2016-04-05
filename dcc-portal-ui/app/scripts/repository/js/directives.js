@@ -724,7 +724,6 @@
           var data = vcfiobio.getGenomeEstimatedDensity(false, densityOptions.removeSpikes,
             densityOptions.maxPoints, densityOptions.epsilonRDP);
 
-            console.log(data);
           // Load the variant density chart with the data
           variantDensityChart.showXAxis(false);
           variantDensityChart(d3.select('#variant-density').datum(data), onVariantDensityChartRendered);
