@@ -18,33 +18,24 @@
 package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableMap;
 
 import java.util.Map;
 
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.val;
-
-import org.elasticsearch.search.facet.terms.TermsFacet;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Elasticsearch facet utilities, not to be confused with API facets.
  */
 @NoArgsConstructor(access = PRIVATE)
-public final class Facets {
+public final class Aggregations {
 
-  public static Map<String, Integer> getFacetCounts(@NonNull TermsFacet termsFacet) {
-    val facetCounts = ImmutableMap.<String, Integer> builder();
-    for (val entry : termsFacet.getEntries()) {
-      val value = entry.getTerm().string();
-      val count = entry.getCount();
-
-      facetCounts.put(value, count);
-    }
-
-    return facetCounts.build();
+  public static Map<String, Long> getTermsCounts(@NonNull Terms agg) {
+    return agg.getBuckets().stream().collect(toImmutableMap(Bucket::getKey, Bucket::getDocCount));
   }
 
 }

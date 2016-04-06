@@ -37,8 +37,8 @@ public class GeneRepositoryIntegrationTest extends BaseRepositoryIntegrationTest
   DonorRepository donorRepository;
 
   @Test
-  public void test_facets() {
-    facets(repository, DEFAULT_SORT, CENTRIC_TYPE, KIND);
+  public void test_aggs() {
+    aggregations(repository, DEFAULT_SORT, CENTRIC_TYPE, KIND);
   }
 
   @Test

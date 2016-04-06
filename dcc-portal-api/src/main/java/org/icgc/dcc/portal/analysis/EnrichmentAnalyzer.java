@@ -24,14 +24,14 @@ import static org.icgc.dcc.portal.analysis.EnrichmentAnalyses.calculateExpectedG
 import static org.icgc.dcc.portal.analysis.EnrichmentAnalyses.calculateGeneCountPValue;
 import static org.icgc.dcc.portal.analysis.EnrichmentQueries.geneSetOverlapQuery;
 import static org.icgc.dcc.portal.analysis.EnrichmentQueries.overlapQuery;
-import static org.icgc.dcc.portal.analysis.EnrichmentSearchResponses.getUniverseTermsFacet;
+import static org.icgc.dcc.portal.analysis.EnrichmentSearchResponses.getUniverseTermsAggregation;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.ANALYZING;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.ERROR;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.POST_PROCESSING;
 import static org.icgc.dcc.portal.model.Query.idField;
 import static org.icgc.dcc.portal.repository.TermsLookupRepository.TermLookupType.GENE_IDS;
-import static org.icgc.dcc.portal.util.Facets.getFacetCounts;
+import static org.icgc.dcc.portal.util.Aggregations.getTermsCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 
 import java.util.List;
@@ -68,7 +68,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EnrichmentAnalyzer {
 
   /**
@@ -222,14 +222,14 @@ public class EnrichmentAnalyzer {
   }
 
   private List<Result> analyzeGeneSetResults(Query query, Universe universe, UUID inputGeneListId,
-      Map<String, Integer> geneSetGeneCounts, Map<String, Integer> overlapGeneSetGeneCounts, int overlapGeneCount,
+      Map<String, Integer> geneSetGeneCounts, Map<String, Long> overlapGeneSetGeneCounts, int overlapGeneCount,
       int universeGeneCount) {
     val results = Lists.<Result> newArrayList();
     int i = 0;
     for (val entry : overlapGeneSetGeneCounts.entrySet()) {
       val geneSetId = entry.getKey();
       val geneSetGeneCount = geneSetGeneCounts.get(geneSetId);
-      int geneSetOverlapGeneCount = entry.getValue();
+      Long geneSetOverlapGeneCount = entry.getValue();
 
       log.info("[{}/{}] Processing {}", new Object[] { i++, overlapGeneSetGeneCounts.size(), geneSetId });
       if (geneSetId.equals(universe.getGeneSetId())) {
@@ -265,13 +265,13 @@ public class EnrichmentAnalyzer {
   }
 
   private Result analyzeGeneSetResult(Query query, Universe universe, UUID inputGeneListId, String geneSetId,
-      int geneSetGeneCount, int geneSetOverlapGeneCount, int overlapGeneCount, int universeGeneCount) {
+      int geneSetGeneCount, Long geneSetOverlapGeneCount, int overlapGeneCount, int universeGeneCount) {
     // Statistics
     val expectedGeneCount = calculateExpectedGeneCount(
         overlapGeneCount,
         geneSetGeneCount, universeGeneCount);
     val pValue = calculateGeneCountPValue(
-        geneSetOverlapGeneCount, overlapGeneCount, // The "four numbers"
+        geneSetOverlapGeneCount.intValue(), overlapGeneCount, // The "four numbers"
         geneSetGeneCount, universeGeneCount);
 
     log.debug("q = {}, k = {}, m = {}, n = {}, pValue = {}",
@@ -282,7 +282,7 @@ public class EnrichmentAnalyzer {
         .setGeneSetId(geneSetId)
 
         .setGeneCount(geneSetGeneCount)
-        .setOverlapGeneSetGeneCount(geneSetOverlapGeneCount)
+        .setOverlapGeneSetGeneCount(geneSetOverlapGeneCount.intValue())
 
         .setExpectedValue(expectedGeneCount)
         .setPValue(pValue);
@@ -341,12 +341,12 @@ public class EnrichmentAnalyzer {
     return geneSetRepository.countGenes(geneSetIds);
   }
 
-  private Map<String, Integer> findOverlapGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
+  private Map<String, Long> findOverlapGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
     val response = geneRepository.findGeneSetCounts(overlapQuery);
-    val geneSetFacet = getUniverseTermsFacet(response, universe);
+    val geneSetAggs = getUniverseTermsAggregation(response, universe);
 
-    return getFacetCounts(geneSetFacet);
+    return getTermsCounts(geneSetAggs);
   }
 
   private Map<String, String> findGeneSetNames(Iterable<String> geneSetIds) {
