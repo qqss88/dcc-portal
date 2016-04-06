@@ -211,7 +211,9 @@ module.exports = function (grunt) {
         httpGeneratedImagesPath: '/images/generated',
         httpFontsPath: '/styles/fonts',
         relativeAssets: false,
-        require: ['compass', 'bootstrap-sass', 'singularitygs', 'singularity-extras']
+        require: ['compass', 'bootstrap-sass', 'singularitygs', 'singularity-extras'],
+        bundleExec: true,
+        raw: 'Encoding.default_external = \'utf-8\'\n'
       },
       dist: {},
       server: {
